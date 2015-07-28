@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="red">#FFC93437</color>
+    <color name="blue">#FF375BF1</color>
+    <color name="yellow">#FFF7D23E</color>
+    <color name="primaryColor">#0072C6</color>
+    <color name="primaryColorDark">#1976D2</color>
+    <color name="transperent">#00000000</color>
+
+    <drawable name="list_normal">#00000000</drawable>
+    <drawable name="list_selected">#40000000</drawable>
+
+    <color name="darkBlue">#002E4F</color>
+
+    <color name="background_tab_pressed">#1AFFFFFF</color>
+    <color name="background_window">#FFE5E5E5</color>
+    <color name="green">#689F38</color>
+    <color name="greenDark">#3E5F22</color>
+    <color name="banana">#FFCC00</color>
+    <color name="back">#e1e1e1</color>
+
+
+
+
+    <color name="color_giftcode">#ED7D31</color>
+    <color name="color_sendmoney">#5B9BD5</color>
+    <color name="color_moneytransfer">#67A93B</color>
+    <color name="color_mobiletopup">#2977AC</color>
+
+
+
+    <color name="paylabas_green">#73AB28</color>
+    <color name="paylabas_blue">#2977AC</color>
+    <color name="paylabas_grey">#9B9B9B</color>
+    <color name="paylabas_dkgrey">#494949</color>
+
+    <color name="paylabas_white">#ffffff</color>
+
+    <color name="paylabas_profile_blue">#6FD5E0</color>
+
+    <color name="paylabas_btn_active">#ff00384a</color>
+    <color name="paylabas_btn_passive">#086381</color>
+
+    <color name="view_background">#e8ecfa</color>
+    <color name="btn_bg">#277bec</color>
+    <color name="white">#ffffff</color>
+    <color name="txt_font">#4e5572</color>
+    <color name="action_bar">#1f2649</color>
+
+
+
+
+</resources>

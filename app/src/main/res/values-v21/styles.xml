@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="AppTheme.Base">
+        <item name="@android:colorPrimary">@color/primaryColor</item>
+        <item name="@android:colorPrimaryDark">@color/paylabas_btn_active</item>
+
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="@android:colorAccent">@color/primaryColor</item>
+    </style>
+
+
+
+</resources>
