@@ -3,8 +3,10 @@
 
     <color name="red">#FFC93437</color>
     <color name="blue">#FF375BF1</color>
-    <color name="yellow">#FFF7D23E</color>
-    <color name="primaryColor">#0072C6</color>
+    <color name="yellow">#edbe4c</color>
+    <color name="primaryColor">#18516e</color>
+    <color name="baseButtonColor">#009987</color>
+
     <color name="primaryColorDark">#1976D2</color>
     <color name="transperent">#00000000</color>
 
