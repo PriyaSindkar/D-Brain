@@ -7,10 +7,13 @@ import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.LayoutDirection;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
@@ -58,13 +61,40 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         mIndicator = (CirclePageIndicator)findViewById(R.id.guideIndicator);
 
 
+
+        mIndicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if(position ==6) {
+                    txtNext.setVisibility(View.VISIBLE);
+                    txtSkip.setVisibility(View.GONE);
+                }
+                else {
+                    txtNext.setVisibility(View.GONE);
+                    txtSkip.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+
+
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.txtSkip:
-                viewPager.setCurrentItem(5);
+                viewPager.setCurrentItem(6);
                 break;
             case R.id.txtNext:
                 break;
