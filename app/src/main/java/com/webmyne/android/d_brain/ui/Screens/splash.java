@@ -6,6 +6,7 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +15,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,7 +39,7 @@ public class splash extends ActionBarActivity   {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         dashedCircularProgress = (DashedCircularProgress) findViewById(R.id.simple);
-       // imgBulb = (ImageView)findViewById(R.id.imgBulb);
+        imgBulb = (ImageView)findViewById(R.id.imgBulb);
         pathView = (PathView) findViewById(R.id.pathView);
         startProgressBar();
 
@@ -51,12 +54,34 @@ public class splash extends ActionBarActivity   {
             @Override
             public void onValueChange(float value) {
                 if (value >= 998 || value == 999) {
-                    int col = Color.parseColor("#edbe4c");
-                   // imgBulb.setColorFilter(col, PorterDuff.Mode.SRC_ATOP);
 
-                    Intent i =  new Intent(splash.this,UserGuide.class);
-                    startActivity(i);
-                    finish();
+                    Animation fadeIn = new AlphaAnimation(0, 1);
+                    fadeIn.setDuration(1000);
+
+                    imgBulb.setVisibility(View.VISIBLE);
+                    int col = Color.parseColor("#edbe4c");
+                    imgBulb.setColorFilter(col, PorterDuff.Mode.SRC_ATOP);
+
+                    imgBulb.setAnimation(fadeIn);
+
+                    new CountDownTimer(700,100){
+
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            Intent i =  new Intent(splash.this,UserGuide.class);
+                            startActivity(i);
+                            finish();
+                        }
+                    }.start();
+
+
+
+
                 }
             }
         });
@@ -66,7 +91,6 @@ public class splash extends ActionBarActivity   {
 
 
     void start(){
-        pathView.setFillAfter(true);
         pathView.getPathAnimator().
                 delay(100).
                 duration(1500).
