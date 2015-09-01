@@ -16,9 +16,9 @@ public class ProgressPainterImp implements ProgressPainter {
     private int color = Color.RED;
     private float startAngle = 270f;
     private float plusAngle = 0;
-    private int internalStrokeWidth = 2;
+    private int internalStrokeWidth = 5;
     private int dashWith = 15;
-    private int dashSpace = 8;
+    private int dashSpace = 0;
     private float marginTop = 85;
     private float padding;
     private float min;

@@ -28,13 +28,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/imgProfile"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_gravity="center"
-                android:scaleType="centerCrop"
-                android:src="@drawable/bulb" />
+            <com.eftimoff.androipathview.PathView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/pathView"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:svg="@raw/bulb"
+                app:pathColor="@color/yellow"
+                app:pathWidth="2"/>
 
 
         </RelativeLayout>

@@ -213,10 +213,10 @@ public class DashedCircularProgress extends RelativeLayout {
             }
             Resources res = _context.getResources();
             last = value;
-            if (last >= 998 || last == 999) {
+           /* if (last >= 998 || last == 999) {
                 last = min;
                 setValue(999);
-            }
+            }*/
 
 
 
