@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Screens;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -52,11 +53,17 @@ public class splash extends ActionBarActivity   {
                 if (value >= 998 || value == 999) {
                     int col = Color.parseColor("#edbe4c");
                    // imgBulb.setColorFilter(col, PorterDuff.Mode.SRC_ATOP);
+
+                    Intent i =  new Intent(splash.this,UserGuide.class);
+                    startActivity(i);
+                    finish();
                 }
             }
         });
 
     }
+
+
 
     void start(){
         pathView.setFillAfter(true);
