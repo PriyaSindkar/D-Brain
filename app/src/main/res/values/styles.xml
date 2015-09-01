@@ -8,7 +8,6 @@
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
 
         <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryDark">@color/paylabas_btn_active</item>
         <item name="colorAccent">@color/primaryColor</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="android:textColorPrimary">@android:color/white</item>

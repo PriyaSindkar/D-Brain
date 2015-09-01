@@ -24,7 +24,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
     private CustomViewPager viewPager;
     private  TabsPagerAdapter mAdapter;
     protected PageIndicator mIndicator;
-    private TextView txtSignup,txtLogin;
+    private TextView txtSkip,txtNext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +46,13 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         mIndicator.setViewPager(viewPager);
     }
     private void init( ){
-        txtLogin = (TextView)findViewById(R.id.txtLogin);
-        txtSignup = (TextView)findViewById(R.id.txtSignup);
-        txtSignup.setOnClickListener(this);
-        txtLogin.setOnClickListener(this);
+
+        txtSkip = (TextView)findViewById(R.id.txtSkip);
+        txtNext = (TextView)findViewById(R.id.txtNext);
+
+
+        txtSkip.setOnClickListener(this);
+        txtNext.setOnClickListener(this);
 
         viewPager = (CustomViewPager) findViewById(R.id.pager);
         mIndicator = (CirclePageIndicator)findViewById(R.id.guideIndicator);
@@ -60,7 +63,11 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-
+            case R.id.txtSkip:
+                viewPager.setCurrentItem(5);
+                break;
+            case R.id.txtNext:
+                break;
         }
     }
 
@@ -82,17 +89,23 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
 
                     return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
 
-                // Top Rated fragment activity
-
                 case 1:
 
                     return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
 
-                // Top Rated fragment activity
-
                 case 2:
 
-                    // Top Rated fragment activity
+                    return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
+                case 3:
+
+                    return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
+                case 4:
+
+                    return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
+                case 5:
+
+                    return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
+                case 6:
 
                     return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
 
@@ -103,7 +116,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
 
         @Override
         public int getCount() {
-            return 3;
+            return 7;
         }
 
     }
