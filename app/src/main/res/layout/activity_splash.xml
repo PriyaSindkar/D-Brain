@@ -1,13 +1,45 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     tools:context=".LauncherScreen">
 
     <ImageView
-        android:layout_centerInParent="true"
         android:scaleType="fitXY"
         android:src="@drawable/splash"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+
+    <com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.DashedCircularProgress
+        android:id="@+id/simple"
+        custom:external_color="@color/yellow"
+        custom:base_color="@color/yellow"
+        custom:min="0"
+        custom:max="999"
+        custom:progress_color="@color/yellow"
+        custom:duration="1500"
+        android:layout_centerInParent="true"
+        android:layout_width="350dp"
+        android:layout_height="350dp">
+
+        <RelativeLayout
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imgProfile"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:scaleType="centerCrop"
+                android:src="@drawable/bulb" />
+
+
+        </RelativeLayout>
+
+    </com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.DashedCircularProgress>
+
 
 </RelativeLayout>
