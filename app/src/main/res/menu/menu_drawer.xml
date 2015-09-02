@@ -56,7 +56,7 @@
             android:title="About Us" />
 
         <item
-            android:icon="@drawable/dr"
+            android:icon="@drawable/drawer_contactus"
             android:id="@+id/drawer_contact"
             android:title="Contact Us" />
 
