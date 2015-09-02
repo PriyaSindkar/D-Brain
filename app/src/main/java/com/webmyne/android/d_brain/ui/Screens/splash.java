@@ -68,7 +68,6 @@ public class splash extends ActionBarActivity {
 
                     imgBulb.setAnimation(fadeIn);
 
-
                     new CountDownTimer(1000, 100) {
 
                         @Override
@@ -93,7 +92,6 @@ public class splash extends ActionBarActivity {
 
 
     private void animaton360() {
-
         ObjectAnimator animator = ObjectAnimator.ofFloat(imgd2, "rotationY", 360f, 0f);
         animator.setDuration(2500);
         animator.start();
