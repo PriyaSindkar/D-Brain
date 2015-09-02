@@ -31,7 +31,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSliderFragment;
 
 
-public class splash extends ActionBarActivity   {
+public class splash extends ActionBarActivity {
     PathView pathView;
     private DashedCircularProgress dashedCircularProgress;
     ImageView imgBulb;
@@ -59,20 +59,17 @@ public class splash extends ActionBarActivity   {
             public void onValueChange(float value) {
                 if (value >= 998 || value == 999) {
 
-                   // Animation fadeIn = new AlphaAnimation(0, 1);
-                  //  fadeIn.setDuration(1800);
+                    Animation fadeIn = new AlphaAnimation(0, 1);
+                    fadeIn.setDuration(1800);
 
                     imgBulb.setVisibility(View.VISIBLE);
                     int col = Color.parseColor("#edbe4c");
                     imgBulb.setColorFilter(col, PorterDuff.Mode.SRC_ATOP);
 
-             //       imgBulb.setAnimation(fadeIn);
+                    imgBulb.setAnimation(fadeIn);
 
 
-
-
-
-                   /* new CountDownTimer(700,100){
+                    new CountDownTimer(1000, 100) {
 
                         @Override
                         public void onTick(long millisUntilFinished) {
@@ -81,13 +78,11 @@ public class splash extends ActionBarActivity   {
 
                         @Override
                         public void onFinish() {
-                            Intent i =  new Intent(splash.this,UserGuide.class);
+                            Intent i = new Intent(splash.this, UserGuide.class);
                             startActivity(i);
                             finish();
                         }
-                    }.start();*/
-
-
+                    }.start();
 
 
                 }
@@ -97,7 +92,7 @@ public class splash extends ActionBarActivity   {
     }
 
 
-    private void animaton360(){
+    private void animaton360() {
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(imgd2, "rotationY", 360f, 0f);
         animator.setDuration(2500);
@@ -105,17 +100,17 @@ public class splash extends ActionBarActivity   {
 
     }
 
-    private void init(){
+    private void init() {
         dashedCircularProgress = (DashedCircularProgress) findViewById(R.id.simple);
-        imgBulb = (ImageView)findViewById(R.id.imgBulb);
+        imgBulb = (ImageView) findViewById(R.id.imgBulb);
         pathView = (PathView) findViewById(R.id.pathView);
-        imgd2 = (ImageView)findViewById(R.id.imgd2);
+        imgd2 = (ImageView) findViewById(R.id.imgd2);
 
 
     }
 
 
-    void start(){
+    void start() {
         pathView.getPathAnimator().
                 delay(100).
                 duration(2500).
@@ -142,9 +137,10 @@ public class splash extends ActionBarActivity   {
         path.close();
         return path;
     }
-    private void startProgressBar(){
+
+    private void startProgressBar() {
         dashedCircularProgress.setValue(999);
 
     }
- //end of main class
+    //end of main class
 }
