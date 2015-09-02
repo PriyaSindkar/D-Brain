@@ -18,12 +18,13 @@
         custom:min="0"
         custom:max="999"
         custom:progress_color="@color/yellow"
-        custom:duration="1600"
+        custom:duration="2600"
         android:layout_centerInParent="true"
-        android:layout_width="350dp"
+        android:layout_width="340dp"
         android:layout_height="350dp">
 
         <RelativeLayout
+            android:id="@+id/pathRel"
             android:layout_centerInParent="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
@@ -34,7 +35,7 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 app:svg="@raw/bulb"
-                app:pathColor="@color/yellow"
+                app:pathColor="@color/white"
                 app:pathWidth="2"/>
 
             <ImageView
@@ -43,9 +44,41 @@
                 android:id="@+id/imgBulb"
                 android:layout_width="100dp"
                 android:layout_height="100dp" />
+        </RelativeLayout>
 
+
+
+        <RelativeLayout
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/pathRel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/img1"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:src="@drawable/dlogo"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
+
+            <ImageView
+                android:tint="@color/yellow"
+                android:tintMode="src_atop"
+                android:id="@+id/imgd2"
+                android:layout_alignRight="@+id/img1"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:src="@drawable/d2"
+                android:layout_width="20dp"
+                android:layout_height="15dp" />
 
         </RelativeLayout>
+
+
 
     </com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.DashedCircularProgress>
 

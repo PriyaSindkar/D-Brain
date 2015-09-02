@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Screens;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Path;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,14 +35,16 @@ public class splash extends ActionBarActivity   {
     PathView pathView;
     private DashedCircularProgress dashedCircularProgress;
     ImageView imgBulb;
+    ImageView imgd2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        dashedCircularProgress = (DashedCircularProgress) findViewById(R.id.simple);
-        imgBulb = (ImageView)findViewById(R.id.imgBulb);
-        pathView = (PathView) findViewById(R.id.pathView);
+
+
+        init();
+
         startProgressBar();
 
         pathView.setFillAfter(true);
@@ -55,16 +59,20 @@ public class splash extends ActionBarActivity   {
             public void onValueChange(float value) {
                 if (value >= 998 || value == 999) {
 
-                    Animation fadeIn = new AlphaAnimation(0, 1);
-                    fadeIn.setDuration(1000);
+                   // Animation fadeIn = new AlphaAnimation(0, 1);
+                  //  fadeIn.setDuration(1800);
 
                     imgBulb.setVisibility(View.VISIBLE);
                     int col = Color.parseColor("#edbe4c");
                     imgBulb.setColorFilter(col, PorterDuff.Mode.SRC_ATOP);
 
-                    imgBulb.setAnimation(fadeIn);
+             //       imgBulb.setAnimation(fadeIn);
 
-                    new CountDownTimer(700,100){
+
+
+
+
+                   /* new CountDownTimer(700,100){
 
                         @Override
                         public void onTick(long millisUntilFinished) {
@@ -77,7 +85,7 @@ public class splash extends ActionBarActivity   {
                             startActivity(i);
                             finish();
                         }
-                    }.start();
+                    }.start();*/
 
 
 
@@ -89,11 +97,34 @@ public class splash extends ActionBarActivity   {
     }
 
 
+    private void animaton360(){
+
+        ObjectAnimator animator = ObjectAnimator.ofFloat(imgd2, "rotationY", 360f, 0f);
+        animator.setDuration(2500);
+        animator.start();
+
+    }
+
+    private void init(){
+        dashedCircularProgress = (DashedCircularProgress) findViewById(R.id.simple);
+        imgBulb = (ImageView)findViewById(R.id.imgBulb);
+        pathView = (PathView) findViewById(R.id.pathView);
+        imgd2 = (ImageView)findViewById(R.id.imgd2);
+
+
+    }
+
 
     void start(){
         pathView.getPathAnimator().
                 delay(100).
-                duration(1500).
+                duration(2500).
+                listenerEnd(new PathView.AnimatorBuilder.ListenerEnd() {
+                    @Override
+                    public void onAnimationEnd() {
+                        animaton360();
+                    }
+                }).
                 interpolator(new AccelerateDecelerateInterpolator()).
                 start();
 
