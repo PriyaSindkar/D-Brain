@@ -60,8 +60,6 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         viewPager = (CustomViewPager) findViewById(R.id.pager);
         mIndicator = (CirclePageIndicator)findViewById(R.id.guideIndicator);
 
-
-
         mIndicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -86,9 +84,9 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             }
         });
 
-
-
     }
+
+
 
     @Override
     public void onClick(View v) {

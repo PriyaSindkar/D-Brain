@@ -29,6 +29,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.DashedC
 import com.webmyne.android.d_brain.ui.Customcomponents.CustomViewPager;
 import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSliderFragment;
+import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 
 
 public class splash extends ActionBarActivity {
@@ -77,7 +78,7 @@ public class splash extends ActionBarActivity {
 
                         @Override
                         public void onFinish() {
-                            Intent i = new Intent(splash.this, UserGuide.class);
+                            Intent i = new Intent(splash.this, HomeDrawerActivity.class);
                             startActivity(i);
                             finish();
                         }

@@ -1,0 +1,54 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.webmyne.kidscrown.ui.MyDrawerActivity">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/drawer_home"
+            android:checked="true"
+            android:title="Home" />
+
+        <item
+            android:id="@+id/drawer_main_panel"
+            android:title="Main Panel" />
+
+        <item
+            android:id="@+id/drawer_scenes"
+            android:title="Scenes" />
+
+        <item
+            android:id="@+id/drawer_schedulers"
+            android:title="Schedulers" />
+
+        <item
+            android:id="@+id/drawer_sensors"
+            android:title="Sensors" />
+
+        <item
+            android:id="@+id/drawer_notification"
+            android:title="Notifications" />
+
+        <item
+            android:id="@+id/drawer_add_machine"
+            android:title="Add Machine" />
+
+        <item
+            android:id="@+id/drawer_machine_config"
+            android:title="Machine Configuration" />
+
+        <item
+            android:id="@+id/drawer_settings"
+            android:title="Settings" />
+
+        <item
+            android:id="@+id/drawer_about"
+            android:title="About Us" />
+
+        <item
+            android:id="@+id/drawer_contact"
+            android:title="Contact Us" />
+
+
+    </group>
+</menu>
