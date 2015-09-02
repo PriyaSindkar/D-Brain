@@ -76,7 +76,6 @@ public class HomeDrawerActivity extends AppCompatActivity {
             }
         };
 
-
         drawerLayout.setDrawerListener(drawerToggle);
         view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
