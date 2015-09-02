@@ -5,47 +5,58 @@
     <group android:checkableBehavior="single">
 
         <item
+            android:icon="@drawable/drawer_home"
             android:id="@+id/drawer_home"
             android:checked="true"
             android:title="Home" />
 
         <item
+            android:icon="@drawable/drawer_mainpanel"
             android:id="@+id/drawer_main_panel"
             android:title="Main Panel" />
 
         <item
+            android:icon="@drawable/drawer_scenes"
             android:id="@+id/drawer_scenes"
             android:title="Scenes" />
 
         <item
+            android:icon="@drawable/drawer_schedulers"
             android:id="@+id/drawer_schedulers"
             android:title="Schedulers" />
 
         <item
+            android:icon="@drawable/drawer_sensors"
             android:id="@+id/drawer_sensors"
             android:title="Sensors" />
 
         <item
+            android:icon="@drawable/drawer_notification"
             android:id="@+id/drawer_notification"
             android:title="Notifications" />
 
         <item
+            android:icon="@drawable/drawer_addmachine"
             android:id="@+id/drawer_add_machine"
             android:title="Add Machine" />
 
         <item
+            android:icon="@drawable/drawer_machineconfig"
             android:id="@+id/drawer_machine_config"
             android:title="Machine Configuration" />
 
         <item
+            android:icon="@drawable/drawer_settings"
             android:id="@+id/drawer_settings"
             android:title="Settings" />
 
         <item
+            android:icon="@drawable/drawer_aboutus"
             android:id="@+id/drawer_about"
             android:title="About Us" />
 
         <item
+            android:icon="@drawable/dr"
             android:id="@+id/drawer_contact"
             android:title="Contact Us" />
 

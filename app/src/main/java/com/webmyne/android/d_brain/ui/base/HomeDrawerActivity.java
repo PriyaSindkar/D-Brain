@@ -92,7 +92,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
             }
         });
 
-        hideMenuItem(1);
+        //hideMenuItem(1);
         setDrawerClick(R.id.drawer_home);
 
 
