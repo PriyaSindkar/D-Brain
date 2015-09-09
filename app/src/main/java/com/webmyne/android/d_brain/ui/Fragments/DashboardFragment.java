@@ -27,21 +27,22 @@ import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
+import com.webmyne.android.d_brain.ui.base.DimmerActivity;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 
 import java.util.zip.Inflater;
 
-
-public class DashboardFragment extends Fragment implements PopupAnimationEnd, View.OnClickListener{
+public class DashboardFragment extends Fragment implements PopupAnimationEnd, View.OnClickListener {
 
     AnimationHelper animObj;
     Toolbar toolbar;
     ImageView imgOptions, imgHScrollLeft, imgHScrollRight;
     boolean isImageUp = true;
-    LinearLayout layoutBottom, linearOptions,linearSceneList ;
+    LinearLayout layoutBottom, linearOptions, linearSceneList;
     HorizontalScrollView hScrollView;
     private FrameLayout parentMotor;
     private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits;
+    LinearLayout sliderLayout;
 
     private int myTotalScenes = 5;
     private String noOfSwitchUnits="13", totalNoOfSwitchUnits="17";
@@ -73,8 +74,18 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     }
 
 
-    private void init(View row){
+    private void init(View row) {
         animObj = new AnimationHelper();
+
+        sliderLayout = (LinearLayout) row.findViewById(R.id.sliderLayout);
+
+        sliderLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent sliderIntent = new Intent(getActivity(), DimmerActivity.class);
+                startActivity(sliderIntent);
+            }
+        });
 
         imgOptions = (ImageView) row.findViewById(R.id.imgOptions);
         layoutBottom = (LinearLayout) row.findViewById(R.id.layoutBottom);
@@ -168,7 +179,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
 
     private void updateSceneList() {
-        for(int i=0; i < myTotalScenes; i++) {
+        for (int i = 0; i < myTotalScenes; i++) {
 
             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view = inflater.inflate(R.layout.dashboard_scene_slider_item, null);

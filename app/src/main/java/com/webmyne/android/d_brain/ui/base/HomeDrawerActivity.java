@@ -2,6 +2,7 @@ package com.webmyne.android.d_brain.ui.base;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -136,7 +137,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
             case R.id.drawer_home:
                 // Home
                 ft.replace(R.id.content, DashboardFragment.newInstance(), "HOME_PAGE");
-                ft.replace(R.id.content, HomeFragment.newInstance(), "HOME_PAGE");
+//                ft.replace(R.id.content, HomeFragment.newInstance(), "HOME_PAGE");
                 ft.commit();
                 break;
 

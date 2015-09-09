@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/thisToolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/primaryColor"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/imgBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/STD_MARGIN"
+        android:background="@drawable/white_border_circle"
+        android:padding="@dimen/S_MARGIN"
+        android:src="@drawable/ic_arrow_left_white" />
+
+    <TextView
+        android:id="@+id/toolbarTitle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/HEADER_BAR_SIZE"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:text="Motors"
+        android:textColor="@color/white"
+        android:textSize="@dimen/L_TEXT_SIZE" />
+
+</RelativeLayout>
