@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,7 +23,7 @@ public class MotorListActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private MotorListAdapter adapter;
     private Toolbar toolbar;
-    private TextView imgBack;
+    private ImageView imgBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +32,7 @@ public class MotorListActivity extends AppCompatActivity {
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        imgBack = (TextView) findViewById(R.id.imgBack);
+        imgBack = (ImageView) findViewById(R.id.imgBack);
 
         //changeLayout = (ImageView) findViewById(R.id.changeLayout);
         if (toolbar != null) {

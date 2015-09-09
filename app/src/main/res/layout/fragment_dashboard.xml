@@ -62,7 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                layout="@layout/dashboard_motor_component"/>
+                layout="@layout/dashboard_sensor_component"/>
 
 
         </LinearLayout>

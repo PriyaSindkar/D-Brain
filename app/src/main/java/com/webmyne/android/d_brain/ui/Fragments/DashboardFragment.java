@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,10 +22,14 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.MotorListActivity;
+import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+
+import java.util.zip.Inflater;
 
 
 public class DashboardFragment extends Fragment implements PopupAnimationEnd, View.OnClickListener{
@@ -35,8 +40,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     boolean isImageUp = true;
     LinearLayout layoutBottom, linearOptions,linearSceneList ;
     HorizontalScrollView hScrollView;
+    private FrameLayout parentMotor;
+    private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits;
 
     private int myTotalScenes = 5;
+    private String noOfSwitchUnits="13", totalNoOfSwitchUnits="17";
 
     public static DashboardFragment newInstance() {
         DashboardFragment fragment = new DashboardFragment();
@@ -75,8 +83,17 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         hScrollView = (HorizontalScrollView) row.findViewById(R.id.hScrollView);
         imgHScrollLeft = (ImageView) row.findViewById(R.id.imgHScrollLeft);
         imgHScrollRight = (ImageView) row.findViewById(R.id.imgHScrollRight);
+
+        txtNoOfSwitchUnits = (TextView) row.findViewById(R.id.txtNoOfSwitchUnits);
+        txtNoOfMotorUnits = (TextView) row.findViewById(R.id.txtNoOfMotorUnits);
+        txtNoOfSliderUnits = (TextView) row.findViewById(R.id.txtNoOfSliderUnits);
+        txtNoOfSensorUnits = (TextView) row.findViewById(R.id.txtNoOfSensorUnits);
+
         imgHScrollLeft.setOnClickListener(this);
         imgHScrollRight.setOnClickListener(this);
+
+        parentMotor = (FrameLayout) row.findViewById(R.id.parentMotor);
+        parentMotor.setOnClickListener(this);
 
 
         hScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
@@ -107,6 +124,13 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             }
         });
 
+
+        AdvancedSpannableString sp = new AdvancedSpannableString(noOfSwitchUnits+"\\"+totalNoOfSwitchUnits);
+
+
+
+
+
         updateSceneList();
     }
 
@@ -129,6 +153,10 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
             case R.id.imgHScrollRight:
                 hScrollView.scrollTo((int) hScrollView.getScrollX() + 20, (int) hScrollView.getScrollY());
+                break;
+            case R.id.parentMotor:
+                Intent intent = new Intent(getActivity(), MotorListActivity.class);
+                startActivity(intent);
                 break;
         }
     }

@@ -32,6 +32,12 @@
             android:name=".ui.base.HomeDrawerActivity"
             android:label="@string/title_activity_dimmer" >
         </activity>
+
+        <activity android:name=".ui.Activities.MotorListActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+
     </application>
 
 </manifest>
