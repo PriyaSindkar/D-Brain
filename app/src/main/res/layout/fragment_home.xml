@@ -1,10 +1,30 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="foodbazar.webmyne.com.foodbaazar.ui.fragments.LocationFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <EditText android:layout_width="match_parent" android:layout_height="match_parent"
-        android:text="hello_blank_fragment" />
 
-</FrameLayout>
+    <SeekBar
+        android:max="100"
+        android:thumb="@drawable/thumb"
+        android:progressDrawable="@drawable/progressbar"
+        android:secondaryProgress="0"
+        android:layout_margin="16dp"
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+    <TextView
+        android:padding="4dp"
+        android:layout_marginRight="8dp"
+        android:layout_gravity="right"
+        android:gravity="center"
+        android:textColor="#ffffff"
+        android:background="@drawable/seekbar_value"
+        android:id="@+id/txtValue"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content" />
+    
+</LinearLayout>

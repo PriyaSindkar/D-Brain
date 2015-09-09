@@ -115,7 +115,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
 
             case R.id.drawer_home:
                 // Home
-                ft.replace(R.id.content, HomeFragment.newInstance("", ""), "HOME_PAGE");
+                ft.replace(R.id.content, HomeFragment.newInstance(), "HOME_PAGE");
                 ft.commit();
                 break;
 
