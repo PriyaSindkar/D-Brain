@@ -43,7 +43,6 @@ public class AnimationHelper {
 
         animatorSet = new AnimatorSet();
         animatorSet.play(animator).with(scaleDownX).with(scaleDownY);
-        Log.e("animatorSet", ""+animatorSet);
     }
 
     public void startPowerButtonAnimation() {

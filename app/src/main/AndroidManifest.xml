@@ -22,15 +22,17 @@
         <activity
             android:name=".ui.base.HomeDrawerActivity"
             android:screenOrientation="portrait" >
+
+        </activity>
+        <activity
+            android:name=".ui.base.DimmerActivity"
+            android:label="@string/title_activity_dimmer" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".ui.base.DimmerActivity"
-            android:label="@string/title_activity_dimmer" >
         </activity>
 
         <activity android:name=".ui.Activities.MotorListActivity"

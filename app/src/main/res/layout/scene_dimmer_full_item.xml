@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:id="@+id/linearParent"
+    android:background="@color/primaryColor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:padding="@dimen/STD_MARGIN"
+            android:id="@+id/txtSwitchName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dimmer Name"
+            android:textColor="@color/white"
+            android:src="@drawable/ic_arrow_left"/>
+
+        <SeekBar
+            android:max="100"
+            android:thumb="@drawable/thumb"
+            android:progressDrawable="@drawable/progressbar"
+            android:secondaryProgress="0"
+            android:layout_margin="16dp"
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            layout="@layout/control_options_item"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

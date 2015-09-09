@@ -1,0 +1,182 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/secondaryBgColor"
+    android:id="@+id/parentRelativeLayout"
+    tools:context=".MainActivity">
+
+    <!--<include
+        android:id="@+id/tool_bar"
+        layout="@layout/toolbar" />-->
+
+    <RelativeLayout
+        android:id="@+id/topBar"
+        android:background="@color/primaryColor"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/HEADER_BAR_SIZE">
+
+            <ImageView
+                android:id="@+id/imgBack"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/HEADER_BAR_SIZE"
+                android:src="@drawable/ic_arrow_left_white"/>
+
+        <TextView
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="@dimen/L_TEXT_SIZE"
+            android:text="My Scene"/>
+
+        <TextView
+            android:background="@drawable/round_corner_button"
+            android:padding="@dimen/S_MARGIN"
+            android:layout_marginRight="@dimen/S_MARGIN"
+            android:drawableLeft="@drawable/ic_tick"
+            android:drawablePadding="@dimen/STD_MARGIN"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="Save"/>
+
+    </RelativeLayout>
+
+
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@id/topBar"
+        android:layout_above="@id/bottomBar"
+        android:id="@+id/recycler_view"
+        android:clickable="true"
+        android:layout_marginTop="@dimen/STD_MARGIN"
+        android:layout_marginBottom="@dimen/STD_MARGIN"
+        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <LinearLayout
+            android:weightSum="3"
+            android:gravity="center"
+            android:background="@color/primaryColor"
+            android:id="@+id/layoutBottom"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/BOTTOM_BAR_SIZE"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtSwitch"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="@dimen/S_MARGIN"
+                android:textColor="@color/white"
+                android:text="Switch"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#000" />
+
+            <TextView
+                android:id="@+id/txtDimmer"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="@dimen/S_MARGIN"
+                android:textColor="@color/white"
+                android:text="Dimmer"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#000" />
+
+            <TextView
+                android:id="@+id/txtMotor"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="@dimen/S_MARGIN"
+                android:textColor="@color/white"
+                android:text="Motor"/>
+
+        </LinearLayout>
+
+
+
+    </RelativeLayout>
+
+    <io.codetail.widget.RevealFrameLayout
+        android:id="@+id/popup"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottomBar">
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/linearPopup"
+            android:gravity="center"
+            android:weightSum="3"
+            android:layout_above="@id/bottomBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_weight="0.5"
+                android:id="@+id/imgHScrollLeft"
+                android:gravity="left|center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_arrow_left" />
+
+                <HorizontalScrollView
+                    android:layout_weight="2"
+                    android:id="@+id/hScrollView"
+                    android:scrollbars="none"
+                    android:layout_margin="@dimen/STD_MARGIN"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:id="@+id/linearControls"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </HorizontalScrollView>
+
+            <ImageView
+                android:layout_weight="0.5"
+                android:id="@+id/imgHScrollRight"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="right|center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_arrow_right" />
+
+        </LinearLayout>
+
+    </io.codetail.widget.RevealFrameLayout>
+
+
+
+
+
+</RelativeLayout>

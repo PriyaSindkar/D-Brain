@@ -1,6 +1,7 @@
 package com.webmyne.android.d_brain.ui.Helpers;
 
 import android.graphics.Typeface;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
@@ -108,10 +109,6 @@ public class AdvancedSpannableString extends SpannableString {
 		setSpan(span, start, end, SPAN_EXCLUSIVE_EXCLUSIVE);
 
 	}
-
-	/*public void setTextSize(String str) {
-		str.set
-	}*/
 
     public static interface OnClickableSpanListner {
         public void onSpanClick();

@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +47,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     LinearLayout sliderLayout;
 
     private int myTotalScenes = 5;
-    private String noOfSwitchUnits="13", totalNoOfSwitchUnits="17";
+    private String noOfSwitchUnits="13", totalNoOfSwitchUnits="17", noOfMotorUnits="13", totalNoOfMotorUnits="17", noOfSliderUnits="13", totalNoOfSliderUnits="17", noOfSensorUnits="13", totalNoOfSensorUnits="17";
 
     public static DashboardFragment newInstance() {
         DashboardFragment fragment = new DashboardFragment();
@@ -136,9 +138,21 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         });
 
 
-        AdvancedSpannableString sp = new AdvancedSpannableString(noOfSwitchUnits+"\\"+totalNoOfSwitchUnits);
+        AdvancedSpannableString sp = new AdvancedSpannableString(noOfSwitchUnits+"//"+totalNoOfSwitchUnits);
+        sp.setSpan(new RelativeSizeSpan(1.3f), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        txtNoOfSwitchUnits.setText(sp);
 
+        sp = new AdvancedSpannableString(noOfMotorUnits+"//"+totalNoOfMotorUnits);
+        sp.setSpan(new RelativeSizeSpan(1.3f), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        txtNoOfMotorUnits.setText(sp);
 
+        sp = new AdvancedSpannableString(noOfSliderUnits+"//"+totalNoOfSliderUnits);
+        sp.setSpan(new RelativeSizeSpan(1.3f), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        txtNoOfSliderUnits.setText(sp);
+
+        sp = new AdvancedSpannableString(noOfSensorUnits+"//"+totalNoOfSensorUnits);
+        sp.setSpan(new RelativeSizeSpan(1.3f), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        txtNoOfSensorUnits.setText(sp);
 
 
 

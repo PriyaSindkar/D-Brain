@@ -13,26 +13,16 @@
 
         android:background="@color/primaryColor">
 
-        <FrameLayout
+        <TextView
             android:layout_gravity="top|right"
+            android:id="@+id/txtNoOfSliderUnits"
+            android:padding="@dimen/S_MARGIN"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/tag"/>
-
-            <TextView
-                android:id="@+id/txtNoOfSliderUnits"
-                android:layout_gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:textSize="@dimen/VS_TEXT_SIZE"
-                android:text="13/17"/>
-
-        </FrameLayout>
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="@dimen/VS_TEXT_SIZE"
+            android:background="@drawable/tag"
+            android:text="13/17"/>
 
         <LinearLayout
             android:padding="@dimen/STD_MARGIN"
