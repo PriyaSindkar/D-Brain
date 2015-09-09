@@ -2,7 +2,6 @@ package com.webmyne.android.d_brain.ui.base;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -16,8 +15,18 @@ import android.widget.ImageView;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
+import com.webmyne.android.d_brain.ui.Fragments.AboutUsFragment;
+import com.webmyne.android.d_brain.ui.Fragments.AddMachineFragment;
+import com.webmyne.android.d_brain.ui.Fragments.ContactUsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.HomeFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
+import com.webmyne.android.d_brain.ui.Fragments.MachineConfigFragment;
+import com.webmyne.android.d_brain.ui.Fragments.MainPanelFragment;
+import com.webmyne.android.d_brain.ui.Fragments.NotificationFragment;
+import com.webmyne.android.d_brain.ui.Fragments.SceneFragment;
+import com.webmyne.android.d_brain.ui.Fragments.SchedulerFragment;
+import com.webmyne.android.d_brain.ui.Fragments.SensorFragment;
+import com.webmyne.android.d_brain.ui.Fragments.SettingsFragment;
 
 public class HomeDrawerActivity extends AppCompatActivity {
 
@@ -127,6 +136,67 @@ public class HomeDrawerActivity extends AppCompatActivity {
             case R.id.drawer_home:
                 // Home
                 ft.replace(R.id.content, DashboardFragment.newInstance(), "HOME_PAGE");
+                ft.replace(R.id.content, HomeFragment.newInstance(), "HOME_PAGE");
+                ft.commit();
+                break;
+
+            case R.id.drawer_main_panel:
+                // Home
+                ft.replace(R.id.content, MainPanelFragment.newInstance(), "MAIN_PANEL");
+                ft.commit();
+                break;
+
+            case R.id.drawer_scenes:
+                // Home
+                ft.replace(R.id.content, SceneFragment.newInstance(), "SCENES");
+                ft.commit();
+                break;
+
+            case R.id.drawer_schedulers:
+                // Home
+                ft.replace(R.id.content, SchedulerFragment.newInstance(), "SCHEDULER");
+                ft.commit();
+                break;
+
+            case R.id.drawer_sensors:
+                // Home
+                ft.replace(R.id.content, SensorFragment.newInstance(), "SENSORS");
+                ft.commit();
+                break;
+
+            case R.id.drawer_notification:
+                // Home
+                ft.replace(R.id.content, NotificationFragment.newInstance(), "NOTIFICATION");
+                ft.commit();
+                break;
+
+            case R.id.drawer_add_machine:
+                // Home
+                ft.replace(R.id.content, AddMachineFragment.newInstance(), "Add Machine");
+                ft.commit();
+                break;
+
+            case R.id.drawer_machine_config:
+                // Home
+                ft.replace(R.id.content, MachineConfigFragment.newInstance(), "Machine Configuration");
+                ft.commit();
+                break;
+
+            case R.id.drawer_settings:
+                // Home
+                ft.replace(R.id.content, SettingsFragment.newInstance(), "Settings");
+                ft.commit();
+                break;
+
+            case R.id.drawer_about:
+                // Home
+                ft.replace(R.id.content, AboutUsFragment.newInstance(), "About Us");
+                ft.commit();
+                break;
+
+            case R.id.drawer_contact:
+                // Home
+                ft.replace(R.id.content, ContactUsFragment.newInstance(), "Contact Us");
                 ft.commit();
                 break;
 

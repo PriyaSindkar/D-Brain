@@ -24,9 +24,6 @@ import java.util.TimeZone;
 
 public class HomeFragment extends Fragment {
 
-
-
-
     private SeekBar seekBar;
     private TextView txtValue;
 
