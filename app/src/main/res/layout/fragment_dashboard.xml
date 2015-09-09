@@ -1,0 +1,241 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2d3f4d"
+    tools:context=".MainActivity">
+
+   <!-- <include
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/HEADER_BAR_SIZE"
+        android:id="@+id/tool_bar"
+        layout="@layout/app_bar" />-->
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_marginLeft="@dimen/L_MARGIN"
+        android:layout_marginRight="@dimen/L_MARGIN"
+        android:layout_marginTop="@dimen/STD_MARGIN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:weightSum="2"
+            android:layout_marginBottom="@dimen/STD_MARGIN"
+            android:layout_height="wrap_content">
+
+
+            <include
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginRight="@dimen/STD_MARGIN"
+                layout="@layout/dashboard_switch_component"/>
+
+            <include
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                layout="@layout/dashboard_motor_component"/>
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:weightSum="2"
+            android:layout_marginBottom="@dimen/STD_MARGIN"
+            android:layout_height="wrap_content">
+
+            <include
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginRight="@dimen/STD_MARGIN"
+                layout="@layout/dashboard_slider_component"/>
+
+            <include
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                layout="@layout/dashboard_motor_component"/>
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/bottomBar"
+        android:foregroundGravity="top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <LinearLayout
+            android:gravity="center"
+            android:background="@color/primaryColor"
+            android:layout_marginTop="@dimen/L_TEXT_SIZE"
+            android:id="@+id/layoutBottom"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/BOTTOM_BAR_SIZE"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+            </LinearLayout>
+
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:background="@drawable/white_border_circle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/STD_MARGIN"
+                    android:src="@drawable/ic_action_favorite" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:background="@drawable/white_border_circle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/STD_MARGIN"
+                    android:src="@drawable/ic_action_favorite" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/imgOptions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/STD_MARGIN"
+                    android:background="@drawable/green_border_circle"
+                    android:src="@drawable/ic_hardware_keyboard_arrow_up" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLeft"
+            android:layout_marginLeft="@dimen/M1_TEXT_SIZE"
+            android:background="@drawable/circle2"
+            android:layout_width="@dimen/BULB_SIZE"
+            android:layout_height="@dimen/BULB_SIZE"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <ImageView
+                android:tintMode="src_atop"
+                android:tint="#ffffff"
+                android:id="@+id/bulb_image"
+                android:layout_width="@dimen/CIRCLE_SIZE"
+                android:layout_height="@dimen/CIRCLE_SIZE"
+                android:layout_gravity="center"
+                android:background="@drawable/circle"
+                android:padding="@dimen/STD_MARGIN"
+                android:src="@drawable/bulb" />
+
+        </LinearLayout>
+        </RelativeLayout>
+    </FrameLayout>
+
+    <include
+        android:id="@+id/linearOptions1"
+        android:layout_above="@id/bottomBar"
+        android:layout_width="match_parent"
+        android:visibility="visible"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        layout="@layout/bottom_options_menu"/>
+
+
+    <LinearLayout
+        android:id="@+id/linearSlider"
+        android:gravity="center_vertical"
+        android:layout_above="@id/linearOptions1"
+        android:layout_marginBottom="@dimen/STD_MARGIN"
+        android:weightSum="3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_weight="0.5"
+            android:id="@+id/imgHScrollLeft"
+            android:gravity="left|center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_left" />
+
+        <HorizontalScrollView
+            android:layout_weight="2"
+            android:id="@+id/hScrollView"
+            android:layout_margin="@dimen/STD_MARGIN"
+            android:scrollbars="none"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:id="@+id/linearSceneList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </HorizontalScrollView>
+
+        <ImageView
+            android:layout_weight="0.5"
+            android:id="@+id/imgHScrollRight"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right|center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_arrow_right" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

@@ -1,0 +1,27 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/rounded_container_bg">
+
+    <TextView
+        android:id="@+id/imgBack"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/HEADER_BAR_SIZE"
+        android:text="Motors"
+        android:textSize="@dimen/L_TEXT_SIZE"
+        android:background="@color/primaryColor"
+        android:textColor="@color/white"
+        android:drawableLeft="@drawable/ic_arrow_left_white"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@id/imgBack"
+        android:id="@+id/recycler_view"
+        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+        android:layout_marginTop="@dimen/STD_MARGIN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
+</RelativeLayout>

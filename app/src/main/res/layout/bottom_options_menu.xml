@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+
+<io.codetail.widget.RevealFrameLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="wrap_content">
+
+<LinearLayout
+    android:id="@+id/linearOptions"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/BOTTOM_BAR_SIZE"
+    android:layout_marginBottom="@dimen/L_MARGIN"
+    android:layout_marginLeft="@dimen/STD_MARGIN"
+    android:layout_marginRight="@dimen/STD_MARGIN"
+    android:orientation="horizontal"
+    android:background="@color/rounded_container_border"
+    android:weightSum="3">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:paddingTop="@dimen/STD_MARGIN"
+        android:orientation="vertical">
+
+
+        <ImageView
+            android:background="@drawable/white_border_circle"
+            android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+            android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+            android:padding="@dimen/STD_MARGIN"
+            android:src="@drawable/ic_action_add" />
+
+        <TextView
+            android:padding="@dimen/VS_MARGIN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Event"
+            android:textSize="@dimen/VS_TEXT_SIZE"
+            android:gravity="center"
+            android:textColor="@color/white" />
+
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/dotted_line" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:paddingTop="@dimen/STD_MARGIN"
+        android:orientation="vertical">
+
+        <ImageView
+            android:background="@drawable/white_border_circle"
+            android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+            android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+            android:padding="@dimen/STD_MARGIN"
+            android:src="@drawable/ic_add_machine" />
+
+        <TextView
+            android:padding="@dimen/VS_MARGIN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Machine"
+            android:textSize="@dimen/VS_TEXT_SIZE"
+            android:gravity="center"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/dotted_line" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:paddingTop="@dimen/STD_MARGIN"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+            android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+            android:background="@drawable/white_border_circle"
+            android:padding="@dimen/STD_MARGIN"
+            android:src="@drawable/ic_scheduler" />
+
+        <TextView
+            android:padding="@dimen/VS_MARGIN"
+            android:singleLine="false"
+            android:lines="2"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Scheduler"
+            android:textSize="@dimen/VS_TEXT_SIZE"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+
+</LinearLayout>
+
+
+</io.codetail.widget.RevealFrameLayout>

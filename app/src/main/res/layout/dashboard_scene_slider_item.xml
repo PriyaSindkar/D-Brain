@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <LinearLayout
+        android:id="@+id/linearLeft"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_margin="@dimen/L_TEXT_SIZE"
+        android:orientation="vertical"
+        android:background="@drawable/scene_item_circle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/white_border_circle"
+        android:gravity="center"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:gravity="center"
+            android:id="@+id/bulb_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/STD_MARGIN"
+            android:src="@drawable/ic_addscene" />
+
+    </LinearLayout>
+
+        <TextView
+            android:layout_gravity="center"
+            android:textSize="@dimen/VS_TEXT_SIZE"
+            android:layout_width="wrap_content"
+            android:padding="@dimen/STD_MARGIN"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="Scene 1"/>
+
+    </LinearLayout>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:weightSum="3"
+    android:id="@+id/linearParent"
+    android:orientation="horizontal"
+    android:background="@color/primaryColor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_weight="2"
+            android:id="@+id/linearMotor"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_margin="@dimen/S_MARGIN"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:weightSum="2"
+                android:layout_height="wrap_content">
+
+            <TextView
+                android:padding="@dimen/S_MARGIN"
+                android:text="Motor Name"
+                android:layout_weight="1.8"
+                android:id="@+id/txtMotorName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#fff"/>
+
+           <ImageView
+               android:layout_weight="0.2"
+                android:layout_gravity="right"
+                android:id="@+id/imgRotateSwitches"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_image_rotate_left"/>
+            </LinearLayout>
+
+            <include
+                layout="@layout/control_options_item"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/linerParantMotorSwitch"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:background="#000" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:background="@color/primaryColor"
+                android:layout_width="wrap_content"
+                android:padding="@dimen/S_MARGIN"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgMotorLeftArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_arrow_left"/>
+
+                <ImageView
+                    android:id="@+id/imgMotorStop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_av_stop"/>
+
+                <ImageView
+                    android:id="@+id/imgMotorRightArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_arrow_right"/>
+
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+</LinearLayout>

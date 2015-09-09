@@ -2,6 +2,7 @@ package com.webmyne.android.d_brain.ui.base;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -11,9 +12,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Fragments.HomeFragment;
+import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 
 public class HomeDrawerActivity extends AppCompatActivity {
 
@@ -21,6 +25,9 @@ public class HomeDrawerActivity extends AppCompatActivity {
     private ActionBarDrawerToggle drawerToggle;
     NavigationView view;
     Toolbar toolbar;
+    private ImageView btn;
+    AnimationHelper animObj;
+    private boolean  isPowerOn = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +36,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         view = (NavigationView) findViewById(R.id.navigation_view);
+        btn = (ImageView) findViewById(R.id.btn);
 
 
         if (toolbar != null) {
@@ -36,6 +44,9 @@ public class HomeDrawerActivity extends AppCompatActivity {
             setSupportActionBar(toolbar);
         }
         initDrawer();
+        animObj = new AnimationHelper();
+        animObj.initPowerButtonAnimation(btn);
+        call();
 
     }
 
@@ -115,11 +126,28 @@ public class HomeDrawerActivity extends AppCompatActivity {
 
             case R.id.drawer_home:
                 // Home
-                ft.replace(R.id.content, HomeFragment.newInstance(), "HOME_PAGE");
+                ft.replace(R.id.content, DashboardFragment.newInstance(), "HOME_PAGE");
                 ft.commit();
                 break;
 
 
         }
+    }
+
+    private void call() {
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //Do something after 100ms
+                isPowerOn = !isPowerOn;
+                if (isPowerOn) {
+                    animObj.cancelPowerButtonAnimation();
+                } else {
+                    animObj.startPowerButtonAnimation();
+                }
+                handler.postDelayed(this, 1000);
+            }
+        }, 1000);
     }
 }

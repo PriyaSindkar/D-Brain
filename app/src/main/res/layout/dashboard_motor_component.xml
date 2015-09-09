@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:background="@color/primaryColor">
+
+        <FrameLayout
+            android:layout_gravity="top|right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/tag"/>
+
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="@dimen/VS_TEXT_SIZE"
+                android:text="13/17"/>
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:padding="@dimen/STD_MARGIN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_gravity="center"
+                android:background="@drawable/circle"
+                android:layout_width="@dimen/ICON_BORDER_SIZE"
+                android:layout_height="@dimen/ICON_BORDER_SIZE"
+                android:padding="@dimen/STD_MARGIN"
+                android:src="@drawable/ic_motors"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:padding="@dimen/S_MARGIN"
+                android:layout_gravity="center"
+                android:text="Motor"/>
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>
