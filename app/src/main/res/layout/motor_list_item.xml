@@ -25,26 +25,40 @@
             <TextView
                 android:padding="@dimen/S_MARGIN"
                 android:text="Motor Name"
-                android:layout_weight="1.8"
+                android:layout_weight="1.9"
                 android:id="@+id/txtMotorName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#fff"/>
 
-           <ImageView
-               android:layout_weight="0.2"
-                android:layout_gravity="right"
-                android:id="@+id/imgRotateSwitches"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_image_rotate_left"/>
+
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
             <include
                 layout="@layout/control_options_item"/>
 
+            <ImageView
+                android:layout_weight="0.1"
+                android:layout_gravity="center"
+                android:id="@+id/imgRotateSwitches"
+                android:background="@drawable/white_border_circle"
+                android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+                android:padding="@dimen/S_MARGIN"
+                android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+                android:src="@drawable/ic_image_rotate_left"/>
+
+            </LinearLayout>
+
         </LinearLayout>
 
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:background="#000" />
 
         <LinearLayout
             android:id="@+id/linerParantMotorSwitch"
@@ -54,12 +68,10 @@
             android:layout_width="0dp"
             android:layout_height="match_parent">
 
-            <View
-                android:layout_width="0.5dp"
-                android:layout_height="match_parent"
-                android:background="#000" />
+
 
             <LinearLayout
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:background="@color/primaryColor"
                 android:layout_width="wrap_content"
@@ -68,8 +80,8 @@
 
                 <ImageView
                     android:id="@+id/imgMotorLeftArrow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+                    android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
                     android:src="@drawable/ic_arrow_left"/>
 
                 <ImageView
@@ -80,8 +92,8 @@
 
                 <ImageView
                     android:id="@+id/imgMotorRightArrow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+                    android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
                     android:src="@drawable/ic_arrow_right"/>
 
 

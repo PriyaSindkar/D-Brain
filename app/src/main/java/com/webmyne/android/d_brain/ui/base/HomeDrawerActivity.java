@@ -48,7 +48,6 @@ public class HomeDrawerActivity extends AppCompatActivity {
         view = (NavigationView) findViewById(R.id.navigation_view);
         btn = (ImageView) findViewById(R.id.btn);
 
-
         if (toolbar != null) {
             toolbar.setTitle("D2 Brain");
             setSupportActionBar(toolbar);
@@ -56,12 +55,14 @@ public class HomeDrawerActivity extends AppCompatActivity {
         initDrawer();
         animObj = new AnimationHelper();
         animObj.initPowerButtonAnimation(btn);
+        btn.setVisibility(View.VISIBLE);
         call();
 
     }
 
     public void setTitle(String title) {
         toolbar.setTitle(title);
+       // toolbar.setNavigationIcon(R.layout.drawer_option_icon);
     }
 
     public void setSubTitle(String subTitle) {
@@ -88,7 +89,6 @@ public class HomeDrawerActivity extends AppCompatActivity {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-
             }
 
             @Override
@@ -184,6 +184,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
 
             case R.id.drawer_settings:
                 // Home
+                btn.setVisibility(View.GONE);
                 ft.replace(R.id.content, SettingsFragment.newInstance(), "Settings");
                 ft.commit();
                 break;

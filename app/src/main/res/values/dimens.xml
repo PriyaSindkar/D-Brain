@@ -20,4 +20,8 @@
     <dimen name="ICON_BORDER_SIZE">40dp</dimen>
     <dimen name="SCENE_ITEM_SIZE">100dp</dimen>
     <dimen name="POPUP_BAR_ICON_SIZE">30dp</dimen>
+
+    <dimen name="DASHBOARD_CARD_WIDTH">200dp</dimen>
+    <dimen name="DASHBOARD_CARD_HEIGHT">120dp</dimen>
+
 </resources>

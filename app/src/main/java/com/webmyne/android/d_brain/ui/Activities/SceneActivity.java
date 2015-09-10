@@ -1,6 +1,5 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,6 +23,12 @@ import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Model.onItemClickListener;
 import com.webmyne.android.d_brain.ui.Widgets.SceneDimmerItem;
@@ -125,6 +130,43 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }
         });
 
+        mAdapter.setSingleClickListener(new onSingleClickListener() {
+            @Override
+            public void onSingleClick(int pos) {
+                Toast.makeText(SceneActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mAdapter.setFavoriteClickListener(new onFavoriteClickListener() {
+            @Override
+            public void onFavoriteOptionClick(int pos) {
+                Toast.makeText(SceneActivity.this, "Add to Favorite option: " + pos, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mAdapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
+
+            @Override
+            public void onAddSchedulerOptionClick(int pos) {
+                Toast.makeText(SceneActivity.this, "Add Scheduler: " + pos, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mAdapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
+            @Override
+            public void onAddToSceneOptionClick(int pos) {
+                Toast.makeText(SceneActivity.this, "Add to scene: " + pos, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mAdapter.setRenameClickListener(new onRenameClickListener() {
+
+            @Override
+            public void onRenameOptionClick(int pos) {
+                Toast.makeText(SceneActivity.this, "Rename: " + pos, Toast.LENGTH_SHORT).show();
+            }
+        });
+
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -179,10 +221,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 txtDimmer.setBackgroundColor(getResources().getColor(R.color.primaryColor));
                 txtMotor.setBackgroundColor(getResources().getColor(R.color.primaryColor));
                 linearPopup.setVisibility(View.GONE);
-                break;
-
-            case R.id.recycler_view:
-                Log.e("acva", "asdsa");
                 break;
         }
 
@@ -319,6 +357,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
     View.OnClickListener buttonClick = new View.OnClickListener() {
         public void onClick(View v) {
+            Log.e("CLICK","CLICK");
             if(v.isFocusable()) {
                 v.setFocusable(false);
 

@@ -3,8 +3,10 @@
     android:layout_height="wrap_content"
     android:background="@color/secondaryBgColor">
 
-
-    <LinearLayout
+<include
+    android:id="@+id/thisToolbar"
+    layout="@layout/app_bar2"/>
+    <!--<LinearLayout
         android:id="@+id/thisToolbar"
         android:background="@color/primaryColor"
         android:layout_width="match_parent"
@@ -29,7 +31,7 @@
         android:textSize="@dimen/L_TEXT_SIZE"
         android:textColor="@color/white"/>
 
-    </LinearLayout>
+    </LinearLayout>-->
 
     <android.support.v7.widget.RecyclerView
         android:layout_below="@id/thisToolbar"

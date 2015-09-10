@@ -8,7 +8,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.priyasindkar.dbraindemo.R;
+import com.webmyne.android.d_brain.R;
+
 
 /**
  * Created by priyasindkar on 03-09-2015.

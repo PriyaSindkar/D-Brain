@@ -1,8 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.webmyne.android.d_brain.ui.base.DimmerActivity">
+    android:layout_height="wrap_content"
+    android:background="@color/secondaryBgColor">
 
     <include layout="@layout/app_bar2"></include>
 
@@ -11,12 +11,15 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/thisToolbar">
 
-        <ListView
-            android:id="@+id/dimmerListView"
+        <android.support.v7.widget.RecyclerView
+            android:layout_below="@id/thisToolbar"
+            android:id="@+id/recycler_view"
+            android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+            android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+            android:layout_marginTop="@dimen/STD_MARGIN"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        </ListView>
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
     </LinearLayout>
 
 </RelativeLayout>

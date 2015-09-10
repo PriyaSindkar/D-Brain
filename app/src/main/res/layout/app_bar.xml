@@ -11,10 +11,10 @@
 
     <ImageView
         android:id="@+id/btn"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="@dimen/VS_TEXT_SIZE"
+        android:layout_height="@dimen/VS_TEXT_SIZE"
         android:layout_gravity="right|center_vertical"
-        android:layout_marginRight="@dimen/STD_MARGIN"
+        android:layout_marginRight="@dimen/L_MARGIN"
         android:src="@drawable/green_power_button" />
 
 </android.support.v7.widget.Toolbar>

@@ -13,9 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.priyasindkar.dbraindemo.R;
+import com.webmyne.android.d_brain.R;
 
-import animationHelpers.AnimationHelper;
 
 /**
  * Created by priyasindkar on 03-09-2015.

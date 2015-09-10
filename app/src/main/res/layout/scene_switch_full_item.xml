@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:toggle="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:id="@+id/linearSwitch"
     android:background="@color/primaryColor"
@@ -48,11 +48,12 @@
                 android:gravity="center"
                 android:layout_height="wrap_content">
 
-                <ImageView
+
+                <!--<ImageView
                     android:id="@+id/imgSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_switch"/>
+                    android:src="@drawable/ic_switch"/>-->
 
             </LinearLayout>
     </LinearLayout>

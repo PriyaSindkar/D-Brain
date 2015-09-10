@@ -16,12 +16,15 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/HEADER_BAR_SIZE">
 
-            <ImageView
-                android:id="@+id/imgBack"
-                android:gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/HEADER_BAR_SIZE"
-                android:src="@drawable/ic_arrow_left_white"/>
+        <ImageView
+            android:id="@+id/imgBack"
+            android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+            android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/L_MARGIN"
+            android:background="@drawable/white_border_circle"
+            android:padding="@dimen/S_MARGIN"
+            android:src="@drawable/ic_arrow_left_white" />
 
         <TextView
             android:layout_centerInParent="true"
@@ -34,7 +37,7 @@
         <TextView
             android:background="@drawable/round_corner_button"
             android:padding="@dimen/S_MARGIN"
-            android:layout_marginRight="@dimen/S_MARGIN"
+            android:layout_margin="@dimen/STD_MARGIN"
             android:drawableLeft="@drawable/ic_tick"
             android:drawablePadding="@dimen/STD_MARGIN"
             android:layout_alignParentRight="true"
@@ -49,17 +52,7 @@
 
 
 
-    <android.support.v7.widget.RecyclerView
-        android:layout_below="@id/topBar"
-        android:layout_above="@id/bottomBar"
-        android:id="@+id/recycler_view"
-        android:clickable="true"
-        android:layout_marginTop="@dimen/STD_MARGIN"
-        android:layout_marginBottom="@dimen/STD_MARGIN"
-        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
-        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+
 
     <RelativeLayout
         android:id="@+id/bottomBar"
@@ -117,10 +110,19 @@
                 android:text="Motor"/>
 
         </LinearLayout>
-
-
-
     </RelativeLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@id/topBar"
+        android:layout_above="@id/bottomBar"
+        android:id="@+id/recycler_view"
+        android:clickable="true"
+        android:layout_marginTop="@dimen/STD_MARGIN"
+        android:layout_marginBottom="@dimen/STD_MARGIN"
+        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <io.codetail.widget.RevealFrameLayout
         android:id="@+id/popup"
@@ -157,8 +159,8 @@
                     <LinearLayout
                         android:orientation="horizontal"
                         android:id="@+id/linearControls"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_width="@dimen/ICON_BORDER_SIZE"
+                        android:layout_height="@dimen/ICON_BORDER_SIZE"/>
 
                 </HorizontalScrollView>
 
@@ -167,14 +169,13 @@
                 android:id="@+id/imgHScrollRight"
                 android:layout_alignParentRight="true"
                 android:layout_gravity="right|center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/ICON_BORDER_SIZE"
+                android:layout_height="@dimen/ICON_BORDER_SIZE"
                 android:src="@drawable/ic_arrow_right" />
 
         </LinearLayout>
 
     </io.codetail.widget.RevealFrameLayout>
-
 
 
 

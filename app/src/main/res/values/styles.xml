@@ -12,8 +12,6 @@
         <item name="colorAccent">@color/primaryColor</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="android:textColorPrimary">@color/white</item>
-
-
     </style>
 
 

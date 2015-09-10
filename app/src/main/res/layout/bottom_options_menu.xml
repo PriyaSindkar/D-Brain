@@ -15,7 +15,7 @@ android:layout_height="wrap_content">
     android:layout_marginLeft="@dimen/STD_MARGIN"
     android:layout_marginRight="@dimen/STD_MARGIN"
     android:orientation="horizontal"
-    android:background="@color/rounded_container_border"
+    android:background="@color/tertiaryBgColor"
     android:weightSum="3">
 
     <LinearLayout

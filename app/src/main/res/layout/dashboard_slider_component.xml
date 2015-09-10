@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+
 
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/parentSlider"
+        android:layout_width="@dimen/DASHBOARD_CARD_WIDTH"
+        android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
         android:gravity="center"
-
         android:background="@color/primaryColor">
 
         <TextView
@@ -24,6 +21,7 @@
             android:background="@drawable/tag"
             android:text="13/17"/>
 
+
         <LinearLayout
             android:padding="@dimen/STD_MARGIN"
             android:layout_width="wrap_content"
@@ -34,8 +32,8 @@
             <ImageView
                 android:layout_gravity="center"
                 android:background="@drawable/circle"
-                android:layout_width="@dimen/ICON_BORDER_SIZE"
-                android:layout_height="@dimen/ICON_BORDER_SIZE"
+                android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+                android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
                 android:padding="@dimen/STD_MARGIN"
                 android:src="@drawable/ic_sliders"/>
 
@@ -49,5 +47,3 @@
         </LinearLayout>
 
     </FrameLayout>
-
-</LinearLayout>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:weightSum="3"
+    android:id="@+id/linearParent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@color/primaryColor"
+    android:layout_margin="@dimen/STD_MARGIN"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+
+
+    <LinearLayout
+        android:id="@+id/linerParantMotorSwitch"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:background="@color/primaryColor"
+            android:layout_width="wrap_content"
+            android:padding="@dimen/S_MARGIN"
+            android:gravity="center"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imgMotorLeftArrow"
+                android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+                android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+                android:src="@drawable/ic_arrow_left"/>
+
+            <ImageView
+                android:id="@+id/imgMotorStop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_av_stop"/>
+
+            <ImageView
+                android:id="@+id/imgMotorRightArrow"
+                android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+                android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+                android:src="@drawable/ic_arrow_right"/>
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:layout_weight="0.1"
+        android:layout_gravity="center"
+        android:id="@+id/imgRotateSwitches"
+        android:background="@drawable/white_border_circle"
+        android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+        android:padding="@dimen/S_MARGIN"
+        android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+        android:src="@drawable/ic_image_rotate_left"/>
+
+    <LinearLayout
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_margin="@dimen/STD_MARGIN"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:padding="@dimen/S_MARGIN"
+            android:text="Motor Name"
+            android:id="@+id/txtMotorName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#fff"/>
+
+
+    </LinearLayout>
+
+</LinearLayout>
