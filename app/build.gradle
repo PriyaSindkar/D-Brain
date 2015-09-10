@@ -35,5 +35,5 @@ dependencies {
     compile 'com.github.ozodrukh:CircularReveal:1.1.0'
     compile 'com.android.support:recyclerview-v7:22.0.0'
     compile 'jp.wasabeef:recyclerview-animators:1.2.2'
-
+    compile 'com.kyleduo.switchbutton:library:1.2.9'
 }

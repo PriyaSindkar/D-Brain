@@ -144,8 +144,8 @@
                 android:layout_weight="0.5"
                 android:id="@+id/imgHScrollLeft"
                 android:gravity="left|center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/ICON_BORDER_SIZE"
+                android:layout_height="@dimen/ICON_BORDER_SIZE"
                 android:src="@drawable/ic_arrow_left" />
 
                 <HorizontalScrollView
@@ -159,8 +159,8 @@
                     <LinearLayout
                         android:orientation="horizontal"
                         android:id="@+id/linearControls"
-                        android:layout_width="@dimen/ICON_BORDER_SIZE"
-                        android:layout_height="@dimen/ICON_BORDER_SIZE"/>
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
 
                 </HorizontalScrollView>
 

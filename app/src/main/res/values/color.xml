@@ -33,8 +33,8 @@
     <color name="light_gray_header_color">#006263</color>
     <color name="secondaryBgColor">#2d3f4d</color>
     <color name="tertiaryBgColor">#3c4d59</color>
-
-
+    <color name="yellowBorder">#e5b94c</color>
+    <color name="offSwitchColor">#0c2836</color>
 
 
 

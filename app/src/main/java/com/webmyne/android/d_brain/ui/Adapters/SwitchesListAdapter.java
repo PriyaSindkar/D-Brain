@@ -6,10 +6,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
@@ -48,6 +50,7 @@ public class SwitchesListAdapter extends RecyclerView.Adapter<SwitchesListAdapte
         public  TextView txtSwitchName;
         public ImageView imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
         public LinearLayout linearSwitch;
+        public SwitchButton imgSwitch;
 
         public ListViewHolder ( View view ) {
             super ( view );
@@ -58,17 +61,21 @@ public class SwitchesListAdapter extends RecyclerView.Adapter<SwitchesListAdapte
             this.imgAddToSceneOption = (ImageView) view.findViewById(R.id.imgAddToSceneOption);
             this.imgAddSchedulerOption = (ImageView) view.findViewById(R.id.imgAddSchedulerOption);
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
+
+            this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
         }
     }
 
     public class GridViewHolder extends ViewHolder{
         public  TextView txtSwitchName;
         public LinearLayout linearSwitch;
+        public SwitchButton imgSwitch;
 
         public GridViewHolder ( View view ) {
             super ( view );
             this.txtSwitchName = (TextView) view.findViewById(R.id.txtSwitchName);
             this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
+            this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
         }
     }
 
@@ -143,6 +150,18 @@ public class SwitchesListAdapter extends RecyclerView.Adapter<SwitchesListAdapte
             case 0:
                final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
                 listHolder.txtSwitchName.setText("Switch " + position);
+
+                listHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if(isChecked) {
+                            listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                        } else {
+                            listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                        }
+
+                    }
+                });
 
                 listHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
                     @Override

@@ -4,7 +4,7 @@
     android:orientation="horizontal"
     android:background="@color/primaryColor"
     android:layout_width="wrap_content"
-    android:padding="@dimen/STD_MARGIN"
+    android:padding="@dimen/S_MARGIN"
     android:layout_height="wrap_content">
 
 
