@@ -11,6 +11,7 @@ import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -43,6 +44,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private int myTotalScenes = 5;
     private String noOfSwitchUnits="13", totalNoOfSwitchUnits="17", noOfMotorUnits="13", totalNoOfMotorUnits="17", noOfSliderUnits="13", totalNoOfSliderUnits="17", noOfSensorUnits="13", totalNoOfSensorUnits="17";
 
+    private LinearLayout firstBottomItem;
+    private FrameLayout linearLeft;
+
     public static DashboardFragment newInstance() {
         DashboardFragment fragment = new DashboardFragment();
         return fragment;
@@ -72,6 +76,10 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
     private void init(View row) {
         animObj = new AnimationHelper();
+
+        linearLeft = (FrameLayout)row.findViewById(R.id.linearLeft);
+        firstBottomItem = (LinearLayout)row.findViewById(R.id.firstBottomItem);
+
         imgOptions = (ImageView) row.findViewById(R.id.imgOptions);
         layoutBottom = (LinearLayout) row.findViewById(R.id.layoutBottom);
         linearOptions = (LinearLayout) row.findViewById(R.id.linearOptions);
@@ -140,7 +148,24 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         sp.setSpan(new RelativeSizeSpan(1.3f), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         txtNoOfSensorUnits.setText(sp);
 
+
         updateSceneList();
+
+        ViewTreeObserver vto = firstBottomItem.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+
+                int width = firstBottomItem.getWidth();
+
+                linearLeft.getLayoutParams().width = width;
+                linearLeft.requestLayout();
+
+
+            }
+        });
+
+
     }
 
     @Override
