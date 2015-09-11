@@ -2,6 +2,7 @@ package com.webmyne.android.d_brain.ui.Screens;
 
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -19,6 +20,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -78,9 +80,18 @@ public class splash extends ActionBarActivity {
 
                         @Override
                         public void onFinish() {
-                            Intent i = new Intent(splash.this, HomeDrawerActivity.class);
-                            startActivity(i);
-                            finish();
+
+                            SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
+                            if(preferences.contains("hasLoggedIn")) {
+                                Intent i = new Intent(splash.this, HomeDrawerActivity.class);
+                                startActivity(i);
+                                finish();
+                                preferences.edit().clear();
+                            } else {
+                                Intent i = new Intent(splash.this, UserGuide.class);
+                                startActivity(i);
+                                finish();
+                            }
                         }
                     }.start();
 

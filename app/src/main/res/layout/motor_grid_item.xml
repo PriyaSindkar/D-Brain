@@ -6,11 +6,21 @@
     android:orientation="vertical"
     android:gravity="center"
     android:background="@color/primaryColor"
-    android:layout_margin="@dimen/STD_MARGIN"
+    android:layout_marginLeft="@dimen/S_MARGIN"
+    android:layout_marginRight="@dimen/S_MARGIN"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-
+    <ImageView
+        android:layout_weight="0.1"
+        android:layout_gravity="center"
+        android:id="@+id/imgRotateSwitches"
+        android:background="@drawable/white_border_circle"
+        android:layout_width="@dimen/ICON_PADDING"
+        android:padding="@dimen/S_MARGIN"
+        android:layout_marginTop="@dimen/S_MARGIN"
+        android:layout_height="@dimen/ICON_PADDING"
+        android:src="@drawable/ic_image_rotate_left"/>
 
     <LinearLayout
         android:id="@+id/linerParantMotorSwitch"
@@ -48,15 +58,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <ImageView
-        android:layout_weight="0.1"
-        android:layout_gravity="center"
-        android:id="@+id/imgRotateSwitches"
-        android:background="@drawable/white_border_circle"
-        android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
-        android:padding="@dimen/S_MARGIN"
-        android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
-        android:src="@drawable/ic_image_rotate_left"/>
+
 
     <LinearLayout
         android:gravity="center"

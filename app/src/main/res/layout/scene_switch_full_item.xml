@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-
     android:background="@color/primaryColor"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -11,10 +10,11 @@
         android:id="@+id/linearSwitch"
         android:layout_width="match_parent"
         android:orientation="horizontal"
-        android:padding="@dimen/S_MARGIN"
+
         android:layout_height="wrap_content">
 
             <LinearLayout
+                android:padding="@dimen/S_MARGIN"
                 android:layout_weight="1.5"
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
@@ -35,18 +35,18 @@
             </LinearLayout>
 
             <View
-                android:layout_width="0.5dp"
+                android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:background="@color/tertiaryBgColor" />
+                android:background="@color/secondaryBgColor" />
 
             <LinearLayout
+                android:layout_margin="@dimen/S_MARGIN"
                 android:layout_weight="0.5"
                 android:orientation="horizontal"
                 android:background="@color/primaryColor"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:padding="@dimen/S_MARGIN"
                 android:layout_height="wrap_content">
 
                 <com.kyleduo.switchbutton.SwitchButton

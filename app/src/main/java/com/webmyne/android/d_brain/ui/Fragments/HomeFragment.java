@@ -113,7 +113,7 @@ public class HomeFragment extends Fragment {
         super.onResume();
 
         HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
-        homeScreen.setTitle("D2 Brain");
+        //homeScreen.setTitle("D2 Brain");
 
 
     }

@@ -7,7 +7,8 @@
     android:gravity="center"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/STD_MARGIN">
+    android:layout_marginLeft="@dimen/S_MARGIN"
+    android:layout_marginRight="@dimen/S_MARGIN">
 
     <com.kyleduo.switchbutton.SwitchButton
         android:id="@+id/imgSwitch"

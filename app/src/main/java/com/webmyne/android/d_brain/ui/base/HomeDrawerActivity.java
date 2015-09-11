@@ -49,7 +49,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
         btn = (ImageView) findViewById(R.id.btn);
 
         if (toolbar != null) {
-            toolbar.setTitle("D2 Brain");
+            toolbar.setTitle("");
             setSupportActionBar(toolbar);
         }
         initDrawer();

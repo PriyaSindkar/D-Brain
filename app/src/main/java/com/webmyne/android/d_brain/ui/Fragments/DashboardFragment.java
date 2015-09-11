@@ -173,7 +173,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         super.onResume();
 
         HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
-        homeScreen.setTitle("Dashboard");
+       // homeScreen.setTitle("Dashboard");
 
     }
 

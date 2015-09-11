@@ -1,26 +1,33 @@
 package com.webmyne.android.d_brain.ui.Screens;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.LayoutDirection;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Customcomponents.CirclePageIndicator;
 import com.webmyne.android.d_brain.ui.Customcomponents.CustomViewPager;
 import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
+import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
+import com.webmyne.android.d_brain.ui.Fragments.UserGuideSettingsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSliderFragment;
+import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 
 
 public class UserGuide extends ActionBarActivity implements View.OnClickListener {
@@ -68,11 +75,10 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
 
             @Override
             public void onPageSelected(int position) {
-                if(position ==6) {
+                if (position == 6) {
                     txtNext.setVisibility(View.VISIBLE);
                     txtSkip.setVisibility(View.GONE);
-                }
-                else {
+                } else {
                     txtNext.setVisibility(View.GONE);
                     txtSkip.setVisibility(View.VISIBLE);
                 }
@@ -95,6 +101,15 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                 viewPager.setCurrentItem(6);
                 break;
             case R.id.txtNext:
+                Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+
+                SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("hasLoggedIn", true);
+                editor.commit();
+
                 break;
         }
     }
@@ -107,14 +122,9 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
 
 
         @Override
-
-
         public Fragment getItem(int index) {
-
             switch (index) {
-
                 case 0:
-
                     return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
 
                 case 1:
@@ -135,7 +145,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                     return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
                 case 6:
 
-                    return UserGuideSliderFragment.newInstance(R.drawable.splash, "");
+                    return UserGuideSettingsFragment.newInstance(R.drawable.splash, "");
 
             }
 
@@ -148,6 +158,11 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         }
 
     }
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Log.e("RAG", "BACK PRESSED");
+        finish();
+    }
 
 }

@@ -82,7 +82,7 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:background="#000" />
+                android:background="@color/secondaryBgColor" />
 
             <TextView
                 android:id="@+id/txtDimmer"
@@ -97,7 +97,7 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:background="#000" />
+                android:background="@color/secondaryBgColor" />
 
             <TextView
                 android:id="@+id/txtMotor"

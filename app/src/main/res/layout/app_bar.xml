@@ -9,12 +9,23 @@
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
     android:layout_height="@dimen/HEADER_BAR_SIZE">
 
+
+    <TextView
+        android:id="@+id/toolbarTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="Dashboard"
+        android:textColor="@color/white"
+        android:textSize="@dimen/L_TEXT_SIZE" />
+
     <ImageView
         android:id="@+id/btn"
         android:layout_width="@dimen/VS_TEXT_SIZE"
         android:layout_height="@dimen/VS_TEXT_SIZE"
         android:layout_gravity="right|center_vertical"
         android:layout_marginRight="@dimen/L_MARGIN"
-        android:src="@drawable/green_power_button" />
+        android:src="@drawable/power_button" />
 
 </android.support.v7.widget.Toolbar>

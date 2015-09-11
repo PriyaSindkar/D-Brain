@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/splash">
+
+    <RelativeLayout
+        android:id="@+id/parentLogo"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/pathRel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/img1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:src="@drawable/dlogo"
+            android:layout_width="60dp"
+            android:layout_height="60dp" />
+
+        <ImageView
+            android:tint="@color/yellow"
+            android:tintMode="src_atop"
+            android:id="@+id/imgd2"
+            android:layout_alignRight="@+id/img1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:src="@drawable/d2"
+            android:layout_width="20dp"
+            android:layout_height="15dp" />
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_below="@id/parentLogo"
+        android:orientation="vertical"
+        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+        android:layout_marginTop="@dimen/BOTTOM_BAR_SIZE"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/TextLabel">
+
+            <EditText
+                android:id="@+id/edtSerialNo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Serial Number"
+                android:inputType="text"
+                android:singleLine="true"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/white"
+                android:textColorHint="@color/lightGrey"
+                android:textSize="@dimen/L_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/TextLabel">
+
+            <EditText
+                android:id="@+id/edtIPAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Device IP Address"
+                android:inputType="text"
+                android:singleLine="true"
+                android:backgroundTint="@color/white"
+                android:textColor="#ffffff"
+                android:textColorHint="#d1d1d1"
+                android:textSize="@dimen/L_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

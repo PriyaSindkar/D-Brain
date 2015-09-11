@@ -203,6 +203,18 @@ public class SwitchesListAdapter extends RecyclerView.Adapter<SwitchesListAdapte
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
                 groupViewHolder.txtSwitchName.setText("Switch "+ position);
 
+                groupViewHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            groupViewHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                        } else {
+                            groupViewHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                        }
+
+                    }
+                });
+
                 groupViewHolder.linearSwitch.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
