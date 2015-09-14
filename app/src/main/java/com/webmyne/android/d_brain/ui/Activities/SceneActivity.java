@@ -251,7 +251,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
             for(int i=0; i < totalNoOfSwitches; i++) {
                 SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
-                sceneSwitchItem.setText("Dimmer "+i);
+                sceneSwitchItem.setText("Switch "+i);
                 linearControls.addView(sceneSwitchItem);
 
                 int idx = linearControls.indexOfChild(sceneSwitchItem);
@@ -260,6 +260,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }
 
             animationHelper.viewPopUpMenuFromBottomLeft(linearPopup);
+
 
         } else { // if switch popup is opened, close it
 

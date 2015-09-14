@@ -132,7 +132,7 @@
         android:layout_above="@id/bottomBar">
 
         <LinearLayout
-            android:visibility="gone"
+            android:visibility="invisible"
             android:id="@+id/linearPopup"
             android:gravity="center"
             android:weightSum="3"

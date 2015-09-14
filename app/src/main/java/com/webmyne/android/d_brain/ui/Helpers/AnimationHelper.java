@@ -5,6 +5,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -126,15 +127,16 @@ public class AnimationHelper {
         imageViewObjectAnimator.start();
     }
 
-    public void viewPopUpMenuFromBottomLeft(LinearLayout mRevealView) {
+    public void viewPopUpMenuFromBottomLeft(final LinearLayout mRevealView) {
+
         int cx = mRevealView.getBottom();
         int cy = (mRevealView.getLeft() + mRevealView.getRight());
         int radius = Math.max(mRevealView.getWidth(), mRevealView.getHeight());
-
         SupportAnimator popUpAnimation = ViewAnimationUtils.createCircularReveal(mRevealView, cx, cy, 0, radius);
         popUpAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
         popUpAnimation.setDuration(200);
         popUpAnimation.start();
+
     }
 
     public  void closePopUpMenuFromBottomLeft(LinearLayout mRevealView) {

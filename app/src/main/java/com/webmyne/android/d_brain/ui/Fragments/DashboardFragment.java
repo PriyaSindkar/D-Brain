@@ -115,7 +115,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         hScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
-        linearOptions.setVisibility(View.GONE);
+        linearOptions.setVisibility(View.INVISIBLE);
 
         imgOptions.setOnClickListener(new View.OnClickListener() {
             @Override
