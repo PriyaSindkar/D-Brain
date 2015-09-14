@@ -133,14 +133,22 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         mAdapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(DimmerActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mAdapter.setLongClickListener(new onLongClickListener() {
+
+            @Override
+            public void onLongClick(int pos) {
+                Toast.makeText(SceneActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
             }
         });
 
         mAdapter.setFavoriteClickListener(new onFavoriteClickListener() {
             @Override
             public void onFavoriteOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Add to Favorite option: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SceneActivity.this, "Added to Favorite Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -148,14 +156,14 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
             @Override
             public void onAddSchedulerOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Add Scheduler: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SceneActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
         mAdapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
             @Override
             public void onAddToSceneOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Add to scene: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SceneActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -163,7 +171,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
             @Override
             public void onRenameOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Rename: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SceneActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -243,6 +251,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
             for(int i=0; i < totalNoOfSwitches; i++) {
                 SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
+                sceneSwitchItem.setText("Dimmer "+i);
                 linearControls.addView(sceneSwitchItem);
 
                 int idx = linearControls.indexOfChild(sceneSwitchItem);
@@ -286,6 +295,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
             for(int i=0; i < totalNoOfDimmers; i++) {
                 SceneDimmerItem sceneSwitchItem = new SceneDimmerItem(SceneActivity.this);
+                sceneSwitchItem.setText("Dimmer "+i);
                 linearControls.addView(sceneSwitchItem);
 
                 int idx = linearControls.indexOfChild(sceneSwitchItem);
@@ -329,6 +339,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
             for(int i=0; i < totalNoOfMotors; i++) {
                 SceneMotorItem sceneSwitchItem = new SceneMotorItem(SceneActivity.this);
+                sceneSwitchItem.setText("Motor "+i);
                 linearControls.addView(sceneSwitchItem);
 
                 int idx = linearControls.indexOfChild(sceneSwitchItem);

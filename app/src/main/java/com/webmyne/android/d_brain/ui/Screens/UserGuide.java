@@ -101,15 +101,23 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                 viewPager.setCurrentItem(6);
                 break;
             case R.id.txtNext:
-                Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
 
-                SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean("hasLoggedIn", true);
-                editor.commit();
+                UserGuideSettingsFragment fragment = (UserGuideSettingsFragment) mAdapter.getItem(6);
 
+                if(fragment.getStrSerialNo().length() == 0) {
+                    Toast.makeText(this, "Must Enter Serial Number!", Toast.LENGTH_LONG).show();
+                } else if(fragment.getIPAddress().length() == 0) {
+                    Toast.makeText(this, "Must Enter Device IP Address!", Toast.LENGTH_LONG).show();
+                } else {
+                    Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+
+                    SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putBoolean("hasLoggedIn", true);
+                    editor.commit();
+                }
                 break;
         }
     }
@@ -156,12 +164,11 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         public int getCount() {
             return 7;
         }
-
     }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        Log.e("RAG", "BACK PRESSED");
         finish();
     }
 

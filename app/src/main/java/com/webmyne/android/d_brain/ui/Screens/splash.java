@@ -60,6 +60,7 @@ public class splash extends ActionBarActivity {
         dashedCircularProgress.setOnValueChangeListener(new DashedCircularProgress.OnValueChangeListener() {
             @Override
             public void onValueChange(float value) {
+
                 if (value >= 998 || value == 999) {
 
                     Animation fadeIn = new AlphaAnimation(0, 1);
@@ -85,10 +86,12 @@ public class splash extends ActionBarActivity {
                             if(preferences.contains("hasLoggedIn")) {
                                 Intent i = new Intent(splash.this, HomeDrawerActivity.class);
                                 startActivity(i);
+                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 finish();
                                 preferences.edit().clear();
                             } else {
                                 Intent i = new Intent(splash.this, UserGuide.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(i);
                                 finish();
                             }

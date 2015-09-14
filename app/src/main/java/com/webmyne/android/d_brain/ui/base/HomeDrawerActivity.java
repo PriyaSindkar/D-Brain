@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
@@ -38,6 +39,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
     private ImageView btn;
     AnimationHelper animObj;
     private boolean  isPowerOn = true;
+    private TextView toolbarTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         view = (NavigationView) findViewById(R.id.navigation_view);
         btn = (ImageView) findViewById(R.id.btn);
+        toolbarTitle = (TextView) findViewById(R.id.toolbarTitle);
 
         if (toolbar != null) {
             toolbar.setTitle("");
@@ -61,7 +64,8 @@ public class HomeDrawerActivity extends AppCompatActivity {
     }
 
     public void setTitle(String title) {
-        toolbar.setTitle(title);
+        toolbarTitle.setText(title);
+        //toolbar.setTitle(title);
        // toolbar.setNavigationIcon(R.layout.drawer_option_icon);
     }
 

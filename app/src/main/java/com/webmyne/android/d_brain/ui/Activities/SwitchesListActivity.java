@@ -75,7 +75,7 @@ public class SwitchesListActivity extends AppCompatActivity {
         adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(DimmerActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -83,14 +83,14 @@ public class SwitchesListActivity extends AppCompatActivity {
 
             @Override
             public void onLongClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Long Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SwitchesListActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
             }
         });
 
         adapter.setFavoriteClickListener(new onFavoriteClickListener() {
             @Override
             public void onFavoriteOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Add to Favorite option: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SwitchesListActivity.this, "Added to Favorite Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -98,14 +98,14 @@ public class SwitchesListActivity extends AppCompatActivity {
 
             @Override
             public void onAddSchedulerOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Add Scheduler: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SwitchesListActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
         adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
             @Override
             public void onAddToSceneOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Add to scene: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SwitchesListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -113,7 +113,7 @@ public class SwitchesListActivity extends AppCompatActivity {
 
             @Override
             public void onRenameOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Rename: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SwitchesListActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 

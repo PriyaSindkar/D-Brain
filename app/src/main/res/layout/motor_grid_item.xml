@@ -18,7 +18,7 @@
         android:background="@drawable/white_border_circle"
         android:layout_width="@dimen/ICON_PADDING"
         android:padding="@dimen/S_MARGIN"
-        android:layout_marginTop="@dimen/S_MARGIN"
+        android:layout_marginTop="@dimen/STD_MARGIN"
         android:layout_height="@dimen/ICON_PADDING"
         android:src="@drawable/ic_image_rotate_left"/>
 

@@ -3,6 +3,9 @@ package com.webmyne.android.d_brain.ui.Fragments;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +22,9 @@ public class UserGuideSettingsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private int mParam1;
     private String mParam2;
-    private EditText edtSerialNo, edtIPAddress;
+    public EditText edtSerialNo, edtIPAddress;
+    static   String  strSerialNo="", strIPAddress="";
+    View convertView;
 
     public static UserGuideSettingsFragment newInstance(int param1, String param2) {
         UserGuideSettingsFragment fragment = new UserGuideSettingsFragment();
@@ -49,12 +54,53 @@ public class UserGuideSettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View convertView= inflater.inflate(R.layout.fragment_slider_settings, container, false);
+        convertView= inflater.inflate(R.layout.fragment_slider_settings, container, false);
 
         edtSerialNo = (EditText) convertView.findViewById(R.id.edtSerialNo);
         edtIPAddress = (EditText) convertView.findViewById(R.id.edtIPAddress);
 
+
+        edtIPAddress.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+
+            }
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+                strIPAddress = s.toString().trim();
+            }
+        });
+
+        edtSerialNo.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+
+            }
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+                strSerialNo = s.toString().trim();
+            }
+        });
+
         return convertView;
+    }
+
+    public String getIPAddress() {
+        return strIPAddress;
+    }
+
+    public String getStrSerialNo() {
+        return strSerialNo;
     }
 
 

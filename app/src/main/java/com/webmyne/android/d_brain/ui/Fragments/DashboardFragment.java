@@ -3,6 +3,7 @@ package com.webmyne.android.d_brain.ui.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
@@ -33,13 +34,13 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
     AnimationHelper animObj;
     Toolbar toolbar;
-    ImageView imgOptions, imgHScrollLeft, imgHScrollRight;
-    boolean isImageUp = true;
+    ImageView imgOptions, imgHScrollLeft, imgHScrollRight, bulb_image;
+    boolean isImageUp = true, isBulbOn = true;
     LinearLayout layoutBottom, linearOptions, linearSceneList;
     HorizontalScrollView hScrollView;
     private FrameLayout parentMotor, parentSlider, parentSwitches;
     private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits;
-    LinearLayout sliderLayout;
+    LinearLayout sliderLayout, linearCreateEvent, linearAddMachine, linearAddScheduler;
 
     private int myTotalScenes = 5;
     private String noOfSwitchUnits="13", totalNoOfSwitchUnits="17", noOfMotorUnits="13", totalNoOfMotorUnits="17", noOfSliderUnits="13", totalNoOfSliderUnits="17", noOfSensorUnits="13", totalNoOfSensorUnits="17";
@@ -85,17 +86,26 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         linearOptions = (LinearLayout) row.findViewById(R.id.linearOptions);
         linearSceneList = (LinearLayout) row.findViewById(R.id.linearSceneList);
         hScrollView = (HorizontalScrollView) row.findViewById(R.id.hScrollView);
-        imgHScrollLeft = (ImageView) row.findViewById(R.id.imgHScrollLeft);
-        imgHScrollRight = (ImageView) row.findViewById(R.id.imgHScrollRight);
+        /*imgHScrollLeft = (ImageView) row.findViewById(R.id.imgHScrollLeft);
+        imgHScrollRight = (ImageView) row.findViewById(R.id.imgHScrollRight);*/
+        bulb_image = (ImageView) row.findViewById(R.id.bulb_image);
+        bulb_image.setOnClickListener(this);
 
         txtNoOfSwitchUnits = (TextView) row.findViewById(R.id.txtNoOfSwitchUnits);
         txtNoOfMotorUnits = (TextView) row.findViewById(R.id.txtNoOfMotorUnits);
         txtNoOfSliderUnits = (TextView) row.findViewById(R.id.txtNoOfSliderUnits);
         txtNoOfSensorUnits = (TextView) row.findViewById(R.id.txtNoOfSensorUnits);
 
-        imgHScrollLeft.setOnClickListener(this);
-        imgHScrollRight.setOnClickListener(this);
+        linearCreateEvent = (LinearLayout) row.findViewById(R.id.linearCreateEvent);
+        linearCreateEvent.setOnClickListener(this);
 
+        linearAddMachine = (LinearLayout) row.findViewById(R.id.linearAddMachine);
+        linearAddMachine.setOnClickListener(this);
+        linearAddScheduler = (LinearLayout) row.findViewById(R.id.linearAddScheduler);
+        linearAddScheduler.setOnClickListener(this);
+        /*imgHScrollLeft.setOnClickListener(this);
+        imgHScrollRight.setOnClickListener(this);
+*/
         parentMotor = (FrameLayout) row.findViewById(R.id.parentMotor);
         parentMotor.setOnClickListener(this);
         parentSlider = (FrameLayout) row.findViewById(R.id.parentSlider);
@@ -173,20 +183,20 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         super.onResume();
 
         HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
-       // homeScreen.setTitle("Dashboard");
+        homeScreen.setTitle("Dashboard");
 
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.imgHScrollLeft:
+            /*case R.id.imgHScrollLeft:
                 hScrollView.scrollTo((int) hScrollView.getScrollX() - 20, (int) hScrollView.getScrollY());
                 break;
 
             case R.id.imgHScrollRight:
                 hScrollView.scrollTo((int) hScrollView.getScrollX() + 20, (int) hScrollView.getScrollY());
-                break;
+                break;*/
             case R.id.parentMotor:
                 Intent intent = new Intent(getActivity(), MotorListActivity.class);
                 startActivity(intent);
@@ -199,6 +209,24 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             case R.id.parentSwitches:
                 intent = new Intent(getActivity(), SwitchesListActivity.class);
                 startActivity(intent);
+                break;
+
+            case R.id.bulb_image:
+                if(isBulbOn) {
+                    bulb_image.setColorFilter(getResources().getColor(R.color.white));
+                    bulb_image.setBackgroundResource(R.drawable.white_border_circle);
+                } else {
+                    bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
+                    bulb_image.setBackgroundResource(R.drawable.circle);
+                }
+                isBulbOn = !isBulbOn;
+                break;
+
+            case R.id.linearCreateEvent:
+                break;
+            case R.id.linearAddMachine:
+                break;
+            case R.id.linearAddScheduler:
                 break;
         }
     }

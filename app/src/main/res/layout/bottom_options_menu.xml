@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-
-
 <io.codetail.widget.RevealFrameLayout
 xmlns:android="http://schemas.android.com/apk/res/android"
 android:layout_width="match_parent"
@@ -15,10 +13,11 @@ android:layout_height="wrap_content">
     android:layout_marginLeft="@dimen/STD_MARGIN"
     android:layout_marginRight="@dimen/STD_MARGIN"
     android:orientation="horizontal"
-    android:background="@color/tertiaryBgColor"
+    android:background="@drawable/linear_shadow"
     android:weightSum="3">
 
     <LinearLayout
+        android:id="@+id/linearCreateEvent"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -52,6 +51,7 @@ android:layout_height="wrap_content">
         android:background="@drawable/dotted_line" />
 
     <LinearLayout
+        android:id="@+id/linearAddMachine"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -82,6 +82,7 @@ android:layout_height="wrap_content">
         android:background="@drawable/dotted_line" />
 
     <LinearLayout
+        android:id="@+id/linearAddScheduler"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"

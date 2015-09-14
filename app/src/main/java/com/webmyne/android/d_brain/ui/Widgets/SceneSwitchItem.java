@@ -57,7 +57,8 @@ public class SceneSwitchItem extends LinearLayout{
         viewLine = findViewById(R.id.viewLine);
 
         setFocusable(true);
-
     }
-
+    public void setText(String text) {
+        txtSwitchName.setText(text);
+    }
 }

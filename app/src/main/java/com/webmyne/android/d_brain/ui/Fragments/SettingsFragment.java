@@ -2,15 +2,18 @@ package com.webmyne.android.d_brain.ui.Fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 
 
 public class SettingsFragment extends Fragment {
+    Toolbar toolbar;
 
     public static SettingsFragment newInstance() {
         SettingsFragment fragment = new SettingsFragment();

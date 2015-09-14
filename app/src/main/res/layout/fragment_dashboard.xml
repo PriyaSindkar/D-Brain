@@ -64,52 +64,35 @@
                 android:layout_weight="1" />
 
         </LinearLayout>
+    </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/linearSlider"
+        android:layout_above="@id/bottomBar"
+        android:layout_below="@id/linearComponents"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/L_MARGIN"
+        android:layout_marginRight="@dimen/L_MARGIN">
 
-        <LinearLayout
-            android:id="@+id/linearSlider"
-            android:layout_width="match_parent"
+        <HorizontalScrollView
+            android:id="@+id/hScrollView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/STD_MARGIN"
-            android:layout_marginTop="@dimen/L_MARGIN"
-            android:gravity="center_vertical"
-            android:weightSum="3">
+            android:layout_weight="2"
+            android:scrollbars="none">
 
-            <ImageView
-                android:id="@+id/imgHScrollLeft"
-                android:layout_width="@dimen/ICON_BORDER_SIZE"
-                android:layout_height="@dimen/ICON_BORDER_SIZE"
-                android:layout_weight="0.5"
-                android:gravity="left|center_vertical"
-                android:src="@drawable/ic_arrow_left" />
-
-            <HorizontalScrollView
-                android:id="@+id/hScrollView"
+            <LinearLayout
+                android:id="@+id/linearSceneList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/STD_MARGIN"
-                android:layout_weight="2"
-                android:scrollbars="none">
+                android:orientation="horizontal" />
 
-                <LinearLayout
-                    android:id="@+id/linearSceneList"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
+        </HorizontalScrollView>
 
-            </HorizontalScrollView>
-
-            <ImageView
-                android:id="@+id/imgHScrollRight"
-                android:layout_width="@dimen/ICON_BORDER_SIZE"
-                android:layout_height="@dimen/ICON_BORDER_SIZE"
-                android:layout_alignParentRight="true"
-                android:layout_gravity="right|center_vertical"
-                android:layout_weight="0.5"
-                android:src="@drawable/ic_arrow_right" />
-
-        </LinearLayout>
     </LinearLayout>
+
 
     <FrameLayout
         android:id="@+id/bottomBar"
@@ -211,6 +194,7 @@
                 android:gravity="center">
 
                 <ImageView
+                    android:id="@+id/imgBulbRing"
                     android:layout_width="@dimen/BULB_SIZE"
                     android:layout_height="@dimen/BULB_SIZE"
                     android:layout_gravity="center"
@@ -224,7 +208,7 @@
                     android:background="@drawable/circle"
                     android:padding="@dimen/STD_MARGIN"
                     android:src="@drawable/bulb"
-                    android:tint="#ffffff"
+                    android:tint="@color/yellowBorder"
                     android:tintMode="src_atop" />
 
             </FrameLayout>

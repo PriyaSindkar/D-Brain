@@ -38,7 +38,7 @@ public class AnimationHelper {
         scaleDownX.setDuration(1000);
         scaleDownY.setDuration(1000);
 
-        Animator animator = ObjectAnimator.ofFloat(btn,"alpha",1f,0.7f);
+        Animator animator = ObjectAnimator.ofFloat(btn,"alpha",1f,0.3f);
         animator.setDuration(1000);
 
         animatorSet = new AnimatorSet();
