@@ -8,15 +8,9 @@ import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.LayoutDirection;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +18,6 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Customcomponents.CirclePageIndicator;
 import com.webmyne.android.d_brain.ui.Customcomponents.CustomViewPager;
 import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
-import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSettingsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSliderFragment;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
@@ -104,8 +97,8 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
 
                 UserGuideSettingsFragment fragment = (UserGuideSettingsFragment) mAdapter.getItem(6);
 
-                if(fragment.getStrSerialNo().length() == 0) {
-                    Toast.makeText(this, "Must Enter Serial Number!", Toast.LENGTH_LONG).show();
+                if(fragment.getStrMachineName().length() == 0) {
+                    Toast.makeText(this, "Must Enter Machine Name!", Toast.LENGTH_LONG).show();
                 } else if(fragment.getIPAddress().length() == 0) {
                     Toast.makeText(this, "Must Enter Device IP Address!", Toast.LENGTH_LONG).show();
                 } else {

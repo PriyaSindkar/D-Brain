@@ -1,0 +1,57 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/secondaryBgColor">
+
+    <RelativeLayout
+        android:id="@+id/thisToolbar"
+        android:background="@color/primaryColor"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/HEADER_BAR_SIZE">
+
+        <ImageView
+            android:id="@+id/imgBack"
+            android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+            android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/L_MARGIN"
+            android:background="@drawable/white_border_circle"
+            android:padding="@dimen/S_MARGIN"
+            android:src="@drawable/ic_arrow_left_white" />
+
+        <TextView
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="@dimen/L_TEXT_SIZE"
+            android:text="Machines"/>
+
+        <TextView
+            android:id="@+id/txtAddMachine"
+            android:background="@drawable/round_corner_button"
+            android:padding="@dimen/S_MARGIN"
+            android:layout_margin="@dimen/STD_MARGIN"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:textSize="@dimen/VS_TEXT_SIZE"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="Add Machine"/>
+
+    </RelativeLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@id/thisToolbar"
+        android:id="@+id/recycler_view"
+        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+        android:layout_marginTop="@dimen/STD_MARGIN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+
+
+</RelativeLayout>

@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.DimmerActivity;
+import com.webmyne.android.d_brain.ui.Activities.MachineListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MotorListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
@@ -227,6 +228,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             case R.id.linearCreateEvent:
                 break;
             case R.id.linearAddMachine:
+                intent = new Intent(getActivity(), MachineListActivity.class);
+                startActivity(intent);
+
                 break;
             case R.id.linearAddScheduler:
                 break;

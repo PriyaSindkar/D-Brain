@@ -1,18 +1,14 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.webmyne.android.d_brain.R;
 
 
@@ -22,8 +18,8 @@ public class UserGuideSettingsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private int mParam1;
     private String mParam2;
-    public EditText edtSerialNo, edtIPAddress;
-    static   String  strSerialNo="", strIPAddress="";
+    public EditText edtMachineName, edtIPAddress;
+    static   String strMachineName ="", strIPAddress="";
     View convertView;
 
     public static UserGuideSettingsFragment newInstance(int param1, String param2) {
@@ -56,7 +52,7 @@ public class UserGuideSettingsFragment extends Fragment {
         // Inflate the layout for this fragment
         convertView= inflater.inflate(R.layout.fragment_slider_settings, container, false);
 
-        edtSerialNo = (EditText) convertView.findViewById(R.id.edtSerialNo);
+        edtMachineName = (EditText) convertView.findViewById(R.id.edtMachineName);
         edtIPAddress = (EditText) convertView.findViewById(R.id.edtIPAddress);
 
 
@@ -76,7 +72,7 @@ public class UserGuideSettingsFragment extends Fragment {
             }
         });
 
-        edtSerialNo.addTextChangedListener(new TextWatcher() {
+        edtMachineName.addTextChangedListener(new TextWatcher() {
 
             public void afterTextChanged(Editable s) {
 
@@ -88,7 +84,7 @@ public class UserGuideSettingsFragment extends Fragment {
 
             public void onTextChanged(CharSequence s, int start,
                                       int before, int count) {
-                strSerialNo = s.toString().trim();
+                strMachineName = s.toString().trim();
             }
         });
 
@@ -99,8 +95,8 @@ public class UserGuideSettingsFragment extends Fragment {
         return strIPAddress;
     }
 
-    public String getStrSerialNo() {
-        return strSerialNo;
+    public String getStrMachineName() {
+        return strMachineName;
     }
 
 

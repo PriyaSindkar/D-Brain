@@ -31,6 +31,11 @@
             android:title="Sensors" />
 
         <item
+            android:icon="@drawable/drawer_sensors"
+            android:id="@+id/drawer_touchpanel"
+            android:title="Touch Panel" />
+
+        <item
             android:icon="@drawable/drawer_notification"
             android:id="@+id/drawer_notification"
             android:title="Notifications" />

@@ -1,5 +1,8 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.app.ActionBar;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -69,7 +73,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
-            //toolbar.setTitle("My Scene");
+            toolbar.setTitle("");
             //toolbar.setTitleTextColor(Color.parseColor("#ffffff"));
             setSupportActionBar(toolbar);
         }
@@ -175,19 +179,19 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }
         });
 
-        imgBack.setOnClickListener(new View.OnClickListener() {
+        /*imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
-        });
+        });*/
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_launcher_screen, menu);
+        getMenuInflater().inflate(R.menu.menu_my_scene, menu);
         return true;
     }
 
