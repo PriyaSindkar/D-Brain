@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="@dimen/L_TEXT_SIZE"
-            android:text="My Scene"/>
+            android:text="Bedroom Scene"/>
 
         <TextView
             android:background="@drawable/round_corner_button"

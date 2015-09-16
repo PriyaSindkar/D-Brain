@@ -43,7 +43,7 @@
                 android:textColor="@color/white"
                 android:padding="@dimen/S_MARGIN"
                 android:layout_gravity="center"
-                android:text="Slider"/>
+                android:text="Dimmer"/>
         </LinearLayout>
 
     </FrameLayout>

@@ -30,6 +30,8 @@ import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 
+import java.util.ArrayList;
+
 public class DashboardFragment extends Fragment implements PopupAnimationEnd, View.OnClickListener {
 
     AnimationHelper animObj;
@@ -238,10 +240,20 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
 
     private void updateSceneList() {
+
+        ArrayList<String> dummyCceneNames = new ArrayList<>();
+        dummyCceneNames.add("Bedroom Theme");
+        dummyCceneNames.add("Kitchen Theme");
+        dummyCceneNames.add("Living Room Theme");
+        dummyCceneNames.add("TV Room Theme");
+        dummyCceneNames.add("Small Bedroom Theme");
+
         for (int i = 0; i < myTotalScenes; i++) {
 
             LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view = inflater.inflate(R.layout.dashboard_scene_slider_item, null);
+            TextView txtSceneName = (TextView) view.findViewById(R.id.txtSceneName);
+            txtSceneName.setText(dummyCceneNames.get(i));
 
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);

@@ -1,6 +1,7 @@
 package com.webmyne.android.d_brain.ui.Screens;
 
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -9,12 +10,14 @@ import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -45,7 +48,6 @@ public class splash extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-
         init();
 
         startProgressBar();
@@ -54,12 +56,21 @@ public class splash extends ActionBarActivity {
         pathView.useNaturalColors();
 
 
-        start();
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            imgBulb.setVisibility(View.VISIBLE);
+            int col = Color.parseColor("#ffffff");
+            imgBulb.setColorFilter(col, PorterDuff.Mode.SRC_ATOP);
+        } else{
+            start();
+        }
+
 
 
         dashedCircularProgress.setOnValueChangeListener(new DashedCircularProgress.OnValueChangeListener() {
             @Override
             public void onValueChange(float value) {
+
 
                 if (value >= 998 || value == 999) {
 
@@ -81,12 +92,11 @@ public class splash extends ActionBarActivity {
 
                         @Override
                         public void onFinish() {
-
                             SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
-                            if(preferences.contains("hasLoggedIn")) {
+                            if (preferences.contains("hasLoggedIn")) {
                                 Intent i = new Intent(splash.this, HomeDrawerActivity.class);
-                                startActivity(i);
                                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(i);
                                 finish();
                                 preferences.edit().clear();
                             } else {
@@ -100,17 +110,25 @@ public class splash extends ActionBarActivity {
 
 
                 }
+
             }
         });
 
-    }
 
+
+
+    }
 
     private void animaton360() {
         ObjectAnimator animator = ObjectAnimator.ofFloat(imgd2, "rotationY", 360f, 0f);
         animator.setDuration(2500);
         animator.start();
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     private void init() {
@@ -124,17 +142,17 @@ public class splash extends ActionBarActivity {
 
 
     void start() {
+
         pathView.getPathAnimator().
                 delay(100).
                 duration(2500).
                 listenerEnd(new PathView.AnimatorBuilder.ListenerEnd() {
                     @Override
-                    public void onAnimationEnd() {
-                        animaton360();
-                    }
-                }).
-                interpolator(new AccelerateDecelerateInterpolator()).
-                start();
+                            public void onAnimationEnd() {
+                                animaton360();
+                            }
+                        }).
+                        interpolator(new AccelerateDecelerateInterpolator()).start();
 
     }
 

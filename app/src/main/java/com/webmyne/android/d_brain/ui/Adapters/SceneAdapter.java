@@ -6,12 +6,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 
+import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
@@ -49,6 +51,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
         public TextView txtSwitchName;
         public LinearLayout linearSwitch;
         private ImageView imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
+        public SwitchButton imgSwitch;
 
         public SwitchViewHolder ( View itemView ) {
             super ( itemView );
@@ -58,6 +61,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
             this.imgAddToSceneOption = (ImageView) itemView.findViewById(R.id.imgAddToSceneOption);
             this.imgAddSchedulerOption = (ImageView) itemView.findViewById(R.id.imgAddSchedulerOption);
             this.imgRenameOption = (ImageView) itemView.findViewById(R.id.imgRenameOption);
+            this.imgSwitch = (SwitchButton) itemView.findViewById(R.id.imgSwitch);
         }
     }
 
@@ -197,8 +201,20 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
 
         switch (viewHolder.getItemViewType () ) {
             case 0:
-                SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
+                final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
                 switchHolder.txtSwitchName.setText("Switch Name "+ position);
+
+                switchHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            switchHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                        } else {
+                            switchHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                        }
+
+                    }
+                });
 
 
                 switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {

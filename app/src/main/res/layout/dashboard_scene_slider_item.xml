@@ -28,8 +28,11 @@
     </LinearLayout>
 
         <TextView
+            android:id="@+id/txtSceneName"
             android:layout_gravity="center"
             android:textSize="@dimen/VS_TEXT_SIZE"
+            android:singleLine="false"
+            android:maxLines="2"
             android:layout_width="wrap_content"
             android:padding="@dimen/STD_MARGIN"
             android:layout_height="wrap_content"

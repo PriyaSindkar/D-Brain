@@ -161,7 +161,7 @@
                         android:layout_height="@dimen/ICON_BORDER_SIZE"
                         android:background="@drawable/white_border_circle"
                         android:padding="@dimen/STD_MARGIN"
-                        android:src="@drawable/ic_action_favorite" />
+                        android:src="@drawable/ic_scheduler" />
                 </LinearLayout>
 
                 <View
