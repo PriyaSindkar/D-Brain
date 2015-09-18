@@ -29,4 +29,38 @@
         android:layout_marginRight="@dimen/L_MARGIN"
         android:src="@drawable/power_button" />
 
+
+    <LinearLayout
+        android:id="@+id/linearClearButton"
+        android:background="@drawable/round_corner_button"
+        android:layout_width="wrap_content"
+        android:layout_gravity="right"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_margin="@dimen/STD_MARGIN"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/STD_MARGIN"
+            android:paddingBottom="@dimen/STD_MARGIN"
+            android:src="@drawable/ic_tick"/>
+
+        <TextView
+            android:id="@+id/txtClearButton"
+            android:padding="@dimen/STD_MARGIN"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:textSize="@dimen/M_TEXT_SIZE"
+            android:layout_height="match_parent"
+            android:textColor="@color/white"
+            android:text="Clear All"/>
+
+    </LinearLayout>
+
+
+
 </android.support.v7.widget.Toolbar>

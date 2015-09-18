@@ -5,12 +5,23 @@ package com.webmyne.android.d_brain.ui.Model;
  */
 public class SceneItemsDataObject {
     private int sceneControlType;
+    private String name;
 
     public SceneItemsDataObject() {
     }
 
-    public SceneItemsDataObject(int sceneControlType) {
+    public SceneItemsDataObject(int sceneControlType, String name) {
         this.sceneControlType = sceneControlType;
+        this.name = name;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getSceneControlType() {

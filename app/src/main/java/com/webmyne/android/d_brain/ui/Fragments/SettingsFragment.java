@@ -42,6 +42,7 @@ public class SettingsFragment extends Fragment {
 
     private void init(View view) {
         ((HomeDrawerActivity) getActivity()).setTitle("Settings");
+        ((HomeDrawerActivity) getActivity()).hideAppBarButton();
     }
 
 }

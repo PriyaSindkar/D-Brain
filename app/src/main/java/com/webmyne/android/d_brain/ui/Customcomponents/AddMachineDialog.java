@@ -14,6 +14,8 @@ import com.flyco.animation.FadeEnter.FadeEnter;
 import com.flyco.animation.FlipEnter.FlipTopEnter;
 import com.flyco.animation.Jelly;
 import com.flyco.animation.NewsPaperEnter;
+import com.flyco.animation.SlideEnter.SlideRightEnter;
+import com.flyco.animation.SlideEnter.SlideTopEnter;
 import com.flyco.dialog.utils.CornerUtils;
 import com.flyco.dialog.widget.base.BaseDialog;
 import com.webmyne.android.d_brain.R;
@@ -32,7 +34,7 @@ public class AddMachineDialog extends BaseDialog {
     @Override
     public View onCreateView() {
         widthScale(0.85f);
-        showAnim(new FlipTopEnter());
+        showAnim(new SlideTopEnter());
 
 
         // dismissAnim(this, new ZoomOutExit());

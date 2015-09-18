@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/add_machine_bg">
+
+    <android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/toolbar"
+        android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:layout_width="match_parent"
+        android:layout_alignParentTop="true"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:layout_height="@dimen/HEADER_BAR_SIZE">
+
+        <TextView
+            android:id="@+id/txtSceneName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:layout_gravity="center"
+            android:textSize="@dimen/L_TEXT_SIZE"
+            android:text="Scenes"/>
+
+        <ImageView
+            android:layout_gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imgCancel"
+            android:layout_marginRight="@dimen/S_MARGIN"
+            android:src="@drawable/ic_navigation_cancel"/>
+
+    </android.support.v7.widget.Toolbar>
+
+
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@id/toolbar"
+        android:id="@+id/recycler_view"
+        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+        android:layout_marginTop="@dimen/STD_MARGIN"
+        android:layout_marginBottom="@dimen/VS_TEXT_SIZE"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/DASHBOARD_CARD_WIDTH" />
+
+    <LinearLayout
+        android:id="@+id/emptyView"
+        android:visibility="gone"
+        android:layout_below="@id/toolbar"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:layout_margin="@dimen/STD_MARGIN"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/DASHBOARD_CARD_WIDTH">
+
+        <TextView
+            android:id="@+id/txtEmptyView"
+            android:layout_width="match_parent"
+            android:textSize="@dimen/M1_TEXT_SIZE"
+            android:gravity="center"
+            android:text="@string/empty_scene"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:visibility="visible"/>
+
+
+        <TextView
+            android:id="@+id/txtEmptyView1"
+            android:layout_width="match_parent"
+            android:textSize="@dimen/M1_TEXT_SIZE"
+            android:gravity="center"
+            android:text="vsdsdrr"
+            android:layout_margin="@dimen/STD_MARGIN"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:visibility="visible"/>
+
+
+    </LinearLayout>
+
+
+
+</RelativeLayout>

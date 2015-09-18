@@ -187,6 +187,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
         homeScreen.setTitle("Dashboard");
+        homeScreen.hideAppBarButton();
 
     }
 

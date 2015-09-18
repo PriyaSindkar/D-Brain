@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,15 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
-import com.webmyne.android.d_brain.ui.Adapters.MotorListAdapter;
-import com.webmyne.android.d_brain.ui.Adapters.SceneListAdapter;
-import com.webmyne.android.d_brain.ui.Adapters.SwitchesListAdapter;
-import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
+import com.webmyne.android.d_brain.ui.Adapters.SchedulerListAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.SensorsListAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
-import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
@@ -29,14 +26,13 @@ import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
 
-public class SwitchesListActivity extends AppCompatActivity {
+public class SensorsListActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
-    private SwitchesListAdapter adapter;
+    private SensorsListAdapter adapter;
     private Toolbar toolbar;
     private ImageView imgBack, imgListGridToggle;
     private TextView toolbarTitle;
-    private int totalNoOfSwitches = 77;
-    private boolean isListView = true;
+    private int totalNoOfSensors = 9;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,22 +43,22 @@ public class SwitchesListActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         imgBack = (ImageView) findViewById(R.id.imgBack);
         imgListGridToggle = (ImageView) findViewById(R.id.imgListGridToggle);
+        imgListGridToggle.setVisibility(View.GONE);
 
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
         toolbarTitle = (TextView) findViewById(R.id.toolbarTitle);
-        toolbarTitle.setText("Switches");
+        toolbarTitle.setText("Schedulers");
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 
         mRecyclerView.setLayoutManager(layoutManager);
-        int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), SwitchesListActivity.this);
+        int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), SensorsListActivity.this);
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        adapter = new SwitchesListAdapter(SwitchesListActivity.this, totalNoOfSwitches);
-        adapter.setType(0);
+        adapter = new SensorsListAdapter(SensorsListActivity.this, totalNoOfSensors);
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
 
@@ -77,7 +73,9 @@ public class SwitchesListActivity extends AppCompatActivity {
         adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
-                //Toast.makeText(DimmerActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+                /*Intent intent = new Intent(SensorsListActivity.this, SceneActivity.class);
+                startActivity(intent);*/
+                Toast.makeText(SensorsListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -85,32 +83,14 @@ public class SwitchesListActivity extends AppCompatActivity {
 
             @Override
             public void onLongClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SensorsListActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
             }
         });
 
-        adapter.setFavoriteClickListener(new onFavoriteClickListener() {
+        adapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
-            public void onFavoriteOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Added to Favorite Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-
-            @Override
-            public void onAddSchedulerOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
-            @Override
-            public void onAddToSceneOptionClick(int pos) {
-                SceneListDialog dialog = new SceneListDialog(SwitchesListActivity.this);
-                dialog.show();
-
-                //Toast.makeText(SwitchesListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
+            public void onDeleteOptionClick(int pos) {
+                Toast.makeText(SensorsListActivity.this, "Deleted Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -118,7 +98,7 @@ public class SwitchesListActivity extends AppCompatActivity {
 
             @Override
             public void onRenameOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SensorsListActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -129,28 +109,6 @@ public class SwitchesListActivity extends AppCompatActivity {
             }
         });
 
-
-        imgListGridToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isListView) {
-                    isListView = false;
-                    imgListGridToggle.setImageResource(R.drawable.ic_list_view);
-                    android.support.v7.widget.GridLayoutManager layoutManager = new android.support.v7.widget.GridLayoutManager(SwitchesListActivity.this, 3);
-                    layoutManager.supportsPredictiveItemAnimations();
-                    mRecyclerView.setLayoutManager(layoutManager);
-                    adapter.setType(1);
-                    adapter.notifyDataSetChanged();
-
-                } else {
-                    isListView = true;
-                    imgListGridToggle.setImageResource(R.drawable.ic_grid_view);
-                    mRecyclerView.setLayoutManager(new LinearLayoutManager(SwitchesListActivity.this));
-                    adapter.setType(0);
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        });
     }
 
 

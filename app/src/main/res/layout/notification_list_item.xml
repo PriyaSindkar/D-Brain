@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:background="@color/primaryColor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <LinearLayout
+        android:id="@+id/linearParent"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:padding="@dimen/S_MARGIN"
+                android:layout_weight="1.5"
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:paddingLeft="@dimen/STD_MARGIN"
+                    android:paddingBottom="@dimen/STD_MARGIN"
+                    android:paddingRight="@dimen/STD_MARGIN"
+                    android:id="@+id/txtNotificationTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Notification Title"
+                    android:textColor="@color/white"
+                    android:src="@drawable/ic_arrow_left"/>
+
+                <TextView
+                    android:padding="@dimen/STD_MARGIN"
+                    android:id="@+id/txtDateTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Date Time"
+                    android:textColor="@color/white"
+                    android:src="@drawable/ic_arrow_left"/>
+
+                <TextView
+                    android:padding="@dimen/STD_MARGIN"
+                    android:id="@+id/txtNotificationMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Message"
+                    android:textColor="@color/white"
+                    android:src="@drawable/ic_arrow_left"/>
+
+            </LinearLayout>
+
+        <ImageView
+            android:layout_margin="@dimen/S_MARGIN"
+            android:id="@+id/imgDeleteOption"
+            android:background="@drawable/white_border_circle"
+            android:src="@drawable/ic_action_delete"
+            android:padding="@dimen/STD_MARGIN"
+            android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+            android:layout_height="@dimen/POPUP_BAR_ICON_SIZE" />
+    </LinearLayout>
+
+
+</LinearLayout>

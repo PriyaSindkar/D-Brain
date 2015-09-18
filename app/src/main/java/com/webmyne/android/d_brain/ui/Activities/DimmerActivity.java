@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.MotorListAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
@@ -98,7 +99,9 @@ public class DimmerActivity extends AppCompatActivity {
         adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
             @Override
             public void onAddToSceneOptionClick(int pos) {
-                Toast.makeText(DimmerActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
+                SceneListDialog dialog = new SceneListDialog(DimmerActivity.this);
+                dialog.show();
+               // Toast.makeText(DimmerActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 

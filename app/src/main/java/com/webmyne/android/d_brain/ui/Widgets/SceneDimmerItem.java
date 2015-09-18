@@ -56,4 +56,8 @@ public class SceneDimmerItem extends LinearLayout{
     public void setText(String text) {
         txtSwitchName.setText(text);
     }
+
+    public String getText() {
+        return txtSwitchName.getText().toString();
+    }
 }

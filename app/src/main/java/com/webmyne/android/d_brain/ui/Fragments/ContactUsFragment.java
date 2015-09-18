@@ -39,6 +39,7 @@ public class ContactUsFragment extends Fragment {
 
     private void init(View view) {
         ((HomeDrawerActivity) getActivity()).setTitle("Contact Us");
+        ((HomeDrawerActivity) getActivity()).hideAppBarButton();
     }
 
 }

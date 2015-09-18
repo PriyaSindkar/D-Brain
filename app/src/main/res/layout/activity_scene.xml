@@ -33,26 +33,42 @@
 
         <TextView
             android:layout_centerInParent="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:textSize="@dimen/L_TEXT_SIZE"
-            android:text="Bedroom Scene"/>
-
-        <!--<TextView
-            android:background="@drawable/round_corner_button"
-            android:padding="@dimen/S_MARGIN"
-            android:layout_margin="@dimen/STD_MARGIN"
-            android:drawableLeft="@drawable/ic_tick"
-            android:drawablePadding="@dimen/STD_MARGIN"
-            android:layout_alignParentRight="true"
-            android:layout_centerInParent="true"
             android:layout_width="wrap_content"
-            android:gravity="center"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:text="Save"/>-->
+            android:layout_gravity="center"
+            android:textSize="@dimen/L_TEXT_SIZE"
+            android:text="My Scene"/>
+
+        <LinearLayout
+            android:background="@drawable/round_corner_button"
+            android:layout_width="wrap_content"
+            android:layout_gravity="right"
+            android:gravity="center"
+            android:layout_margin="@dimen/STD_MARGIN"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/STD_MARGIN"
+                android:paddingBottom="@dimen/STD_MARGIN"
+                android:src="@drawable/ic_tick"/>
+
+            <TextView
+                android:padding="@dimen/STD_MARGIN"
+                android:layout_centerInParent="true"
+                android:layout_width="wrap_content"
+                android:gravity="center"
+                android:textSize="@dimen/M_TEXT_SIZE"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:text="Save"/>
+
+        </LinearLayout>
+
+
 
     </android.support.v7.widget.Toolbar>
 

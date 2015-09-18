@@ -5,6 +5,7 @@
     <dimen name="CARD_DIVIDER_HEIGHT">8dp</dimen>
 
     <dimen name="VS_TEXT_SIZE">10dp</dimen>
+    <dimen name="M_TEXT_SIZE">12dp</dimen>
     <dimen name="M1_TEXT_SIZE">15dp</dimen>
     <dimen name="L_TEXT_SIZE">18dp</dimen>
     <dimen name="HEADER_BAR_SIZE">48dp</dimen>

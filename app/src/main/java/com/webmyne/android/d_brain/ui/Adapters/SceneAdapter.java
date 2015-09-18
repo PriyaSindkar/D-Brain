@@ -202,7 +202,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
-                switchHolder.txtSwitchName.setText("Switch Name "+ position);
+                switchHolder.txtSwitchName.setText(mDataset.get(position).getName());
 
                 switchHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
@@ -255,7 +255,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-                dimmerHolder.txtDimmerName.setText("Dimmer Name " + position);
+                dimmerHolder.txtDimmerName.setText(mDataset.get(position).getName());
 
                 dimmerHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
@@ -313,7 +313,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
 
             case 2:
                 final MotorViewHolder motorViewHolder = ( MotorViewHolder ) viewHolder;
-                motorViewHolder.txtMotorName.setText("Motor Name "+ position);
+                motorViewHolder.txtMotorName.setText(mDataset.get(position).getName());
 
                 motorViewHolder.imgRotateSwitches.setOnClickListener(new View.OnClickListener() {
                     @Override

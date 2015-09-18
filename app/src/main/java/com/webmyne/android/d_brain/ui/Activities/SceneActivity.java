@@ -64,6 +64,10 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     private int totalNoOfMotors = 33;
     private int totalNoOfDimmers = 77;
 
+    ArrayList<SceneSwitchItem> initSwitches = new ArrayList<>();
+    ArrayList<SceneMotorItem> initMotors = new ArrayList<>();
+    ArrayList<SceneDimmerItem> initDimmers = new ArrayList<>();
+
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -118,9 +122,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         mAdapter.setType(0);
         mRecycler.setAdapter(mAdapter);
 
+        initSwitches();
+        initMotors();
+        initDimmers();
+
         mRecycler.setOnClickListener(this);
-
-
 
         parentRelativeLayout.setOnClickListener(this);
 
@@ -179,12 +185,12 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }
         });
 
-        /*imgBack.setOnClickListener(new View.OnClickListener() {
+        imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
-        });*/
+        });
 
     }
 
@@ -253,14 +259,22 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             linearPopup.setVisibility(View.VISIBLE);
             linearControls.removeAllViews();
 
-            for(int i=0; i < totalNoOfSwitches; i++) {
-                SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
-                sceneSwitchItem.setText("Switch "+i);
-                linearControls.addView(sceneSwitchItem);
+            for(int i=0; i < initSwitches.size(); i++) {
+                linearControls.addView(initSwitches.get(i));
 
-                int idx = linearControls.indexOfChild(sceneSwitchItem);
-                sceneSwitchItem.setTag("SWITCH_"+Integer.toString(idx));
-                sceneSwitchItem.setOnClickListener(buttonClick);
+                final int position = i;
+                initSwitches.get(i).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(initSwitches.get(position).isFocusable()) {
+                            mAdapter.add(mData.size(), new SceneItemsDataObject(0, initSwitches.get(position).getText()));
+                            initSwitches.get(position).setFocusable(false);
+                        } else {
+                            Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
             }
 
             animationHelper.viewPopUpMenuFromBottomLeft(linearPopup);
@@ -298,15 +312,22 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             linearPopup.setVisibility(View.VISIBLE);
             linearControls.removeAllViews();
 
-            for(int i=0; i < totalNoOfDimmers; i++) {
-                SceneDimmerItem sceneSwitchItem = new SceneDimmerItem(SceneActivity.this);
-                sceneSwitchItem.setText("Dimmer "+i);
-                linearControls.addView(sceneSwitchItem);
+            for(int i=0; i < initDimmers.size(); i++) {
+                linearControls.addView(initDimmers.get(i));
 
-                int idx = linearControls.indexOfChild(sceneSwitchItem);
-                sceneSwitchItem.setTag("DIMMER_"+Integer.toString(idx));
-                sceneSwitchItem.setOnClickListener(buttonClick);
+                final int position = i;
+                initDimmers.get(i).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (initDimmers.get(position).isFocusable()) {
+                            mAdapter.add(mData.size(), new SceneItemsDataObject(1, initDimmers.get(position).getText()));
+                            initDimmers.get(position).setFocusable(false);
+                        } else {
+                            Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                        }
 
+                    }
+                });
             }
 
             animationHelper.viewPopUpMenuFromBottomLeft(linearPopup);
@@ -342,14 +363,22 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             linearPopup.setVisibility(View.VISIBLE);
             linearControls.removeAllViews();
 
-            for(int i=0; i < totalNoOfMotors; i++) {
-                SceneMotorItem sceneSwitchItem = new SceneMotorItem(SceneActivity.this);
-                sceneSwitchItem.setText("Motor "+i);
-                linearControls.addView(sceneSwitchItem);
+            for(int i=0; i < initMotors.size(); i++) {
+                linearControls.addView(initMotors.get(i));
 
-                int idx = linearControls.indexOfChild(sceneSwitchItem);
-                sceneSwitchItem.setTag("MOTOR_"+Integer.toString(idx));
-                sceneSwitchItem.setOnClickListener(buttonClick);
+                final int position = i;
+                initMotors.get(i).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (initMotors.get(position).isFocusable()) {
+                            mAdapter.add(mData.size(), new SceneItemsDataObject(2, initMotors.get(position).getText()));
+                            initMotors.get(position).setFocusable(false);
+                        } else {
+                            Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
             }
 
             animationHelper.viewPopUpMenuFromBottomLeft(linearPopup);
@@ -371,9 +400,32 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
-    View.OnClickListener buttonClick = new View.OnClickListener() {
+    private void initSwitches() {
+        for(int i=0; i < totalNoOfSwitches; i++) {
+            SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
+            sceneSwitchItem.setText("Switch " + i);
+            initSwitches.add(sceneSwitchItem);
+        }
+    }
+
+    private void initMotors() {
+        for(int i=0; i < totalNoOfMotors; i++) {
+            SceneMotorItem sceneSwitchItem = new SceneMotorItem(SceneActivity.this);
+            sceneSwitchItem.setText("Motor " + i);
+            initMotors.add(sceneSwitchItem);
+        }
+    }
+
+    private void initDimmers() {
+        for(int i=0; i < totalNoOfMotors; i++) {
+            SceneDimmerItem sceneSwitchItem = new SceneDimmerItem(SceneActivity.this);
+            sceneSwitchItem.setText("Dimmer " + i);
+            initDimmers.add(sceneSwitchItem);
+        }
+    }
+
+    /*View.OnClickListener buttonClick = new View.OnClickListener() {
         public void onClick(View v) {
-            Log.e("CLICK","CLICK");
             if(v.isFocusable()) {
                 v.setFocusable(false);
 
@@ -392,5 +444,5 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
             }
         }
-    };
+    };*/
 }
