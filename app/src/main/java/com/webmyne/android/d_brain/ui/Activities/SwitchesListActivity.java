@@ -1,10 +1,14 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +19,7 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.MotorListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SceneListAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchesListAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -25,18 +30,34 @@ import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
+import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
 
 public class SwitchesListActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
-    private SwitchesListAdapter adapter;
+    private SwitchListCursorAdapter adapter;
     private Toolbar toolbar;
     private ImageView imgBack, imgListGridToggle;
     private TextView toolbarTitle;
-    private int totalNoOfSwitches = 77;
+
     private boolean isListView = true;
+    private Cursor switchListCursor;
+    ArrayList<XMLValues> switchStatusList;
+
+    private InputStream inputStream;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +75,8 @@ public class SwitchesListActivity extends AppCompatActivity {
         toolbarTitle = (TextView) findViewById(R.id.toolbarTitle);
         toolbarTitle.setText("Switches");
 
+        initArrayOfSwitches();
+
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 
         mRecyclerView.setLayoutManager(layoutManager);
@@ -61,10 +84,10 @@ public class SwitchesListActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        adapter = new SwitchesListAdapter(SwitchesListActivity.this, totalNoOfSwitches);
-        adapter.setType(0);
-        adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);
+        //adapter = new SwitchesListAdapter(SwitchesListActivity.this, totalNoOfSwitches);
+
+        // fetch switch status
+        new GetSwitchStatus().execute();
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
@@ -74,7 +97,7 @@ public class SwitchesListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setChangeDuration(500);
 
 
-        adapter.setSingleClickListener(new onSingleClickListener() {
+        /*adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
                 //Toast.makeText(DimmerActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
@@ -120,7 +143,7 @@ public class SwitchesListActivity extends AppCompatActivity {
             public void onRenameOptionClick(int pos) {
                 Toast.makeText(SwitchesListActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
 
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,6 +174,60 @@ public class SwitchesListActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void initArrayOfSwitches() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+
+        //insert switches in adapter ofr machine-1
+        try {
+            dbHelper.openDataBase();
+            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public class GetSwitchStatus extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            try {
+                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
+                Log.e("# urlValue", urlValue.toString());
+
+                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setRequestMethod("GET");
+                inputStream = httpUrlConnection.getInputStream();
+                Log.e("# inputStream", inputStream.toString());
+                MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                switchStatusList = pullParser.processXML(inputStream);
+                Log.e("XML PARSERED", switchStatusList.toString());
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            try{
+                //init adapter
+                adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, switchStatusList);
+                adapter.setType(0);
+                adapter.setHasStableIds(true);
+                mRecyclerView.setAdapter(adapter);
+
+            }catch(Exception e){
+            }
+        }
+
     }
 
 

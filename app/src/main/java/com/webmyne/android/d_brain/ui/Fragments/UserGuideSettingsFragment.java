@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -54,7 +55,6 @@ public class UserGuideSettingsFragment extends Fragment {
 
         edtMachineName = (EditText) convertView.findViewById(R.id.edtMachineName);
         edtIPAddress = (EditText) convertView.findViewById(R.id.edtIPAddress);
-
 
         edtIPAddress.addTextChangedListener(new TextWatcher() {
 

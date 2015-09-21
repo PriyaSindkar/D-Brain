@@ -30,6 +30,7 @@ import com.webmyne.android.d_brain.ui.Fragments.MainPanelFragment;
 import com.webmyne.android.d_brain.ui.Fragments.NotificationFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SceneFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SettingsFragment;
+import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 
 public class HomeDrawerActivity extends AppCompatActivity {
 
@@ -236,4 +237,5 @@ public class HomeDrawerActivity extends AppCompatActivity {
             }
         }, 1000);
     }
+
 }

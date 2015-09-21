@@ -20,7 +20,13 @@ import com.webmyne.android.d_brain.ui.Customcomponents.CustomViewPager;
 import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSettingsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSliderFragment;
+import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 
 public class UserGuide extends ActionBarActivity implements View.OnClickListener {
@@ -102,16 +108,44 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                 } else if(fragment.getIPAddress().length() == 0) {
                     Toast.makeText(this, "Must Enter Device IP Address!", Toast.LENGTH_LONG).show();
                 } else {
-                    Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
 
                     SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putBoolean("hasLoggedIn", true);
                     editor.commit();
+
+                    initDatabaseComponents();
+
+                    Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
                 }
                 break;
+        }
+    }
+
+    private void initDatabaseComponents() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+
+        //insert switches in component table for the given machine
+        try {
+            dbHelper.openDataBase();
+
+            // init the component table with switches of a machine
+            // product code and machine IP are hard-coded
+            String productCode = DBConstants.TEMP_PRODUCT_CODE;
+            int totalNoOfSwitches = Integer.parseInt(productCode.substring(2,3)) * 11;
+            ArrayList<ComponentModel> listOfSwitches = new ArrayList<>();
+
+            for(int i=0; i<totalNoOfSwitches; i++) {
+                ComponentModel switchItem = new ComponentModel("Switch"+String.valueOf(i), "Switch", "", DBConstants.MACHINE1_IP);
+                listOfSwitches.add(switchItem);
+            }
+            dbHelper.insertIntoComponent(listOfSwitches);
+            dbHelper.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
