@@ -29,7 +29,7 @@ import jp.wasabeef.recyclerview.animators.LandingAnimator;
 public class SceneFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private SceneListAdapter adapter;
-    private int totalNoOfScenes = 0;
+    private int totalNoOfScenes = 10;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
 
@@ -112,6 +112,16 @@ public class SceneFragment extends Fragment {
             emptyView.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
         }
+
+        txtEmptyView1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), SceneActivity.class);
+                getActivity().startActivity(intent);
+            }
+        });
+
+
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
 
 

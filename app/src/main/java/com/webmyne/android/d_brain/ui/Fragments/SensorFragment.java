@@ -28,7 +28,7 @@ public class SensorFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private SensorsListAdapter adapter;
-    private int totalNoOfSensors = 0;
+    private int totalNoOfSensors = 9;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
 

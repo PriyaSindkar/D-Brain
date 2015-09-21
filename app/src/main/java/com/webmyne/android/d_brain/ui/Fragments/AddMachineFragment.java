@@ -30,7 +30,7 @@ public class AddMachineFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private MachineListAdapter adapter;
-    private int totalNoOfMachines = 0;
+    private int totalNoOfMachines = 2;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
 

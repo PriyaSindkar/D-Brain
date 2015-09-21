@@ -28,7 +28,7 @@ public class SchedulerFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private SchedulerListAdapter adapter;
-    private int totalNoOfSchedulers = 0;
+    private int totalNoOfSchedulers = 6;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
 

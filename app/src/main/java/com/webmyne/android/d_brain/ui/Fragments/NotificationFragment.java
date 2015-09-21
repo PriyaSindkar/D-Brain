@@ -29,7 +29,7 @@ import jp.wasabeef.recyclerview.animators.LandingAnimator;
 public class NotificationFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private NotificationListAdapter adapter;
-    private int totalNoOfNotifications = 0;
+    private int totalNoOfNotifications = 6;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
 
