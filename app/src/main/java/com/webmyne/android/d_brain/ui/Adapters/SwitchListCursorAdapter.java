@@ -165,27 +165,57 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                 }
 
-                listHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                listHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                    @Override
+//                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                        Log.e("onCheckedChanged ","POS "+ position);
+//                        if (isChecked) {
+//                            Log.e("# IF", "On checked changes IF");
+//                            Log.e("CURR_POS IF", "POS " + position);
+//
+//                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
+//                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+//
+//
+//                            listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+//                        } else {
+//                            Log.e("# ELSE", "On checked changes else");
+//                            Log.e("CURR_POS ELSE","POS "+ position);
+//
+//                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
+//                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+//                            listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+//                        }
+//                    }
+//                });
+
+
+
+                listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        Log.e("onCheckedChanged ","POS "+ position);
-                        if (isChecked) {
+                    public void onClick(View v) {
+                        listHolder.imgSwitch.toggle();
+
+                        if(listHolder.imgSwitch.isChecked()){
                             Log.e("# IF", "On checked changes IF");
                             Log.e("CURR_POS IF", "POS " + position);
 
-                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
+                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
 
 
                             listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                        } else {
+                        }else{
                             Log.e("# ELSE", "On checked changes else");
                             Log.e("CURR_POS ELSE","POS "+ position);
 
-                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
+                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                             listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                         }
+
+//                        String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
+//                        new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                     }
                 });
 
@@ -303,7 +333,10 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             try{
-                new GetSwitchStatus().execute();
+
+                //new GetSwitchStatus().execute();
+                _singleClick.onSingleClick(0);
+
             }catch(Exception e){
             }
         }

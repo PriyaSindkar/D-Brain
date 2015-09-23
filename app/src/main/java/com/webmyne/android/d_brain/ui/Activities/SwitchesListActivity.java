@@ -111,14 +111,9 @@ public class SwitchesListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setChangeDuration(500);
 
 
-        /*adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                //Toast.makeText(DimmerActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
-            }
-        });
 
-        adapter.setLongClickListener(new onLongClickListener() {
+
+       /*   adapter.setLongClickListener(new onLongClickListener() {
 
             @Override
             public void onLongClick(int pos) {
@@ -247,11 +242,24 @@ public class SwitchesListActivity extends AppCompatActivity {
             Log.e("TAG_ASYNC", "Inside onPostExecute");
             try{
                 progressBar.setVisibility(View.GONE);
+
+
+
                 //init adapter
+
                 adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, switchStatusList);
                 adapter.setType(0);
                 adapter.setHasStableIds(true);
                 mRecyclerView.setAdapter(adapter);
+
+                adapter.notifyDataSetChanged();
+                adapter.setSingleClickListener(new onSingleClickListener() {
+                    @Override
+                    public void onSingleClick(int pos) {
+                        Toast.makeText(SwitchesListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+                        new GetSwitchStatus().execute();
+                    }
+                });
 
             }catch(Exception e){
             }
