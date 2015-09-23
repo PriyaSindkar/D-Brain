@@ -1,9 +1,9 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,22 +15,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
-import com.webmyne.android.d_brain.ui.Adapters.MotorListAdapter;
-import com.webmyne.android.d_brain.ui.Adapters.SceneListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
-import com.webmyne.android.d_brain.ui.Adapters.SwitchesListAdapter;
-import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
-import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -42,8 +32,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -55,16 +45,12 @@ public class SwitchesListActivity extends AppCompatActivity {
     private ImageView imgBack, imgListGridToggle;
     private TextView toolbarTitle;
 
-    private boolean isListView = true;
+    private boolean isListView = true, isFirstTime = true;
     private Cursor switchListCursor;
     ArrayList<XMLValues> switchStatusList;
-
-    Map<String, XMLValues> statusMap;
-    ArrayList<Map<String, XMLValues>> mapList;
-
     private InputStream inputStream;
-
     private ProgressBar progressBar;
+    private Timer timer;
 
 
     @Override
@@ -96,20 +82,31 @@ public class SwitchesListActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        //adapter = new SwitchesListAdapter(SwitchesListActivity.this, totalNoOfSwitches);
-
-        // fetch switch status
-        new GetSwitchStatus().execute();
+        // fetch switch status periodically
+        final Handler handler = new Handler();
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.e("TIMER", "Timer called");
+                        new GetSwitchStatus().execute();
+                    }
+                });
+            }
+        }, 0, 500 * 1);
 
 
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
+        mRecyclerView.getItemAnimator().setSupportsChangeAnimations(false);
         mRecyclerView.getItemAnimator().setAddDuration(500);
         mRecyclerView.getItemAnimator().setRemoveDuration(500);
         mRecyclerView.getItemAnimator().setMoveDuration(500);
-        mRecyclerView.getItemAnimator().setChangeDuration(500);
-
+        mRecyclerView.getItemAnimator().setChangeDuration(0);
 
 
 
@@ -157,6 +154,8 @@ public class SwitchesListActivity extends AppCompatActivity {
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.e("back", "back");
+                timer.cancel();
                 finish();
             }
         });
@@ -185,6 +184,12 @@ public class SwitchesListActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        timer.cancel();
+    }
+
     private void initArrayOfSwitches() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
 
@@ -208,7 +213,6 @@ public class SwitchesListActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-
             try {
                 URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
                 Log.e("# urlValue", urlValue.toString());
@@ -221,16 +225,6 @@ public class SwitchesListActivity extends AppCompatActivity {
 
                 switchStatusList = pullParser.processXML(inputStream);
                 Log.e("XML PARSERED", switchStatusList.toString());
-
-                /*mapList = new ArrayList<>();
-
-                for(int i=0; i<switchStatusList.size();i++) {
-                    statusMap = new HashMap<>();
-                    statusMap.put(String.valueOf(i), switchStatusList.get(i));
-                    mapList.add(statusMap);
-                }*/
-
-
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
             }
@@ -240,31 +234,32 @@ public class SwitchesListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             Log.e("TAG_ASYNC", "Inside onPostExecute");
-            try{
+            try {
                 progressBar.setVisibility(View.GONE);
+                if(isFirstTime) {
+                    //init adapter
+                    adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, switchStatusList);
+                    adapter.setType(0);
+                    adapter.setHasStableIds(true);
+                    mRecyclerView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                    isFirstTime = false;
+                } else {
+                    //set adapter again
+                    adapter.setSwitchStatus(switchStatusList);
+                    adapter.notifyDataSetChanged();
+                }
 
-
-
-                //init adapter
-
-                adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, switchStatusList);
-                adapter.setType(0);
-                adapter.setHasStableIds(true);
-                mRecyclerView.setAdapter(adapter);
-
-                adapter.notifyDataSetChanged();
-                adapter.setSingleClickListener(new onSingleClickListener() {
+                adapter.setCheckedChangeListener(new onCheckedChangeListener() {
                     @Override
-                    public void onSingleClick(int pos) {
-                        Toast.makeText(SwitchesListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
-                        new GetSwitchStatus().execute();
+                    public void onCheckedChangeClick() {
+                        //new GetSwitchStatus().execute();
                     }
                 });
 
-            }catch(Exception e){
+            } catch (Exception e) {
             }
         }
-
     }
 
 

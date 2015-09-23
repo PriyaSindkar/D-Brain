@@ -1,19 +1,15 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
-import android.app.ActionBar;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
+import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,21 +17,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.webmyne.android.d_brain.R;
-import com.webmyne.android.d_brain.ui.Adapters.SceneAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.CreateSceneAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
-import com.webmyne.android.d_brain.ui.Helpers.Utils;
-import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
-import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
-import com.webmyne.android.d_brain.ui.Model.onItemClickListener;
 import com.webmyne.android.d_brain.ui.Widgets.SceneDimmerItem;
 import com.webmyne.android.d_brain.ui.Widgets.SceneMotorItem;
 import com.webmyne.android.d_brain.ui.Widgets.SceneSwitchItem;
@@ -47,40 +35,38 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 
-public class SceneActivity extends AppCompatActivity implements View.OnClickListener{
-    Toolbar toolbar;
-    TextView txtSwitch, txtDimmer, txtMotor, txtSceneName;
-    ImageView imgHScrollLeft, imgHScrollRight, imgBack;
-    HorizontalScrollView hScrollView;
+public class CreateSceneActivity extends AppCompatActivity implements View.OnClickListener{
+    private Toolbar toolbar;
+    private TextView txtSwitch, txtDimmer, txtMotor, txtSceneTitle;
+    private ImageView imgHScrollLeft, imgHScrollRight, imgBack;
+    private HorizontalScrollView hScrollView;
     private LinearLayout linearControls, linearPopup, linearSaveScene;
-    RelativeLayout parentRelativeLayout;
+    private RelativeLayout parentRelativeLayout;
+    private EditText edtIPAddress;
 
     boolean isSwitchPopupShown = false;
     boolean isDimmerPopupShown = false;
     boolean isMotorPopupShown = false;
 
-    AnimationHelper animationHelper = new AnimationHelper();
+    private  AnimationHelper animationHelper = new AnimationHelper();
 
-    ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
-    ArrayList<SceneItemsDataObject> newMData = new ArrayList<>();
-    RecyclerView mRecycler;
-    SceneAdapter mAdapter;
-
-    private String currentSceneId, currentSceneName;
+    private  ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
+    private GridView gridView;
+    private   CreateSceneAdapter mAdapter;
 
     private int totalNoOfSwitches = 77;
     private int totalNoOfMotors = 33;
     private int totalNoOfDimmers = 77;
 
-    ArrayList<SceneSwitchItem> initSwitches = new ArrayList<>();
-    ArrayList<SceneMotorItem> initMotors = new ArrayList<>();
-    ArrayList<SceneDimmerItem> initDimmers = new ArrayList<>();
+    private  ArrayList<SceneSwitchItem> initSwitches = new ArrayList<>();
+    private   ArrayList<SceneMotorItem> initMotors = new ArrayList<>();
+    private  ArrayList<SceneDimmerItem> initDimmers = new ArrayList<>();
 
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scene);
+        setContentView(R.layout.activity_create_scene);
 
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -103,14 +89,15 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         imgHScrollLeft = (ImageView) findViewById(R.id.imgHScrollLeft);
         imgHScrollRight = (ImageView) findViewById(R.id.imgHScrollRight);
         imgBack = (ImageView) findViewById(R.id.imgBack);
-        txtSceneName = (TextView) findViewById(R.id.txtSceneName);
+
         linearSaveScene = (LinearLayout) findViewById(R.id.linearSaveScene);
+        edtIPAddress = (EditText) findViewById(R.id.edtIPAddress);
+        txtSceneTitle = (TextView) findViewById(R.id.txtSceneTitle);
 
         txtSwitch.setOnClickListener(this);
         txtMotor.setOnClickListener(this);
         txtDimmer.setOnClickListener(this);
         linearSaveScene.setOnClickListener(this);
-        linearSaveScene.setClickable(false);
 
         imgHScrollLeft.setOnClickListener(this);
         imgHScrollRight.setOnClickListener(this);
@@ -121,35 +108,37 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         parentRelativeLayout = (RelativeLayout) findViewById(R.id.parentRelativeLayout);
 
 
-        mRecycler = (RecyclerView) findViewById(R.id.recycler_view);
-        mRecycler.setHasFixedSize(true);
-        mRecycler.setItemViewCacheSize(0);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
-        mRecycler.setLayoutManager(mLayoutManager);
+        gridView = (GridView) findViewById(R.id.grid_view);
+        gridView.setNumColumns(3);
 
-        int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), SceneActivity.this);
-        mRecycler.addItemDecoration(new VerticalSpaceItemDecoration(margin));
+        mAdapter = new CreateSceneAdapter(this,mData);
+        gridView.setAdapter(mAdapter);
 
-        mAdapter = new SceneAdapter(this, mData);
-       // mAdapter.setType(AppConstants.SWITCH_TYPE);
-        mRecycler.setAdapter(mAdapter);
-
-        currentSceneId = getIntent().getStringExtra("scene_id");
-        currentSceneName = getIntent().getStringExtra("scene_name");
-        showSceneSavedState();
-
-        initSwitches();
-        initMotors();
-        initDimmers();
-
-
-        mRecycler.setOnClickListener(this);
-
-        parentRelativeLayout.setOnClickListener(this);
-
-        mAdapter.setOnItemClick(new onItemClickListener() {
+        mAdapter.setOnDeleteClick(new onDeleteClickListener() {
             @Override
-            public void _onItemClickListener() {
+            public void onDeleteOptionClick(int pos) {
+                if (mData.get(pos).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
+                    initSwitches.get(pos).setFocusable(true);
+                    mData.remove(pos);
+                    mAdapter.notifyDataSetChanged();
+                } else if (mData.get(pos).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
+                    initDimmers.get(pos).setFocusable(true);
+                    mData.remove(pos);
+                    mAdapter.notifyDataSetChanged();
+                } else if (mData.get(pos).getSceneControlType().equals(AppConstants.MOTOR_TYPE)) {
+                    initMotors.get(pos).setFocusable(true);
+                    mData.remove(pos);
+                    mAdapter.notifyDataSetChanged();
+                } else {
+
+                }
+            }
+        });
+
+        // hide pop-up
+        mAdapter.set_onSingleClick(new onSingleClickListener() {
+            @Override
+            public void onSingleClick(int pos) {
                 txtSwitch.setBackgroundColor(getResources().getColor(R.color.primaryColor));
                 txtDimmer.setBackgroundColor(getResources().getColor(R.color.primaryColor));
                 txtMotor.setBackgroundColor(getResources().getColor(R.color.primaryColor));
@@ -157,50 +146,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }
         });
 
-        mAdapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                //Toast.makeText(DimmerActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
-            }
-        });
+        initSwitches();
+        initMotors();
+        initDimmers();
 
-        mAdapter.setLongClickListener(new onLongClickListener() {
-
-            @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mAdapter.setFavoriteClickListener(new onFavoriteClickListener() {
-            @Override
-            public void onFavoriteOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Added to Favorite Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mAdapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-
-            @Override
-            public void onAddSchedulerOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mAdapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
-            @Override
-            public void onAddToSceneOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mAdapter.setRenameClickListener(new onRenameClickListener() {
-
-            @Override
-            public void onRenameOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
+        parentRelativeLayout.setOnClickListener(this);
 
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -236,11 +186,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 showSwitchPopup();
                 break;
             case R.id.txtDimmer:
-             //   showDimmerPopup();
+               // showDimmerPopup();
                 break;
 
             case R.id.txtMotor:
-              //  showMotorPopup();
+               // showMotorPopup();
                 break;
 
             case R.id.imgHScrollLeft:
@@ -257,18 +207,23 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 txtMotor.setBackgroundColor(getResources().getColor(R.color.primaryColor));
                 linearPopup.setVisibility(View.GONE);
                 break;
-            case R.id.linearSaveScene:
-                // save scene in DB
-                DatabaseHelper dbHelper = new DatabaseHelper(this);
-                try {
-                    dbHelper.openDataBase();
 
-                    dbHelper.saveScene(currentSceneId, newMData);
-                    dbHelper.close();
-                    linearSaveScene.setClickable(false);
-                    Toast.makeText(SceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
-                } catch (SQLException e) {
-                    Log.e("SQLEXP", e.toString());
+            case R.id.linearSaveScene:
+                if(edtIPAddress.getText().toString().trim().length() == 0) {
+                    Toast.makeText(CreateSceneActivity.this, "Please Enter Scene Name", Toast.LENGTH_SHORT).show();
+                } else {
+                    // save scene in DB
+                    DatabaseHelper dbHelper = new DatabaseHelper(this);
+                    try {
+                        dbHelper.openDataBase();
+
+                        dbHelper.createNewScene(edtIPAddress.getText().toString().trim(), mData);
+                        dbHelper.close();
+                        txtSceneTitle.setText(edtIPAddress.getText().toString().trim());
+                        Toast.makeText(CreateSceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
+                    } catch (SQLException e) {
+                        Log.e("SQLEXP", e.toString());
+                    }
                 }
                 break;
         }
@@ -297,27 +252,20 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 initSwitches.get(i).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (initSwitches.get(position).isFocusable()) {
-                            SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
+                        if(initSwitches.get(position).isFocusable()) {
+                            SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
                             sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
                             sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
                             sceneItemsDataObject.setMachineID("");
-                            //mAdapter.add(mData.size(), sceneItemsDataObject);
-                            mData.add(sceneItemsDataObject);
 
-                            // to save this new component
-                            newMData.add(sceneItemsDataObject);
-
-                            mAdapter.notifyDataSetChanged();
+                            mAdapter.add(mData.size(), sceneItemsDataObject);
                             initSwitches.get(position).setFocusable(false);
-                            linearSaveScene.setClickable(true);
                         } else {
-                            Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
                         }
 
                     }
                 });
-
             }
 
             animationHelper.viewPopUpMenuFromBottomLeft(linearPopup);
@@ -363,10 +311,14 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onClick(View v) {
                         if (initDimmers.get(position).isFocusable()) {
-                            mAdapter.add(mData.size(), new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText()));
+                            SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
+                            sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
+                            sceneItemsDataObject.setMachineID("");
+
+                            mAdapter.add(mData.size(), sceneItemsDataObject);
                             initDimmers.get(position).setFocusable(false);
                         } else {
-                            Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -414,10 +366,14 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onClick(View v) {
                         if (initMotors.get(position).isFocusable()) {
-                            mAdapter.add(mData.size(), new SceneItemsDataObject(AppConstants.MOTOR_TYPE, initMotors.get(position).getText()));
+                            SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.MOTOR_TYPE, initMotors.get(position).getText());
+                            sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
+                            sceneItemsDataObject.setMachineID("");
+
+                            mAdapter.add(mData.size(), sceneItemsDataObject);
                             initMotors.get(position).setFocusable(false);
                         } else {
-                            Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -442,7 +398,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-
     private void initSwitches() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
@@ -456,15 +411,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 switchListCursor.moveToFirst();
                 if (switchListCursor.getCount() > 0) {
                     do {
-                        SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
+                        SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(CreateSceneActivity.this);
                         sceneSwitchItem.setText(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
                         sceneSwitchItem.setSwitchId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
-
-                        for(int i=0; i<mData.size(); i++) {
-                            if(mData.get(i).getSceneItemId().equals(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)))) {
-                                sceneSwitchItem.setFocusable(false);
-                            }
-                        }
 
                         initSwitches.add(sceneSwitchItem);
                     } while (switchListCursor.moveToNext());
@@ -473,11 +422,17 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
         }
+
+       /* for(int i=0; i < totalNoOfSwitches; i++) {
+            SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(CreateSceneActivity.this);
+            sceneSwitchItem.setText("Switch " + i);
+            initSwitches.add(sceneSwitchItem);
+        }*/
     }
 
     private void initMotors() {
         for(int i=0; i < totalNoOfMotors; i++) {
-            SceneMotorItem sceneSwitchItem = new SceneMotorItem(SceneActivity.this);
+            SceneMotorItem sceneSwitchItem = new SceneMotorItem(CreateSceneActivity.this);
             sceneSwitchItem.setText("Motor " + i);
             initMotors.add(sceneSwitchItem);
         }
@@ -485,67 +440,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
     private void initDimmers() {
         for(int i=0; i < totalNoOfMotors; i++) {
-            SceneDimmerItem sceneSwitchItem = new SceneDimmerItem(SceneActivity.this);
+            SceneDimmerItem sceneSwitchItem = new SceneDimmerItem(CreateSceneActivity.this);
             sceneSwitchItem.setText("Dimmer " + i);
             initDimmers.add(sceneSwitchItem);
         }
     }
-
-    private void showSceneSavedState() {
-        // show scene saved state
-        txtSceneName.setText(currentSceneName);
-
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        try {
-            dbHelper.openDataBase();
-            Cursor switchListCursor = dbHelper.getAllSwitchComponentsInAScene(currentSceneId);
-            mData.clear();
-            if (switchListCursor != null) {
-                switchListCursor.moveToFirst();
-                if (switchListCursor.getCount() > 0) {
-                    do {
-                        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID));
-
-                        SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
-                        sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
-                        sceneItemsDataObject.setSceneControlType(AppConstants.SWITCH_TYPE);
-                        sceneItemsDataObject.setSceneItemId(componentId);
-
-                        String componentName = dbHelper.getAllComponentsById(componentId);
-                        //String componentName = componentCursor.getString(componentCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
-
-                        sceneItemsDataObject.setName(componentName);
-                        mData.add(sceneItemsDataObject);
-
-                    } while (switchListCursor.moveToNext());
-                }
-            }
-            dbHelper.close();
-            mAdapter.notifyDataSetChanged();
-        } catch (SQLException e) {
-            Log.e("SQLEXP", e.toString());
-        }
-    }
-
-    /*View.OnClickListener buttonClick = new View.OnClickListener() {
-        public void onClick(View v) {
-            if(v.isFocusable()) {
-                v.setFocusable(false);
-
-                if (v instanceof SceneSwitchItem) {
-                    mAdapter.add(mData.size(), new SceneItemsDataObject(0));
-                }
-
-                if(v instanceof SceneDimmerItem) {
-                    mAdapter.add(mData.size(), new SceneItemsDataObject(1));
-                }
-
-                if (v instanceof SceneMotorItem) {
-                    mAdapter.add(mData.size(), new SceneItemsDataObject(2));
-                }
-            } else {
-                Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
-            }
-        }
-    };*/
 }

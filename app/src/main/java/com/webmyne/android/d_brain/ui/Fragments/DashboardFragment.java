@@ -3,12 +3,14 @@ package com.webmyne.android.d_brain.ui.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.style.RelativeSizeSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +20,10 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.DemoSwitchListActivity;
 import com.webmyne.android.d_brain.ui.Activities.DimmerActivity;
 import com.webmyne.android.d_brain.ui.Activities.MachineListActivity;
@@ -32,25 +36,26 @@ import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class DashboardFragment extends Fragment implements PopupAnimationEnd, View.OnClickListener {
 
     AnimationHelper animObj;
-    Toolbar toolbar;
     ImageView imgOptions, imgHScrollLeft, imgHScrollRight, bulb_image;
     boolean isImageUp = true, isBulbOn = true;
     LinearLayout layoutBottom, linearOptions, linearSceneList;
     HorizontalScrollView hScrollView;
     private FrameLayout parentMotor, parentSlider, parentSwitches;
     private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits;
-    LinearLayout sliderLayout, linearCreateEvent, linearAddMachine, linearAddScheduler;
+    LinearLayout  linearCreateScene, linearAddMachine, linearAddScheduler, firstBottomItem;
 
     private int myTotalScenes = 5;
     private String noOfSwitchUnits="13", totalNoOfSwitchUnits="17", noOfMotorUnits="13", totalNoOfMotorUnits="17", noOfSliderUnits="13", totalNoOfSliderUnits="17", noOfSensorUnits="13", totalNoOfSensorUnits="17";
 
-    private LinearLayout firstBottomItem;
     private FrameLayout linearLeft;
 
     public static DashboardFragment newInstance() {
@@ -101,8 +106,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         txtNoOfSliderUnits = (TextView) row.findViewById(R.id.txtNoOfSliderUnits);
         txtNoOfSensorUnits = (TextView) row.findViewById(R.id.txtNoOfSensorUnits);
 
-        linearCreateEvent = (LinearLayout) row.findViewById(R.id.linearCreateEvent);
-        linearCreateEvent.setOnClickListener(this);
+        linearCreateScene = (LinearLayout) row.findViewById(R.id.linearCreateScene);
+        linearCreateScene.setOnClickListener(this);
 
         linearAddMachine = (LinearLayout) row.findViewById(R.id.linearAddMachine);
         linearAddMachine.setOnClickListener(this);
@@ -228,7 +233,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 isBulbOn = !isBulbOn;
                 break;
 
-            case R.id.linearCreateEvent:
+            case R.id.linearCreateScene:
+                intent = new Intent(getActivity(), CreateSceneActivity.class);
+                startActivity(intent);
                 break;
             case R.id.linearAddMachine:
                 intent = new Intent(getActivity(), MachineListActivity.class);
@@ -248,7 +255,54 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
     private void updateSceneList() {
 
-        ArrayList<String> dummyCceneNames = new ArrayList<>();
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        try {
+            dbHelper.openDataBase();
+
+            final Cursor sceneCursor = dbHelper.getAllScenes(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+
+            if (sceneCursor != null) {
+                myTotalScenes = sceneCursor.getCount();
+
+                sceneCursor.moveToFirst();
+                if (sceneCursor.getCount() > 0) {
+                    do {
+                        final LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        View view = inflater.inflate(R.layout.dashboard_scene_slider_item, null);
+                        TextView txtSceneName = (TextView) view.findViewById(R.id.txtSceneName);
+                        final String sceneId = ""+sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+                        final String sceneName = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
+
+                        txtSceneName.setText(sceneName);
+
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), getActivity());
+                        layoutParams.setMargins(margin, margin, margin, margin);
+                        view.setLayoutParams(layoutParams);
+
+                        view.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(getActivity(), SceneActivity.class);
+                                intent.putExtra("scene_id", sceneId);
+                                intent.putExtra("scene_name", sceneName);
+                                startActivity(intent);
+                            }
+                        });
+
+                        linearSceneList.addView(view);
+                    } while (sceneCursor.moveToNext());
+                }
+            }
+
+        } catch (SQLException e) {
+            Log.e("SQLEXP", e.toString());
+        }
+
+        /*ArrayList<String> dummyCceneNames = new ArrayList<>();
         dummyCceneNames.add("Bedroom Theme");
         dummyCceneNames.add("Kitchen Theme");
         dummyCceneNames.add("Living Room Theme");
@@ -278,7 +332,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             });
 
             linearSceneList.addView(view);
-        }
+        }*/
     }
 
 

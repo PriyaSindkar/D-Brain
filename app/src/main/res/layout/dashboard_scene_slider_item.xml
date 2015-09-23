@@ -8,32 +8,34 @@
         android:background="@drawable/scene_item_circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="@dimen/L_MARGIN"
         android:gravity="center">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/white_border_circle"
-        android:gravity="center"
-        android:layout_gravity="center">
-
-        <ImageView
-            android:gravity="center"
-            android:id="@+id/bulb_image"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="@dimen/STD_MARGIN"
-            android:src="@drawable/ic_addscene" />
+            android:background="@drawable/white_border_circle"
+            android:gravity="center"
+            android:layout_gravity="center">
 
-    </LinearLayout>
+            <ImageView
+                android:gravity="center"
+                android:id="@+id/bulb_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/STD_MARGIN"
+                android:src="@drawable/ic_addscene" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/txtSceneName"
             android:layout_gravity="center"
+            android:gravity="center"
+            android:singleLine="true"
             android:textSize="@dimen/VS_TEXT_SIZE"
-            android:singleLine="false"
-            android:maxLines="2"
-            android:layout_width="wrap_content"
+            android:maxLines="3"
+            android:layout_width="@dimen/BULB_SIZE"
             android:padding="@dimen/STD_MARGIN"
             android:layout_height="wrap_content"
             android:textColor="@color/white"

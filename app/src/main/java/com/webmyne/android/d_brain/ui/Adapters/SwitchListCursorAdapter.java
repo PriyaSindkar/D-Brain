@@ -17,11 +17,11 @@ import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
-import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
@@ -31,7 +31,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Map;
 
 
 /**
@@ -49,6 +48,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     public onAddToSceneClickListener _addToSceneClick;
     public onAddSchedulerClickListener _addSchedulerClick;
     public onRenameClickListener _renameClick;
+    public onCheckedChangeListener _switchClick;
 
     public SwitchListCursorAdapter(Context context){
         super(context );
@@ -151,45 +151,13 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
                 listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
 
-                Log.e("XML onBind", switchStatus.toString());
-                Log.e("Onbind value ", "POS: "+ position+ " "+ switchStatus.get(position).tagName + " "+ switchStatus.get(position).tagValue );
-
-
                 if( switchStatus.get(position).tagValue.equals("00")) {
-                    Log.e("IF value ", "POS: " + position + " ");
                     listHolder.imgSwitch.setChecked(false);
-                    listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                    //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                 } else {
-                    Log.e("ELSE value ", "POS: " + position + " ");
                     listHolder.imgSwitch.setChecked(true);
-                    listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                   // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                 }
-
-//                listHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                    @Override
-//                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                        Log.e("onCheckedChanged ","POS "+ position);
-//                        if (isChecked) {
-//                            Log.e("# IF", "On checked changes IF");
-//                            Log.e("CURR_POS IF", "POS " + position);
-//
-//                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
-//                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-//
-//
-//                            listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-//                        } else {
-//                            Log.e("# ELSE", "On checked changes else");
-//                            Log.e("CURR_POS ELSE","POS "+ position);
-//
-//                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
-//                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-//                            listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-//                        }
-//                    }
-//                });
-
-
 
                 listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -197,25 +165,14 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                         listHolder.imgSwitch.toggle();
 
                         if(listHolder.imgSwitch.isChecked()){
-                            Log.e("# IF", "On checked changes IF");
-                            Log.e("CURR_POS IF", "POS " + position);
-
+                           // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                             String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-
-
-                            listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                         }else{
-                            Log.e("# ELSE", "On checked changes else");
-                            Log.e("CURR_POS ELSE","POS "+ position);
-
+                            //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                             String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                            listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                         }
-
-//                        String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
-//                        new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                     }
                 });
 
@@ -307,7 +264,9 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         this._renameClick = obj;
     }
 
-
+    public void setCheckedChangeListener(onCheckedChangeListener obj){
+        this._switchClick = obj;
+    }
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
 
@@ -333,50 +292,10 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             try{
-
-                //new GetSwitchStatus().execute();
-                _singleClick.onSingleClick(0);
+                _switchClick.onCheckedChangeClick();
 
             }catch(Exception e){
             }
         }
-
-    }
-
-    public class GetSwitchStatus extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            try {
-                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
-                Log.e("# urlValue", urlValue.toString());
-
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
-                MainXmlPullParser pullParser = new MainXmlPullParser();
-
-                switchStatus = pullParser.processXML(inputStream);
-                Log.e("XML", switchStatus.toString());
-
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            Log.e("TAG_ASYNC", "Inside onPostExecute");
-            try{
-            }catch(Exception e){
-            }
-        }
-
     }
 }

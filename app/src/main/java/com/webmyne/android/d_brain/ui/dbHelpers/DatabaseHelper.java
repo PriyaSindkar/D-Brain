@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
+import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
 import java.io.File;
@@ -174,8 +175,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public Cursor getAllSwitchComponentsForAMachine(String machineIP) {
+    /*public Cursor getAllSwitchComponentsForAMachine(String machineIP) {
         SQLiteDatabase db = this.getReadableDatabase();
+
+
 
         Cursor cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=?",
                 new String[] { machineIP }, null, null, null, null);
@@ -186,8 +189,130 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 } while (cursor.moveToNext());
             }
         }
-
         return cursor;
+    }*/
 
+    public Cursor getAllSwitchComponentsForAMachine(String machineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{machineIP, "Switch"}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+
+    public void createNewScene(String sceneName, ArrayList<SceneItemsDataObject> componentModels) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // create new scene
+        ContentValues values = new ContentValues();
+        values.put(DBConstants.KEY_S_NAME, sceneName);
+        long sceneId = db.insert(DBConstants.TABLE_SCENE, null, values);
+
+        // create scene components
+        values = new ContentValues();
+
+        for(int i=0; i<componentModels.size(); i++) {
+            values.put(DBConstants.KEY_SC_SCENE_ID, String.valueOf(sceneId));
+            values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
+            values.put(DBConstants.KEY_SC_TYPE, componentModels.get(i).getSceneControlType());
+            values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
+
+            db.insert(DBConstants.TABLE_SCENE_COMPONENT, null, values);
+        }
+
+        db.close();
+    }
+
+    public Cursor getAllScenes(String machineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            // TO:DO search machine-wise
+
+           /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
+                    new String[]{machineIP}, null, null, null, null);*/
+
+            cursor = db.query(DBConstants.TABLE_SCENE, null, null,
+                    null , null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+    public void saveScene(String sceneId, ArrayList<SceneItemsDataObject> componentModels) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+       /* // create new scene
+        ContentValues values = new ContentValues();
+        values.put(DBConstants.KEY_S_NAME, sceneName);
+        long sceneId = db.insert(DBConstants.TABLE_SCENE, null, values);*/
+
+        // save new scene components
+        ContentValues values = new ContentValues();
+
+        for(int i=0; i<componentModels.size(); i++) {
+            values.put(DBConstants.KEY_SC_SCENE_ID, sceneId);
+            values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
+            values.put(DBConstants.KEY_SC_TYPE, componentModels.get(i).getSceneControlType());
+            values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
+
+            db.insert(DBConstants.TABLE_SCENE_COMPONENT, null, values);
+        }
+
+        db.close();
+    }
+
+
+
+    public Cursor getAllSwitchComponentsInAScene(String sceneId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_SCENE_COMPONENT, null, DBConstants.KEY_SC_SCENE_ID + "=? AND " + DBConstants.KEY_SC_TYPE + "=?",
+                    new String[]{sceneId, AppConstants.SWITCH_TYPE}, null, null, null, null);
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+    public String getAllComponentsById(String componentId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        String componentName = "";
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_ID + "=?" ,
+                    new String[]{componentId}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                componentName =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return componentName;
     }
 }

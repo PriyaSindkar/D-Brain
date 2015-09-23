@@ -1,17 +1,12 @@
 package com.webmyne.android.d_brain.ui.Widgets;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 
@@ -25,6 +20,7 @@ public class SceneSwitchItem extends LinearLayout{
     View viewLine;
     private ImageView imgSwitch;
     private TextView txtSwitchName;
+    private String switchId;
 
     public SceneSwitchItem(Context _context) {
         super(_context);
@@ -64,5 +60,13 @@ public class SceneSwitchItem extends LinearLayout{
 
     public String getText() {
         return txtSwitchName.getText().toString();
+    }
+
+    public String getSwitchId() {
+        return switchId;
+    }
+
+    public void setSwitchId(String switchId) {
+        this.switchId = switchId;
     }
 }

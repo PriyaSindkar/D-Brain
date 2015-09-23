@@ -22,6 +22,7 @@ import com.webmyne.android.d_brain.ui.Fragments.UserGuideSettingsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSliderFragment;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
@@ -138,7 +139,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             ArrayList<ComponentModel> listOfSwitches = new ArrayList<>();
 
             for(int i=0; i<totalNoOfSwitches; i++) {
-                ComponentModel switchItem = new ComponentModel("Switch"+String.valueOf(i), "Switch", "", DBConstants.MACHINE1_IP);
+                ComponentModel switchItem = new ComponentModel("Switch"+String.valueOf(i), AppConstants.SWITCH_TYPE, "", DBConstants.MACHINE1_IP);
                 listOfSwitches.add(switchItem);
             }
             dbHelper.insertIntoComponent(listOfSwitches);

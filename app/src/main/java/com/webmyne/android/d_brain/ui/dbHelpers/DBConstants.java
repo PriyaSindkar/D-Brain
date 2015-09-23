@@ -14,9 +14,13 @@ public class DBConstants {
     public static final String DATABASE_PATH = "/data/data/com.webmyne.android.d_brain/databases/";
 
     // Machine table name
-    public static final String TABLE_MACHINE = "machine";
+    public static final String TABLE_MACHINE = "Machine";
     // Component table name
-    public static final String TABLE_COMPONENT = "component";
+    public static final String TABLE_COMPONENT = "Component";
+    // Scene table name
+    public static final String TABLE_SCENE = "Scene";
+    // Scene_Component table name
+    public static final String TABLE_SCENE_COMPONENT = "SceneComponent";
 
     // Machine Table Columns names
     public static final String KEY_M_ID = "id";
@@ -34,6 +38,17 @@ public class DBConstants {
     public static final String KEY_C_TYPE = "COMPONENT_TYPE";
     public static final String KEY_C_MIP = "MACHINE_IP";
     public static final String KEY_C_MID = "MACHINE_ID";
+
+    // Scene Table Column names
+    public static final String KEY_S_ID = "ID";
+    public static final String KEY_S_NAME = "NAME";
+
+    // Scene-Component Table Column names
+    public static final String KEY_SC_ID = "ID";
+    public static final String KEY_SC_COMPONENT_ID = "COMPONENT_ID";
+    public static final String KEY_SC_SCENE_ID = "SCENE_ID";
+    public static final String KEY_SC_TYPE = "COMPONENT_TYPE";
+    public static final String KEY_SC_MIP = "MACHINE_IP";
 
     //Machine Config
     public static final String MACHINE1_IP = "192.168.1.199";

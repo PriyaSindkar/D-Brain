@@ -52,7 +52,9 @@
             android:screenOrientation="portrait">
         </activity>
 
-
+        <activity android:name=".ui.Activities.CreateSceneActivity"
+            android:screenOrientation="portrait">
+        </activity>
 
         <activity android:name=".ui.Activities.DemoSwitchListActivity"
             android:screenOrientation="portrait">

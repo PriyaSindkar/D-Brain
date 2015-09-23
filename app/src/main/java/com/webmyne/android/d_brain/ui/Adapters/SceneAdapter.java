@@ -24,13 +24,14 @@ import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Model.onItemClickListener;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 
 import java.util.ArrayList;
 
 
 public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> {
     private ArrayList<SceneItemsDataObject> mDataset;
-    static int VIEW_TYPE;
+    static String VIEW_TYPE;
     public Context _ctx;
     public onItemClickListener _onItemClick;
     public onLongClickListener _longClick;
@@ -117,11 +118,11 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
             return 1;
         }*/
 
-        if(mDataset.get(position).getSceneControlType() == 0) {
+        if(mDataset.get(position).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
             return 0;
-        } else if (mDataset.get(position).getSceneControlType() == 1){
+        } else if (mDataset.get(position).getSceneControlType().equals(AppConstants.DIMMER_TYPE)){
             return 1;
-        } else if (mDataset.get(position).getSceneControlType() == 2){
+        } else if (mDataset.get(position).getSceneControlType().equals(AppConstants.MOTOR_TYPE)){
             return 2;
         }
 /*
@@ -153,7 +154,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
         return super.getItemId(position);
     }
 
-    public void setType(int type){
+    public void setType(String type){
         VIEW_TYPE = type;
     }
 

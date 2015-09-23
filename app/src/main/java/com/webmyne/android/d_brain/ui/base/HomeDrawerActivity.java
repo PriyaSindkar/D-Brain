@@ -11,6 +11,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AboutUsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AddMachineFragment;
@@ -65,6 +67,16 @@ public class HomeDrawerActivity extends AppCompatActivity {
         animObj.initPowerButtonAnimation(btn);
         btn.setVisibility(View.VISIBLE);
         call();
+
+        txtClearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(txtClearButton.getText().toString().equals("Add Machine")) {
+                    AddMachineDialog machineDialog = new AddMachineDialog(HomeDrawerActivity.this);
+                    machineDialog.show();
+                }
+            }
+        });
 
     }
 

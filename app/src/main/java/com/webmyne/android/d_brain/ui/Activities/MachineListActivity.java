@@ -111,8 +111,6 @@ public class MachineListActivity extends AppCompatActivity {
 
             }
         });
-
-
     }
 
 

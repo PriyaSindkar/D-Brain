@@ -84,6 +84,7 @@ public class NotificationFragment extends Fragment {
     private void init(View view) {
         ((HomeDrawerActivity) getActivity()).setTitle("Notifications");
         ((HomeDrawerActivity) getActivity()).showAppBarButton();
+        ((HomeDrawerActivity) getActivity()).setClearButtonText("Clear Notifications");
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         emptyView = (LinearLayout) view.findViewById(R.id.emptyView);
