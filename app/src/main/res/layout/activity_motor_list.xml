@@ -6,6 +6,13 @@
 <include
     android:id="@+id/thisToolbar"
     layout="@layout/app_bar2"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
     <!--<LinearLayout
         android:id="@+id/thisToolbar"
         android:background="@color/primaryColor"

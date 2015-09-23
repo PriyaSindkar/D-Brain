@@ -159,6 +159,7 @@ public class DimmerListAdapter extends RecyclerView.Adapter<DimmerListAdapter.Vi
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         listHolder.txtValue.setText("" + progress);
+
                     }
 
                     @Override

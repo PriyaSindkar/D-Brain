@@ -32,4 +32,12 @@ public class XMLValues {
     public void setTagName(String tagName) {
         this.tagName = tagName;
     }
+
+    @Override
+    public String toString() {
+        return "XMLValues{" +
+                "tagName='" + tagName + '\'' +
+                ", tagValue='" + tagValue + '\'' +
+                '}';
+    }
 }

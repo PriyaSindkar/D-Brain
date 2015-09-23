@@ -20,6 +20,10 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
 
     private DataSetObserver mDataSetObserver;
 
+    public CursorRecyclerViewAdapter(Context context) {
+        mContext = context;
+    }
+
     public CursorRecyclerViewAdapter(Context context, Cursor cursor) {
         mContext = context;
         mCursor = cursor;

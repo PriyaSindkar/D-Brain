@@ -20,11 +20,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.DemoSwitchListActivity;
 import com.webmyne.android.d_brain.ui.Activities.DimmerActivity;
 import com.webmyne.android.d_brain.ui.Activities.MachineListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MotorListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
+import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;

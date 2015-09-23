@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +42,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -56,7 +59,12 @@ public class SwitchesListActivity extends AppCompatActivity {
     private Cursor switchListCursor;
     ArrayList<XMLValues> switchStatusList;
 
+    Map<String, XMLValues> statusMap;
+    ArrayList<Map<String, XMLValues>> mapList;
+
     private InputStream inputStream;
+
+    private ProgressBar progressBar;
 
 
     @Override
@@ -75,11 +83,15 @@ public class SwitchesListActivity extends AppCompatActivity {
         toolbarTitle = (TextView) findViewById(R.id.toolbarTitle);
         toolbarTitle.setText("Switches");
 
+
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
+
         initArrayOfSwitches();
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-
         mRecyclerView.setLayoutManager(layoutManager);
+
         int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), SwitchesListActivity.this);
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
@@ -88,6 +100,8 @@ public class SwitchesListActivity extends AppCompatActivity {
 
         // fetch switch status
         new GetSwitchStatus().execute();
+
+
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
@@ -193,6 +207,11 @@ public class SwitchesListActivity extends AppCompatActivity {
     public class GetSwitchStatus extends AsyncTask<Void, Void, Void> {
 
         @Override
+        protected void onPreExecute() {
+            setProgressBarIndeterminateVisibility(true);
+        }
+
+        @Override
         protected Void doInBackground(Void... params) {
 
             try {
@@ -208,6 +227,15 @@ public class SwitchesListActivity extends AppCompatActivity {
                 switchStatusList = pullParser.processXML(inputStream);
                 Log.e("XML PARSERED", switchStatusList.toString());
 
+                /*mapList = new ArrayList<>();
+
+                for(int i=0; i<switchStatusList.size();i++) {
+                    statusMap = new HashMap<>();
+                    statusMap.put(String.valueOf(i), switchStatusList.get(i));
+                    mapList.add(statusMap);
+                }*/
+
+
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
             }
@@ -216,8 +244,9 @@ public class SwitchesListActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+            Log.e("TAG_ASYNC", "Inside onPostExecute");
             try{
+                progressBar.setVisibility(View.GONE);
                 //init adapter
                 adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, switchStatusList);
                 adapter.setType(0);

@@ -21,6 +21,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
@@ -30,6 +31,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Map;
 
 
 /**
@@ -48,6 +50,12 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     public onAddSchedulerClickListener _addSchedulerClick;
     public onRenameClickListener _renameClick;
 
+    public SwitchListCursorAdapter(Context context){
+        super(context );
+        mCtx = context;
+    }
+
+
     public SwitchListCursorAdapter(Context context, Cursor cursor, ArrayList<XMLValues> _switchStatus){
         super(context,cursor);
         mCtx = context;
@@ -61,12 +69,11 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     }
 
 
-    public class ListViewHolder extends ViewHolder{
+    public class ListViewHolder extends ViewHolder {
         public  TextView txtSwitchName;
         public ImageView imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
         public LinearLayout linearSwitch;
         public SwitchButton imgSwitch;
-        private String strSwitchStatus = "00";
 
         public ListViewHolder ( View view ) {
             super ( view );
@@ -108,6 +115,10 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         VIEW_TYPE = type;
     }
 
+    public  void setSwitchStatus(ArrayList<XMLValues> _switchStatus) {
+        this.switchStatus = _switchStatus;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -132,18 +143,24 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         int switchNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
         final int position = cursor.getPosition();
-        final String strPosition = String.format("%02d", position);
+        final String strPosition = String.format("%02d", (position + 1));
+
 
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
                 listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
-                listHolder.strSwitchStatus = this.switchStatus.get(position).tagValue;
 
-                if(listHolder.strSwitchStatus.equals("00")) {
+                Log.e("XML onBind", switchStatus.toString());
+                Log.e("Onbind value ", "POS: "+ position+ " "+ switchStatus.get(position).tagName + " "+ switchStatus.get(position).tagValue );
+
+
+                if( switchStatus.get(position).tagValue.equals("00")) {
+                    Log.e("IF value ", "POS: " + position + " ");
                     listHolder.imgSwitch.setChecked(false);
                     listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                 } else {
+                    Log.e("ELSE value ", "POS: " + position + " ");
                     listHolder.imgSwitch.setChecked(true);
                     listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                 }
@@ -151,17 +168,22 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 listHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        Log.e("onCheckedChanged ","POS "+ position);
                         if (isChecked) {
+                            Log.e("# IF", "On checked changes IF");
+                            Log.e("CURR_POS IF", "POS " + position);
+
                             String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                            switchStatus.get(position).tagValue = "01";
-                            listHolder.strSwitchStatus = "01";
+
+
                             listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                         } else {
+                            Log.e("# ELSE", "On checked changes else");
+                            Log.e("CURR_POS ELSE","POS "+ position);
+
                             String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                            switchStatus.get(position).tagValue = "00";
-                            listHolder.strSwitchStatus = "00";
                             listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                         }
                     }
@@ -281,7 +303,44 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             try{
+                new GetSwitchStatus().execute();
+            }catch(Exception e){
+            }
+        }
 
+    }
+
+    public class GetSwitchStatus extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            try {
+                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
+                Log.e("# urlValue", urlValue.toString());
+
+                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setRequestMethod("GET");
+                InputStream inputStream = httpUrlConnection.getInputStream();
+                MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                switchStatus = pullParser.processXML(inputStream);
+                Log.e("XML", switchStatus.toString());
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Log.e("TAG_ASYNC", "Inside onPostExecute");
+            try{
             }catch(Exception e){
             }
         }
