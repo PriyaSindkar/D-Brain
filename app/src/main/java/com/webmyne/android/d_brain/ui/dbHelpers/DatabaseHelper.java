@@ -286,7 +286,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // to update scene component default values
-    public void updateSceneComponents(String sceneId, ArrayList<SceneItemsDataObject> componentModels) {
+    public void updateSceneComponents(ArrayList<SceneItemsDataObject> componentModels) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         // update scene components
@@ -300,6 +300,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.close();
     }
+
+    // to update scene component default values
+    public void deleteSceneComponents(ArrayList<SceneItemsDataObject> componentModels) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        for(int i=0; i<componentModels.size(); i++) {
+            db.delete(DBConstants.TABLE_SCENE_COMPONENT, DBConstants.KEY_SC_COMPONENT_ID + "=" + componentModels.get(i).getSceneItemId(), null);
+        }
+
+        db.close();
+    }
+
+
 
 
     public void renameScene(String sceneId, String sceneName) {

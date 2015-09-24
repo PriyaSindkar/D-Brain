@@ -492,6 +492,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                 txtSceneTitle.setText(edtIPAddress.getText().toString().trim());
                 isSceneSaved = true;
                 Toast.makeText(CreateSceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
+
+                finish();
             } catch (SQLException e) {
                 Log.e("SQLEXP", e.toString());
             }

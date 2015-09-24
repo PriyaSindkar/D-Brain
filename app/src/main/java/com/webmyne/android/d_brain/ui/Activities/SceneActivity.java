@@ -32,6 +32,7 @@ import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
+import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
@@ -72,7 +73,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
     private ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
     private ArrayList<SceneItemsDataObject> newMData = new ArrayList<>();
-    ArrayList<SceneItemsDataObject> updatedMData = new ArrayList<>();
+    private ArrayList<SceneItemsDataObject> updatedMData = new ArrayList<>();
+    private ArrayList<SceneItemsDataObject> deletedMData = new ArrayList<>();
 
     RecyclerView mRecycler;
     SceneAdapter mAdapter;
@@ -142,7 +144,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecycler.setLayoutManager(mLayoutManager);
 
-        int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), SceneActivity.this);
+        final int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), SceneActivity.this);
         mRecycler.addItemDecoration(new VerticalSpaceItemDecoration(margin));
 
         mAdapter = new SceneAdapter(this, mData);
@@ -179,41 +181,22 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }
         });
 
-        mAdapter.setLongClickListener(new onLongClickListener() {
-
+        mAdapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });
+            public void onDeleteOptionClick(int pos) {
+                if (mData.get(pos).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
+                    initSwitches.get(pos).setFocusable(true);
+                } else if (mData.get(pos).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
+                    initDimmers.get(pos).setFocusable(true);
+                } else if (mData.get(pos).getSceneControlType().equals(AppConstants.MOTOR_TYPE)) {
+                    initMotors.get(pos).setFocusable(true);
+                } else {
 
-        mAdapter.setFavoriteClickListener(new onFavoriteClickListener() {
-            @Override
-            public void onFavoriteOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Added to Favorite Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mAdapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-
-            @Override
-            public void onAddSchedulerOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mAdapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
-            @Override
-            public void onAddToSceneOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        mAdapter.setRenameClickListener(new onRenameClickListener() {
-
-            @Override
-            public void onRenameOptionClick(int pos) {
-                Toast.makeText(SceneActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
+                }
+                isSceneSaved = false;
+                deletedMData.add(mData.get(pos));
+                mData.remove(pos);
+                mAdapter.notifyDataSetChanged();
             }
         });
 
@@ -238,9 +221,10 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         @Override
                         public void onSaveClick(boolean isSave) {
                             if (isSave) {
-                                saveScene();
+                                if(saveScene()) {
+                                    finish();
+                                }
                             }
-                            finish();
                         }
                     });
                 }
@@ -279,9 +263,10 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 @Override
                 public void onSaveClick(boolean isSave) {
                     if(isSave) {
-                        saveScene();
+                        if(saveScene()) {
+                            finish();
+                        }
                     }
-                    finish();
                 }
             });
         }
@@ -342,10 +327,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             case R.id.sceneMainSwitch:
                 sceneMainSwitch.toggle();
                 if(sceneMainSwitch.isChecked()) {
-                    Log.e("TAG", "Switch off");
                     new CallSceneOff().execute();
                 } else {
-                    Log.e("TAG","Switch on");
                     new CallSceneOn().execute();
                 }
                 break;
@@ -607,15 +590,25 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    private void saveScene() {
+    private boolean saveScene() {
         // save scene in DB
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
 
+            // if the scene is renamed
+            if(isSceneNamedChanged) {
+                if(currentSceneName.length() == 0) {
+                    Toast.makeText(SceneActivity.this, "Please Enter Scene Name", Toast.LENGTH_SHORT).show();
+                    return false;
+                } else {
+                    dbHelper.renameScene(currentSceneId, currentSceneName);
+                }
+            }
+
             // if scene components are updated
             if( !updatedMData.isEmpty()) {
-                dbHelper.updateSceneComponents(currentSceneId, updatedMData);
+                dbHelper.updateSceneComponents(updatedMData);
             }
 
             //if new components are added to the scene
@@ -623,9 +616,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 dbHelper.addNewSceneComponents(currentSceneId, newMData);
             }
 
-            // if the scene is renamed
-            if(isSceneNamedChanged) {
-                dbHelper.renameScene(currentSceneId, currentSceneName);
+            //if scene component is deleted
+            if( !deletedMData.isEmpty()) {
+                dbHelper.deleteSceneComponents(deletedMData);
             }
 
             dbHelper.close();
@@ -634,6 +627,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
         }
+        return true;
     }
 
     public class CallSceneOn extends AsyncTask<Void, Void, Void> {

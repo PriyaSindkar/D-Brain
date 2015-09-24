@@ -19,6 +19,7 @@ import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
+import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
@@ -37,10 +38,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
     public onItemClickListener _onItemClick;
     public onLongClickListener _longClick;
     public onSingleClickListener _singleClick;
-    public onFavoriteClickListener _favoriteClick;
-    public onAddToSceneClickListener _addToSceneClick;
-    public onAddSchedulerClickListener _addSchedulerClick;
-    public onRenameClickListener _renameClick;
+    public onDeleteClickListener _onDeleteClick;
 
     public onCheckedChangeListener _switchClick;
 
@@ -54,17 +52,14 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
     public class SwitchViewHolder extends ViewHolder {
         public TextView txtSwitchName;
         public LinearLayout linearSwitch;
-        private ImageView imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
+        private ImageView imgDeleteOption;
         public SwitchButton imgSwitch;
 
         public SwitchViewHolder ( View itemView ) {
             super ( itemView );
-            txtSwitchName = (TextView) itemView.findViewById(R.id.txtSwitchName);
-            linearSwitch = (LinearLayout) itemView.findViewById(R.id.linearSwitch);
-            this.imgFavoriteOption = (ImageView) itemView.findViewById(R.id.imgFavoriteOption);
-            this.imgAddToSceneOption = (ImageView) itemView.findViewById(R.id.imgAddToSceneOption);
-            this.imgAddSchedulerOption = (ImageView) itemView.findViewById(R.id.imgAddSchedulerOption);
-            this.imgRenameOption = (ImageView) itemView.findViewById(R.id.imgRenameOption);
+            this.txtSwitchName = (TextView) itemView.findViewById(R.id.txtSwitchName);
+            this.linearSwitch = (LinearLayout) itemView.findViewById(R.id.linearSwitch);
+            this.imgDeleteOption = (ImageView) itemView.findViewById(R.id.imgDeleteOption);
             this.imgSwitch = (SwitchButton) itemView.findViewById(R.id.imgSwitch);
         }
     }
@@ -176,7 +171,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
         switch (viewType) {
 
             case 0:
-                ViewGroup viewgroup1 = ( ViewGroup ) mInflater.inflate ( R.layout.scene_switch_full_item, parent, false );
+                ViewGroup viewgroup1 = ( ViewGroup ) mInflater.inflate ( R.layout.create_scene_item, parent, false );
                 SwitchViewHolder listHolder = new SwitchViewHolder (viewgroup1);
                 return listHolder;
             case 1:
@@ -246,33 +241,14 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                     }
                 });
 
-                switchHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
+                switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        _favoriteClick.onFavoriteOptionClick(position);
+                        _onDeleteClick.onDeleteOptionClick(position);
                     }
                 });
 
-                switchHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addToSceneClick.onAddToSceneOptionClick(position);
-                    }
-                });
 
-                switchHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addSchedulerClick.onAddSchedulerOptionClick(position);
-                    }
-                });
-
-                switchHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position);
-                    }
-                });
 
                 break;
             case 1:
@@ -303,7 +279,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                     }
                 });
 
-                dimmerHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
+                /*dimmerHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         _favoriteClick.onFavoriteOptionClick(position);
@@ -329,7 +305,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                     public void onClick(View view) {
                         _renameClick.onRenameOptionClick(position);
                     }
-                });
+                });*/
 
                 break;
 
@@ -362,35 +338,6 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                     }
                 });
 
-                motorViewHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _favoriteClick.onFavoriteOptionClick(position);
-                    }
-                });
-
-                motorViewHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addToSceneClick.onAddToSceneOptionClick(position);
-                    }
-                });
-
-                motorViewHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addSchedulerClick.onAddSchedulerOptionClick(position);
-                    }
-                });
-
-                motorViewHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position);
-                    }
-                });
-
-
                 break;
 
         }
@@ -409,24 +356,8 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
         this._singleClick = obj;
     }
 
-    public void setLongClickListener(onLongClickListener obj){
-        this._longClick = obj;
-    }
-
-    public void setFavoriteClickListener(onFavoriteClickListener obj){
-        this._favoriteClick = obj;
-    }
-
-    public void setAddToSceneClickListener(onAddToSceneClickListener obj){
-        this._addToSceneClick = obj;
-    }
-
-    public void setAddSchedulerClickListener(onAddSchedulerClickListener obj){
-        this._addSchedulerClick = obj;
-    }
-
-    public void setRenameClickListener(onRenameClickListener obj){
-        this._renameClick = obj;
+    public void setDeleteClickListener(onDeleteClickListener obj){
+        this._onDeleteClick = obj;
     }
 
     public void setCheckedChangeListener(onCheckedChangeListener obj){
