@@ -51,6 +51,39 @@ public class SwitchesListActivity extends AppCompatActivity {
     private InputStream inputStream;
     private ProgressBar progressBar;
     private Timer timer;
+    private Handler handler;
+    public static boolean isDelay = false;
+
+    private void PauseTimer(){
+        this.timer.cancel();
+        Log.e("TIMER", "Timer Paused");
+    }
+
+    public void ResumeTimer() {
+        handler = new Handler();
+        timer = new Timer();
+
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isDelay) {
+                            new GetSwitchStatus().execute();
+                            Log.e("TIMER", "Timer Start");
+                        } else {
+                            PauseTimer();
+                            ResumeTimer();
+                        }
+                    }
+                });
+
+            }
+        }, 0, 4000 * 1);
+
+    }
 
 
     @Override
@@ -83,20 +116,8 @@ public class SwitchesListActivity extends AppCompatActivity {
         mRecyclerView.setItemViewCacheSize(0);
 
         // fetch switch status periodically
-        final Handler handler = new Handler();
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.e("TIMER", "Timer called");
-                        new GetSwitchStatus().execute();
-                    }
-                });
-            }
-        }, 0, 500 * 1);
+        ResumeTimer();
+
 
 
 
@@ -215,16 +236,18 @@ public class SwitchesListActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             try {
                 URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
-                Log.e("# urlValue", urlValue.toString());
+               // Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                 httpUrlConnection.setRequestMethod("GET");
                 inputStream = httpUrlConnection.getInputStream();
-                Log.e("# inputStream", inputStream.toString());
+              //  Log.e("# inputStream", inputStream.toString());
                 MainXmlPullParser pullParser = new MainXmlPullParser();
 
                 switchStatusList = pullParser.processXML(inputStream);
-                Log.e("XML PARSERED", switchStatusList.toString());
+               // Log.e("XML PARSERED", switchStatusList.toString());
+
+
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
             }
@@ -233,12 +256,11 @@ public class SwitchesListActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Log.e("TAG_ASYNC", "Inside onPostExecute");
+           // Log.e("TAG_ASYNC", "Inside onPostExecute");
             try {
                 progressBar.setVisibility(View.GONE);
                 if(isFirstTime) {
                     //init adapter
-                    Log.e("scsa","asfsa");
                     adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, switchStatusList);
                     adapter.setType(0);
                     adapter.setHasStableIds(true);
@@ -254,7 +276,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                 adapter.setCheckedChangeListener(new onCheckedChangeListener() {
                     @Override
                     public void onCheckedChangeClick(int pos) {
-                        //new GetSwitchStatus().execute();
+                        isDelay  = false;
                     }
                 });
 
