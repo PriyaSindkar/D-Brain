@@ -1,6 +1,7 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
 import android.app.ActionBar;
+import android.app.Dialog;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -9,11 +10,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,9 +25,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SceneAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -33,6 +37,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Model.onItemClickListener;
@@ -49,7 +54,8 @@ import java.util.ArrayList;
 
 public class SceneActivity extends AppCompatActivity implements View.OnClickListener{
     Toolbar toolbar;
-    TextView txtSwitch, txtDimmer, txtMotor, txtSceneName;
+    private TextView txtSwitch, txtDimmer, txtMotor;
+    private EditText edtSceneName;
     ImageView imgHScrollLeft, imgHScrollRight, imgBack;
     HorizontalScrollView hScrollView;
     private LinearLayout linearControls, linearPopup, linearSaveScene;
@@ -67,6 +73,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     SceneAdapter mAdapter;
 
     private String currentSceneId, currentSceneName;
+    private boolean isSceneSaved = true;
+    private boolean isSceneNamedChanged = false;
 
     private int totalNoOfSwitches = 77;
     private int totalNoOfMotors = 33;
@@ -103,14 +111,13 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         imgHScrollLeft = (ImageView) findViewById(R.id.imgHScrollLeft);
         imgHScrollRight = (ImageView) findViewById(R.id.imgHScrollRight);
         imgBack = (ImageView) findViewById(R.id.imgBack);
-        txtSceneName = (TextView) findViewById(R.id.txtSceneName);
+        edtSceneName = (EditText) findViewById(R.id.edtSceneName);
         linearSaveScene = (LinearLayout) findViewById(R.id.linearSaveScene);
 
         txtSwitch.setOnClickListener(this);
         txtMotor.setOnClickListener(this);
         txtDimmer.setOnClickListener(this);
         linearSaveScene.setOnClickListener(this);
-        linearSaveScene.setClickable(false);
 
         imgHScrollLeft.setOnClickListener(this);
         imgHScrollRight.setOnClickListener(this);
@@ -205,10 +212,62 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                if (isSceneSaved) {
+                    finish();
+                } else {
+                    SaveAlertDialog saveAlertDialog = new SaveAlertDialog(SceneActivity.this);
+                    saveAlertDialog.show();
+
+                    saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            if (isSave) {
+                                saveScene();
+                            }
+                            finish();
+                        }
+                    });
+                }
             }
         });
 
+        edtSceneName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                isSceneNamedChanged = true;
+                currentSceneName = s.toString().trim();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(isSceneSaved) {
+            finish();
+        } else {
+            SaveAlertDialog saveAlertDialog = new SaveAlertDialog(SceneActivity.this);
+            saveAlertDialog.show();
+
+            saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                @Override
+                public void onSaveClick(boolean isSave) {
+                    if(isSave) {
+                        saveScene();
+                    }
+                    finish();
+                }
+            });
+        }
     }
 
     @Override
@@ -258,17 +317,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 linearPopup.setVisibility(View.GONE);
                 break;
             case R.id.linearSaveScene:
-                // save scene in DB
-                DatabaseHelper dbHelper = new DatabaseHelper(this);
-                try {
-                    dbHelper.openDataBase();
-
-                    dbHelper.saveScene(currentSceneId, newMData);
-                    dbHelper.close();
-                    linearSaveScene.setClickable(false);
-                    Toast.makeText(SceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
-                } catch (SQLException e) {
-                    Log.e("SQLEXP", e.toString());
+                if( !isSceneSaved) {
+                    saveScene();
                 }
                 break;
         }
@@ -302,6 +352,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
                             sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
                             sceneItemsDataObject.setMachineID("");
+                            sceneItemsDataObject.setDefaultValue("00");
                             //mAdapter.add(mData.size(), sceneItemsDataObject);
                             mData.add(sceneItemsDataObject);
 
@@ -310,7 +361,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
                             mAdapter.notifyDataSetChanged();
                             initSwitches.get(position).setFocusable(false);
-                            linearSaveScene.setClickable(true);
+                            isSceneSaved = false;
                         } else {
                             Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
                         }
@@ -493,7 +544,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
     private void showSceneSavedState() {
         // show scene saved state
-        txtSceneName.setText(currentSceneName);
+        edtSceneName.setText(currentSceneName);
 
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
@@ -505,6 +556,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 if (switchListCursor.getCount() > 0) {
                     do {
                         String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID));
+                        String defaultValue = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
 
                         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
                         sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
@@ -515,6 +567,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         //String componentName = componentCursor.getString(componentCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
 
                         sceneItemsDataObject.setName(componentName);
+                        sceneItemsDataObject.setDefaultValue(defaultValue);
                         mData.add(sceneItemsDataObject);
 
                     } while (switchListCursor.moveToNext());
@@ -522,6 +575,25 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }
             dbHelper.close();
             mAdapter.notifyDataSetChanged();
+        } catch (SQLException e) {
+            Log.e("SQLEXP", e.toString());
+        }
+    }
+
+    private void saveScene() {
+        // save scene in DB
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        try {
+            dbHelper.openDataBase();
+
+            if(isSceneNamedChanged) {
+
+            }
+
+            dbHelper.saveScene(currentSceneId, newMData);
+            dbHelper.close();
+            isSceneSaved = true;
+            Toast.makeText(SceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
         }

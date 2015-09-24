@@ -164,8 +164,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     public void onClick(View v) {
                         listHolder.imgSwitch.toggle();
 
-                        if(listHolder.imgSwitch.isChecked()){
-                           // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                        if(listHolder.imgSwitch.isChecked()){// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                             String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }else{

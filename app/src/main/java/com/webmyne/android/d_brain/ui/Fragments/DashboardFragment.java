@@ -234,15 +234,46 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 break;
 
             case R.id.linearCreateScene:
+                //close the popup
+                animObj.rotateViewAntiClockwise(imgOptions);
+                animObj.closePopUpMenu(linearOptions);
+                animObj.setInterFaceObj(new PopupAnimationEnd() {
+                    @Override
+                    public void animationCompleted() {
+                        linearOptions.setVisibility(View.GONE);
+                        isImageUp = true;
+                    }
+                });
+
                 intent = new Intent(getActivity(), CreateSceneActivity.class);
                 startActivity(intent);
                 break;
             case R.id.linearAddMachine:
+                //close the popup
+                animObj.rotateViewAntiClockwise(imgOptions);
+                animObj.closePopUpMenu(linearOptions);
+                animObj.setInterFaceObj(new PopupAnimationEnd() {
+                    @Override
+                    public void animationCompleted() {
+                        linearOptions.setVisibility(View.GONE);
+                        isImageUp = true;
+                    }
+                });
+
                 intent = new Intent(getActivity(), MachineListActivity.class);
                 startActivity(intent);
-
                 break;
             case R.id.linearAddScheduler:
+                // close pop up
+                animObj.rotateViewAntiClockwise(imgOptions);
+                animObj.closePopUpMenu(linearOptions);
+                animObj.setInterFaceObj(new PopupAnimationEnd() {
+                    @Override
+                    public void animationCompleted() {
+                        linearOptions.setVisibility(View.GONE);
+                        isImageUp = true;
+                    }
+                });
                 break;
         }
     }
@@ -295,6 +326,13 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
                         linearSceneList.addView(view);
                     } while (sceneCursor.moveToNext());
+                } else {
+
+                    TextView emptyMessage = new TextView(getActivity());
+                    emptyMessage.setText("No Scenes Created");
+                    emptyMessage.setTextColor(getResources().getColor(R.color.white));
+                    linearSceneList.addView(emptyMessage);
+
                 }
             }
 

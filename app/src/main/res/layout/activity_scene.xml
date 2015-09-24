@@ -4,6 +4,8 @@
     android:layout_height="match_parent"
     android:background="@color/secondaryBgColor"
     android:id="@+id/parentRelativeLayout"
+    android:focusableInTouchMode="false"
+    android:focusable="false"
     tools:context=".MainActivity">
 
     <!--<include
@@ -31,8 +33,8 @@
             android:padding="@dimen/S_MARGIN"
             android:src="@drawable/ic_arrow_left_white" />
 
-        <TextView
-            android:id="@+id/txtSceneName"
+        <EditText
+            android:id="@+id/edtSceneName"
             android:layout_centerInParent="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

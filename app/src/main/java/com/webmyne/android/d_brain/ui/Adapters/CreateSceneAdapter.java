@@ -2,6 +2,7 @@ package com.webmyne.android.d_brain.ui.Adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,6 @@ public class CreateSceneAdapter extends BaseAdapter {
     public CreateSceneAdapter(Activity activity, ArrayList<SceneItemsDataObject> _mDataset ) {
         this.activity = activity;
         this.mDataset = _mDataset;
-
     }
 
     @Override
@@ -70,16 +70,22 @@ public class CreateSceneAdapter extends BaseAdapter {
 
             viewHolder = new ViewHolderItem();
             viewHolder.linearItem = (LinearLayout) convertView.findViewById(R.id.linearItem);
-            viewHolder.textViewItem = (TextView) convertView.findViewById(R.id.txtItemName);
-            viewHolder.txtMachineIPAddress = (TextView) convertView.findViewById(R.id.txtMachineIPAddress);
+            viewHolder.textViewItem = (TextView) convertView.findViewById(R.id.txtSwitchName);
+            viewHolder.txtMachineName = (TextView) convertView.findViewById(R.id.txtMachineName);
             viewHolder.imgDelete = (ImageView) convertView.findViewById(R.id.imgDeleteOption);
+            viewHolder.imgSwitch = (SwitchButton) convertView.findViewById(R.id.imgSwitch);
 
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolderItem) convertView.getTag();
         }
         viewHolder.textViewItem.setText(mDataset.get(position).getName());
-        viewHolder.txtMachineIPAddress.setText(mDataset.get(position).getMachineIP());
+        viewHolder.txtMachineName.setText(mDataset.get(position).getMachineIP());
+
+        if( mDataset.get(position).getDefaultValue().equals("00"))
+            viewHolder.imgSwitch.setChecked(false);
+        else
+            viewHolder.imgSwitch.setChecked(true);
 
         viewHolder.linearItem.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,14 +101,28 @@ public class CreateSceneAdapter extends BaseAdapter {
             }
         });
 
+        viewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewHolder.imgSwitch.toggle();
+                if (viewHolder.imgSwitch.isChecked()) {
+                    mDataset.get(position).setDefaultValue("00");
+                } else {
+                    mDataset.get(position).setDefaultValue("01");
+                }
+            }
+        });
+
         return convertView;
     }
 
 
     static class ViewHolderItem {
         LinearLayout linearItem;
-        TextView textViewItem, txtMachineIPAddress;
+        TextView textViewItem, txtMachineName;
         ImageView imgDelete;
+        SwitchButton imgSwitch;
+
     }
 
     public void setOnDeleteClick(onDeleteClickListener obj){

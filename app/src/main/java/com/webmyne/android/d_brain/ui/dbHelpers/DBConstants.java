@@ -49,6 +49,7 @@ public class DBConstants {
     public static final String KEY_SC_SCENE_ID = "SCENE_ID";
     public static final String KEY_SC_TYPE = "COMPONENT_TYPE";
     public static final String KEY_SC_MIP = "MACHINE_IP";
+    public static final String KEY_SC_DEFAULT = "DEF_VALUE";
 
     //Machine Config
     public static final String MACHINE1_IP = "192.168.1.199";

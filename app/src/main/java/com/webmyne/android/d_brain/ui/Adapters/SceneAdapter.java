@@ -205,7 +205,24 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
                 switchHolder.txtSwitchName.setText(mDataset.get(position).getName());
 
-                switchHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                if( mDataset.get(position).getDefaultValue().equals("00"))
+                    switchHolder.imgSwitch.setChecked(false);
+                else
+                    switchHolder.imgSwitch.setChecked(true);
+
+                switchHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        switchHolder.imgSwitch.toggle();
+                        if (switchHolder.imgSwitch.isChecked()) {
+                            mDataset.get(position).setDefaultValue("00");
+                        } else {
+                            mDataset.get(position).setDefaultValue("01");
+                        }
+                    }
+                });
+
+                /*switchHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
@@ -215,7 +232,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                         }
 
                     }
-                });
+                });*/
 
 
                 switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {

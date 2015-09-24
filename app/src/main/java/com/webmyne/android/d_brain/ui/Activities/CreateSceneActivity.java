@@ -19,9 +19,11 @@ import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.CreateSceneAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Widgets.SceneDimmerItem;
@@ -53,6 +55,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     private  ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
     private GridView gridView;
     private   CreateSceneAdapter mAdapter;
+
+    private boolean isSceneSaved = true;
 
     private int totalNoOfSwitches = 77;
     private int totalNoOfMotors = 33;
@@ -109,9 +113,9 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
 
         gridView = (GridView) findViewById(R.id.grid_view);
-        gridView.setNumColumns(3);
+        gridView.setNumColumns(1);
 
-        mAdapter = new CreateSceneAdapter(this,mData);
+        mAdapter = new CreateSceneAdapter(this, mData);
         gridView.setAdapter(mAdapter);
 
         mAdapter.setOnDeleteClick(new onDeleteClickListener() {
@@ -155,10 +159,47 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                if(isSceneSaved) {
+                    finish();
+                } else {
+                    SaveAlertDialog saveAlertDialog = new SaveAlertDialog(CreateSceneActivity.this);
+                    saveAlertDialog.show();
+
+                    saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            if(isSave) {
+                                saveScene();
+                            } else{
+                                finish();
+                            }
+                        }
+                    });
+                }
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(isSceneSaved) {
+            finish();
+        } else {
+            SaveAlertDialog saveAlertDialog = new SaveAlertDialog(CreateSceneActivity.this);
+            saveAlertDialog.show();
+
+            saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                @Override
+                public void onSaveClick(boolean isSave) {
+                    if(isSave) {
+                        saveScene();
+                    } else {
+                        finish();
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -209,21 +250,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                 break;
 
             case R.id.linearSaveScene:
-                if(edtIPAddress.getText().toString().trim().length() == 0) {
-                    Toast.makeText(CreateSceneActivity.this, "Please Enter Scene Name", Toast.LENGTH_SHORT).show();
-                } else {
-                    // save scene in DB
-                    DatabaseHelper dbHelper = new DatabaseHelper(this);
-                    try {
-                        dbHelper.openDataBase();
-
-                        dbHelper.createNewScene(edtIPAddress.getText().toString().trim(), mData);
-                        dbHelper.close();
-                        txtSceneTitle.setText(edtIPAddress.getText().toString().trim());
-                        Toast.makeText(CreateSceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
-                    } catch (SQLException e) {
-                        Log.e("SQLEXP", e.toString());
-                    }
+                if( !isSceneSaved) {
+                    saveScene();
                 }
                 break;
         }
@@ -257,9 +285,11 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
                             sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
                             sceneItemsDataObject.setMachineID("");
+                            sceneItemsDataObject.setDefaultValue("00");
 
                             mAdapter.add(mData.size(), sceneItemsDataObject);
                             initSwitches.get(position).setFocusable(false);
+                            isSceneSaved = false;
                         } else {
                             Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
                         }
@@ -443,6 +473,28 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
             SceneDimmerItem sceneSwitchItem = new SceneDimmerItem(CreateSceneActivity.this);
             sceneSwitchItem.setText("Dimmer " + i);
             initDimmers.add(sceneSwitchItem);
+        }
+    }
+
+
+    private void saveScene() {
+        if(edtIPAddress.getText().toString().trim().length() == 0) {
+            Toast.makeText(CreateSceneActivity.this, "Please Enter Scene Name", Toast.LENGTH_SHORT).show();
+        } else {
+
+            // save scene in DB
+            DatabaseHelper dbHelper = new DatabaseHelper(this);
+            try {
+                dbHelper.openDataBase();
+
+                dbHelper.createNewScene(edtIPAddress.getText().toString().trim(), mData);
+                dbHelper.close();
+                txtSceneTitle.setText(edtIPAddress.getText().toString().trim());
+                isSceneSaved = true;
+                Toast.makeText(CreateSceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
+            } catch (SQLException e) {
+                Log.e("SQLEXP", e.toString());
+            }
         }
     }
 }
