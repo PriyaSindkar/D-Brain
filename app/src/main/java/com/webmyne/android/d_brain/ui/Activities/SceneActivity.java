@@ -652,9 +652,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
                     String SET_STATUS_URL = "";
                     if(mData.get(i).getDefaultValue().equals("00")) {
-                        SET_STATUS_URL = AppConstants.SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
+                        SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
                     } else {
-                        SET_STATUS_URL = AppConstants.SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
+                        SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
                     }
 
                     URL urlValue = new URL(SET_STATUS_URL);
@@ -694,7 +694,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         strPosition = mData.get(i).getSceneItemId();
                     }
 
-                    String SET_STATUS_URL = AppConstants.SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
+                    String SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
 
                     URL urlValue = new URL(SET_STATUS_URL);
                     Log.e("# urlValue", urlValue.toString());

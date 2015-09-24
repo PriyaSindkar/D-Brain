@@ -8,6 +8,7 @@ public class AppConstants {
     public static String SIMULATOR_URL = "http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
 
     public static String URL_MACHINE_IP = "http://192.168.1.199";
+    //public static String URL_MACHINE_IP = "http://d2brain.com";
     public static String URL_FETCH_SWITCH_STATUS="/swcr.xml";
     public static String URL_CHANGE_SWITCH_STATUS="/cswcr.cgi?SW=";
 

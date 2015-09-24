@@ -238,6 +238,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 if(isFirstTime) {
                     //init adapter
+                    Log.e("scsa","asfsa");
                     adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, switchStatusList);
                     adapter.setType(0);
                     adapter.setHasStableIds(true);

@@ -197,7 +197,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         try {
             cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
-                    new String[]{machineIP, "Switch"}, null, null, null, null);
+                    new String[]{machineIP, AppConstants.SWITCH_TYPE}, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getCount() > 0) {
