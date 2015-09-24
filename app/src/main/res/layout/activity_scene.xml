@@ -33,6 +33,13 @@
             android:padding="@dimen/S_MARGIN"
             android:src="@drawable/ic_arrow_left_white" />
 
+        <com.kyleduo.switchbutton.SwitchButton
+            android:layout_width="@dimen/BULB_SIZE"
+            android:layout_height="@dimen/CIRCLE_SIZE"
+            android:id="@+id/sceneMainSwitch"
+            style="@style/MaterialDesignStyle"
+            android:layout_marginLeft="@dimen/STD_MARGIN" />
+
         <EditText
             android:id="@+id/edtSceneName"
             android:layout_centerInParent="true"

@@ -252,7 +252,7 @@ public class SwitchesListActivity extends AppCompatActivity {
 
                 adapter.setCheckedChangeListener(new onCheckedChangeListener() {
                     @Override
-                    public void onCheckedChangeClick() {
+                    public void onCheckedChangeClick(int pos) {
                         //new GetSwitchStatus().execute();
                     }
                 });

@@ -18,6 +18,7 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
@@ -40,6 +41,8 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
     public onAddToSceneClickListener _addToSceneClick;
     public onAddSchedulerClickListener _addSchedulerClick;
     public onRenameClickListener _renameClick;
+
+    public onCheckedChangeListener _switchClick;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public ViewHolder(View v) {
@@ -219,6 +222,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                         } else {
                             mDataset.get(position).setDefaultValue("01");
                         }
+                        _switchClick.onCheckedChangeClick(position);
                     }
                 });
 
@@ -423,6 +427,10 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
 
     public void setRenameClickListener(onRenameClickListener obj){
         this._renameClick = obj;
+    }
+
+    public void setCheckedChangeListener(onCheckedChangeListener obj){
+        this._switchClick = obj;
     }
 
 }

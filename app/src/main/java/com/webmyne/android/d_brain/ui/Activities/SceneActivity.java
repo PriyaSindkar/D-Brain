@@ -1,10 +1,7 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
-import android.app.ActionBar;
-import android.app.Dialog;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,7 +13,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -25,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SceneAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
@@ -34,6 +31,7 @@ import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
@@ -48,18 +46,23 @@ import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 
 public class SceneActivity extends AppCompatActivity implements View.OnClickListener{
-    Toolbar toolbar;
+    private Toolbar toolbar;
     private TextView txtSwitch, txtDimmer, txtMotor;
     private EditText edtSceneName;
-    ImageView imgHScrollLeft, imgHScrollRight, imgBack;
-    HorizontalScrollView hScrollView;
+    private ImageView imgHScrollLeft, imgHScrollRight, imgBack;
+    private HorizontalScrollView hScrollView;
     private LinearLayout linearControls, linearPopup, linearSaveScene;
-    RelativeLayout parentRelativeLayout;
+    private RelativeLayout parentRelativeLayout;
+    private SwitchButton sceneMainSwitch;
+
 
     boolean isSwitchPopupShown = false;
     boolean isDimmerPopupShown = false;
@@ -67,10 +70,13 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
     AnimationHelper animationHelper = new AnimationHelper();
 
-    ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
-    ArrayList<SceneItemsDataObject> newMData = new ArrayList<>();
+    private ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
+    private ArrayList<SceneItemsDataObject> newMData = new ArrayList<>();
+    ArrayList<SceneItemsDataObject> updatedMData = new ArrayList<>();
+
     RecyclerView mRecycler;
     SceneAdapter mAdapter;
+    private Cursor switchListCursor;
 
     private String currentSceneId, currentSceneName;
     private boolean isSceneSaved = true;
@@ -113,11 +119,13 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         imgBack = (ImageView) findViewById(R.id.imgBack);
         edtSceneName = (EditText) findViewById(R.id.edtSceneName);
         linearSaveScene = (LinearLayout) findViewById(R.id.linearSaveScene);
+        sceneMainSwitch = (SwitchButton) findViewById(R.id.sceneMainSwitch);
 
         txtSwitch.setOnClickListener(this);
         txtMotor.setOnClickListener(this);
         txtDimmer.setOnClickListener(this);
         linearSaveScene.setOnClickListener(this);
+        sceneMainSwitch.setOnClickListener(this);
 
         imgHScrollLeft.setOnClickListener(this);
         imgHScrollRight.setOnClickListener(this);
@@ -209,6 +217,14 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }
         });
 
+        mAdapter.setCheckedChangeListener(new onCheckedChangeListener() {
+            @Override
+            public void onCheckedChangeClick(int pos) {
+                isSceneSaved = false;
+                updatedMData.add(mData.get(pos));
+            }
+        });
+
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -240,6 +256,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 isSceneNamedChanged = true;
+                isSceneSaved = false;
                 currentSceneName = s.toString().trim();
             }
 
@@ -321,6 +338,17 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     saveScene();
                 }
                 break;
+
+            case R.id.sceneMainSwitch:
+                sceneMainSwitch.toggle();
+                if(sceneMainSwitch.isChecked()) {
+                    Log.e("TAG", "Switch off");
+                    new CallSceneOff().execute();
+                } else {
+                    Log.e("TAG","Switch on");
+                    new CallSceneOn().execute();
+                }
+                break;
         }
 
     }
@@ -365,7 +393,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         } else {
                             Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
                         }
-
                     }
                 });
 
@@ -498,7 +525,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            Cursor switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+            switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
             dbHelper.close();
 
             totalNoOfSwitches = switchListCursor.getCount();
@@ -586,11 +613,21 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         try {
             dbHelper.openDataBase();
 
-            if(isSceneNamedChanged) {
-
+            // if scene components are updated
+            if( !updatedMData.isEmpty()) {
+                dbHelper.updateSceneComponents(currentSceneId, updatedMData);
             }
 
-            dbHelper.saveScene(currentSceneId, newMData);
+            //if new components are added to the scene
+            if(!newMData.isEmpty()) {
+                dbHelper.addNewSceneComponents(currentSceneId, newMData);
+            }
+
+            // if the scene is renamed
+            if(isSceneNamedChanged) {
+                dbHelper.renameScene(currentSceneId, currentSceneName);
+            }
+
             dbHelper.close();
             isSceneSaved = true;
             Toast.makeText(SceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
@@ -599,25 +636,86 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    /*View.OnClickListener buttonClick = new View.OnClickListener() {
-        public void onClick(View v) {
-            if(v.isFocusable()) {
-                v.setFocusable(false);
+    public class CallSceneOn extends AsyncTask<Void, Void, Void> {
 
-                if (v instanceof SceneSwitchItem) {
-                    mAdapter.add(mData.size(), new SceneItemsDataObject(0));
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                //setting default wal
+                for(int i=0;i<mData.size();i++) {
+                    String strPosition;
+                    if(Integer.parseInt(mData.get(i).getSceneItemId()) < 10) {
+                        strPosition = "0"+mData.get(i).getSceneItemId();
+                    } else {
+                        strPosition = mData.get(i).getSceneItemId();
+                    }
+
+                    String SET_STATUS_URL = "";
+                    if(mData.get(i).getDefaultValue().equals("00")) {
+                        SET_STATUS_URL = AppConstants.SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
+                    } else {
+                        SET_STATUS_URL = AppConstants.SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "01";
+                    }
+
+                    URL urlValue = new URL(SET_STATUS_URL);
+                    Log.e("# urlValue", urlValue.toString());
+
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
                 }
 
-                if(v instanceof SceneDimmerItem) {
-                    mAdapter.add(mData.size(), new SceneItemsDataObject(1));
-                }
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+            }
+            return null;
+        }
 
-                if (v instanceof SceneMotorItem) {
-                    mAdapter.add(mData.size(), new SceneItemsDataObject(2));
-                }
-            } else {
-                Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            try{
+            }catch(Exception e){
             }
         }
-    };*/
+    }
+
+    public class CallSceneOff extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                //setting default wal
+                for(int i=0;i<mData.size();i++) {
+                    String strPosition;
+                    if(Integer.parseInt(mData.get(i).getSceneItemId()) < 10) {
+                        strPosition = "0"+mData.get(i).getSceneItemId();
+                    } else {
+                        strPosition = mData.get(i).getSceneItemId();
+                    }
+
+                    String SET_STATUS_URL = AppConstants.SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + "00";
+
+                    URL urlValue = new URL(SET_STATUS_URL);
+                    Log.e("# urlValue", urlValue.toString());
+
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                }
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            try{
+            }catch(Exception e){
+            }
+        }
+    }
 }

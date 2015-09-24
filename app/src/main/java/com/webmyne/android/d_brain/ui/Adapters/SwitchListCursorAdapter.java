@@ -291,7 +291,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             try{
-                _switchClick.onCheckedChangeClick();
+                _switchClick.onCheckedChangeClick(0);
 
             }catch(Exception e){
             }

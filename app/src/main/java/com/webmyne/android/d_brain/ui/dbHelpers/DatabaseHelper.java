@@ -260,7 +260,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public void saveScene(String sceneId, ArrayList<SceneItemsDataObject> componentModels) {
+    // to save newly added components
+    public void addNewSceneComponents(String sceneId, ArrayList<SceneItemsDataObject> componentModels) {
         SQLiteDatabase db = this.getWritableDatabase();
 
        /* // create new scene
@@ -284,16 +285,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // to update scene component default values
+    public void updateSceneComponents(String sceneId, ArrayList<SceneItemsDataObject> componentModels) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // update scene components
+        ContentValues values = new ContentValues();
+
+        for(int i=0; i<componentModels.size(); i++) {
+            values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
+
+            db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMPONENT_ID + "=" + componentModels.get(i).getSceneItemId(), null);
+        }
+
+        db.close();
+    }
+
 
     public void renameScene(String sceneId, String sceneName) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-       /* // create new scene
-        ContentValues values = new ContentValues();
-        values.put(DBConstants.KEY_S_NAME, sceneName);
-        long sceneId = db.insert(DBConstants.TABLE_SCENE, null, values);*/
-
-        // save new scene components
+        // save new scene name
         ContentValues values = new ContentValues();
         values.put(DBConstants.KEY_S_NAME, sceneName);
         db.update(DBConstants.TABLE_SCENE, values, DBConstants.KEY_S_ID + "=" + sceneId, null);
