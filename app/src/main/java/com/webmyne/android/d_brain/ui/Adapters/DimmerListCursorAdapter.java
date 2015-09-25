@@ -8,13 +8,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.DimmerActivity;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
@@ -36,11 +36,10 @@ import java.util.ArrayList;
 /**
  * Created by priyasindkar on 14-09-2015.
  */
-public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchListCursorAdapter.ViewHolder>{
+public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerListCursorAdapter.ViewHolder>{
     private  Context mCtx;
     static int VIEW_TYPE;
-    private int totalNoOfSwitches;
-    private ArrayList<XMLValues> switchStatus;
+    private ArrayList<XMLValues> dimmerStatus;
 
     public onLongClickListener _longClick;
     public onSingleClickListener _singleClick;
@@ -50,16 +49,16 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     public onRenameClickListener _renameClick;
     public onCheckedChangeListener _switchClick;
 
-    public SwitchListCursorAdapter(Context context){
+    public DimmerListCursorAdapter(Context context){
         super(context );
         mCtx = context;
     }
 
 
-    public SwitchListCursorAdapter(Context context, Cursor cursor, ArrayList<XMLValues> _switchStatus){
+    public DimmerListCursorAdapter(Context context, Cursor cursor, ArrayList<XMLValues> _dimmerStatus){
         super(context,cursor);
         mCtx = context;
-        this.switchStatus = _switchStatus;
+        this.dimmerStatus = _dimmerStatus;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -70,35 +69,39 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
 
     public class ListViewHolder extends ViewHolder {
-        public  TextView txtSwitchName;
-        public ImageView imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
-        public LinearLayout linearSwitch;
-        public SwitchButton imgSwitch;
+        public TextView txtDimmerName, txtValue;
+        private SeekBar seekBar;
+        private ImageView  imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
+        private LinearLayout linearParent;
 
-        public ListViewHolder ( View view ) {
-            super ( view );
-            this.txtSwitchName = (TextView) view.findViewById(R.id.txtSwitchName);
-            this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
+        public ListViewHolder(View view) {
+            super(view);
+            this.txtDimmerName = (TextView) view.findViewById(R.id.txtDimmerName);
+            this.seekBar = (SeekBar) view.findViewById(R.id.seekBar);
+            this.txtValue = (TextView) view.findViewById(R.id.txtValue);
+            this.linearParent = (LinearLayout) view.findViewById(R.id.linearParent);
+            txtValue.setText("0");
 
             this.imgFavoriteOption = (ImageView) view.findViewById(R.id.imgFavoriteOption);
             this.imgAddToSceneOption = (ImageView) view.findViewById(R.id.imgAddToSceneOption);
             this.imgAddSchedulerOption = (ImageView) view.findViewById(R.id.imgAddSchedulerOption);
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
 
-            this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
         }
     }
 
-    public class GridViewHolder extends ViewHolder{
-        public  TextView txtSwitchName;
-        public LinearLayout linearSwitch;
-        public SwitchButton imgSwitch;
+    public class GridViewHolder extends ViewHolder {
+        private TextView txtDimmerName, txtValue;
+        private LinearLayout linearParent;
+        private SeekBar seekBar;
 
-        public GridViewHolder ( View view ) {
-            super ( view );
-            this.txtSwitchName = (TextView) view.findViewById(R.id.txtSwitchName);
-            this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
-            this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
+        public GridViewHolder(View view) {
+            super(view);
+            this.txtDimmerName = (TextView) view.findViewById(R.id.txtDimmerName);
+            this.linearParent = (LinearLayout) view.findViewById(R.id.linearParent);
+            this.seekBar = (SeekBar) view.findViewById(R.id.seekBar);
+            this.txtValue = (TextView) view.findViewById(R.id.txtValue);
+            txtValue.setText("0");
         }
     }
 
@@ -115,8 +118,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         VIEW_TYPE = type;
     }
 
-    public  void setSwitchStatus(ArrayList<XMLValues> _switchStatus) {
-        this.switchStatus = _switchStatus;
+    public  void setDimmerStatus(ArrayList<XMLValues> _dimmerStatus) {
+        this.dimmerStatus = _dimmerStatus;
     }
 
     @Override
@@ -125,15 +128,15 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
         switch (viewType) {
             case 0:
-                ViewGroup viewgroup1 = ( ViewGroup ) mInflater.inflate ( R.layout.scene_switch_full_item, parent, false );
+                ViewGroup viewgroup1 = ( ViewGroup ) mInflater.inflate ( R.layout.dimmer_list_item, parent, false );
                 ListViewHolder listHolder = new ListViewHolder (viewgroup1);
                 return listHolder;
             case 1:
-                ViewGroup viewgroup2 = ( ViewGroup ) mInflater.inflate(R.layout.switch_grid_item, parent, false);
+                ViewGroup viewgroup2 = ( ViewGroup ) mInflater.inflate(R.layout.dimmer_grid_item, parent, false);
                 GridViewHolder gridHolder = new GridViewHolder (viewgroup2);
                 return gridHolder;
             default:
-                ViewGroup viewgroup3 = ( ViewGroup ) mInflater.inflate ( R.layout.scene_switch_full_item, parent, false );
+                ViewGroup viewgroup3 = ( ViewGroup ) mInflater.inflate ( R.layout.dimmer_grid_item, parent, false );
                 GridViewHolder gridHolder1 = new GridViewHolder (viewgroup3);
                 return gridHolder1;
         }
@@ -141,7 +144,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
-        int switchNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        int dimmerNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
@@ -149,41 +152,55 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-                listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
+                listHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
 
-                if( switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
-                    listHolder.imgSwitch.setChecked(false);
-                    //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                String dimmerOnOffStatus = (dimmerStatus.get(position).tagValue).substring(0, 2);
+                int seekProgress  = Integer.parseInt((dimmerStatus.get(position).tagValue).substring(2,4))+1;
+
+                if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
+                    listHolder.txtValue.setText("0");
+                    listHolder.seekBar.setProgress(0);
                 } else {
-                    listHolder.imgSwitch.setChecked(true);
-                   // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                    listHolder.txtValue.setText(String.valueOf(seekProgress));
+                    listHolder.seekBar.setProgress(seekProgress);
                 }
 
-                listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                listHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
-                    public void onClick(View v) {
-                        listHolder.imgSwitch.toggle();
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        listHolder.txtValue.setText("" + progress);
 
-                        if(listHolder.imgSwitch.isChecked()){// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                            SwitchesListActivity.isDelay  = true;
-                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                        }else{
-                            //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                            SwitchesListActivity.isDelay  = true;
-                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        String strProgress = "00";
+                        String CHANGE_STATUS_URL = "";
+
+                        if (seekBar.getProgress() > 0) {
+                            strProgress = String.format("%02d", (seekBar.getProgress() - 1));
+                            CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                        } else if (seekBar.getProgress() == 0) {
+                            CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                            dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
+                        DimmerActivity.isDelay = true;
+                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                     }
                 });
 
-                /*listHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
+                /*listHolder.linearParent.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         _singleClick.onSingleClick(position);
                     }
                 });
-
                 listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -215,21 +232,26 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 break;
             case 1:
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
-                groupViewHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
+                groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
 
-                groupViewHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                groupViewHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) {
-                            groupViewHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                        } else {
-                            groupViewHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                        }
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        groupViewHolder.txtValue.setText("" + progress);
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
 
                     }
                 });
 
-                groupViewHolder.linearSwitch.setOnLongClickListener(new View.OnLongClickListener() {
+                groupViewHolder.linearParent.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
                         _longClick.onLongClick(position);
@@ -269,7 +291,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         this._switchClick = obj;
     }
 
-    public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
+    public class ChangeDimmerStatus extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... params) {

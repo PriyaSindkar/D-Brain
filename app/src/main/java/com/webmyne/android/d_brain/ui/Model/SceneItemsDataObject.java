@@ -4,7 +4,7 @@ package com.webmyne.android.d_brain.ui.Model;
  * Created by priyasindkar on 08-09-2015.
  */
 public class SceneItemsDataObject {
-    private String sceneItemId, sceneControlType, name, machineIP, machineID, defaultValue;
+    private String sceneItemId, sceneControlType, name, machineIP, machineID, defaultValue, sceneComponentId;
 
     public SceneItemsDataObject() {
     }
@@ -14,12 +14,20 @@ public class SceneItemsDataObject {
         this.name = name;
     }
 
+    // id from component table
     public String getSceneItemId() {
         return sceneItemId;
     }
-
     public void setSceneItemId(String sceneItemId) {
         this.sceneItemId = sceneItemId;
+    }
+
+    //component_id from component table
+    public String getSceneComponentId() {
+        return sceneComponentId;
+    }
+    public void setSceneComponentId(String sceneComponentId) {
+        this.sceneComponentId = sceneComponentId;
     }
 
     public String getName() {
@@ -60,5 +68,15 @@ public class SceneItemsDataObject {
 
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if(sceneItemId.equals(((SceneItemsDataObject)o).getSceneItemId())) {
+            return  true;
+        } else {
+            return false;
+        }
     }
 }

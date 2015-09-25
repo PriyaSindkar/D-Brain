@@ -11,7 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
@@ -26,7 +25,7 @@ import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import java.util.ArrayList;
 
 
-public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> {
+public class NewCreateSceneAdapter extends RecyclerView.Adapter<NewCreateSceneAdapter.ViewHolder> {
     private ArrayList<SceneItemsDataObject> mDataset;
     static String VIEW_TYPE;
     public Context _ctx;
@@ -71,10 +70,9 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
             this.seekBar = (SeekBar) itemView.findViewById(R.id.seekBar);
             this.txtValue = (TextView) itemView.findViewById(R.id.txtValue);
             this.linearItem = (LinearLayout) itemView.findViewById(R.id.linearItem);
-            this.imgDeleteOption = (ImageView) itemView.findViewById(R.id.imgDeleteOption);
             txtValue.setText("0");
 
-
+            this.imgDeleteOption = (ImageView) itemView.findViewById(R.id.imgDeleteOption);
         }
     }
 
@@ -149,7 +147,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
         VIEW_TYPE = type;
     }
 
-    public SceneAdapter(Context ctx,ArrayList<SceneItemsDataObject> myDataset) {
+    public NewCreateSceneAdapter(Context ctx, ArrayList<SceneItemsDataObject> myDataset) {
         this._ctx = ctx;
         mDataset = myDataset;
     }
@@ -178,7 +176,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                 return thirdHolder;
 
             default:
-                ViewGroup viewgroup4 = ( ViewGroup ) mInflater.inflate ( R.layout.create_scene_dimmer_item, parent, false );
+                ViewGroup viewgroup4 = ( ViewGroup ) mInflater.inflate ( R.layout.dimmer_list_item, parent, false );
                 DimmerViewHolder gridHolder1 = new DimmerViewHolder (viewgroup4);
                 return gridHolder1;
         }
@@ -210,21 +208,11 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                         } else {
                             mDataset.get(position).setDefaultValue(AppConstants.ON_VALUE);
                         }
-                        _switchClick.onCheckedChangeClick(position);
+                      //  _switchClick.onCheckedChangeClick(position);
                     }
                 });
 
-                /*switchHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) {
-                            switchHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                        } else {
-                            switchHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                        }
 
-                    }
-                });*/
 
 
                /* switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
@@ -232,12 +220,11 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                     public void onClick(View v) {
                         _onItemClick._onItemClickListener();
                     }
-                });*/
-
+                });
+*/
                 switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Log.e("POs adapter", position+"");
                         _onDeleteClick.onDeleteOptionClick(position);
                     }
                 });
@@ -250,6 +237,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                 dimmerHolder.txtDimmerName.setText(mDataset.get(position).getName());
                 dimmerHolder.txtValue.setText(mDataset.get(position).getDefaultValue());
                 dimmerHolder.seekBar.setProgress(Integer.parseInt(mDataset.get(position).getDefaultValue()));
+
                 dimmerHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -269,53 +257,27 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                         } else if (seekBar.getProgress() == 0) {
                             strProgress = "00";
                         }
+
                         mDataset.get(position).setDefaultValue(strProgress);
-                        _switchClick.onCheckedChangeClick(position);
+
                     }
                 });
 
                 dimmerHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Log.e("POs adapter", position+"");
                         _onDeleteClick.onDeleteOptionClick(position);
                     }
                 });
 
-               /* dimmerHolder.linearParent.setOnClickListener(new View.OnClickListener() {
+               /* dimmerHolder.linearItem.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         _onItemClick._onItemClickListener();
                     }
                 });*/
 
-                /*dimmerHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _favoriteClick.onFavoriteOptionClick(position);
-                    }
-                });
 
-                dimmerHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addToSceneClick.onAddToSceneOptionClick(position);
-                    }
-                });
-
-                dimmerHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addSchedulerClick.onAddSchedulerOptionClick(position);
-                    }
-                });
-
-                dimmerHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position);
-                    }
-                });*/
 
                 break;
 

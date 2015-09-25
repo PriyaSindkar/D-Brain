@@ -164,6 +164,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         for(int i=0; i<componentModels.size(); i++) {
+            values.put(DBConstants.KEY_C_COMPONENT_ID, componentModels.get(i).getComponentId());
             values.put(DBConstants.KEY_C_NAME, componentModels.get(i).getName());
             values.put(DBConstants.KEY_C_TYPE, componentModels.get(i).getType());
             values.put(DBConstants.KEY_C_MID, componentModels.get(i).getMid());
@@ -198,6 +199,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
                     new String[]{machineIP, AppConstants.SWITCH_TYPE}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+    public Cursor getAllDimmerComponentsForAMachine(String machineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{machineIP, AppConstants.DIMMER_TYPE}, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getCount() > 0) {
@@ -293,9 +313,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         for(int i=0; i<componentModels.size(); i++) {
-            values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
 
-            db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMPONENT_ID + "=" + componentModels.get(i).getSceneItemId(), null);
+            if(componentModels.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
+                String strDefault = "00";
+                if(!componentModels.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
+                    strDefault = String.format("%02d", (Integer.parseInt(componentModels.get(i).getDefaultValue()) - 1));
+                }
+                values.put(DBConstants.KEY_SC_DEFAULT, strDefault);
+            } else {
+                values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
+            }
+
+            db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMPONENT_ID + " = '" + componentModels.get(i).getSceneItemId() + "'", null);
         }
 
         db.close();
@@ -340,12 +369,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public String getAllComponentsById(String componentId) {
+
+    public Cursor getAllComponentsInAScene(String sceneId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_SCENE_COMPONENT, null, DBConstants.KEY_SC_SCENE_ID + "=?",
+                    new String[]{sceneId}, null, null, null, null);
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+    public String getComponentNameById(String componentId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         String componentName = "";
         try {
-            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_ID + "=?" ,
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_COMPONENT_ID + "=?" ,
                     new String[]{componentId}, null, null, null, null);
 
             if (cursor != null) {

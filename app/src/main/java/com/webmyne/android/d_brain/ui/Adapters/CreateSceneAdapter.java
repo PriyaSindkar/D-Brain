@@ -6,25 +6,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 public class CreateSceneAdapter extends BaseAdapter {
@@ -61,57 +56,116 @@ public class CreateSceneAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        final ViewHolderItem viewHolder;
+        ViewHolderItem switchViewHolder = null;
+        ViewHolderItem dimmerViewHolder = null;
 
-        if (inflater == null)
+        //if (inflater == null)
             inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.create_scene_item, null);
 
-            viewHolder = new ViewHolderItem();
-            viewHolder.linearItem = (LinearLayout) convertView.findViewById(R.id.linearItem);
-            viewHolder.textViewItem = (TextView) convertView.findViewById(R.id.txtSwitchName);
-            viewHolder.txtMachineName = (TextView) convertView.findViewById(R.id.txtMachineName);
-            viewHolder.imgDelete = (ImageView) convertView.findViewById(R.id.imgDeleteOption);
-            viewHolder.imgSwitch = (SwitchButton) convertView.findViewById(R.id.imgSwitch);
+            //set item view according to component type
+            if(mDataset.get(position).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
+                Log.e("if", "if");
+                convertView = inflater.inflate(R.layout.create_scene_switch_item, null);
 
-            convertView.setTag(viewHolder);
+                switchViewHolder = new ViewHolderItem();
+                switchViewHolder.linearItem = (LinearLayout) convertView.findViewById(R.id.linearItem);
+                switchViewHolder.textViewItem = (TextView) convertView.findViewById(R.id.txtSwitchName);
+                switchViewHolder.txtMachineName = (TextView) convertView.findViewById(R.id.txtMachineName);
+                switchViewHolder.imgDelete = (ImageView) convertView.findViewById(R.id.imgDeleteOption);
+                switchViewHolder.imgSwitch = (SwitchButton) convertView.findViewById(R.id.imgSwitch);
+
+                convertView.setTag(switchViewHolder);
+            }
+
+            else if (mDataset.get(position).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
+                Log.e("else", "else");
+                convertView = inflater.inflate(R.layout.create_scene_dimmer_item, null);
+
+                dimmerViewHolder = new ViewHolderItem();
+                dimmerViewHolder.linearItem = (LinearLayout) convertView.findViewById(R.id.linearItem);
+                dimmerViewHolder.textViewItem = (TextView) convertView.findViewById(R.id.txtDimmerName);
+                dimmerViewHolder.txtMachineName = (TextView) convertView.findViewById(R.id.txtMachineName);
+                dimmerViewHolder.imgDelete = (ImageView) convertView.findViewById(R.id.imgDeleteOption);
+                dimmerViewHolder.seekBar = (SeekBar) convertView.findViewById(R.id.seekBar);
+
+                convertView.setTag(dimmerViewHolder);
+            }
         } else {
-            viewHolder = (ViewHolderItem) convertView.getTag();
+            if(mDataset.get(position).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
+                switchViewHolder = (ViewHolderItem) convertView.getTag();
+            } else if (mDataset.get(position).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
+                dimmerViewHolder = (ViewHolderItem) convertView.getTag();
+            }
+
         }
-        viewHolder.textViewItem.setText(mDataset.get(position).getName());
-        viewHolder.txtMachineName.setText(mDataset.get(position).getMachineIP());
 
-        if( mDataset.get(position).getDefaultValue().equals("00"))
-            viewHolder.imgSwitch.setChecked(false);
-        else
-            viewHolder.imgSwitch.setChecked(true);
 
-        viewHolder.linearItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                _onSingleClick.onSingleClick(position);
-            }
-        });
 
-        viewHolder.imgDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                _onDeleteClick.onDeleteOptionClick(position);
-            }
-        });
+        //initialize switch status
+        if(mDataset.get(position).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
 
-        viewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewHolder.imgSwitch.toggle();
-                if (viewHolder.imgSwitch.isChecked()) {
-                    mDataset.get(position).setDefaultValue("00");
-                } else {
-                    mDataset.get(position).setDefaultValue("01");
+            switchViewHolder.textViewItem.setText(mDataset.get(position).getName());
+            switchViewHolder.txtMachineName.setText(mDataset.get(position).getMachineIP());
+
+            final ViewHolderItem finalViewHolder = switchViewHolder;
+
+            //set default value to switch
+            if (mDataset.get(position).getDefaultValue().equals(AppConstants.OFF_VALUE))
+                switchViewHolder.imgSwitch.setChecked(false);
+            else
+                switchViewHolder.imgSwitch.setChecked(true);
+
+            switchViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finalViewHolder.imgSwitch.toggle();
+                    if (finalViewHolder.imgSwitch.isChecked()) {
+                        mDataset.get(position).setDefaultValue(AppConstants.OFF_VALUE);
+                    } else {
+                        mDataset.get(position).setDefaultValue(AppConstants.ON_VALUE);
+                    }
                 }
-            }
-        });
+            });
+
+            switchViewHolder.imgDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    _onDeleteClick.onDeleteOptionClick(position);
+                }
+            });
+
+
+            switchViewHolder.linearItem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    _onSingleClick.onSingleClick(position);
+                }
+            });
+        }
+
+        //initialize dimmer status
+        if(mDataset.get(position).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
+            dimmerViewHolder.textViewItem.setText(mDataset.get(position).getName());
+            dimmerViewHolder.txtMachineName.setText(mDataset.get(position).getMachineIP());
+
+            dimmerViewHolder.imgDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    _onDeleteClick.onDeleteOptionClick(position);
+                }
+            });
+
+
+            dimmerViewHolder.linearItem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    _onSingleClick.onSingleClick(position);
+                }
+            });
+        }
+
+
 
         return convertView;
     }
@@ -119,9 +173,10 @@ public class CreateSceneAdapter extends BaseAdapter {
 
     static class ViewHolderItem {
         LinearLayout linearItem;
-        TextView textViewItem, txtMachineName;
+        TextView textViewItem, txtMachineName, txtDimmerValue;
         ImageView imgDelete;
         SwitchButton imgSwitch;
+        SeekBar seekBar;
 
     }
 

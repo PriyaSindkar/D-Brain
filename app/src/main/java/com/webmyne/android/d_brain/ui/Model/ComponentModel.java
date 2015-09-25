@@ -5,6 +5,7 @@ package com.webmyne.android.d_brain.ui.Model;
  */
 public class ComponentModel {
     private int id;
+    private String componentId;
     private String name;
     private String type;
     private String mid;
@@ -13,7 +14,8 @@ public class ComponentModel {
     public ComponentModel() {
     }
 
-    public ComponentModel(String name, String type, String mid, String mip) {
+    public ComponentModel(String componentId, String name, String type, String mid, String mip) {
+        this.componentId = componentId;
         this.name = name;
         this.type = type;
         this.mid = mid;
@@ -26,6 +28,14 @@ public class ComponentModel {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getComponentId() {
+        return componentId;
+    }
+
+    public void setComponentId(String componentId) {
+        this.componentId = componentId;
     }
 
     public String getName() {

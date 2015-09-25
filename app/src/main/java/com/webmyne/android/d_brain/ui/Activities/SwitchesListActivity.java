@@ -245,7 +245,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                 MainXmlPullParser pullParser = new MainXmlPullParser();
 
                 switchStatusList = pullParser.processXML(inputStream);
-               // Log.e("XML PARSERED", switchStatusList.toString());
+               // Log.e("XML PARSERED", dimmerStatusList.toString());
 
 
             } catch (Exception e) {

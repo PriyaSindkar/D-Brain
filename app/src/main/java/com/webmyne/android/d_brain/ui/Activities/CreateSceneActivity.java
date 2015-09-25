@@ -3,6 +3,8 @@ package com.webmyne.android.d_brain.ui.Activities;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -19,9 +21,12 @@ import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.CreateSceneAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.NewCreateSceneAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
+import com.webmyne.android.d_brain.ui.Helpers.Utils;
+import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
@@ -53,8 +58,9 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     private  AnimationHelper animationHelper = new AnimationHelper();
 
     private  ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
-    private GridView gridView;
-    private   CreateSceneAdapter mAdapter;
+    //private GridView gridView;
+    private RecyclerView mRecycler;
+    private NewCreateSceneAdapter mAdapter;
 
     private boolean isSceneSaved = true;
 
@@ -64,7 +70,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
     private  ArrayList<SceneSwitchItem> initSwitches = new ArrayList<>();
     private   ArrayList<SceneMotorItem> initMotors = new ArrayList<>();
-    private  ArrayList<SceneDimmerItem> initDimmers = new ArrayList<>();
+    private  ArrayList<SceneSwitchItem> initDimmers = new ArrayList<>();
 
 
     @Override
@@ -111,36 +117,43 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         linearPopup =  (LinearLayout) findViewById(R.id.linearPopup);
         parentRelativeLayout = (RelativeLayout) findViewById(R.id.parentRelativeLayout);
 
+        mRecycler = (RecyclerView) findViewById(R.id.recycler_view);
+        mRecycler = (RecyclerView) findViewById(R.id.recycler_view);
+        mRecycler.setHasFixedSize(true);
+        mRecycler.setItemViewCacheSize(0);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        mRecycler.setLayoutManager(mLayoutManager);
 
-        gridView = (GridView) findViewById(R.id.grid_view);
+        final int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), CreateSceneActivity.this);
+        mRecycler.addItemDecoration(new VerticalSpaceItemDecoration(margin));
+        mAdapter = new NewCreateSceneAdapter(this, mData);
+        mRecycler.setAdapter(mAdapter);
+
+       /* gridView = (GridView) findViewById(R.id.grid_view);
         gridView.setNumColumns(1);
 
         mAdapter = new CreateSceneAdapter(this, mData);
-        gridView.setAdapter(mAdapter);
+        gridView.setAdapter(mAdapter);*/
 
-        mAdapter.setOnDeleteClick(new onDeleteClickListener() {
+        mAdapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
             public void onDeleteOptionClick(int pos) {
                 if (mData.get(pos).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
                     initSwitches.get(pos).setFocusable(true);
-                    mData.remove(pos);
-                    mAdapter.notifyDataSetChanged();
                 } else if (mData.get(pos).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
                     initDimmers.get(pos).setFocusable(true);
-                    mData.remove(pos);
-                    mAdapter.notifyDataSetChanged();
                 } else if (mData.get(pos).getSceneControlType().equals(AppConstants.MOTOR_TYPE)) {
                     initMotors.get(pos).setFocusable(true);
-                    mData.remove(pos);
-                    mAdapter.notifyDataSetChanged();
                 } else {
 
                 }
+                mData.remove(pos);
+                mAdapter.notifyDataSetChanged();
             }
         });
 
         // hide pop-up
-        mAdapter.set_onSingleClick(new onSingleClickListener() {
+        mAdapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
                 txtSwitch.setBackgroundColor(getResources().getColor(R.color.primaryColor));
@@ -227,7 +240,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                 showSwitchPopup();
                 break;
             case R.id.txtDimmer:
-               // showDimmerPopup();
+                showDimmerPopup();
                 break;
 
             case R.id.txtMotor:
@@ -282,12 +295,15 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                     public void onClick(View v) {
                         if(initSwitches.get(position).isFocusable()) {
                             SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
+                            // set component_id in scene_component table
                             sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
                             sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
                             sceneItemsDataObject.setMachineID("");
-                            sceneItemsDataObject.setDefaultValue("00");
+                            sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
 
-                            mAdapter.add(mData.size(), sceneItemsDataObject);
+                           // mAdapter.add(mData.size(), sceneItemsDataObject);
+                            mData.add(sceneItemsDataObject);
+                            mAdapter.notifyDataSetChanged();
                             initSwitches.get(position).setFocusable(false);
                             isSceneSaved = false;
                         } else {
@@ -342,11 +358,18 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                     public void onClick(View v) {
                         if (initDimmers.get(position).isFocusable()) {
                             SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
+                            // set component_id in scene_component table
+                            sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
                             sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
                             sceneItemsDataObject.setMachineID("");
+                            Log.e("DIMMER_DEF_VALUE", initDimmers.get(position).getSwitchId().substring(2, 4));
+                            sceneItemsDataObject.setDefaultValue(AppConstants.DIMMER_DEFAULT_VALUE);
 
-                            mAdapter.add(mData.size(), sceneItemsDataObject);
+                          //  mAdapter.add(mData.size(), sceneItemsDataObject);
+                            mData.add(sceneItemsDataObject);
+                            mAdapter.notifyDataSetChanged();
                             initDimmers.get(position).setFocusable(false);
+                            isSceneSaved = false;
                         } else {
                             Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
                         }
@@ -443,7 +466,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                     do {
                         SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(CreateSceneActivity.this);
                         sceneSwitchItem.setText(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
-                        sceneSwitchItem.setSwitchId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
+                        //switch id from main component table
+                        sceneSwitchItem.setSwitchId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID)));
 
                         initSwitches.add(sceneSwitchItem);
                     } while (switchListCursor.moveToNext());
@@ -469,11 +493,37 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void initDimmers() {
-        for(int i=0; i < totalNoOfMotors; i++) {
+
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        try {
+            dbHelper.openDataBase();
+            Cursor dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+
+            totalNoOfDimmers = dimmerListCursor.getCount();
+
+            if (dimmerListCursor != null) {
+                dimmerListCursor.moveToFirst();
+                if (dimmerListCursor.getCount() > 0) {
+                    do {
+                        SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(CreateSceneActivity.this);
+                        sceneSwitchItem.setText(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
+                        //dimmer id from main component table
+                        sceneSwitchItem.setSwitchId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID)));
+
+                        initDimmers.add(sceneSwitchItem);
+                    } while (dimmerListCursor.moveToNext());
+                }
+            }
+        } catch (SQLException e) {
+            Log.e("SQLEXP", e.toString());
+        }
+
+        /*for(int i=0; i < totalNoOfMotors; i++) {
             SceneDimmerItem sceneSwitchItem = new SceneDimmerItem(CreateSceneActivity.this);
             sceneSwitchItem.setText("Dimmer " + i);
             initDimmers.add(sceneSwitchItem);
-        }
+        }*/
     }
 
 

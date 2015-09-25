@@ -34,6 +34,7 @@ public class DBConstants {
 
     // Component Table Column names
     public static final String KEY_C_ID = "ID";
+    public static final String KEY_C_COMPONENT_ID = "COMPONENT_ID";
     public static final String KEY_C_NAME = "NAME";
     public static final String KEY_C_TYPE = "COMPONENT_TYPE";
     public static final String KEY_C_MIP = "MACHINE_IP";
@@ -53,7 +54,6 @@ public class DBConstants {
 
     //Machine Config
     public static final String MACHINE1_IP = "192.168.1.199";
-    public static final String TEMP_PRODUCT_CODE = "0123456789";
 
     /*public static final String CREATE_MACHINE_TABLE = "CREATE TABLE " + TABLE_MACHINE + "("
             + DBConstants.KEY_M_ID + " INTEGER PRIMARY KEY,"

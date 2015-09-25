@@ -157,7 +157,19 @@
         </LinearLayout>
     </RelativeLayout>
 
-    <GridView
+    <android.support.v7.widget.RecyclerView
+        android:layout_above="@id/bottomBar"
+        android:layout_below="@id/txtInputIP"
+        android:id="@+id/recycler_view"
+        android:clickable="true"
+        android:layout_marginTop="@dimen/STD_MARGIN"
+        android:layout_marginBottom="@dimen/STD_MARGIN"
+        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!--<GridView
         android:layout_above="@id/bottomBar"
         android:layout_below="@id/txtInputIP"
         android:id="@+id/grid_view"
@@ -170,7 +182,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
-    </GridView>
+    </GridView>-->
 
 
 

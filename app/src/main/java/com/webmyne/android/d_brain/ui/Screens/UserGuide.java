@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -132,17 +133,27 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         try {
             dbHelper.openDataBase();
 
-            // init the component table with switches of a machine
             // product code and machine IP are hard-coded
-            String productCode = DBConstants.TEMP_PRODUCT_CODE;
-            int totalNoOfSwitches = Integer.parseInt(productCode.substring(2,3)) * 11;
-            ArrayList<ComponentModel> listOfSwitches = new ArrayList<>();
+            String productCode = AppConstants.TEMP_PRODUCT_CODE;
 
+            // init the component table with switches of a machine
+            int totalNoOfSwitches = Integer.parseInt(productCode.substring(2,3)) * 11;
+            ArrayList<ComponentModel> listOfComponents = new ArrayList<>();
             for(int i=0; i<totalNoOfSwitches; i++) {
-                ComponentModel switchItem = new ComponentModel("Switch"+String.valueOf(i), AppConstants.SWITCH_TYPE, "", DBConstants.MACHINE1_IP);
-                listOfSwitches.add(switchItem);
+                String idSuffix = String.format("%02d", (i + 1));
+                ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX+idSuffix, AppConstants.SWITCH_TYPE+String.valueOf(i+1), AppConstants.SWITCH_TYPE, "", DBConstants.MACHINE1_IP);
+                listOfComponents.add(switchItem);
             }
-            dbHelper.insertIntoComponent(listOfSwitches);
+
+            // init the component table with dimmers of a machine
+            int totalNoOfDimmers = Integer.parseInt(productCode.substring(3,4)) * 11;
+            for(int i=0; i<totalNoOfDimmers; i++) {
+                String idSuffix = String.format("%02d", (i + 1));
+                ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX+idSuffix, AppConstants.DIMMER_TYPE+String.valueOf(i+1), AppConstants.DIMMER_TYPE, "", DBConstants.MACHINE1_IP);
+                listOfComponents.add(dimmerItem);
+            }
+
+            dbHelper.insertIntoComponent(listOfComponents);
             dbHelper.close();
 
         } catch (SQLException e) {
