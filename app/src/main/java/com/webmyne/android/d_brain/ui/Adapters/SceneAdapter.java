@@ -237,7 +237,6 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                 switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Log.e("POs adapter", position+"");
                         _onDeleteClick.onDeleteOptionClick(position);
                     }
                 });
@@ -264,10 +263,12 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         String strProgress = "";
-                        if (seekBar.getProgress() > 0) {
+                        if (seekBar.getProgress() > 0 && seekBar.getProgress() < 100) {
                             strProgress = String.format("%02d", (seekBar.getProgress()));
                         } else if (seekBar.getProgress() == 0) {
                             strProgress = "00";
+                        } else if(seekBar.getProgress() == 100) {
+                            strProgress = "100";
                         }
                         mDataset.get(position).setDefaultValue(strProgress);
                         _switchClick.onCheckedChangeClick(position);
@@ -277,7 +278,6 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                 dimmerHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Log.e("POs adapter", position+"");
                         _onDeleteClick.onDeleteOptionClick(position);
                     }
                 });

@@ -293,13 +293,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         for(int i=0; i<componentModels.size(); i++) {
+
             values.put(DBConstants.KEY_SC_SCENE_ID, sceneId);
             values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
             values.put(DBConstants.KEY_SC_TYPE, componentModels.get(i).getSceneControlType());
             values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
             values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
 
-            db.insert(DBConstants.TABLE_SCENE_COMPONENT, null, values);
+            if( !isComponentAlreadyExists(componentModels.get(i).getSceneItemId(), sceneId))
+                db.insert(DBConstants.TABLE_SCENE_COMPONENT, null, values);
+            else {
+                db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMPONENT_ID + " = '" + componentModels.get(i).getSceneItemId() + "'", null);
+            }
         }
 
         db.close();
@@ -317,7 +322,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if(componentModels.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
                 String strDefault = "00";
                 if(!componentModels.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                    strDefault = String.format("%02d", (Integer.parseInt(componentModels.get(i).getDefaultValue()) - 1));
+                    if(componentModels.get(i).getDefaultValue().equals("100") ){
+                        strDefault = "100";
+                    } else {
+                        strDefault = String.format("%02d", (Integer.parseInt(componentModels.get(i).getDefaultValue())));
+                    }
                 }
                 values.put(DBConstants.KEY_SC_DEFAULT, strDefault);
             } else {
@@ -335,13 +344,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         for(int i=0; i<componentModels.size(); i++) {
-            db.delete(DBConstants.TABLE_SCENE_COMPONENT, DBConstants.KEY_SC_COMPONENT_ID + "=" + componentModels.get(i).getSceneItemId(), null);
+            db.delete(DBConstants.TABLE_SCENE_COMPONENT, DBConstants.KEY_SC_COMPONENT_ID + "='" + componentModels.get(i).getSceneItemId() + "'", null);
         }
 
         db.close();
     }
 
+    public boolean isComponentAlreadyExists(String componentId, String sceneId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        boolean result = true;
+        try {
+            // TO:DO search machine-wise
 
+           /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
+                    new String[]{machineIP}, null, null, null, null);*/
+
+            cursor = db.query(DBConstants.TABLE_SCENE_COMPONENT, null, DBConstants.KEY_SC_SCENE_ID + "=? AND " + DBConstants.KEY_SC_COMPONENT_ID + "=?",
+                    new String[]{sceneId, componentId}, null, null, null, null);
+            if (cursor != null) {
+                if(cursor.getCount() == 0) {
+                    result =  false;
+                } else {
+                    result =  true;
+                }
+            } else {
+                result =  false;
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return result;
+    }
 
 
     public void renameScene(String sceneId, String sceneName) {

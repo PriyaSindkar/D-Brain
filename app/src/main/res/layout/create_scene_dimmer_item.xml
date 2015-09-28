@@ -61,7 +61,7 @@
                 android:textColor="#fff" />
 
             <TextView
-                android:layout_weight="0.2"
+                android:layout_weight="0.3"
                 android:id="@+id/txtValue"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -69,6 +69,7 @@
                 android:layout_gravity="right"
                 android:layout_marginRight="@dimen/STD_MARGIN"
                 android:padding="@dimen/S_MARGIN"
+                android:singleLine="true"
                 android:background="@drawable/seekbar_value"
                 android:gravity="center"
                 android:textColor="#ffffff" />

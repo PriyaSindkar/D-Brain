@@ -79,4 +79,11 @@ public class SceneItemsDataObject {
             return false;
         }
     }
+
+    @Override
+    public String toString() {
+        return "SceneItemsDataObject{" +
+                "sceneItemId='" + sceneItemId + '\'' +
+                '}';
+    }
 }

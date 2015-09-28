@@ -185,15 +185,29 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     updatedMData.remove(mData.get(pos));
                 }
 
+                // remove the deleted component from new list
+                if( newMData.contains(mData.get(pos))) {
+                    newMData.remove(mData.get(pos));
+                }
+
+                String componentId = mData.get(pos).getSceneItemId();
+
                 if (mData.get(pos).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
-                    Log.e("mdata del", pos + " "+mData.get(pos).getSceneItemId());
-                    Log.e("initSwitches del", initSwitches.get(pos).getSwitchId());
-                    initSwitches.get(pos).setFocusable(true);
+                    for(int i=0;i<initSwitches.size();i++) {
+                        if( initSwitches.get(i).getSwitchId().equals(componentId)){
+                            initSwitches.get(i).setFocusable(true);
+                            break;
+                        }
+                    }
                 } else if (mData.get(pos).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
-                    Log.e("mdata del", pos + " "+mData.get(pos).getSceneItemId());
-                    Log.e("initdimmers del", initDimmers.get(pos).getSwitchId());
-                    initDimmers.get(pos).setFocusable(true);
-                } else if (mData.get(pos).getSceneControlType().equals(AppConstants.MOTOR_TYPE)) {
+                    for(int i=0;i<initDimmers.size();i++) {
+                        if( initDimmers.get(i).getSwitchId().equals(componentId)){
+                            initDimmers.get(i).setFocusable(true);
+                            break;
+                        }
+                    }
+
+                }  else if (mData.get(pos).getSceneControlType().equals(AppConstants.MOTOR_TYPE)) {
                     initMotors.get(pos).setFocusable(true);
                 } else {
 
@@ -211,7 +225,10 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onCheckedChangeClick(int pos) {
                 isSceneSaved = false;
-                updatedMData.add(mData.get(pos));
+
+                if(!newMData.contains(mData.get(pos)) ) {
+                    updatedMData.add(mData.get(pos));
+                }
             }
         });
 
@@ -378,6 +395,16 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             //mAdapter.add(mData.size(), sceneItemsDataObject);
                             mData.add(sceneItemsDataObject);
 
+                            // remove the new component from deleted list
+                            if(deletedMData.contains(sceneItemsDataObject)) {
+                                deletedMData.remove(sceneItemsDataObject);
+                            }
+
+                            // remove the new component from updated list
+                            if(updatedMData.contains(sceneItemsDataObject)) {
+                                updatedMData.remove(sceneItemsDataObject);
+                            }
+
                             // to save this new component
                             newMData.add(sceneItemsDataObject);
 
@@ -442,6 +469,16 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
                             //mAdapter.add(mData.size(), sceneItemsDataObject);
                             mData.add(sceneItemsDataObject);
+
+                            // remove the new component from deleted list
+                            if(deletedMData.contains(sceneItemsDataObject)) {
+                                deletedMData.remove(sceneItemsDataObject);
+                            }
+
+                            // remove the new component from updated list
+                            if(updatedMData.contains(sceneItemsDataObject)) {
+                                updatedMData.remove(sceneItemsDataObject);
+                            }
 
                             // to save this new component
                             newMData.add(sceneItemsDataObject);
@@ -588,7 +625,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         // check if this component is already added or not
                         for(int i=0; i<mData.size(); i++) {
                             if(mData.get(i).getSceneItemId().equals(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)))) {
-                                Log.e("comp init id", dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
                                 sceneSwitchItem.setFocusable(false);
                             }
                         }
@@ -633,6 +669,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         //String componentName = componentCursor.getString(componentCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
 
                         sceneItemsDataObject.setName(componentName);
+                        Log.e("DEFAULT", componentId+" "+ defaultValue);
                         sceneItemsDataObject.setDefaultValue(defaultValue);
                         mData.add(sceneItemsDataObject);
 
@@ -711,10 +748,14 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
                     // set defaults for dimmer
                     if(mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE) ) {
+                        String dimmerValue = "00";
+                        if( !mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0") ) {
+                            dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
+                        }
                         if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + mData.get(i).getDefaultValue();
+                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE +dimmerValue;
                         } else {
-                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + mData.get(i).getDefaultValue();
+                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
                         }
                     }
 
@@ -758,7 +799,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     }
 
                     if(mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE) ) {
-                        SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + mData.get(i).getDefaultValue();
+                        String dimmerValue = "00";
+                        if( !mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0")) {
+                            dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
+                        }
+                        SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
                     }
 
                     URL urlValue = new URL(SET_STATUS_URL);

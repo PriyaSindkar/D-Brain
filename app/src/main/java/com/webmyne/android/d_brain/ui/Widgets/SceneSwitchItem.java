@@ -69,4 +69,11 @@ public class SceneSwitchItem extends LinearLayout{
     public void setSwitchId(String switchId) {
         this.switchId = switchId;
     }
+
+    @Override
+    public String toString() {
+        return "SceneSwitchItem{" +
+                "switchId='" + switchId + '\'' +
+                '}';
+    }
 }

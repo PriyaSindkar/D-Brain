@@ -241,7 +241,7 @@ public class DimmerActivity extends AppCompatActivity {
     private void initArrayOfDimmers() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
 
-        //insert switches in adapter ofr machine-1
+        //insert dimmers in adapter for machine-1
         try {
             dbHelper.openDataBase();
             dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
@@ -263,7 +263,7 @@ public class DimmerActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             try {
                 URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_DIMMER_STATUS);
-                 //Log.e("# urlValue", urlValue.toString());
+                 Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                 httpUrlConnection.setRequestMethod("GET");

@@ -43,11 +43,13 @@
         <EditText
             android:id="@+id/edtSceneName"
             android:layout_centerInParent="true"
+            android:maxWidth="@dimen/SCENE_ITEM_SIZE"
+            android:singleLine="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:layout_gravity="center"
-            android:textSize="@dimen/L_TEXT_SIZE"
+            android:textSize="@dimen/M1_TEXT_SIZE"
             android:text="My Scene"/>
 
         <LinearLayout
@@ -68,7 +70,7 @@
                 android:src="@drawable/ic_tick"/>
 
             <TextView
-                android:padding="@dimen/STD_MARGIN"
+                android:padding="@dimen/S_MARGIN"
                 android:layout_centerInParent="true"
                 android:layout_width="wrap_content"
                 android:gravity="center"

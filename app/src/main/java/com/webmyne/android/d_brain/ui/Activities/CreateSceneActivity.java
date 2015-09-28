@@ -6,12 +6,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,7 +22,6 @@ import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.CreateSceneAdapter;
-import com.webmyne.android.d_brain.ui.Adapters.NewCreateSceneAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
@@ -31,7 +31,6 @@ import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
-import com.webmyne.android.d_brain.ui.Widgets.SceneDimmerItem;
 import com.webmyne.android.d_brain.ui.Widgets.SceneMotorItem;
 import com.webmyne.android.d_brain.ui.Widgets.SceneSwitchItem;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
@@ -60,7 +59,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     private  ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
     //private GridView gridView;
     private RecyclerView mRecycler;
-    private NewCreateSceneAdapter mAdapter;
+    private CreateSceneAdapter mAdapter;
 
     private boolean isSceneSaved = true;
 
@@ -126,7 +125,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
         final int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), CreateSceneActivity.this);
         mRecycler.addItemDecoration(new VerticalSpaceItemDecoration(margin));
-        mAdapter = new NewCreateSceneAdapter(this, mData);
+        mAdapter = new CreateSceneAdapter(this, mData);
         mRecycler.setAdapter(mAdapter);
 
        /* gridView = (GridView) findViewById(R.id.grid_view);
@@ -138,10 +137,23 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         mAdapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
             public void onDeleteOptionClick(int pos) {
+                String componentId = mData.get(pos).getSceneItemId();
+
                 if (mData.get(pos).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
-                    initSwitches.get(pos).setFocusable(true);
+                    for(int i=0;i<initSwitches.size();i++) {
+                        if( initSwitches.get(i).getSwitchId().equals(componentId)){
+                            initSwitches.get(i).setFocusable(true);
+                            break;
+                        }
+                    }
                 } else if (mData.get(pos).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
-                    initDimmers.get(pos).setFocusable(true);
+                    for(int i=0;i<initDimmers.size();i++) {
+                        if( initDimmers.get(i).getSwitchId().equals(componentId)){
+                            initDimmers.get(i).setFocusable(true);
+                            break;
+                        }
+                    }
+
                 } else if (mData.get(pos).getSceneControlType().equals(AppConstants.MOTOR_TYPE)) {
                     initMotors.get(pos).setFocusable(true);
                 } else {
@@ -189,6 +201,23 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                         }
                     });
                 }
+            }
+        });
+
+        edtIPAddress.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                isSceneSaved = false;
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
 
@@ -362,7 +391,6 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
                             sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
                             sceneItemsDataObject.setMachineID("");
-                            Log.e("DIMMER_DEF_VALUE", initDimmers.get(position).getSwitchId().substring(2, 4));
                             sceneItemsDataObject.setDefaultValue(AppConstants.DIMMER_DEFAULT_VALUE);
 
                           //  mAdapter.add(mData.size(), sceneItemsDataObject);
