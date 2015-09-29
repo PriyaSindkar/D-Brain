@@ -56,7 +56,7 @@
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name=".ui.Activities.DemoSwitchListActivity"
+        <activity android:name=".ui.Activities.SensorsListActivity"
             android:screenOrientation="portrait">
         </activity>
 

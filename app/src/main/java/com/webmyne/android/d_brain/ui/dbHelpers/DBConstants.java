@@ -39,10 +39,12 @@ public class DBConstants {
     public static final String KEY_C_TYPE = "COMPONENT_TYPE";
     public static final String KEY_C_MIP = "MACHINE_IP";
     public static final String KEY_C_MID = "MACHINE_ID";
+    public static final String KEY_C_MNAME = "MACHINE_NAME";
 
     // Scene Table Column names
     public static final String KEY_S_ID = "ID";
     public static final String KEY_S_NAME = "NAME";
+    public static final String KEY_S_STATUS = "IS_SCENE_ON";
 
     // Scene-Component Table Column names
     public static final String KEY_SC_ID = "ID";

@@ -1,25 +1,45 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
+import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Adapters.SensorListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SensorsListAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
+import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -27,10 +47,48 @@ import jp.wasabeef.recyclerview.animators.LandingAnimator;
 public class SensorFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
-    private SensorsListAdapter adapter;
+    private SensorListCursorAdapter adapter;
     private int totalNoOfSensors = 9;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
+    private Cursor sensorListCursor;
+    private ArrayList<XMLValues> sensorStatusList;
+    private boolean isFirstTime = true;
+    private ProgressBar progressBar;
+    private Timer timer;
+    private Handler handler;
+    public static boolean isDelay = false;
+
+    private void PauseTimer(){
+        this.timer.cancel();
+        Log.e("TIMER", "Timer Paused");
+    }
+
+    public void ResumeTimer() {
+        handler = new Handler();
+        timer = new Timer();
+
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isDelay) {
+                            new GetSensorStatus().execute();
+                            Log.e("TIMER", "Timer Start");
+                        } else {
+                            PauseTimer();
+                            ResumeTimer();
+                        }
+                    }
+                });
+
+            }
+        }, 0, 4000 * 1);
+
+    }
 
     public static SensorFragment newInstance() {
         SensorFragment fragment = new SensorFragment();
@@ -55,7 +113,7 @@ public class SensorFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_scene_list, container, false);
         init(view);
 
-        adapter.setSingleClickListener(new onSingleClickListener() {
+        /*adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
             Toast.makeText(getActivity(), "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
@@ -83,7 +141,7 @@ public class SensorFragment extends Fragment {
             public void onRenameOptionClick(int pos) {
                 Toast.makeText(getActivity(), "Rename Sccessful!", Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
         
         return view;
     }
@@ -96,7 +154,9 @@ public class SensorFragment extends Fragment {
         txtEmptyView1 = (TextView) view.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) view.findViewById(R.id.txtEmptyView);
 
-        if(totalNoOfSensors == 0) {
+        initArrayOfSensors();
+
+        if(sensorListCursor.getCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
 
@@ -105,6 +165,9 @@ public class SensorFragment extends Fragment {
             emptyView.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
         }
+        progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
+
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
 
         mRecyclerView.setLayoutManager(layoutManager);
@@ -112,9 +175,8 @@ public class SensorFragment extends Fragment {
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        adapter = new SensorsListAdapter(getActivity(), totalNoOfSensors);
-        adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);
+        // fetch sensor status periodically
+        ResumeTimer();
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
@@ -124,4 +186,82 @@ public class SensorFragment extends Fragment {
         mRecyclerView.getItemAnimator().setChangeDuration(500);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        timer.cancel();
+    }
+
+    private void initArrayOfSensors() {
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+
+        //insert switches in adapter ofr machine-1
+        try {
+            dbHelper.openDataBase();
+            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public class GetSensorStatus extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+           // getActivity().setProgressBarIndeterminateVisibility(true);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                URL urlValue = new URL(AppConstants.SIMULATOR_URL + AppConstants.URL_FETCH_SENSOR_STATUS);
+                // Log.e("# urlValue", urlValue.toString());
+
+                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setRequestMethod("GET");
+                InputStream inputStream = httpUrlConnection.getInputStream();
+                //  Log.e("# inputStream", inputStream.toString());
+                MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                sensorStatusList = pullParser.processXML(inputStream);
+                 Log.e("XML PARSERED", sensorStatusList.toString());
+
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            // Log.e("TAG_ASYNC", "Inside onPostExecute");
+            try {
+                progressBar.setVisibility(View.GONE);
+                if(isFirstTime) {
+                    //init adapter
+                    adapter = new SensorListCursorAdapter(getActivity(), sensorListCursor, sensorStatusList);
+                    adapter.setHasStableIds(true);
+                    mRecyclerView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                    isFirstTime = false;
+                } else {
+                    //set adapter again
+                    adapter.setSensorStatus(sensorStatusList);
+                    adapter.notifyDataSetChanged();
+                }
+
+               /* adapter.setCheckedChangeListener(new onCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChangeClick(int pos) {
+                        isDelay  = false;
+                    }
+                });*/
+
+            } catch (Exception e) {
+            }
+        }
+    }
 }

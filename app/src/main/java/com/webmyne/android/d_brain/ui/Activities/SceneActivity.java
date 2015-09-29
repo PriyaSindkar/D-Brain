@@ -41,7 +41,9 @@ import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.SQLException;
@@ -148,12 +150,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
         currentSceneId = getIntent().getStringExtra("scene_id");
         currentSceneName = getIntent().getStringExtra("scene_name");
-        showSceneSavedState();
 
         initSwitches();
         initMotors();
         initDimmers();
-
+        showSceneSavedState();
 
         mRecycler.setOnClickListener(this);
 
@@ -278,6 +279,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public void onBackPressed() {
         if(isSceneSaved) {
             finish();
@@ -354,11 +360,24 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
             case R.id.sceneMainSwitch:
                 sceneMainSwitch.toggle();
+                String sceneStatus="";
                 if(sceneMainSwitch.isChecked()) {
+                    sceneStatus = "no";
                     new CallSceneOff().execute();
                 } else {
+                    sceneStatus = "yes";
                     new CallSceneOn().execute();
                 }
+
+                DatabaseHelper dbHelper = new DatabaseHelper(this);
+                try {
+                    dbHelper.openDataBase();
+                    dbHelper.updateSceneStatus(currentSceneId, sceneStatus);
+                    dbHelper.close();
+                }catch (Exception e) {
+
+                }
+                Log.e("isSceneSaved", String.valueOf(isSceneSaved));
                 break;
         }
 
@@ -652,6 +671,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         try {
             dbHelper.openDataBase();
             Cursor switchListCursor = dbHelper.getAllComponentsInAScene(currentSceneId);
+            /*if(dbHelper.getSceneStatus(currentSceneId).equals("yes")) {
+                sceneMainSwitch.setChecked(true);
+            } else {
+                sceneMainSwitch.setChecked(false);
+            }*/
             mData.clear();
             if (switchListCursor != null) {
                 switchListCursor.moveToFirst();
@@ -669,7 +693,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         //String componentName = componentCursor.getString(componentCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
 
                         sceneItemsDataObject.setName(componentName);
-                        Log.e("DEFAULT", componentId+" "+ defaultValue);
                         sceneItemsDataObject.setDefaultValue(defaultValue);
                         mData.add(sceneItemsDataObject);
 
@@ -731,8 +754,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 //setting default wal
                 for(int i=0;i<mData.size();i++) {
                     String strPosition;
-                    Log.e("pos", mData.get(i).getSceneItemId().substring(2,4));
-
                     strPosition = String.format("%02d",  Integer.parseInt(mData.get(i).getSceneItemId().substring(2,4)));
 
                     String SET_STATUS_URL = "";
@@ -760,11 +781,19 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     }
 
                     URL urlValue = new URL(SET_STATUS_URL);
-                    Log.e("# urlValue", urlValue.toString());
+                    Log.e("# urlValue2222", urlValue.toString());
 
                     HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                     httpUrlConnection.setRequestMethod("GET");
                     InputStream inputStream = httpUrlConnection.getInputStream();
+
+                    BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder total = new StringBuilder();
+                    String line;
+                    while ((line = r.readLine()) != null) {
+                        total.append(line);
+                    }
+                    Log.e("result", total.toString());
                 }
 
             } catch (Exception e) {
@@ -812,6 +841,15 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                     httpUrlConnection.setRequestMethod("GET");
                     InputStream inputStream = httpUrlConnection.getInputStream();
+
+
+                    BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder total = new StringBuilder();
+                    String line;
+                    while ((line = r.readLine()) != null) {
+                        total.append(line);
+                    }
+                    Log.e("result", total.toString());
                 }
 
             } catch (Exception e) {

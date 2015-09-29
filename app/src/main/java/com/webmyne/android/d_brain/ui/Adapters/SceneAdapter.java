@@ -227,12 +227,12 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                 });*/
 
 
-               /* switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        _onItemClick._onItemClickListener();
-                    }
-                });*/
+                switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    _onItemClick._onItemClickListener();
+                }
+            });
 
                 switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -282,12 +282,12 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                     }
                 });
 
-               /* dimmerHolder.linearParent.setOnClickListener(new View.OnClickListener() {
+                dimmerHolder.linearItem.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         _onItemClick._onItemClickListener();
                     }
-                });*/
+                });
 
                 /*dimmerHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
                     @Override

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
     <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
+         android:id="@+id/parentSensors"
         android:layout_width="@dimen/DASHBOARD_CARD_WIDTH"
         android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
         android:gravity="center"

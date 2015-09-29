@@ -24,11 +24,11 @@ import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
-import com.webmyne.android.d_brain.ui.Activities.DemoSwitchListActivity;
 import com.webmyne.android.d_brain.ui.Activities.DimmerActivity;
 import com.webmyne.android.d_brain.ui.Activities.MachineListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MotorListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
+import com.webmyne.android.d_brain.ui.Activities.SensorsListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
@@ -44,19 +44,17 @@ import java.util.ArrayList;
 
 public class DashboardFragment extends Fragment implements PopupAnimationEnd, View.OnClickListener {
 
-    AnimationHelper animObj;
-    ImageView imgOptions, imgHScrollLeft, imgHScrollRight, bulb_image;
-    boolean isImageUp = true, isBulbOn = true;
-    LinearLayout layoutBottom, linearOptions, linearSceneList;
-    HorizontalScrollView hScrollView;
-    private FrameLayout parentMotor, parentSlider, parentSwitches;
+    private AnimationHelper animObj;
+    private ImageView imgOptions, imgHScrollLeft, imgHScrollRight, bulb_image;
+    private boolean isImageUp = true, isBulbOn = true;
+    private LinearLayout layoutBottom, linearOptions, linearSceneList;
+    private HorizontalScrollView hScrollView;
+    private FrameLayout parentMotor, parentSlider, parentSwitches, parentSensors, linearLeft;
     private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits;
-    LinearLayout  linearCreateScene, linearAddMachine, linearAddScheduler, firstBottomItem;
+    private LinearLayout  linearCreateScene, linearAddMachine, linearAddScheduler, firstBottomItem;
 
     private int myTotalScenes = 5;
     private String noOfSwitchUnits="13", totalNoOfSwitchUnits="17", noOfMotorUnits="13", totalNoOfMotorUnits="17", noOfSliderUnits="13", totalNoOfSliderUnits="17", noOfSensorUnits="13", totalNoOfSensorUnits="17";
-
-    private FrameLayout linearLeft;
 
     public static DashboardFragment newInstance() {
         DashboardFragment fragment = new DashboardFragment();
@@ -122,6 +120,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         parentSlider.setOnClickListener(this);
         parentSwitches = (FrameLayout) row.findViewById(R.id.parentSwitches);
         parentSwitches.setOnClickListener(this);
+        parentSensors = (FrameLayout) row.findViewById(R.id.parentSensors);
+        parentSensors.setOnClickListener(this);
 
         hScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
@@ -168,9 +168,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         sp.setSpan(new RelativeSizeSpan(1.3f), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         txtNoOfSensorUnits.setText(sp);
 
-
-        updateSceneList();
-
         ViewTreeObserver vto = firstBottomItem.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -196,6 +193,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         homeScreen.setTitle("Dashboard");
         homeScreen.hideAppBarButton();
 
+        updateSceneList();
+
     }
 
     @Override
@@ -219,6 +218,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 break;
             case R.id.parentSwitches:
                 intent = new Intent(getActivity(), SwitchesListActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.parentSensors:
+                intent = new Intent(getActivity(), SensorsListActivity.class);
                 startActivity(intent);
                 break;
 
@@ -285,7 +289,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
 
     private void updateSceneList() {
-
+        linearSceneList.removeAllViews();
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();

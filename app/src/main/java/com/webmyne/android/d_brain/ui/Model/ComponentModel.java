@@ -10,6 +10,8 @@ public class ComponentModel {
     private String type;
     private String mid;
     private String mip;
+    private String machineName;
+    private String details;
 
     public ComponentModel() {
     }
@@ -70,6 +72,21 @@ public class ComponentModel {
         this.mip = mip;
     }
 
+    public String getMachineName() {
+        return machineName;
+    }
+
+    public void setMachineName(String machineName) {
+        this.machineName = machineName;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
+    }
 
     @Override
     public String toString() {

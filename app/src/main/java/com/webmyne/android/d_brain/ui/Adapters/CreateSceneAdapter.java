@@ -215,13 +215,12 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
 
 
 
-               /* switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
+                switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         _onItemClick._onItemClickListener();
                     }
                 });
-*/
                 switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

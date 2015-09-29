@@ -169,6 +169,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_C_TYPE, componentModels.get(i).getType());
             values.put(DBConstants.KEY_C_MID, componentModels.get(i).getMid());
             values.put(DBConstants.KEY_C_MIP, componentModels.get(i).getMip());
+            values.put(DBConstants.KEY_C_MNAME, componentModels.get(i).getMachineName());
 
             db.insert(DBConstants.TABLE_COMPONENT, null, values);
         }
@@ -232,12 +233,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
+    public Cursor getAllSensorComponentsForAMachine(String machineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{machineIP, AppConstants.ALERT_TYPE}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+
     public void createNewScene(String sceneName, ArrayList<SceneItemsDataObject> componentModels) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         // create new scene
         ContentValues values = new ContentValues();
         values.put(DBConstants.KEY_S_NAME, sceneName);
+        values.put(DBConstants.KEY_S_STATUS, "no");
         long sceneId = db.insert(DBConstants.TABLE_SCENE, null, values);
 
         // create scene components
@@ -255,6 +277,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.close();
     }
+
+    // to update scene  on/off statusvalues
+    public void updateSceneStatus(String sceneId, String status) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // update scene components
+        ContentValues values = new ContentValues();
+        values.put(DBConstants.KEY_S_STATUS, status);
+
+        db.update(DBConstants.TABLE_SCENE, values, DBConstants.KEY_S_ID + " = '" + sceneId + "'", null);
+
+        db.close();
+    }
+
+    public String getSceneStatus(String sceneId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        String sceneStatus="no";
+        try {
+            // TO:DO search machine-wise
+
+           /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
+                    new String[]{machineIP}, null, null, null, null);*/
+
+            cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_S_ID + "=?",
+                    new String[]{sceneId}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    sceneStatus = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_S_STATUS));
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return sceneStatus;
+    }
+
 
     public Cursor getAllScenes(String machineIP) {
         SQLiteDatabase db = this.getReadableDatabase();

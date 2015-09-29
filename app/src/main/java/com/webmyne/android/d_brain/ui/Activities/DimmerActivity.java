@@ -13,21 +13,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
-import com.webmyne.android.d_brain.ui.Adapters.DimmerListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
-import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
-import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
-import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -116,7 +107,9 @@ public class DimmerActivity extends AppCompatActivity {
         mRecyclerView.setItemViewCacheSize(0);
 
         // fetch dimmer status periodically
-        ResumeTimer();
+           ResumeTimer();
+        // call first time
+        //new GetDimmerStatus().execute();
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
@@ -203,7 +196,6 @@ public class DimmerActivity extends AppCompatActivity {
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("back", "back");
                 timer.cancel();
                 finish();
             }
@@ -262,7 +254,7 @@ public class DimmerActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_DIMMER_STATUS);
+                URL urlValue = new URL(AppConstants.SIMULATOR_URL + AppConstants.URL_FETCH_DIMMER_STATUS);
                  Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();

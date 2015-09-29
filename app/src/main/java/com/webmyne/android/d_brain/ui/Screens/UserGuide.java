@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -135,13 +134,15 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
 
             // product code and machine IP are hard-coded
             String productCode = AppConstants.TEMP_PRODUCT_CODE;
+            ArrayList<ComponentModel> listOfComponents = new ArrayList<>();
 
             // init the component table with switches of a machine
             int totalNoOfSwitches = Integer.parseInt(productCode.substring(2,3)) * 11;
-            ArrayList<ComponentModel> listOfComponents = new ArrayList<>();
+
             for(int i=0; i<totalNoOfSwitches; i++) {
                 String idSuffix = String.format("%02d", (i + 1));
                 ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX+idSuffix, AppConstants.SWITCH_TYPE+String.valueOf(i+1), AppConstants.SWITCH_TYPE, "", DBConstants.MACHINE1_IP);
+                switchItem.setMachineName("Machine-1");
                 listOfComponents.add(switchItem);
             }
 
@@ -150,10 +151,23 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             for(int i=0; i<totalNoOfDimmers; i++) {
                 String idSuffix = String.format("%02d", (i + 1));
                 ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX+idSuffix, AppConstants.DIMMER_TYPE+String.valueOf(i+1), AppConstants.DIMMER_TYPE, "", DBConstants.MACHINE1_IP);
+                dimmerItem.setMachineName("Machine-1");
                 listOfComponents.add(dimmerItem);
             }
 
+            // init the component table with alerts of a machine
+            int totalNoOfAlerts = Integer.parseInt(productCode.substring(1,2));
+            for(int i=0; i<totalNoOfAlerts; i++) {
+                String idSuffix = String.format("%02d", (i + 1));
+                ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX+idSuffix, AppConstants.ALERT_TYPE+String.valueOf(i+1), AppConstants.ALERT_TYPE, "", DBConstants.MACHINE1_IP);
+                sensorItem.setMachineName("Machine-1");
+                listOfComponents.add(sensorItem);
+
+            }
+
             dbHelper.insertIntoComponent(listOfComponents);
+
+
             dbHelper.close();
 
         } catch (SQLException e) {
