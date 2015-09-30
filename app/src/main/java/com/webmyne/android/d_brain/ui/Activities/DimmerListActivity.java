@@ -16,9 +16,13 @@ import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
+import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -35,7 +39,7 @@ import java.util.TimerTask;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
-public class DimmerActivity extends AppCompatActivity {
+public class DimmerListActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private TextView txtTitle;
@@ -102,7 +106,7 @@ public class DimmerActivity extends AppCompatActivity {
 
         //layoutManager.supportsPredictiveItemAnimations();
         mRecyclerView.setLayoutManager(layoutManager);
-        int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), DimmerActivity.this);
+        int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), DimmerListActivity.this);
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
@@ -118,7 +122,7 @@ public class DimmerActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(500);
 
-        /*adapter = new DimmerListAdapter(DimmerActivity.this, totalNoOfDimmers);
+        /*adapter = new DimmerListAdapter(DimmerListActivity.this, totalNoOfDimmers);
         adapter.setType(0);
         adapter.setHasStableIds(true);*/
 
@@ -127,7 +131,7 @@ public class DimmerActivity extends AppCompatActivity {
         /*adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
-                //Toast.makeText(DimmerActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(DimmerListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -135,14 +139,14 @@ public class DimmerActivity extends AppCompatActivity {
 
             @Override
             public void onLongClick(int pos) {
-                Toast.makeText(DimmerActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DimmerListActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
             }
         });
 
         adapter.setFavoriteClickListener(new onFavoriteClickListener() {
             @Override
             public void onFavoriteOptionClick(int pos) {
-                Toast.makeText(DimmerActivity.this, "Added to Favorite Sccessful!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DimmerListActivity.this, "Added to Favorite Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -150,16 +154,16 @@ public class DimmerActivity extends AppCompatActivity {
 
             @Override
             public void onAddSchedulerOptionClick(int pos) {
-                Toast.makeText(DimmerActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DimmerListActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
         adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
             @Override
             public void onAddToSceneOptionClick(int pos) {
-                SceneListDialog dialog = new SceneListDialog(DimmerActivity.this);
+                SceneListDialog dialog = new SceneListDialog(DimmerListActivity.this);
                 dialog.show();
-               // Toast.makeText(DimmerActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
+               // Toast.makeText(DimmerListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -167,7 +171,7 @@ public class DimmerActivity extends AppCompatActivity {
 
             @Override
             public void onRenameOptionClick(int pos) {
-                Toast.makeText(DimmerActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DimmerListActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });*/
 
@@ -177,7 +181,7 @@ public class DimmerActivity extends AppCompatActivity {
                 if (isListView) {
                     isListView = false;
                     imgListGridToggle.setImageResource(R.drawable.ic_list_view);
-                    android.support.v7.widget.GridLayoutManager layoutManager = new android.support.v7.widget.GridLayoutManager(DimmerActivity.this, 2);
+                    android.support.v7.widget.GridLayoutManager layoutManager = new android.support.v7.widget.GridLayoutManager(DimmerListActivity.this, 2);
                     layoutManager.supportsPredictiveItemAnimations();
                     mRecyclerView.setLayoutManager(layoutManager);
                     adapter.setType(1);
@@ -186,7 +190,7 @@ public class DimmerActivity extends AppCompatActivity {
                 } else {
                     isListView = true;
                     imgListGridToggle.setImageResource(R.drawable.ic_grid_view);
-                    mRecyclerView.setLayoutManager(new LinearLayoutManager(DimmerActivity.this));
+                    mRecyclerView.setLayoutManager(new LinearLayoutManager(DimmerListActivity.this));
                     adapter.setType(0);
                     adapter.notifyDataSetChanged();
                 }
@@ -279,7 +283,7 @@ public class DimmerActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 if(isFirstTime) {
                     //init adapter
-                    adapter = new DimmerListCursorAdapter(DimmerActivity.this, dimmerListCursor, dimmerStatusList);
+                    adapter = new DimmerListCursorAdapter(DimmerListActivity.this, dimmerListCursor, dimmerStatusList);
                     adapter.setType(0);
                     adapter.setHasStableIds(true);
                     mRecyclerView.setAdapter(adapter);
@@ -295,6 +299,61 @@ public class DimmerActivity extends AppCompatActivity {
                     @Override
                     public void onCheckedChangeClick(int pos) {
                         isDelay  = false;
+                    }
+                });
+
+                adapter.setRenameClickListener(new onRenameClickListener() {
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String _oldName) {
+                        final int position = pos;
+                        dimmerListCursor.moveToPosition(position);
+                        final String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+
+                        RenameDialog renameDialog = new RenameDialog(DimmerListActivity.this, _oldName);
+                        renameDialog.show();
+
+                        renameDialog.setRenameListener(new onRenameClickListener() {
+                            @Override
+                            public void onRenameOptionClick(int pos, String newName) {
+                                try {
+                                    DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+                                    dbHelper.openDataBase();
+                                    dbHelper.renameComponent(componentId, newName);
+                                    dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
+                                    dbHelper.close();
+                                    adapter.changeCursor(dimmerListCursor);
+
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+
+                            @Override
+                            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+                    }
+                });
+
+                adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
+                    @Override
+                    public void onAddToSceneOptionClick(int pos) {
+                        timer.cancel();
+                        dimmerListCursor.moveToPosition(pos);
+                        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+                        SceneListDialog dialog = new SceneListDialog(DimmerListActivity.this, componentId, componentType);
+                        dialog.show();
+
+                        //Toast.makeText(SwitchesListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
                     }
                 });
 

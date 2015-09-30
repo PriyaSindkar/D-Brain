@@ -44,7 +44,7 @@
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name=".ui.Activities.DimmerActivity"
+        <activity android:name=".ui.Activities.DimmerListActivity"
             android:screenOrientation="portrait">
         </activity>
 

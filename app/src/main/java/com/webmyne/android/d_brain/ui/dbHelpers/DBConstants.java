@@ -36,6 +36,7 @@ public class DBConstants {
     public static final String KEY_C_ID = "ID";
     public static final String KEY_C_COMPONENT_ID = "COMPONENT_ID";
     public static final String KEY_C_NAME = "NAME";
+    public static final String KEY_C_DETAILS = "DETAILS";
     public static final String KEY_C_TYPE = "COMPONENT_TYPE";
     public static final String KEY_C_MIP = "MACHINE_IP";
     public static final String KEY_C_MID = "MACHINE_ID";

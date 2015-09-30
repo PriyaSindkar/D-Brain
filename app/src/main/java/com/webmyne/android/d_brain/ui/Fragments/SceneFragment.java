@@ -1,10 +1,13 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +16,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Adapters.SceneListAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.SceneListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
@@ -23,15 +28,20 @@ import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+
+import java.sql.SQLException;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
 public class SceneFragment extends Fragment {
     private RecyclerView mRecyclerView;
-    private SceneListAdapter adapter;
-    private int totalNoOfScenes = 10;
+    private SceneListCursorAdapter adapter;
+    private int totalNoOfScenes = 0;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
+    private Cursor sceneListCursor;
 
     public static SceneFragment newInstance() {
         SceneFragment fragment = new SceneFragment();
@@ -57,7 +67,7 @@ public class SceneFragment extends Fragment {
         init(view);
 
 
-        adapter.setSingleClickListener(new onSingleClickListener() {
+        /*adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
                 Intent intent = new Intent(getActivity(), SceneActivity.class);
@@ -84,10 +94,15 @@ public class SceneFragment extends Fragment {
         adapter.setRenameClickListener(new onRenameClickListener() {
 
             @Override
-            public void onRenameOptionClick(int pos) {
+            public void onRenameOptionClick(int pos, String _oldName) {
                 Toast.makeText(getActivity(), "Rename Sccessful!", Toast.LENGTH_SHORT).show();
             }
-        });
+
+            @Override
+            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+            }
+        });*/
         
         return view;
     }
@@ -95,12 +110,14 @@ public class SceneFragment extends Fragment {
     private void init(View view) {
         ((HomeDrawerActivity) getActivity()).setTitle("Scenes");
         ((HomeDrawerActivity) getActivity()).hideAppBarButton();
-         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         emptyView = (LinearLayout) view.findViewById(R.id.emptyView);
         txtEmptyView1 = (TextView) view.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) view.findViewById(R.id.txtEmptyView);
 
-        if(totalNoOfScenes == 0) {
+        updateSceneList();
+
+        if(sceneListCursor.getCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
 
@@ -116,7 +133,7 @@ public class SceneFragment extends Fragment {
         txtEmptyView1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), SceneActivity.class);
+                Intent intent = new Intent(getActivity(), CreateSceneActivity.class);
                 getActivity().startActivity(intent);
             }
         });
@@ -130,7 +147,7 @@ public class SceneFragment extends Fragment {
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        adapter = new SceneListAdapter(getActivity(), totalNoOfScenes);
+        adapter = new SceneListCursorAdapter(getActivity(), sceneListCursor);
         adapter.setType(1);
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
@@ -141,6 +158,35 @@ public class SceneFragment extends Fragment {
         mRecyclerView.getItemAnimator().setRemoveDuration(500);
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(500);
+
+        adapter.setSingleClickListener(new onSingleClickListener() {
+            @Override
+            public void onSingleClick(int pos) {
+                sceneListCursor.moveToPosition(pos);
+
+                String sceneId = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+                String sceneName = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
+
+                // Redirect To the respective saved scene
+                Intent intent = new Intent(getActivity(), SceneActivity.class);
+                intent.putExtra("scene_id", sceneId);
+                intent.putExtra("scene_name", sceneName);
+                getActivity().startActivity(intent);
+            }
+        });
+
+    }
+
+    private void updateSceneList() {
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        try {
+            dbHelper.openDataBase();
+
+            sceneListCursor = dbHelper.getAllScenes(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+        } catch (SQLException e) {
+            Log.e("SQLEXP", e.toString());
+        }
 
     }
 

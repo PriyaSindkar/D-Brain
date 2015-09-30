@@ -80,8 +80,13 @@ public class SchedulerFragment extends Fragment {
         adapter.setRenameClickListener(new onRenameClickListener() {
 
             @Override
-            public void onRenameOptionClick(int pos) {
+            public void onRenameOptionClick(int pos, String _oldName) {
                 Toast.makeText(getActivity(), "Rename Sccessful!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
             }
         });
 

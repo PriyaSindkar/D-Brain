@@ -44,11 +44,15 @@
 
         </LinearLayout>
 
-        <include
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <!--<ImageView
+            android:id="@+id/imgRenameOption"
+            android:background="@drawable/white_border_circle"
+            android:src="@drawable/ic_edit"
+            android:padding="@dimen/STD_MARGIN"
+            android:layout_marginTop="@dimen/STD_MARGIN"
             android:layout_marginRight="@dimen/STD_MARGIN"
-            layout="@layout/machine_options_item"/>
+            android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+            android:layout_height="@dimen/POPUP_BAR_ICON_SIZE" />-->
     </LinearLayout>
 
 

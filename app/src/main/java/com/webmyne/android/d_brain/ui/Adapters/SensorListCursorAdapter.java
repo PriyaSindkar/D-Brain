@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -70,7 +71,7 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
 
     public class ListViewHolder extends ViewHolder {
         public  TextView txtSensorName, txtMachineName, txtSensorDetails;
-        public ImageView imgDeleteOption, imgRenameOption;
+        public ImageView imgRenameOption;
         public LinearLayout linearSensor;
 
         public ListViewHolder ( View view ) {
@@ -80,7 +81,6 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
             this.txtSensorDetails = (TextView) view.findViewById(R.id.txtSensorDetails);
             this.linearSensor = (LinearLayout) view.findViewById(R.id.linearSensor);
 
-            this.imgDeleteOption = (ImageView) view.findViewById(R.id.imgDeleteOption);
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
         }
     }
@@ -115,53 +115,23 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
-        int switchNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        int nameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
         int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
+        int detailsNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_DETAILS);
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-                listHolder.txtSensorName.setText(cursor.getString(switchNameIndex));
+                listHolder.txtSensorName.setText(cursor.getString(nameIndex));
                 listHolder.txtMachineName.setText("Machine Name: "+cursor.getString(machineNameIndex));
-                listHolder.txtSensorDetails.setText("Alert fired when the main gate is opened forcibly");
-
-                /*listHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _singleClick.onSingleClick(position);
-                    }
-                });
-
-                listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _favoriteClick.onFavoriteOptionClick(position);
-                    }
-                });
-
-                listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addToSceneClick.onAddToSceneOptionClick(position);
-                    }
-                });
-
-                listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addSchedulerClick.onAddSchedulerOptionClick(position);
-                    }
-                });
+                listHolder.txtSensorDetails.setText((cursor.getString(detailsNameIndex)));
 
                 listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position);
+                        _renameClick.onRenameOptionClick(position, listHolder.txtSensorName.getText().toString().trim(), listHolder.txtSensorDetails.getText().toString().trim());
                     }
-                });*/
-
-
-
+                });
 
     }
 
@@ -172,54 +142,9 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
         this._longClick = obj;
     }
 
-    public void setFavoriteClickListener(onFavoriteClickListener obj){
-        this._favoriteClick = obj;
-    }
-
-    public void setAddToSceneClickListener(onAddToSceneClickListener obj){
-        this._addToSceneClick = obj;
-    }
-
-    public void setAddSchedulerClickListener(onAddSchedulerClickListener obj){
-        this._addSchedulerClick = obj;
-    }
 
     public void setRenameClickListener(onRenameClickListener obj){
         this._renameClick = obj;
     }
 
-    public void setCheckedChangeListener(onCheckedChangeListener obj){
-        this._switchClick = obj;
-    }
-
-    public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-
-            try {
-                URL urlValue = new URL(params[0]);
-                Log.e("# urlValue", urlValue.toString());
-
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
-
-
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            try{
-                _switchClick.onCheckedChangeClick(0);
-
-            }catch(Exception e){
-            }
-        }
-    }
 }

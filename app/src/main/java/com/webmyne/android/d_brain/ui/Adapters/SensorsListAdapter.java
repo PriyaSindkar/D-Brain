@@ -108,7 +108,7 @@ public class SensorsListAdapter extends RecyclerView.Adapter<SensorsListAdapter.
             holder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    _renameClick.onRenameOptionClick(position);
+                    _renameClick.onRenameOptionClick(position,  holder.txtSensorName.getText().toString().trim());
                 }
             });
     }

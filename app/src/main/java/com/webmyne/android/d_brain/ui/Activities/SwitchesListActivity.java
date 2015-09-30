@@ -15,12 +15,18 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
+import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -72,7 +78,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                     public void run() {
                         if (!isDelay) {
                             new GetSwitchStatus().execute();
-                            Log.e("TIMER", "Timer Start");
+                            Log.e("TIMER switch", "Timer Start");
                         } else {
                             PauseTimer();
                             ResumeTimer();
@@ -129,8 +135,6 @@ public class SwitchesListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(0);
 
-
-
        /*   adapter.setLongClickListener(new onLongClickListener() {
 
             @Override
@@ -153,24 +157,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                 Toast.makeText(SwitchesListActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
-
-        adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
-            @Override
-            public void onAddToSceneOptionClick(int pos) {
-                SceneListDialog dialog = new SceneListDialog(SwitchesListActivity.this);
-                dialog.show();
-
-                //Toast.makeText(SwitchesListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setRenameClickListener(new onRenameClickListener() {
-
-            @Override
-            public void onRenameOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });*/
+        */
 
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -277,6 +264,61 @@ public class SwitchesListActivity extends AppCompatActivity {
                     @Override
                     public void onCheckedChangeClick(int pos) {
                         isDelay  = false;
+                    }
+                });
+
+                adapter.setRenameClickListener(new onRenameClickListener() {
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String _oldName) {
+                        final int position = pos;
+                        switchListCursor.moveToPosition(position);
+                        final String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+
+                        RenameDialog renameDialog = new RenameDialog(SwitchesListActivity.this, _oldName);
+                        renameDialog.show();
+
+                        renameDialog.setRenameListener(new onRenameClickListener() {
+                            @Override
+                            public void onRenameOptionClick(int pos, String newName) {
+                                try {
+                                    DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                                    dbHelper.openDataBase();
+                                    dbHelper.renameComponent(componentId, newName);
+                                    switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+                                    dbHelper.close();
+                                    adapter.changeCursor(switchListCursor);
+
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+
+                            @Override
+                            public void onRenameOptionClick(int pos, String newName, String newDetails) {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+                    }
+                });
+
+                adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
+                    @Override
+                    public void onAddToSceneOptionClick(int pos) {
+                        timer.cancel();
+                        switchListCursor.moveToPosition(pos);
+                        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+                        SceneListDialog dialog = new SceneListDialog(SwitchesListActivity.this,componentId, componentType );
+                        dialog.show();
+
+                        //Toast.makeText(SwitchesListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
                     }
                 });
 

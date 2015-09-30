@@ -2,8 +2,10 @@ package com.webmyne.android.d_brain.ui.Customcomponents;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -12,12 +14,18 @@ import android.widget.TextView;
 import com.flyco.animation.SlideEnter.SlideBottomEnter;
 import com.flyco.dialog.widget.base.BaseDialog;
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Adapters.SceneListAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.SceneListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+
+import java.sql.SQLException;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -26,14 +34,22 @@ import jp.wasabeef.recyclerview.animators.LandingAnimator;
  */
 public class SceneListDialog extends BaseDialog {
     private RecyclerView mRecyclerView;
-    private SceneListAdapter adapter;
+    private SceneListCursorAdapter adapter;
     private ImageView imgCancel;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
-    private int totalNoOfScenes = 5;
+    private Cursor sceneListCursor;
+    private String newComponentId;
+    private String newComponentType;
 
     public SceneListDialog(Context context) {
         super(context);
+    }
+
+    public SceneListDialog(Context context, String _componentId, String _componentType) {
+        super(context);
+        this.newComponentId = _componentId;
+        this.newComponentType = _componentType;
     }
 
     @Override
@@ -56,49 +72,7 @@ public class SceneListDialog extends BaseDialog {
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        adapter = new SceneListAdapter(context, totalNoOfScenes);
-        adapter.setType(0);
-        adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);
 
-        mRecyclerView.setItemAnimator(new LandingAnimator());
-
-        mRecyclerView.getItemAnimator().setAddDuration(500);
-        mRecyclerView.getItemAnimator().setRemoveDuration(500);
-        mRecyclerView.getItemAnimator().setMoveDuration(500);
-        mRecyclerView.getItemAnimator().setChangeDuration(500);
-
-        if(totalNoOfScenes == 0) {
-            AdvancedSpannableString sp = new AdvancedSpannableString("Click Here");
-            sp.setUnderLine("Click Here");
-            sp.setColor(context.getResources().getColor(R.color.yellow), "Click Here");
-            txtEmptyView1.setText(sp);
-
-            emptyView.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.GONE);
-        } else {
-            emptyView.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
-        }
-
-        txtEmptyView1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, SceneActivity.class);
-                context.startActivity(intent);
-                dismiss();
-            }
-        });
-
-        adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                // Redirect To the respective saved scene
-                Intent intent = new Intent(context, SceneActivity.class);
-                context.startActivity(intent);
-                dismiss();
-            }
-        });
 
         inflate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,6 +88,59 @@ public class SceneListDialog extends BaseDialog {
 
     @Override
     public boolean setUiBeforShow() {
+        updateSceneList();
+        adapter = new SceneListCursorAdapter(context, sceneListCursor);
+        adapter.setType(0);
+        adapter.setHasStableIds(true);
+        mRecyclerView.setAdapter(adapter);
+
+        mRecyclerView.setItemAnimator(new LandingAnimator());
+
+        mRecyclerView.getItemAnimator().setAddDuration(500);
+        mRecyclerView.getItemAnimator().setRemoveDuration(500);
+        mRecyclerView.getItemAnimator().setMoveDuration(500);
+        mRecyclerView.getItemAnimator().setChangeDuration(500);
+
+        if(sceneListCursor.getCount() == 0) {
+            AdvancedSpannableString sp = new AdvancedSpannableString("Click Here");
+            sp.setUnderLine("Click Here");
+            sp.setColor(context.getResources().getColor(R.color.yellow), "Click Here");
+            txtEmptyView1.setText(sp);
+
+            emptyView.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
+        } else {
+            emptyView.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.VISIBLE);
+        }
+
+        txtEmptyView1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, CreateSceneActivity.class);
+                context.startActivity(intent);
+                dismiss();
+            }
+        });
+
+        adapter.setSingleClickListener(new onSingleClickListener() {
+            @Override
+            public void onSingleClick(int pos) {
+                sceneListCursor.moveToPosition(pos);
+
+                String sceneId = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+                String sceneName = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
+
+                // Redirect To the respective saved scene
+                Intent intent = new Intent(context, SceneActivity.class);
+                intent.putExtra("scene_id", sceneId);
+                intent.putExtra("scene_name", sceneName);
+                intent.putExtra("new_component_id", newComponentId);
+                intent.putExtra("new_component_type", newComponentType);
+                context.startActivity(intent);
+                dismiss();
+            }
+        });
 
 
         imgCancel.setOnClickListener(new View.OnClickListener() {
@@ -124,5 +151,18 @@ public class SceneListDialog extends BaseDialog {
         });
 
         return true;
+    }
+
+    private void updateSceneList() {
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        try {
+            dbHelper.openDataBase();
+
+            sceneListCursor = dbHelper.getAllScenes(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+        } catch (SQLException e) {
+            Log.e("SQLEXP", e.toString());
+        }
+
     }
 }

@@ -4,10 +4,8 @@ package com.webmyne.android.d_brain.ui.Fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
@@ -20,17 +18,15 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
-import com.webmyne.android.d_brain.ui.Activities.DimmerActivity;
+import com.webmyne.android.d_brain.ui.Activities.DimmerListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MachineListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MotorListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SensorsListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
-import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
@@ -40,7 +36,6 @@ import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class DashboardFragment extends Fragment implements PopupAnimationEnd, View.OnClickListener {
 
@@ -213,7 +208,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 break;
 
             case R.id.parentSlider:
-                intent = new Intent(getActivity(), DimmerActivity.class);
+                intent = new Intent(getActivity(), DimmerListActivity.class);
                 startActivity(intent);
                 break;
             case R.id.parentSwitches:

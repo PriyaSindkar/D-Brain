@@ -60,7 +60,7 @@ public class AddMachineFragment extends Fragment {
         adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
-                //Toast.makeText(DimmerActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(DimmerListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -82,8 +82,13 @@ public class AddMachineFragment extends Fragment {
         adapter.setRenameClickListener(new onRenameClickListener() {
 
             @Override
-            public void onRenameOptionClick(int pos) {
+            public void onRenameOptionClick(int pos, String _oldName) {
                 Toast.makeText(getActivity(), "Rename Sccessful!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
             }
         });
 

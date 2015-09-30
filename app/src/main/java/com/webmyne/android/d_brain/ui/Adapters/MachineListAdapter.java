@@ -57,12 +57,12 @@ public class MachineListAdapter extends RecyclerView.Adapter<MachineListAdapter.
         }
     }
 
-    /*public class GridViewHolder extends ViewHolder{
+    /*public class ListViewHolder extends ViewHolder{
         public  TextView txtSwitchName;
         public LinearLayout linearSwitch;
         public SwitchButton imgSwitch;
 
-        public GridViewHolder ( View view ) {
+        public ListViewHolder ( View view ) {
             super ( view );
             this.txtSwitchName = (TextView) view.findViewById(R.id.txtSwitchName);
             this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
@@ -144,7 +144,7 @@ public class MachineListAdapter extends RecyclerView.Adapter<MachineListAdapter.
             listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    _renameClick.onRenameOptionClick(position);
+                    _renameClick.onRenameOptionClick(position,listHolder.txtMachineName.getText().toString().trim() );
                 }
             });
     }

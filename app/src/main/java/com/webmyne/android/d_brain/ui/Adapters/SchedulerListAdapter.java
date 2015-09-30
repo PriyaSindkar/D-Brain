@@ -106,7 +106,7 @@ public class SchedulerListAdapter extends RecyclerView.Adapter<SchedulerListAdap
             holder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    _renameClick.onRenameOptionClick(position);
+                    _renameClick.onRenameOptionClick(position, holder.txtSchedulerName.getText().toString().trim() );
                 }
             });
     }

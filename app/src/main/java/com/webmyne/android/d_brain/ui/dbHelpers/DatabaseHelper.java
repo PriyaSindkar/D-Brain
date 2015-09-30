@@ -85,6 +85,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.e("mPath", mPath);
         mDb = SQLiteDatabase.openDatabase(mPath, null, SQLiteDatabase.CREATE_IF_NECESSARY);
         //mDataBase = SQLiteDatabase.openDatabase(mPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+        mDb.execSQL("PRAGMA foreign_keys=ON");
         return myDataBase != null;
 
     }
@@ -174,6 +175,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.insert(DBConstants.TABLE_COMPONENT, null, values);
         }
 
+        db.close();
+    }
+
+    public void renameComponent(String componentId, String componentName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // save new component name
+        ContentValues values = new ContentValues();
+        values.put(DBConstants.KEY_C_NAME, componentName);
+        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_COMPONENT_ID + "='" + componentId+"'", null);
+        db.close();
+    }
+
+    public void renameComponent(String componentId, String componentName, String componentDetails) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // save new component name
+        ContentValues values = new ContentValues();
+        values.put(DBConstants.KEY_C_NAME, componentName);
+        values.put(DBConstants.KEY_C_DETAILS, componentDetails);
+        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_COMPONENT_ID + "='" + componentId+"'", null);
         db.close();
     }
 

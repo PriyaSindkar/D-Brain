@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/STD_MARGIN"
+    android:background="@drawable/add_machine_bg">
+
+    <ImageView
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imgCancel"
+        android:src="@drawable/ic_navigation_cancel"/>
+
+    <RelativeLayout
+        android:layout_centerInParent="true"
+        android:layout_below="@id/parentLogo"
+        android:orientation="vertical"
+        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+        android:layout_marginTop="@dimen/L_MARGIN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/txtInputName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/STD_MARGIN">
+
+            <EditText
+                android:id="@+id/edtInputName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Name"
+                android:inputType="text"
+                android:singleLine="true"
+                android:backgroundTint="@color/white"
+                android:textColor="#ffffff"
+                android:textColorHint="#d1d1d1"
+                android:textSize="@dimen/M1_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/txtInputDetails"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtInputName"
+            android:layout_marginBottom="@dimen/STD_MARGIN">
+
+            <EditText
+                android:id="@+id/edtInputDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Details"
+                android:inputType="text"
+                android:singleLine="false"
+                android:maxLines="2"
+                android:backgroundTint="@color/white"
+                android:textColor="#ffffff"
+                android:textColorHint="#d1d1d1"
+                android:textSize="@dimen/M1_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+        <TextView
+            android:id="@+id/txtRename"
+            android:background="@drawable/round_corner_button"
+            android:layout_below="@id/txtInputDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/STD_MARGIN"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/HEADER_BAR_SIZE"
+            android:textSize="@dimen/M1_TEXT_SIZE"
+            android:textColor="@color/white"
+            android:text="@string/rename_text"/>
+
+
+    </RelativeLayout>
+
+</RelativeLayout>

@@ -80,7 +80,7 @@ public class MotorListActivity extends AppCompatActivity {
         adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
-                //Toast.makeText(DimmerActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(DimmerListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -119,8 +119,13 @@ public class MotorListActivity extends AppCompatActivity {
         adapter.setRenameClickListener(new onRenameClickListener() {
 
             @Override
-            public void onRenameOptionClick(int pos) {
+            public void onRenameOptionClick(int pos, String _oldName) {
                 Toast.makeText(MotorListActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
             }
         });
 

@@ -23,6 +23,7 @@ import com.webmyne.android.d_brain.ui.Adapters.SchedulerListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SensorListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SensorsListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
@@ -157,13 +158,7 @@ public class SensorsListActivity extends AppCompatActivity {
             }
         });
 
-        adapter.setRenameClickListener(new onRenameClickListener() {
-
-            @Override
-            public void onRenameOptionClick(int pos) {
-                Toast.makeText(SensorsListActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });*/
+       */
 
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -257,13 +252,45 @@ public class SensorsListActivity extends AppCompatActivity {
                     adapter.setSensorStatus(sensorStatusList);
                     adapter.notifyDataSetChanged();
                 }
-/*
-                adapter.setCheckedChangeListener(new onCheckedChangeListener() {
+                adapter.setRenameClickListener(new onRenameClickListener() {
+
                     @Override
-                    public void onCheckedChangeClick(int pos) {
-                        isDelay  = false;
+                    public void onRenameOptionClick(int pos, String _oldName) {
+
                     }
-                });*/
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String _oldName, String _oldDetails) {
+                        final int position = pos;
+                        sensorListCursor.moveToPosition(position);
+                        final String componentId = sensorListCursor.getString(sensorListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+
+                        RenameDialog renameDialog = new RenameDialog(SensorsListActivity.this, _oldName, _oldDetails);
+                        renameDialog.show();
+
+                        renameDialog.setRenameListener(new onRenameClickListener() {
+                            @Override
+                            public void onRenameOptionClick(int pos, String oldName) {
+
+                            }
+
+                            @Override
+                            public void onRenameOptionClick(int pos, String newName, String newDetails) {
+                                try {
+                                    DatabaseHelper dbHelper = new DatabaseHelper(SensorsListActivity.this);
+                                    dbHelper.openDataBase();
+                                    dbHelper.renameComponent(componentId, newName, newDetails);
+                                    sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DBConstants.MACHINE1_IP);
+                                    dbHelper.close();
+                                    adapter.changeCursor(sensorListCursor);
+
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+                });
 
             } catch (Exception e) {
             }

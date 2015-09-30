@@ -197,7 +197,7 @@ public class MotorListAdapter extends RecyclerView.Adapter<MotorListAdapter.View
                 listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position);
+                        _renameClick.onRenameOptionClick(position, listHolder.txtMotorName.getText().toString().trim());
                     }
                 });
 
@@ -350,7 +350,7 @@ public class MotorListAdapter extends RecyclerView.Adapter<MotorListAdapter.View
         public void onClick(View view) {
 
         if(VIEW_TYPE == 0) {
-            ListViewHolder listViewHolder = (ListViewHolder) view.getTag();
+            SimpleDialogViewHolder listViewHolder = (SimpleDialogViewHolder) view.getTag();
             Log.e("POS", String.valueOf(listViewHolder.getPosition()));
             Log.e("CLC","CKIC");
 

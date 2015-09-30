@@ -14,8 +14,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
-import com.webmyne.android.d_brain.ui.Activities.DimmerActivity;
-import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
+import com.webmyne.android.d_brain.ui.Activities.DimmerListActivity;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
@@ -144,7 +143,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
-        int dimmerNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        final int dimmerNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
@@ -184,14 +183,28 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
                         if (seekBar.getProgress() > 0) {
                             strProgress = String.format("%02d", (seekBar.getProgress() - 1));
-                            CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
                         } else if (seekBar.getProgress() == 0) {
-                            CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                            CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
-                        DimmerActivity.isDelay = true;
+                        DimmerListActivity.isDelay = true;
                         new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                    }
+                });
+
+                listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        _renameClick.onRenameOptionClick(position, listHolder.txtDimmerName.getText().toString().trim());
+                    }
+                });
+
+                listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        _addToSceneClick.onAddToSceneOptionClick(position);
                     }
                 });
 
@@ -220,14 +233,9 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                     public void onClick(View view) {
                         _addSchedulerClick.onAddSchedulerOptionClick(position);
                     }
-                });
-
-                listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position);
-                    }
                 });*/
+
+
 
                 break;
             case 1:
