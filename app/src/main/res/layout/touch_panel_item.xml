@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/itemLinear"
+        android:layout_width="@dimen/TOUCH_PANEL_ITEM_WIDTH"
+        android:layout_height="wrap_content"
+        android:background="@drawable/touch_panel_bg"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/ICON_PADDING"
+        android:paddingTop="@dimen/ICON_PADDING">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center">
+
+
+            <LinearLayout
+
+                android:id="@+id/viewTP"
+                android:layout_width="@dimen/ICON_PADDING"
+                android:layout_height="@dimen/ICON_PADDING"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:padding="@dimen/STD_MARGIN">
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtTouchPanelId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:clickable="false"
+                android:gravity="center"
+                android:text="TP01"
+                android:textColor="@color/white"
+                android:textSize="@dimen/M_TEXT_SIZE" />
+
+
+        </RelativeLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtTouchPanelName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:padding="@dimen/S_MARGIN"
+        android:text="Position 1"
+        android:textColor="@color/white"
+        android:textSize="@dimen/M_TEXT_SIZE" />
+</LinearLayout>

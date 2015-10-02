@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AboutUsFragment;
@@ -190,6 +191,11 @@ public class HomeDrawerActivity extends AppCompatActivity {
             case R.id.drawer_sensors:
                 ft.replace(R.id.content, SensorFragment.newInstance(), "SENSOR");
                 ft.commit();
+                break;
+
+            case R.id.drawer_touchpanel:
+                    Intent intent = new Intent(HomeDrawerActivity.this, TouchPanelActivity.class);
+                    startActivity(intent);
                 break;
 
             case R.id.drawer_notification:

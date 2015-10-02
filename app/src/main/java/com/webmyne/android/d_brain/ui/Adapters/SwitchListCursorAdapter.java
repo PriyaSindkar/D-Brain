@@ -165,12 +165,12 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                         listHolder.imgSwitch.toggle();
 
                         if(listHolder.imgSwitch.isChecked()){// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                            String CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                             SwitchesListActivity.isDelay  = true;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }else{
                             //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                            String CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
                             SwitchesListActivity.isDelay  = true;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }

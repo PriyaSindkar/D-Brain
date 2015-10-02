@@ -183,10 +183,10 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
                         if (seekBar.getProgress() > 0) {
                             strProgress = String.format("%02d", (seekBar.getProgress() - 1));
-                            CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
                         } else if (seekBar.getProgress() == 0) {
-                            CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                            CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
                         DimmerListActivity.isDelay = true;

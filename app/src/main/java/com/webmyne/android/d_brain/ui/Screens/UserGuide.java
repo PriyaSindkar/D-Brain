@@ -161,6 +161,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                 String idSuffix = String.format("%02d", (i + 1));
                 ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX+idSuffix, AppConstants.ALERT_TYPE+String.valueOf(i+1), AppConstants.ALERT_TYPE, "", DBConstants.MACHINE1_IP);
                 sensorItem.setMachineName("Machine-1");
+                sensorItem.setDetails("Alert fired on breach");
                 listOfComponents.add(sensorItem);
 
             }

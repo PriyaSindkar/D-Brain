@@ -820,9 +820,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     // set defaults for switch
                     if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
                         if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                            SET_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                         } else {
-                            SET_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
                         }
                     }
 
@@ -833,9 +833,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
                         }
                         if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                            SET_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE +dimmerValue;
+                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE +dimmerValue;
                         } else {
-                            SET_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
+                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
                         }
                     }
 
@@ -883,7 +883,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
                     // for switch
                     if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
-                        SET_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                        SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                     }
 
                     if(mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE) ) {
@@ -891,7 +891,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         if( !mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0")) {
                             dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
                         }
-                        SET_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
+                        SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
                     }
 
                     URL urlValue = new URL(SET_STATUS_URL);

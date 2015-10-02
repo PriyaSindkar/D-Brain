@@ -60,6 +60,10 @@
             android:screenOrientation="portrait">
         </activity>
 
+        <activity android:name=".ui.Activities.TouchPanelActivity"
+            android:screenOrientation="landscape">
+        </activity>
+
     </application>
 
 </manifest>
