@@ -216,15 +216,29 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
                 groupViewHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
 
-                groupViewHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) {
-                            groupViewHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                        } else {
-                            groupViewHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                        }
+                if( switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
+                    groupViewHolder.imgSwitch.setChecked(false);
+                    //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                } else {
+                    groupViewHolder.imgSwitch.setChecked(true);
+                    // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                }
 
+                groupViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        groupViewHolder.imgSwitch.toggle();
+
+                        if (groupViewHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                            SwitchesListActivity.isDelay = true;
+                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                        } else {
+                            //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            SwitchesListActivity.isDelay = true;
+                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                        }
                     }
                 });
 

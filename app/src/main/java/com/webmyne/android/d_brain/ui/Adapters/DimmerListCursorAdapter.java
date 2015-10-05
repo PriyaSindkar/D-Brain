@@ -147,14 +147,14 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
+        String dimmerOnOffStatus = (dimmerStatus.get(position).tagValue).substring(0, 2);
+        int seekProgress  = Integer.parseInt((dimmerStatus.get(position).tagValue).substring(2,4))+1;
 
         switch (viewHolder.getItemViewType () ) {
+
             case 0:
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
                 listHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
-
-                String dimmerOnOffStatus = (dimmerStatus.get(position).tagValue).substring(0, 2);
-                int seekProgress  = Integer.parseInt((dimmerStatus.get(position).tagValue).substring(2,4))+1;
 
                 if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
                     listHolder.txtValue.setText("0");
@@ -242,6 +242,14 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
                 groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
 
+                if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
+                    groupViewHolder.txtValue.setText("0");
+                    groupViewHolder.seekBar.setProgress(0);
+                } else {
+                    groupViewHolder.txtValue.setText(String.valueOf(seekProgress));
+                    groupViewHolder.seekBar.setProgress(seekProgress);
+                }
+
                 groupViewHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -255,6 +263,19 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
+                        String strProgress = "00";
+                        String CHANGE_STATUS_URL = "";
+
+                        if (seekBar.getProgress() > 0) {
+                            strProgress = String.format("%02d", (seekBar.getProgress() - 1));
+                            CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                        } else if (seekBar.getProgress() == 0) {
+                            CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                            dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                        }
+                        DimmerListActivity.isDelay = true;
+                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
 
                     }
                 });
@@ -306,7 +327,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
             try {
                 URL urlValue = new URL(params[0]);
-                Log.e("# urlValue", urlValue.toString());
+                Log.e("# url change dimmer", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                 httpUrlConnection.setRequestMethod("GET");

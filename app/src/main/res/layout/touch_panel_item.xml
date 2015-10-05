@@ -33,7 +33,7 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/txtTouchPanelId"
+                android:id="@+id/txtTouchPanelItemId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
@@ -48,7 +48,7 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/txtTouchPanelName"
+        android:id="@+id/txtTouchPanelItemName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="false"

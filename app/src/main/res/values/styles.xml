@@ -72,4 +72,10 @@
         <item name="colorControlActivated">@color/white</item>
 
     </style>
+
+    <style name="FloatingActionButton" parent="Theme.AppCompat">
+        <item name="android:background">@drawable/fab_background</item>
+        <item name="android:layout_width">@dimen/ICON_BORDER_SIZE</item>
+        <item name="android:layout_height">@dimen/ICON_BORDER_SIZE</item>
+    </style>
 </resources>

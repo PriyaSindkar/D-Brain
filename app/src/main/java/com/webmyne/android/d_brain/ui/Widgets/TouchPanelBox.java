@@ -7,6 +7,7 @@ package com.webmyne.android.d_brain.ui.Widgets;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -48,7 +49,8 @@ public class TouchPanelBox extends LinearLayout {
     private OnPaneItemClickListener onPanelItemClickListner;
     private LinearLayout linearParentQuad;
     private ArrayList<String> addedValues;
-    private String panelId;
+    private String panelId, selected = "";
+    private Context mContext;
 
 
     public TouchPanelBox(Context context) {
@@ -70,6 +72,8 @@ public class TouchPanelBox extends LinearLayout {
     }
 
     private void init(Context context) {
+        mContext = context;
+
         View.inflate(context, R.layout.touch_panel_grid, this);
         tableLayout = (TableLayout) findViewById(R.id.tableLayout);
         row1 = (TableRow) tableLayout.getChildAt(0);
@@ -83,49 +87,48 @@ public class TouchPanelBox extends LinearLayout {
     }
 
     public void setupRows(final String[] arr1, final String[] arr2) {
+        int noOfComponentsRow1 = arr1.length;
 
         for (int i = 0; i < row1.getChildCount(); i++) {
-
+            final int pos = i;
             final View view = row1.getChildAt(i);
-            TextView txtTouchPanelName = (TextView) view.findViewById(R.id.txtTouchPanelName);
-            TextView txtTouchPanelId = (TextView) view.findViewById(R.id.txtTouchPanelId);
+
+            TextView txtTouchPanelItemName = (TextView) view.findViewById(R.id.txtTouchPanelItemName);
+            TextView txtTouchPanelItemId = (TextView) view.findViewById(R.id.txtTouchPanelItemId);
             LinearLayout viewCB = (LinearLayout) view.findViewById(R.id.viewTP);
             final String name = arr1[i];
-            txtTouchPanelName.setText(name);
-            txtTouchPanelId.setText(name);
-            txtTouchPanelId.setPadding(8, 8, 8, 8);
+            txtTouchPanelItemName.setText(name);
+            txtTouchPanelItemId.setText(String.valueOf(pos+1));
+            txtTouchPanelItemId.setPadding(8, 8, 8, 8);
 
             view.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onPanelItemClickListner.onPanelItemSelection(name);
-                    onPanelItemClickListner.onDisplayPanelComponents(name);
                 }
             });
 
         }
 
-        for (int i = 0; i < row2.getChildCount(); i++) {
-
+        for ( int i = 0; i < row2.getChildCount(); i++, noOfComponentsRow1++) {
+            final int pos = noOfComponentsRow1;
             final View view = row2.getChildAt(i);
-            TextView txtTouchPanelName = (TextView) view.findViewById(R.id.txtTouchPanelName);
-            TextView txtTouchPanelId = (TextView) view.findViewById(R.id.txtTouchPanelId);
+
+            TextView txtTouchPanelItemName = (TextView) view.findViewById(R.id.txtTouchPanelItemName);
+            TextView txtTouchPanelItemId = (TextView) view.findViewById(R.id.txtTouchPanelItemId);
             final String name = arr2[i];
-            txtTouchPanelName.setText(name);
-            txtTouchPanelId.setText(name);
-            txtTouchPanelId.setPadding(8, 8, 8, 8);
+            txtTouchPanelItemName.setText(name);
+            txtTouchPanelItemId.setText(String.valueOf(pos+1));
+            txtTouchPanelItemId.setPadding(8, 8, 8, 8);
             view.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onPanelItemClickListner.onPanelItemSelection(name);
-                    onPanelItemClickListner.onDisplayPanelComponents(name);
                 }
             });
-
         }
 
     }
-
     public void setUpTouchBox() {
         setupRows(sheet.getUl1(), sheet.getUl2());
     }
@@ -136,13 +139,14 @@ public class TouchPanelBox extends LinearLayout {
 
 
     public void setSelection(String panelItemName) {
+        selected = panelItemName;
 
         for (int i = 0; i < row1.getChildCount(); i++) {
-
+            final int pos = i;
             final View view = row1.getChildAt(i);
-            TextView txtTouchPanelName = (TextView) view.findViewById(R.id.txtTouchPanelName);
+            TextView txtTouchPanelItemName = (TextView) view.findViewById(R.id.txtTouchPanelItemName);
             final LinearLayout itemLinear = (LinearLayout) view.findViewById(R.id.itemLinear);
-            final String name = txtTouchPanelName.getText().toString();
+            final String name = txtTouchPanelItemName.getText().toString();
 
             if (name.equals(panelItemName)) {
                 itemLinear.setBackgroundResource(R.drawable.touch_panel_selected);
@@ -153,9 +157,9 @@ public class TouchPanelBox extends LinearLayout {
 
         for (int i = 0; i < row2.getChildCount(); i++) {
             final View view = row2.getChildAt(i);
-            TextView txtTouchPanelName = (TextView) view.findViewById(R.id.txtTouchPanelName);
+            TextView txtTouchPanelItemName = (TextView) view.findViewById(R.id.txtTouchPanelItemName);
             final LinearLayout itemLinear = (LinearLayout) view.findViewById(R.id.itemLinear);
-            final String name = txtTouchPanelName.getText().toString();
+            final String name = txtTouchPanelItemName.getText().toString();
 
             if (name.equals(panelItemName)) {
                 itemLinear.setBackgroundResource(R.drawable.touch_panel_selected);

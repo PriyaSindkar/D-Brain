@@ -21,6 +21,8 @@ public class DBConstants {
     public static final String TABLE_SCENE = "Scene";
     // Scene_Component table name
     public static final String TABLE_SCENE_COMPONENT = "SceneComponent";
+    // TouchPanel table name
+    public static final String TABLE_TOUCH_PANEL = "TouchPanel";
 
     // Machine Table Columns names
     public static final String KEY_M_ID = "id";

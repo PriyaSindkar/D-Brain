@@ -21,6 +21,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSettingsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSliderFragment;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
+import com.webmyne.android.d_brain.ui.Model.TouchPanelModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -135,6 +136,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             // product code and machine IP are hard-coded
             String productCode = AppConstants.TEMP_PRODUCT_CODE;
             ArrayList<ComponentModel> listOfComponents = new ArrayList<>();
+            ArrayList<TouchPanelModel> listOfTouchPanels = new ArrayList<>();
 
             // init the component table with switches of a machine
             int totalNoOfSwitches = Integer.parseInt(productCode.substring(2,3)) * 11;
@@ -166,8 +168,18 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
 
             }
 
-            dbHelper.insertIntoComponent(listOfComponents);
+            // init the touch_panel table
+            int totalNoOfPanels = (Integer.parseInt(productCode.substring(7,8)) * 10) + Integer.parseInt(productCode.substring(8,9));
 
+            for(int i=0; i<totalNoOfPanels; i++) {
+                String idSuffix = String.format("%02d", (i + 1));
+                TouchPanelModel touchPanelBox = new TouchPanelModel(AppConstants.TOUCH_PANEL_TYPE+idSuffix);
+                listOfTouchPanels.add(touchPanelBox);
+
+            }
+
+            dbHelper.insertIntoComponent(listOfComponents);
+            dbHelper.insertIntoTouchPanel(listOfTouchPanels);
 
             dbHelper.close();
 

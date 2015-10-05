@@ -7,11 +7,11 @@ public class AppConstants {
 
     public static String SIMULATOR_URL = "http://ws-srv-net.in.webmyne.com/Applications/DsquareWS";
     public static String CHANGE_STATUS_SIMULATOR_URL="http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
-    public static final String TEMP_PRODUCT_CODE = "0921456789";
+    public static final String TEMP_PRODUCT_CODE = "0921456119";
 
-    public static String URL_MACHINE_IP = "http://192.168.1.199";
+    //public static String URL_MACHINE_IP = "http://192.168.1.199";
     // for simulator
-  // public static String URL_MACHINE_IP = "http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
+   public static String URL_MACHINE_IP = "http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
     //public static String URL_MACHINE_IP = "http://d2brain.com";
     public static String URL_FETCH_SWITCH_STATUS = "/swcr.xml";
     public static String URL_CHANGE_SWITCH_STATUS = "/cswcr.cgi?SW=";
@@ -27,6 +27,7 @@ public class AppConstants {
     public static String SWITCH_PREFIX = "SW";
     public static String DIMMER_PREFIX = "DM";
     public static String ALERT_PREFIX = "AS";
+    public static String TOUCH_PANEL_TYPE = "touch_panel";
 
     //component values
     public  static String OFF_VALUE = "00";

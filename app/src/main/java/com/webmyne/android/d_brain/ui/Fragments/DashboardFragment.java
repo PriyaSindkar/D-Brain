@@ -32,6 +32,7 @@ import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
@@ -176,6 +177,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
             }
         });
+
+        int totalNoOfPanels = (Integer.parseInt(AppConstants.TEMP_PRODUCT_CODE.substring(7, 8)) * 10) + Integer.parseInt(AppConstants.TEMP_PRODUCT_CODE.substring(8,9));
+        Log.e("totalNoOfPanels", totalNoOfPanels+"");
 
 
     }

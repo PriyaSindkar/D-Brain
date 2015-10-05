@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
+import com.webmyne.android.d_brain.ui.Model.TouchPanelModel;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
 import java.io.File;
@@ -516,5 +517,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.e("EXP ", e.toString());
         }
         return componentName;
+    }
+
+    public void insertIntoTouchPanel(ArrayList<TouchPanelModel> touchPanelModels) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        for(int i=0; i<touchPanelModels.size(); i++) {
+            values.put(DBConstants.KEY_C_NAME, touchPanelModels.get(i).getName());
+
+            db.insert(DBConstants.TABLE_TOUCH_PANEL, null, values);
+        }
+
+        db.close();
+    }
+
+    public Cursor getAllTouchPanelBoxes() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_TOUCH_PANEL, null, null, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                /*if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }*/
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
     }
 }

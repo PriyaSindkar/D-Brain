@@ -5,5 +5,4 @@ package com.webmyne.android.d_brain.ui.Listeners;
  */
 public interface OnPaneItemClickListener {
     public void onPanelItemSelection(String oldName);
-    public void onDisplayPanelComponents(String oldName);
 }
