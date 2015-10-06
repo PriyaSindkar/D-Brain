@@ -596,6 +596,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.e("EXP ", e.toString());
         }
         return cursor;
+
     }
 
     public boolean isPanelItemComponentAlreadyExists(String panelId, int position,String componentId) {
