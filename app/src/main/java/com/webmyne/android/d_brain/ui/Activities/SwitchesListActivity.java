@@ -205,6 +205,7 @@ public class SwitchesListActivity extends AppCompatActivity {
         try {
             dbHelper.openDataBase();
             switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+            Log.e("switchListCursor", switchListCursor.getCount()+"");
             dbHelper.close();
 
         } catch (SQLException e) {

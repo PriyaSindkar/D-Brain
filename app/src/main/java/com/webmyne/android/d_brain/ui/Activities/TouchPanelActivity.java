@@ -4,44 +4,55 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.konifar.fab_transformation.FabTransformation;
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Adapters.TouchPComponentListAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.TouchPanelItemListAdapter;
 import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemClickListener;
-import com.webmyne.android.d_brain.ui.Widgets.QuadSheet;
+import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemDeleteListener;
+import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Widgets.TouchPanelBox;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Created by priyasindkar on 02-10-2015.
  */
 public class TouchPanelActivity extends AppCompatActivity implements View.OnClickListener{
     private Toolbar toolbar;
-    private TextView toolbarTitle, txtDisplayPanelName;
-    private LinearLayout linearTouchPanelItems, panelSetLayout,linearAddComponents, linearAddedComponents, linearAddCancel;
+    private TextView toolbarTitle, txtDisplayPanelName, listComponentsEmptyView, panelItemsListEmptyView;
+    private LinearLayout linearTouchPanelItems, panelSetLayout,linearAddComponents, linearAddCancel;
+    private RelativeLayout linearPanelList, linearComponentList;
     private FrameLayout rightParent;
-    private int totalNoOfTouchPanels = 5;
-    private RecyclerView componentsRecycler;
-    private ListView listAddedComponents;
-    private Cursor touchPanelListCursor;
+    private ListView listComponents, panelItemsList;
+    private Cursor touchPanelListCursor, switchListCursor;
+    private TouchPComponentListAdapter componentAdapter;
     private View divider;
     private FloatingActionButton fab;
     private Button btnAddSwitch, btnAddDimmer, btnAddMotor, btnAdd, btnCancel;
-    private String selected = "";
+
+    private int selectedPanelPosition;
+    private String selectedPanelId;
+
+    private TouchPanelItemListAdapter touchPanelItemListAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +69,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         linearTouchPanelItems = (LinearLayout) findViewById(R.id.linearTouchPanelItems);
 
         linearAddComponents = (LinearLayout) findViewById(R.id.linearAddComponents);
-        componentsRecycler = (RecyclerView) findViewById(R.id.panelItemsRecycler);
+        panelItemsList = (ListView) findViewById(R.id.panelItemsList);
 
         rightParent = (FrameLayout) findViewById(R.id.rightParent);
         panelSetLayout = (LinearLayout) findViewById(R.id.panelSetLayout);
@@ -72,14 +83,21 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         btnCancel = (Button) findViewById(R.id.btnCancel);
         linearAddCancel = (LinearLayout) findViewById(R.id.linearAddCancel);
 
+        linearPanelList = (RelativeLayout) findViewById(R.id.linearPanelList);
+
         btnAddSwitch.setOnClickListener(this);
         btnAddDimmer.setOnClickListener(this);
         btnAddMotor.setOnClickListener(this);
         btnAdd.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
 
-        linearAddedComponents = (LinearLayout) findViewById(R.id.linearAddedComponents);
-        listAddedComponents = (ListView) findViewById(R.id.listAddedComponents);
+        linearComponentList = (RelativeLayout) findViewById(R.id.linearComponentList);
+        listComponents = (ListView) findViewById(R.id.listComponents);
+        listComponentsEmptyView = (TextView) findViewById(R.id.listComponentsEmptyView);
+        listComponents.setEmptyView(listComponentsEmptyView);
+
+        panelItemsListEmptyView = (TextView) findViewById(R.id.panelItemsListEmptyView);
+        panelItemsList.setEmptyView(panelItemsListEmptyView);
 
         initArrayOfTouchPanels();
         initTouchPanelList();
@@ -87,13 +105,19 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("TAG_FAB", "fab click");
                 FabTransformation.with(fab)
                         .transformTo(linearAddComponents);
+                componentAdapter.init();
             }
         });
 
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //populate the switch component list
+        initArrayOfSwitches();
     }
 
     private void initTouchPanelList() {
@@ -119,14 +143,39 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
                         touchPanelBox.setOnPanelItemClickListner(new OnPaneItemClickListener() {
                             @Override
-                            public void onPanelItemSelection(String oldName) {
-                                touchPanelBox.setSelection(oldName);
-                                txtDisplayPanelName.setText(touchPanelName + "\nPos: " + oldName);
+                            public void onPanelItemSelection(String panelName, int positionInPanel, String panelId) {
+                                selectedPanelId = panelId;
+                                selectedPanelPosition = positionInPanel;
+
+
+                                DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
+
+                                //get all touch panel item components
+                                try {
+                                    dbHelper.openDataBase();
+                                    Cursor savedPanelItemComponents = dbHelper.getPanelItemComponents(panelId, positionInPanel);
+                                    touchPanelItemListAdapter = new TouchPanelItemListAdapter(TouchPanelActivity.this, R.layout.touch_panel_item_row,
+                                            savedPanelItemComponents, new String[]{DBConstants.KEY_TP_ITEM_COMPONENT_NAME},
+                                            new int[]{R.id.txtSwitchName});
+
+                                    panelItemsList.setAdapter(touchPanelItemListAdapter);
+
+                                    dbHelper.close();
+
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+
+                                touchPanelBox.setSelection(panelName);
+                                txtDisplayPanelName.setText(touchPanelName + "\nPos: " + positionInPanel);
 
                                 panelSetLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
                                 rightParent.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
                                 rightParent.setVisibility(View.VISIBLE);
                                 divider.setVisibility(View.VISIBLE);
+
+                                linearPanelList.setVisibility(View.VISIBLE);
+
                             }
 
                         });
@@ -136,33 +185,6 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                     } while (touchPanelListCursor.moveToNext());
                 }
         }
-
-        /*for(int i=0; i<touchPanelListCursor.getCount(); i++) {
-            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View view = inflater.inflate(R.layout.touch_panel_box, null);
-
-            final TextView txtPanelHeading = (TextView) view.findViewById(R.id.txtPanelHeading);
-            txtPanelHeading.setText("Touch Panel No. " + (i + 1));
-            final TouchPanelBox touchPanelBox = (TouchPanelBox) view.findViewById(R.id.touchPanelBox);
-            touchPanelBox.setUpTouchBox();
-
-            touchPanelBox.setOnPanelItemClickListner(new OnPaneItemClickListener() {
-                @Override
-                public void onPanelItemSelection(String oldName) {
-                    touchPanelBox.setSelection(oldName);
-                    txtDisplayPanelName.setText("Touch Panel: " + txtPanelHeading.getText().toString() + "\nPos: " + oldName);
-                }
-
-                @Override
-                public void onDisplayPanelComponents(String oldName) {
-                    // get touch panel pos components
-
-                }
-            });
-
-            linearTouchPanelItems.addView(view);
-
-        }*/
     }
 
     private void initArrayOfTouchPanels() {
@@ -182,31 +204,100 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+
             case R.id.btnAddSwitch:
                 linearAddComponents.setVisibility(View.INVISIBLE);
                 linearAddCancel.setVisibility(View.VISIBLE);
-                linearAddedComponents.setVisibility(View.VISIBLE);
+                linearComponentList.setVisibility(View.VISIBLE);
+                linearPanelList.setVisibility(View.GONE);
+
+                // populate switch components
+                listComponents.setAdapter(componentAdapter);
+
                 break;
+
             case R.id.btnAddDimmer:
                 break;
+
             case R.id.btnAddMotor:
                 break;
+
             case R.id.btnAdd:
-                /*panelSetLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 2f));
-                rightParent.setVisibility(View.GONE);
-                divider.setVisibility(View.GONE);*/
-               // linearAddComponents.setVisibility(View.INVISIBLE);
-                linearAddedComponents.setVisibility(View.INVISIBLE);
+
+                linearPanelList.setVisibility(View.VISIBLE);
+                linearComponentList.setVisibility(View.INVISIBLE);
+
                 fab.setVisibility(View.GONE);
                 FabTransformation.with(fab)
                         .transformFrom(linearAddCancel);
+
+                //add components to panel item
+                Log.e("Selected COMPs", componentAdapter.getSelectedComponents().toString());
+                addPanelItem(componentAdapter.getSelectedComponents());
+
                 break;
+
             case R.id.btnCancel:
-                linearAddComponents.setVisibility(View.INVISIBLE);
-                linearAddedComponents.setVisibility(View.VISIBLE);
+                linearPanelList.setVisibility(View.VISIBLE);
+                linearComponentList.setVisibility(View.INVISIBLE);
+                fab.setVisibility(View.GONE);
                 FabTransformation.with(fab)
                         .transformFrom(linearAddCancel);
                 break;
         }
     }
+
+    private void initArrayOfSwitches() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+
+        //insert switches in adapter ofr machine-1
+        try {
+            dbHelper.openDataBase();
+            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+
+            componentAdapter = new TouchPComponentListAdapter(TouchPanelActivity.this, R.layout.touchp_component_list_item,
+                  switchListCursor,  new String[] {DBConstants.KEY_C_NAME,
+                     DBConstants.KEY_C_MNAME }, new int[] { R.id.txtSwitchName, R.id.txtMachineName});
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //  add the selected components in panel item
+    private void addPanelItem(ArrayList<String> selectedComonentList) {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        try {
+            dbHelper.openDataBase();
+
+            for(int i=0; i<selectedComonentList.size(); i++) {
+                ComponentModel componentModel =  dbHelper.getComponentById(selectedComonentList.get(i));
+                dbHelper.insertIntoPanelItem(componentModel, selectedPanelId, selectedPanelPosition);
+            }
+
+            dbHelper.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /*@Override
+    public void onPanelItemDeletion(String panelId, int positionInPanel, String componentId) {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+
+        //get all touch panel item components
+        try {
+            dbHelper.openDataBase();
+            dbHelper.deletePanelItemComponents(panelId, positionInPanel, componentId);
+            dbHelper.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        touchPanelItemListAdapter.notifyDataSetChanged();
+    }*/
+
 }

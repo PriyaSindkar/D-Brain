@@ -12,6 +12,7 @@ public class ComponentModel {
     private String mip;
     private String machineName;
     private String details;
+    private String defaultValue;
 
     public ComponentModel() {
     }
@@ -88,14 +89,26 @@ public class ComponentModel {
         this.details = details;
     }
 
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
     @Override
     public String toString() {
         return "ComponentModel{" +
                 "id=" + id +
+                ", componentId='" + componentId + '\'' +
                 ", name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", mid='" + mid + '\'' +
                 ", mip='" + mip + '\'' +
+                ", machineName='" + machineName + '\'' +
+                ", details='" + details + '\'' +
+                ", defaultValue='" + defaultValue + '\'' +
                 '}';
     }
 }

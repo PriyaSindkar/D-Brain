@@ -200,23 +200,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    /*public Cursor getAllSwitchComponentsForAMachine(String machineIP) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-
-
-        Cursor cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=?",
-                new String[] { machineIP }, null, null, null, null);
-            if (cursor != null) {
-            cursor.moveToFirst();
-            if (cursor.getCount() > 0) {
-                do {
-                } while (cursor.moveToNext());
-            }
-        }
-        return cursor;
-    }*/
-
     public Cursor getAllSwitchComponentsForAMachine(String machineIP) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
@@ -519,6 +502,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return componentName;
     }
 
+    public ComponentModel getComponentById(String componentId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        ComponentModel component = new ComponentModel();
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_COMPONENT_ID + "=?" ,
+                    new String[]{componentId}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                component.setName(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
+                component.setType(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE)));
+                component.setComponentId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID)));
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return component;
+    }
+
     public void insertIntoTouchPanel(ArrayList<TouchPanelModel> touchPanelModels) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -549,5 +553,92 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.e("EXP ", e.toString());
         }
         return cursor;
+    }
+
+    public void insertIntoPanelItem(ComponentModel component, String panelId, int positionInPanel) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(DBConstants.KEY_TP_ITEM_POS, positionInPanel);
+        values.put(DBConstants.KEY_TP_ITEM_PID, panelId);
+        values.put(DBConstants.KEY_TP_ITEM_COMPONENT_ID, component.getComponentId());
+        values.put(DBConstants.KEY_TP_ITEM_COMPONENT_NAME, component.getName());
+        values.put(DBConstants.KEY_TP_ITEM_COMPONENT_TYPE, component.getType());
+        values.put(DBConstants.KEY_TP_ITEM_DEF_VALUE, "");
+
+        if( !isPanelItemComponentAlreadyExists(panelId, positionInPanel,component.getComponentId())) {
+            Log.e("NEW",component.getComponentId() );
+            db.insert(DBConstants.TABLE_TOUCH_PANEL_ITEM, null, values);
+        } else {
+            Log.e("EXisITS", component.getComponentId() );
+        }
+
+        db.close();
+    }
+
+    public Cursor getPanelItemComponents(String panelId, int positionInPanel) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_ITEM, null, DBConstants.KEY_TP_ITEM_PID + "=? AND "
+                            + DBConstants.KEY_TP_ITEM_POS + "=?",
+                    new String[]{panelId, String.valueOf(positionInPanel) }, null, null, null, null);
+            /*if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                        Log.e("PANEL_POS_COMP", cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_ITEM_COMPONENT_NAME)));
+                    } while (cursor.moveToNext());
+                }
+            }*/
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+    public boolean isPanelItemComponentAlreadyExists(String panelId, int position,String componentId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        boolean result = true;
+        try {
+            // TO:DO search machine-wise
+
+           /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
+                    new String[]{machineIP}, null, null, null, null);*/
+
+            cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_ITEM, null, DBConstants.KEY_TP_ITEM_PID + "=? AND "
+                            + DBConstants.KEY_TP_ITEM_POS + "=? AND " + DBConstants.KEY_TP_ITEM_COMPONENT_ID + "=?",
+                    new String[]{panelId, String.valueOf(position), componentId}, null, null, null, null);
+            if (cursor != null) {
+                if(cursor.getCount() == 0) {
+                    result =  false;
+                } else {
+                    result =  true;
+                }
+            } else {
+                result =  false;
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return result;
+    }
+
+    public void deletePanelItemComponents(String panelId, int positionInPanel, String componentId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        //Cursor cursor = null;
+        try {
+            /*cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_ITEM, null, DBConstants.KEY_TP_ITEM_PID + "=? AND "
+                            + DBConstants.KEY_TP_ITEM_POS + "=? AND " +DBConstants.KEY_TP_ITEM_COMPONENT_ID + "=?" ,
+                    new String[]{panelId, String.valueOf(positionInPanel), componentId }, null, null, null, null);*/
+
+            db.delete(DBConstants.TABLE_TOUCH_PANEL_ITEM,  DBConstants.KEY_TP_ITEM_PID + "=? AND "
+                            + DBConstants.KEY_TP_ITEM_POS + "=? AND " +DBConstants.KEY_TP_ITEM_COMPONENT_ID + "=?" ,
+                    new String[]{panelId, String.valueOf(positionInPanel), componentId });
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
     }
 }

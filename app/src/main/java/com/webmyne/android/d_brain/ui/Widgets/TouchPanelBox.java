@@ -49,7 +49,7 @@ public class TouchPanelBox extends LinearLayout {
     private OnPaneItemClickListener onPanelItemClickListner;
     private LinearLayout linearParentQuad;
     private ArrayList<String> addedValues;
-    private String panelId, selected = "";
+    private String panelId;
     private Context mContext;
 
 
@@ -70,6 +70,8 @@ public class TouchPanelBox extends LinearLayout {
     public void setPanelId(String panelId) {
         this.panelId = panelId;
     }
+
+
 
     private void init(Context context) {
         mContext = context;
@@ -104,7 +106,7 @@ public class TouchPanelBox extends LinearLayout {
             view.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onPanelItemClickListner.onPanelItemSelection(name);
+                    onPanelItemClickListner.onPanelItemSelection(name, pos+1, panelId);
                 }
             });
 
@@ -123,7 +125,7 @@ public class TouchPanelBox extends LinearLayout {
             view.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onPanelItemClickListner.onPanelItemSelection(name);
+                    onPanelItemClickListner.onPanelItemSelection(name, pos+1, panelId);
                 }
             });
         }
@@ -139,7 +141,6 @@ public class TouchPanelBox extends LinearLayout {
 
 
     public void setSelection(String panelItemName) {
-        selected = panelItemName;
 
         for (int i = 0; i < row1.getChildCount(); i++) {
             final int pos = i;

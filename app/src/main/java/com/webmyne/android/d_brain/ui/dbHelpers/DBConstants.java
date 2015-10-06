@@ -24,8 +24,11 @@ public class DBConstants {
     // TouchPanel table name
     public static final String TABLE_TOUCH_PANEL = "TouchPanel";
 
+    // TouchPanel table name
+    public static final String TABLE_TOUCH_PANEL_ITEM = "TouchPanelItem";
+
     // Machine Table Columns names
-    public static final String KEY_M_ID = "id";
+    public static final String KEY_M_ID = "_id";
     public static final String KEY_M_DA = "DA";
     public static final String KEY_M_SERIALNO = "DSN";
     public static final String KEY_M_VERSION = "DV";
@@ -35,7 +38,7 @@ public class DBConstants {
     public static final String KEY_M_NAME = "DNAME";
 
     // Component Table Column names
-    public static final String KEY_C_ID = "ID";
+    public static final String KEY_C_ID = "_id";
     public static final String KEY_C_COMPONENT_ID = "COMPONENT_ID";
     public static final String KEY_C_NAME = "NAME";
     public static final String KEY_C_DETAILS = "DETAILS";
@@ -45,17 +48,27 @@ public class DBConstants {
     public static final String KEY_C_MNAME = "MACHINE_NAME";
 
     // Scene Table Column names
-    public static final String KEY_S_ID = "ID";
+    public static final String KEY_S_ID = "_id";
     public static final String KEY_S_NAME = "NAME";
     public static final String KEY_S_STATUS = "IS_SCENE_ON";
 
     // Scene-Component Table Column names
-    public static final String KEY_SC_ID = "ID";
+    public static final String KEY_SC_ID = "_id";
     public static final String KEY_SC_COMPONENT_ID = "COMPONENT_ID";
     public static final String KEY_SC_SCENE_ID = "SCENE_ID";
     public static final String KEY_SC_TYPE = "COMPONENT_TYPE";
     public static final String KEY_SC_MIP = "MACHINE_IP";
     public static final String KEY_SC_DEFAULT = "DEF_VALUE";
+
+    // Touch_Panel_item Table Column names
+    public static final String KEY_TP_ITEM_ID = "_id";
+    public static final String KEY_TP_ITEM_PID = "TOUCH_PANEL_ID";
+    public static final String KEY_TP_ITEM_POS = "POSITION_IN_PANEL";
+    public static final String KEY_TP_ITEM_COMPONENT_ID = "COMPONENT_ID";
+    public static final String KEY_TP_ITEM_COMPONENT_NAME = "COMPONENT_NAME";
+    public static final String KEY_TP_ITEM_COMPONENT_TYPE = "COMPONENT_TYPE";
+    public static final String KEY_TP_ITEM_DEF_VALUE = "DEF_VALUE";
+
 
     //Machine Config
     public static final String MACHINE1_IP = "192.168.1.199";

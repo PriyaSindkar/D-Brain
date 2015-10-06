@@ -9,60 +9,44 @@
     android:layout_height="match_parent"
     android:layout_weight="1">
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/linearPanelList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:orientation="vertical"
-            android:visibility="visible"
-            android:weightSum="1">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/txtDisplayPanelName"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:textColor="@color/white"
-                        android:text="Touch Panel Box 1"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/panelItemsRecycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="8dp"
-                    android:layout_weight="1">
-
-                </android.support.v7.widget.RecyclerView>
-            </LinearLayout>
+            android:visibility="visible">
 
             <TextView
-                android:id="@android:id/empty"
+                android:id="@+id/txtDisplayPanelName"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:gravity="center"
+                android:padding="@dimen/STD_MARGIN"
+                android:textColor="@color/white"
+                android:text="Touch Panel Box 1"
+                android:textStyle="bold" />
+
+
+            <ListView
+                android:layout_below="@id/txtDisplayPanelName"
+                android:id="@+id/panelItemsList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/STD_MARGIN">
+
+            </ListView>
+
+            <TextView
+                android:id="@+id/panelItemsListEmptyView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:gravity="center"
                 android:textColor="@color/white"
                 android:text="No Component assigned" />
 
             <LinearLayout
+                android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -121,49 +105,32 @@
 
             </LinearLayout>
 
-        </LinearLayout>
+        </RelativeLayout>
 
-        <LinearLayout
-            android:id="@+id/linearAddedComponents"
+        <RelativeLayout
+            android:id="@+id/linearComponentList"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:weightSum="1">
-
-            <ListView
-                android:id="@+id/listAddedComponents"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
-
-            </ListView>
-
-            <TextView
-                android:id="@android:id/empty"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="No Switch assigned" />
-
+            android:layout_height="wrap_content"
+            android:visibility="gone">
 
             <io.codetail.widget.RevealFrameLayout
+                android:layout_alignParentBottom="true"
+                android:id="@+id/revealLinearAddCancel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:id="@+id/linearAddCancel"
                     android:orientation="horizontal"
+                    android:layout_marginTop="@dimen/STD_MARGIN"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="48dp">
 
                     <Button
                         android:layout_weight="1"
                         android:id="@+id/btnAdd"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:background="@color/primaryColor"
                         android:text="Add"
                         android:textColor="@color/white" />
@@ -172,7 +139,7 @@
                         android:layout_weight="1"
                         android:id="@+id/btnCancel"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:background="@color/primaryColor"
                         android:text="Cancel"
                         android:textColor="@color/white" />
@@ -180,6 +147,23 @@
 
             </io.codetail.widget.RevealFrameLayout>
 
-        </LinearLayout>
+            <ListView
+                android:layout_above="@id/revealLinearAddCancel"
+                android:layout_alignParentTop="true"
+                android:id="@+id/listComponents"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            </ListView>
+
+            <TextView
+                android:id="@+id/listComponentsEmptyView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:text="No Switch assigned" />
+
+        </RelativeLayout>
 
     </FrameLayout>
