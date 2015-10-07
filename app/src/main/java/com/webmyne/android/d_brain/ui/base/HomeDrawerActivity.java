@@ -2,6 +2,7 @@ package com.webmyne.android.d_brain.ui.base;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
@@ -17,10 +18,14 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
+import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AboutUsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AddMachineFragment;
@@ -33,7 +38,20 @@ import com.webmyne.android.d_brain.ui.Fragments.MainPanelFragment;
 import com.webmyne.android.d_brain.ui.Fragments.NotificationFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SceneFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SettingsFragment;
+import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
+import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
+import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class HomeDrawerActivity extends AppCompatActivity {
 
@@ -46,6 +64,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
     private boolean  isPowerOn = true;
     private TextView toolbarTitle, txtClearButton;
     private LinearLayout linearClearButton;
+    private  ArrayList<XMLValues> powerStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -245,15 +264,82 @@ public class HomeDrawerActivity extends AppCompatActivity {
             @Override
             public void run() {
                 //Do something after 100ms
-                isPowerOn = !isPowerOn;
-                if (isPowerOn) {
+                new GetMachineStatus().execute();
+               // isPowerOn = !isPowerOn;
+                /*if (isPowerOn) {
                     animObj.cancelPowerButtonAnimation();
                 } else {
                     animObj.startPowerButtonAnimation();
-                }
+                }*/
                 handler.postDelayed(this, 1000);
             }
         }, 1000);
     }
 
+    public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            setProgressBarIndeterminateVisibility(true);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_MACHINE_STATUS);
+                 Log.e("# urlValue", urlValue.toString());
+
+                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(1000*60);
+
+                httpUrlConnection.setRequestMethod("GET");
+                InputStream inputStream = httpUrlConnection.getInputStream();
+                Log.e("# inputStream", inputStream.toString());
+                MainXmlPullParser pullParser = new MainXmlPullParser();
+
+
+
+                powerStatus = pullParser.processXML(inputStream);
+               // Log.e("XML PARSERED", powerStatus.toString());
+
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            // Log.e("TAG_ASYNC", "Inside onPostExecute");
+           try {
+
+               int count = 0;
+               for (int i = 0; i < powerStatus.size(); i++) {
+                   if (powerStatus.get(i).tagName.equals("led0")) {
+                       Log.e("Power_status", powerStatus.get(i).tagValue);
+                       if (powerStatus.get(i).tagValue.equals("0")) {
+                           if (isPowerOn) {
+                               Toast.makeText(HomeDrawerActivity.this, "Machine is disconnected", Toast.LENGTH_LONG).show();
+                           }
+                           isPowerOn = false;
+                           animObj.cancelPowerButtonAnimation();
+                           count++;
+                       } else {
+                           isPowerOn = true;
+                           animObj.startPowerButtonAnimation();
+                       }
+                       break;
+                   }
+               }
+
+           }catch (Exception e){
+               Toast.makeText(HomeDrawerActivity.this, "Machine is disconnected", Toast.LENGTH_LONG).show();
+               isPowerOn = false;
+               animObj.cancelPowerButtonAnimation();
+           }
+
+
+        }
+    }
 }

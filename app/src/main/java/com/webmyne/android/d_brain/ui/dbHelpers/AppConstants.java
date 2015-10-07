@@ -9,10 +9,11 @@ public class AppConstants {
     public static String CHANGE_STATUS_SIMULATOR_URL="http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
     public static final String TEMP_PRODUCT_CODE = "02119-6119";
 
-    //public static String URL_MACHINE_IP = "http://192.168.1.199";
+    public static String URL_MACHINE_IP = "http://192.168.1.199";
     // for simulator
-   public static String URL_MACHINE_IP = "http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
-    //public static String URL_MACHINE_IP = "http://d2brain.com";
+   //public static String URL_MACHINE_IP = "http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
+   // public static String URL_MACHINE_IP = "http://d2brain.com";
+    public static String URL_FETCH_MACHINE_STATUS = "/debt.xml";
     public static String URL_FETCH_SWITCH_STATUS = "/swcr.xml";
     public static String URL_CHANGE_SWITCH_STATUS = "/cswcr.cgi?SW=";
     public static String URL_FETCH_DIMMER_STATUS = "/dmcr.xml";
