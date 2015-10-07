@@ -7,7 +7,7 @@ public class AppConstants {
 
     public static String SIMULATOR_URL = "http://ws-srv-net.in.webmyne.com/Applications/DsquareWS";
     public static String CHANGE_STATUS_SIMULATOR_URL="http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
-    public static final String TEMP_PRODUCT_CODE = "0921456119";
+    public static final String TEMP_PRODUCT_CODE = "02119-6119";
 
     //public static String URL_MACHINE_IP = "http://192.168.1.199";
     // for simulator
@@ -26,6 +26,7 @@ public class AppConstants {
     public static String ALERT_TYPE="alert";
     public static String SWITCH_PREFIX = "SW";
     public static String DIMMER_PREFIX = "DM";
+    public static String MOTOR_PREFIX = "MO";
     public static String ALERT_PREFIX = "AS";
     public static String TOUCH_PANEL_TYPE = "touch_panel";
 

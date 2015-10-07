@@ -17,9 +17,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:textSize="@dimen/VS_TEXT_SIZE"
+            android:gravity="center_horizontal"
+            android:textSize="@dimen/M_TEXT_SIZE"
             android:background="@drawable/tag"
-            android:text="13/17"/>
+            android:text=""/>
 
 
         <LinearLayout

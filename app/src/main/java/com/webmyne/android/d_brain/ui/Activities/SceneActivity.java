@@ -61,6 +61,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     private LinearLayout linearControls, linearPopup, linearSaveScene;
     private RelativeLayout parentRelativeLayout;
     private SwitchButton sceneMainSwitch;
+    private View switchDivider;
 
 
     boolean isSwitchPopupShown = false;
@@ -76,8 +77,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
     RecyclerView mRecycler;
     SceneAdapter mAdapter;
-    private Cursor switchListCursor;
-    private Cursor dimmerListCursor;
+    private Cursor switchListCursor,dimmerListCursor, motorListCursor;
 
     private String currentSceneId, currentSceneName;
     private boolean isSceneSaved = true;
@@ -113,6 +113,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         txtDimmer = (TextView) findViewById(R.id.txtDimmer);
         txtSwitch = (TextView) findViewById(R.id.txtSwitch);
         txtMotor = (TextView) findViewById(R.id.txtMotor);
+        switchDivider = findViewById(R.id.switchDivider);
+
 
         hScrollView = (HorizontalScrollView) findViewById(R.id.hScrollView);
         imgHScrollLeft = (ImageView) findViewById(R.id.imgHScrollLeft);
@@ -587,7 +589,13 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
                         initSwitches.add(sceneSwitchItem);
                     } while (switchListCursor.moveToNext());
+                } else {
+                    txtSwitch.setVisibility(View.GONE);
+                    switchDivider.setVisibility(View.GONE);
                 }
+            } else {
+                txtSwitch.setVisibility(View.GONE);
+                switchDivider.setVisibility(View.GONE);
             }
         } catch (SQLException e) {
             Log.e("SQLException", e.toString());
@@ -595,10 +603,39 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void initMotors() {
-        for(int i=0; i < totalNoOfMotors; i++) {
-            SceneMotorItem sceneSwitchItem = new SceneMotorItem(SceneActivity.this);
-            sceneSwitchItem.setText("Motor " + i);
-            initMotors.add(sceneSwitchItem);
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        try {
+            dbHelper.openDataBase();
+            motorListCursor = dbHelper.getAllMotorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+
+            totalNoOfMotors = motorListCursor.getCount();
+
+            if (motorListCursor != null) {
+                motorListCursor.moveToFirst();
+                if (motorListCursor.getCount() > 0) {
+                    do {
+                        /*SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
+                        sceneSwitchItem.setText(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
+                        sceneSwitchItem.setSwitchId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
+
+                        // check if this component is already added or not
+                        for(int i=0; i<mData.size(); i++) {
+                            if(mData.get(i).getSceneItemId().equals(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)))) {
+                                sceneSwitchItem.setFocusable(false);
+                            }
+                        }
+
+                        initDimmers.add(sceneSwitchItem);*/
+                    } while (motorListCursor.moveToNext());
+                } else {
+                    txtMotor.setVisibility(View.GONE);
+                }
+            } else {
+                txtMotor.setVisibility(View.GONE);
+            }
+        } catch (SQLException e) {
+            Log.e("SQLException", e.toString());
         }
     }
 
@@ -628,7 +665,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
                         initDimmers.add(sceneSwitchItem);
                     } while (dimmerListCursor.moveToNext());
+                } else {
+                    txtDimmer.setVisibility(View.GONE);
                 }
+            } else {
+                txtDimmer.setVisibility(View.GONE);
             }
         } catch (SQLException e) {
             Log.e("SQLException", e.toString());

@@ -67,7 +67,7 @@
             <LinearLayout
                 android:id="@+id/linearAddComponents"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/ICON_BORDER_SIZE"
                 android:visibility="invisible"
                 android:background="@color/primaryColor"
                 android:orientation="horizontal">
@@ -78,8 +78,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:text="S"
+                    android:text="Switch"
+                    android:textAllCaps="false"
                     android:textColor="#fff" />
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/secondaryBgColor" />
 
                 <Button
                     android:id="@+id/btnAddDimmer"
@@ -87,8 +92,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:text="D"
+                    android:text="Dimmer"
+                    android:textAllCaps="false"
                     android:textColor="#fff" />
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/secondaryBgColor" />
 
                 <Button
                     android:id="@+id/btnAddMotor"
@@ -96,7 +106,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="#00000000"
-                    android:text="M"
+                    android:text="Motor"
+                    android:textAllCaps="false"
                     android:textColor="#fff" />
 
             </LinearLayout>
@@ -113,6 +124,16 @@
             android:layout_height="wrap_content"
             android:visibility="gone">
 
+            <TextView
+                android:layout_alignParentTop="true"
+                android:id="@+id/txtComponentListHeading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="@dimen/S_MARGIN"
+                android:textColor="@color/white"
+                android:text=""/>
+
             <io.codetail.widget.RevealFrameLayout
                 android:layout_alignParentBottom="true"
                 android:id="@+id/revealLinearAddCancel"
@@ -124,7 +145,7 @@
                     android:orientation="horizontal"
                     android:layout_marginTop="@dimen/STD_MARGIN"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp">
+                    android:layout_height="@dimen/ICON_BORDER_SIZE">
 
                     <Button
                         android:layout_weight="1"
@@ -133,7 +154,13 @@
                         android:layout_height="match_parent"
                         android:background="@color/primaryColor"
                         android:text="Add"
+                        android:textAllCaps="false"
                         android:textColor="@color/white" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/secondaryBgColor" />
 
                     <Button
                         android:layout_weight="1"
@@ -142,6 +169,7 @@
                         android:layout_height="match_parent"
                         android:background="@color/primaryColor"
                         android:text="Cancel"
+                        android:textAllCaps="false"
                         android:textColor="@color/white" />
                 </LinearLayout>
 
@@ -149,7 +177,7 @@
 
             <ListView
                 android:layout_above="@id/revealLinearAddCancel"
-                android:layout_alignParentTop="true"
+                android:layout_below="@id/txtComponentListHeading"
                 android:id="@+id/listComponents"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">

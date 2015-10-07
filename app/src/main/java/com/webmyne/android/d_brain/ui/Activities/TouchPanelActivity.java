@@ -1,5 +1,7 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -10,6 +12,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -18,6 +22,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.flyco.animation.SlideEnter.SlideRightEnter;
 import com.konifar.fab_transformation.FabTransformation;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.TouchPComponentListAdapter;
@@ -37,12 +42,12 @@ import java.util.ArrayList;
  */
 public class TouchPanelActivity extends AppCompatActivity implements View.OnClickListener{
     private Toolbar toolbar;
-    private TextView toolbarTitle, txtDisplayPanelName, listComponentsEmptyView, panelItemsListEmptyView;
+    private TextView toolbarTitle, txtDisplayPanelName, listComponentsEmptyView, panelItemsListEmptyView, txtComponentListHeading;
     private LinearLayout linearTouchPanelItems, panelSetLayout,linearAddComponents, linearAddCancel;
     private RelativeLayout linearPanelList, linearComponentList;
     private FrameLayout rightParent;
     private ListView listComponents, panelItemsList;
-    private Cursor touchPanelListCursor, switchListCursor;
+    private Cursor touchPanelListCursor, switchListCursor, dimmerListCursor, motorListCursor;
     private TouchPComponentListAdapter componentAdapter;
     private View divider;
     private FloatingActionButton fab;
@@ -99,15 +104,49 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         panelItemsListEmptyView = (TextView) findViewById(R.id.panelItemsListEmptyView);
         panelItemsList.setEmptyView(panelItemsListEmptyView);
 
+        txtComponentListHeading = (TextView) findViewById(R.id.txtComponentListHeading);
+
         initArrayOfTouchPanels();
         initTouchPanelList();
+        initArrayOfSwitches();
+        initArrayOfDimmers();
+        initArrayOfMotors();
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FabTransformation.with(fab)
                         .transformTo(linearAddComponents);
-                componentAdapter.init();
+
+                if(switchListCursor != null) {
+                    if(switchListCursor.getCount() > 0) {
+                       // componentAdapter.init();
+                    } else {
+                        btnAddSwitch.setVisibility(View.GONE);
+                    }
+                } else {
+                    btnAddSwitch.setVisibility(View.GONE);
+                }
+
+                if(dimmerListCursor != null) {
+                    if(dimmerListCursor.getCount() > 0) {
+                        // componentAdapter.init();
+                    } else {
+                        btnAddDimmer.setVisibility(View.GONE);
+                    }
+                } else {
+                    btnAddDimmer.setVisibility(View.GONE);
+                }
+
+                if(motorListCursor != null) {
+                    if(motorListCursor.getCount() > 0) {
+                        // componentAdapter.init();
+                    } else {
+                        btnAddMotor.setVisibility(View.GONE);
+                    }
+                } else {
+                    btnAddMotor.setVisibility(View.GONE);
+                }
             }
         });
 
@@ -116,8 +155,10 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onResume() {
         super.onResume();
-        //populate the switch component list
+        //populate the each component list
         initArrayOfSwitches();
+        initArrayOfDimmers();
+        initArrayOfMotors();
     }
 
     private void initTouchPanelList() {
@@ -174,6 +215,9 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                                 rightParent.setVisibility(View.VISIBLE);
                                 divider.setVisibility(View.VISIBLE);
 
+                                rightParent.startAnimation(AnimationUtils.loadAnimation(TouchPanelActivity.this,
+                                        R.anim.slide_in_right));
+
                                 linearPanelList.setVisibility(View.VISIBLE);
 
                             }
@@ -206,10 +250,24 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         switch (v.getId()) {
 
             case R.id.btnAddSwitch:
+                txtComponentListHeading.setText("Switches");
+
                 linearAddComponents.setVisibility(View.INVISIBLE);
                 linearAddCancel.setVisibility(View.VISIBLE);
                 linearComponentList.setVisibility(View.VISIBLE);
                 linearPanelList.setVisibility(View.GONE);
+
+                if(switchListCursor != null) {
+                    if(switchListCursor.getCount() > 0) {
+                        componentAdapter = new TouchPComponentListAdapter(TouchPanelActivity.this, R.layout.touchp_component_list_item,
+                                switchListCursor,  new String[] {DBConstants.KEY_C_NAME,
+                                DBConstants.KEY_C_MNAME }, new int[] { R.id.txtSwitchName, R.id.txtMachineName});
+                    } else {
+                        btnAddSwitch.setVisibility(View.GONE);
+                    }
+                } else {
+                    btnAddSwitch.setVisibility(View.GONE);
+                }
 
                 // populate switch components
                 listComponents.setAdapter(componentAdapter);
@@ -217,9 +275,53 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                 break;
 
             case R.id.btnAddDimmer:
+                txtComponentListHeading.setText("Dimmers");
+
+                linearAddComponents.setVisibility(View.INVISIBLE);
+                linearAddCancel.setVisibility(View.VISIBLE);
+                linearComponentList.setVisibility(View.VISIBLE);
+                linearPanelList.setVisibility(View.GONE);
+
+                if(dimmerListCursor != null) {
+                    if(dimmerListCursor.getCount() > 0) {
+                        componentAdapter = new TouchPComponentListAdapter(TouchPanelActivity.this, R.layout.touchp_component_list_item,
+                                dimmerListCursor,  new String[] {DBConstants.KEY_C_NAME,
+                                DBConstants.KEY_C_MNAME }, new int[] { R.id.txtSwitchName, R.id.txtMachineName});
+                    } else {
+                        btnAddDimmer.setVisibility(View.GONE);
+                    }
+                } else {
+                    btnAddDimmer.setVisibility(View.GONE);
+                }
+
+                // populate dimmer components
+                listComponents.setAdapter(componentAdapter);
+
                 break;
 
             case R.id.btnAddMotor:
+                txtComponentListHeading.setText("Motors");
+
+                linearAddComponents.setVisibility(View.INVISIBLE);
+                linearAddCancel.setVisibility(View.VISIBLE);
+                linearComponentList.setVisibility(View.VISIBLE);
+                linearPanelList.setVisibility(View.GONE);
+
+                if(motorListCursor != null) {
+                    if(motorListCursor.getCount() > 0) {
+                        componentAdapter = new TouchPComponentListAdapter(TouchPanelActivity.this, R.layout.touchp_component_list_item,
+                                motorListCursor,  new String[] {DBConstants.KEY_C_NAME,
+                                DBConstants.KEY_C_MNAME }, new int[] { R.id.txtSwitchName, R.id.txtMachineName});
+                    } else {
+                        btnAddMotor.setVisibility(View.GONE);
+                    }
+                } else {
+                    btnAddMotor.setVisibility(View.GONE);
+                }
+
+                // populate motor components
+                listComponents.setAdapter(componentAdapter);
+
                 break;
 
             case R.id.btnAdd:
@@ -256,14 +358,39 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
             dbHelper.close();
 
-            componentAdapter = new TouchPComponentListAdapter(TouchPanelActivity.this, R.layout.touchp_component_list_item,
-                  switchListCursor,  new String[] {DBConstants.KEY_C_NAME,
-                     DBConstants.KEY_C_MNAME }, new int[] { R.id.txtSwitchName, R.id.txtMachineName});
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initArrayOfDimmers() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+
+        //insert switches in adapter ofr machine-1
+        try {
+            dbHelper.openDataBase();
+            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dbHelper.close();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+    private void initArrayOfMotors() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+
+        //insert switches in adapter ofr machine-1
+        try {
+            dbHelper.openDataBase();
+            motorListCursor =  dbHelper.getAllMotorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     //  add the selected components in panel item
     private void addPanelItem(ArrayList<String> selectedComonentList) {
@@ -275,7 +402,9 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                 ComponentModel componentModel =  dbHelper.getComponentById(selectedComonentList.get(i));
                 dbHelper.insertIntoPanelItem(componentModel, selectedPanelId, selectedPanelPosition);
             }
-
+            /*Cursor cursor = dbHelper.getPanelItemComponents(selectedPanelId, selectedPanelPosition);
+            touchPanelItemListAdapter.swapCursor(cursor);*/
+           // touchPanelItemListAdapter.notifyDataSetChanged();
             dbHelper.close();
 
         } catch (SQLException e) {

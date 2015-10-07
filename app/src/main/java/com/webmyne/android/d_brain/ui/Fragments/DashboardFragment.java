@@ -148,7 +148,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         });
 
 
-        AdvancedSpannableString sp = new AdvancedSpannableString(noOfSwitchUnits+"/"+totalNoOfSwitchUnits);
+        /*AdvancedSpannableString sp = new AdvancedSpannableString(noOfSwitchUnits+"/"+totalNoOfSwitchUnits);
         sp.setSpan(new RelativeSizeSpan(1.3f), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         txtNoOfSwitchUnits.setText(sp);
 
@@ -162,7 +162,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         sp = new AdvancedSpannableString(noOfSensorUnits+"/"+totalNoOfSensorUnits);
         sp.setSpan(new RelativeSizeSpan(1.3f), 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        txtNoOfSensorUnits.setText(sp);
+        txtNoOfSensorUnits.setText(sp);*/
 
         ViewTreeObserver vto = firstBottomItem.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -178,10 +178,49 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             }
         });
 
-        int totalNoOfPanels = (Integer.parseInt(AppConstants.TEMP_PRODUCT_CODE.substring(7, 8)) * 10) + Integer.parseInt(AppConstants.TEMP_PRODUCT_CODE.substring(8,9));
-        Log.e("totalNoOfPanels", totalNoOfPanels+"");
+        //check total components in adapter ofr machine-1
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        try {
+            dbHelper.openDataBase();
+            Cursor switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+            Cursor dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
+            Cursor motorListCursor =  dbHelper.getAllMotorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+
+            if(switchListCursor != null) {
+                if (switchListCursor.getCount() == 0) {
+                    parentSwitches.setVisibility(View.GONE);
+                } else {
+                    txtNoOfSwitchUnits.setText(String.valueOf(switchListCursor.getCount()));
+                }
+            } else {
+                parentSwitches.setVisibility(View.GONE);
+            }
+
+            if(dimmerListCursor != null) {
+                if (dimmerListCursor.getCount() == 0) {
+                    parentSlider.setVisibility(View.GONE);
+                } else {
+                    txtNoOfSliderUnits.setText(String.valueOf(dimmerListCursor.getCount()));
+                }
+            } else {
+                parentSlider.setVisibility(View.GONE);
+            }
+
+            if(motorListCursor != null) {
+                if (motorListCursor.getCount() == 0) {
+                    parentMotor.setVisibility(View.GONE);
+                } else {
+                    txtNoOfMotorUnits.setText(String.valueOf(motorListCursor.getCount()));
+                }
+            } else {
+                parentMotor.setVisibility(View.GONE);
+            }
 
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

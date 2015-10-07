@@ -89,7 +89,7 @@ public class SchedulerListAdapter extends RecyclerView.Adapter<SchedulerListAdap
 
 
 
-            holder.linearScene.setOnClickListener(new View.OnClickListener() {
+            /*holder.linearScene.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     _singleClick.onSingleClick(position);
@@ -108,7 +108,7 @@ public class SchedulerListAdapter extends RecyclerView.Adapter<SchedulerListAdap
                 public void onClick(View view) {
                     _renameClick.onRenameOptionClick(position, holder.txtSchedulerName.getText().toString().trim() );
                 }
-            });
+            });*/
     }
 
     @Override

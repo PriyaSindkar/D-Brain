@@ -20,6 +20,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.CustomViewPager;
 import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSettingsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSliderFragment;
+import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.TouchPanelModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
@@ -111,16 +112,20 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                     Toast.makeText(this, "Must Enter Device IP Address!", Toast.LENGTH_LONG).show();
                 } else {
 
-                    SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putBoolean("hasLoggedIn", true);
-                    editor.commit();
+                    if(Utils.validateProductCode(AppConstants.TEMP_PRODUCT_CODE)) {
+                        SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putBoolean("hasLoggedIn", true);
+                        editor.commit();
 
-                    initDatabaseComponents();
+                        initDatabaseComponents();
 
-                    Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
+                        Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(this, "Invalid Product Code", Toast.LENGTH_LONG).show();
+                    }
                 }
                 break;
         }
@@ -139,22 +144,43 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             ArrayList<TouchPanelModel> listOfTouchPanels = new ArrayList<>();
 
             // init the component table with switches of a machine
-            int totalNoOfSwitches = Integer.parseInt(productCode.substring(2,3)) * 11;
+            int totalNoOfSwitches = Integer.parseInt(productCode.substring(1,2)) * 11;
+            int totalNoOfDimmers = Integer.parseInt(productCode.substring(2,3)) * 11;
+            int totalNoOfMotors = Integer.parseInt(productCode.substring(3,4)) * 11;
 
-            for(int i=0; i<totalNoOfSwitches; i++) {
-                String idSuffix = String.format("%02d", (i + 1));
-                ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX+idSuffix, AppConstants.SWITCH_TYPE+String.valueOf(i+1), AppConstants.SWITCH_TYPE, "", DBConstants.MACHINE1_IP);
-                switchItem.setMachineName("Machine-1");
-                listOfComponents.add(switchItem);
+            if(totalNoOfSwitches == 0) {
+
+            } else {
+                for (int i = 0; i < totalNoOfSwitches; i++) {
+                    String idSuffix = String.format("%02d", (i + 1));
+                    ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX + idSuffix, AppConstants.SWITCH_TYPE + String.valueOf(i + 1), AppConstants.SWITCH_TYPE, "", DBConstants.MACHINE1_IP);
+                    switchItem.setMachineName("Machine-1");
+                    listOfComponents.add(switchItem);
+                }
             }
 
             // init the component table with dimmers of a machine
-            int totalNoOfDimmers = Integer.parseInt(productCode.substring(3,4)) * 11;
-            for(int i=0; i<totalNoOfDimmers; i++) {
-                String idSuffix = String.format("%02d", (i + 1));
-                ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX+idSuffix, AppConstants.DIMMER_TYPE+String.valueOf(i+1), AppConstants.DIMMER_TYPE, "", DBConstants.MACHINE1_IP);
-                dimmerItem.setMachineName("Machine-1");
-                listOfComponents.add(dimmerItem);
+            if(totalNoOfDimmers == 0) {
+
+            } else {
+                for (int i = 0; i < totalNoOfDimmers; i++) {
+                    String idSuffix = String.format("%02d", (i + 1));
+                    ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX + idSuffix, AppConstants.DIMMER_TYPE + String.valueOf(i + 1), AppConstants.DIMMER_TYPE, "", DBConstants.MACHINE1_IP);
+                    dimmerItem.setMachineName("Machine-1");
+                    listOfComponents.add(dimmerItem);
+                }
+            }
+
+            // init the component table with dimmers of a machine
+            if(totalNoOfMotors == 0) {
+
+            } else {
+                for (int i = 0; i < totalNoOfMotors; i++) {
+                    String idSuffix = String.format("%02d", (i + 1));
+                    ComponentModel motorItem = new ComponentModel(AppConstants.MOTOR_PREFIX + idSuffix, AppConstants.MOTOR_TYPE + String.valueOf(i + 1), AppConstants.MOTOR_TYPE, "", DBConstants.MACHINE1_IP);
+                    motorItem.setMachineName("Machine-1");
+                    listOfComponents.add(motorItem);
+                }
             }
 
             // init the component table with alerts of a machine

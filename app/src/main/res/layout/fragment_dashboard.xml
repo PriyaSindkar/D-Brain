@@ -24,8 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
             android:layout_marginBottom="@dimen/STD_MARGIN"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:orientation="horizontal">
 
             <include
                 layout="@layout/dashboard_switch_component"
@@ -47,8 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/STD_MARGIN"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:orientation="horizontal">
 
             <include
                 layout="@layout/dashboard_slider_component"

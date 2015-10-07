@@ -238,6 +238,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    public Cursor getAllMotorComponentsForAMachine(String machineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{machineIP, AppConstants.MOTOR_TYPE}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
 
     public Cursor getAllSensorComponentsForAMachine(String machineIP) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -584,14 +603,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_ITEM, null, DBConstants.KEY_TP_ITEM_PID + "=? AND "
                             + DBConstants.KEY_TP_ITEM_POS + "=?",
                     new String[]{panelId, String.valueOf(positionInPanel) }, null, null, null, null);
-            /*if (cursor != null) {
+            if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getCount() > 0) {
                     do {
                         Log.e("PANEL_POS_COMP", cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_ITEM_COMPONENT_NAME)));
                     } while (cursor.moveToNext());
                 }
-            }*/
+            }
         }catch (Exception e) {
             Log.e("EXP ", e.toString());
         }

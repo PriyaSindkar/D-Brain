@@ -74,7 +74,6 @@ public class TouchPanelItemListAdapter extends SimpleCursorAdapter {
                     dbHelper.openDataBase();
                     dbHelper.deletePanelItemComponents(panelId, Integer.parseInt(panelposition), componentId);
                     dbHelper.close();
-
                     cursor = dbHelper.getPanelItemComponents(panelId, Integer.parseInt(panelposition));
 
                 } catch (SQLException e) {
@@ -89,14 +88,9 @@ public class TouchPanelItemListAdapter extends SimpleCursorAdapter {
         return (convertView);
     }
 
-
-
     class ViewHolder {
         TextView txtSwitchName;
         ImageView cancel;
     }
 
-    public void setOnPaneItemDeleteListener(OnPaneItemDeleteListener listner) {
-        this.onPaneItemDeleteListener = listner;
-    }
 }

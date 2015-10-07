@@ -49,6 +49,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     private LinearLayout linearControls, linearPopup, linearSaveScene;
     private RelativeLayout parentRelativeLayout;
     private EditText edtIPAddress;
+    private View switchDivider;
 
     boolean isSwitchPopupShown = false;
     boolean isDimmerPopupShown = false;
@@ -93,6 +94,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         txtDimmer = (TextView) findViewById(R.id.txtDimmer);
         txtSwitch = (TextView) findViewById(R.id.txtSwitch);
         txtMotor = (TextView) findViewById(R.id.txtMotor);
+
+        switchDivider = findViewById(R.id.switchDivider);
 
         hScrollView = (HorizontalScrollView) findViewById(R.id.hScrollView);
         imgHScrollLeft = (ImageView) findViewById(R.id.imgHScrollLeft);
@@ -174,6 +177,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                 linearPopup.setVisibility(View.INVISIBLE);
             }
         });
+
 
         initSwitches();
         initMotors();
@@ -499,7 +503,13 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
                         initSwitches.add(sceneSwitchItem);
                     } while (switchListCursor.moveToNext());
+                } else {
+                    txtSwitch.setVisibility(View.GONE);
+                    switchDivider.setVisibility(View.GONE);
                 }
+            } else {
+                txtSwitch.setVisibility(View.GONE);
+                switchDivider.setVisibility(View.GONE);
             }
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
@@ -513,10 +523,33 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void initMotors() {
-        for(int i=0; i < totalNoOfMotors; i++) {
-            SceneMotorItem sceneSwitchItem = new SceneMotorItem(CreateSceneActivity.this);
-            sceneSwitchItem.setText("Motor " + i);
-            initMotors.add(sceneSwitchItem);
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        try {
+            dbHelper.openDataBase();
+            Cursor motorListCursor = dbHelper.getAllMotorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dbHelper.close();
+
+            totalNoOfMotors = motorListCursor.getCount();
+
+            if (motorListCursor != null) {
+                motorListCursor.moveToFirst();
+                if (motorListCursor.getCount() > 0) {
+                    do {
+                        /*SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(CreateSceneActivity.this);
+                        sceneSwitchItem.setText(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
+                        //dimmer id from main component table
+                        sceneSwitchItem.setSwitchId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID)));
+
+                        initDimmers.add(sceneSwitchItem);*/
+                    } while (motorListCursor.moveToNext());
+                } else {
+                    txtMotor.setVisibility(View.GONE);
+                }
+            } else {
+                txtMotor.setVisibility(View.GONE);
+            }
+        } catch (SQLException e) {
+            Log.e("SQLEXP", e.toString());
         }
     }
 
@@ -541,7 +574,11 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
                         initDimmers.add(sceneSwitchItem);
                     } while (dimmerListCursor.moveToNext());
+                } else {
+                    txtDimmer.setVisibility(View.GONE);
                 }
+            } else {
+                txtDimmer.setVisibility(View.GONE);
             }
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
