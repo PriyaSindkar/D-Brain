@@ -184,14 +184,17 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             }
 
             // init the component table with alerts of a machine
-            int totalNoOfAlerts = Integer.parseInt(productCode.substring(1,2));
-            for(int i=0; i<totalNoOfAlerts; i++) {
-                String idSuffix = String.format("%02d", (i + 1));
-                ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX+idSuffix, AppConstants.ALERT_TYPE+String.valueOf(i+1), AppConstants.ALERT_TYPE, "", DBConstants.MACHINE1_IP);
-                sensorItem.setMachineName("Machine-1");
-                sensorItem.setDetails("Alert fired on breach");
-                listOfComponents.add(sensorItem);
+            int totalNoOfAlerts = Integer.parseInt(productCode.substring(4,5));
+            if(totalNoOfAlerts == 0) {
 
+            } else {
+                for (int i = 0; i < totalNoOfAlerts; i++) {
+                    String idSuffix = String.format("%02d", (i + 1));
+                    ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX + idSuffix, AppConstants.ALERT_TYPE + String.valueOf(i + 1), AppConstants.ALERT_TYPE, "", DBConstants.MACHINE1_IP);
+                    sensorItem.setMachineName("Machine-1");
+                    sensorItem.setDetails("Alert fired on breach");
+                    listOfComponents.add(sensorItem);
+                }
             }
 
             // init the touch_panel table

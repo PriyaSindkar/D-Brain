@@ -219,7 +219,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                                         R.anim.slide_in_right));
 
                                 linearPanelList.setVisibility(View.VISIBLE);
-
+                                //linearAddComponents.setVisibility(View.INVISIBLE);
                             }
 
                         });
@@ -402,9 +402,14 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                 ComponentModel componentModel =  dbHelper.getComponentById(selectedComonentList.get(i));
                 dbHelper.insertIntoPanelItem(componentModel, selectedPanelId, selectedPanelPosition);
             }
-            /*Cursor cursor = dbHelper.getPanelItemComponents(selectedPanelId, selectedPanelPosition);
-            touchPanelItemListAdapter.swapCursor(cursor);*/
-           // touchPanelItemListAdapter.notifyDataSetChanged();
+
+            Cursor cursor = dbHelper.getPanelItemComponents(selectedPanelId, selectedPanelPosition);
+            touchPanelItemListAdapter = new TouchPanelItemListAdapter(TouchPanelActivity.this, R.layout.touch_panel_item_row,
+                    cursor, new String[]{DBConstants.KEY_TP_ITEM_COMPONENT_NAME},
+                    new int[]{R.id.txtSwitchName});
+
+            panelItemsList.setAdapter(touchPanelItemListAdapter);
+
             dbHelper.close();
 
         } catch (SQLException e) {

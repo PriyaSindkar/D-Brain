@@ -1,96 +1,125 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/parentRelativeLayout"
     android:background="#2d3f4d"
     tools:context=".MainActivity">
 
-    <!-- <include
-         android:layout_width="match_parent"
-         android:layout_height="@dimen/HEADER_BAR_SIZE"
-         android:id="@+id/tool_bar"
-         layout="@layout/app_bar" />-->
-
-    <LinearLayout
-        android:id="@+id/linearComponents"
+    <RelativeLayout
+        android:id="@+id/frameMainBody"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/L_MARGIN"
-        android:layout_marginRight="@dimen/L_MARGIN"
-        android:layout_marginTop="@dimen/STD_MARGIN"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_height="match_parent">
 
         <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
-            android:layout_marginBottom="@dimen/STD_MARGIN"
-            android:orientation="horizontal">
+            android:layout_height="match_parent">
 
-            <include
-                layout="@layout/dashboard_switch_component"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
-                android:layout_marginRight="@dimen/STD_MARGIN"
-                android:layout_weight="1" />
+                <LinearLayout
+                    android:id="@+id/linearComponents"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/L_MARGIN"
+                    android:layout_marginRight="@dimen/L_MARGIN"
+                    android:layout_marginTop="@dimen/STD_MARGIN"
+                    android:orientation="vertical">
 
-            <include
-                layout="@layout/dashboard_motor_component"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
-                android:layout_weight="1" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
+                        android:layout_marginBottom="@dimen/STD_MARGIN"
+                        android:orientation="horizontal">
 
-        </LinearLayout>
+                        <include
+                            layout="@layout/dashboard_switch_component"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
+                            android:layout_marginRight="@dimen/STD_MARGIN"
+                            android:layout_weight="1" />
+
+                        <include
+                            layout="@layout/dashboard_motor_component"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
+                            android:layout_weight="1" />
+
+                    </LinearLayout>
 
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/STD_MARGIN"
-            android:orientation="horizontal">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/STD_MARGIN"
+                        android:orientation="horizontal">
 
-            <include
-                layout="@layout/dashboard_slider_component"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
-                android:layout_marginRight="@dimen/STD_MARGIN"
-                android:layout_weight="1" />
+                        <include
+                            layout="@layout/dashboard_slider_component"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
+                            android:layout_marginRight="@dimen/STD_MARGIN"
+                            android:layout_weight="1" />
 
-            <include
-                layout="@layout/dashboard_sensor_component"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
-                android:layout_weight="1" />
+                        <include
+                            layout="@layout/dashboard_sensor_component"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
+                            android:layout_weight="1" />
 
-        </LinearLayout>
-    </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/linearSlider"
-        android:layout_above="@id/bottomBar"
-        android:layout_below="@id/linearComponents"
-        android:layout_width="match_parent"
-        android:gravity="center"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/L_MARGIN"
-        android:layout_marginRight="@dimen/L_MARGIN">
-
-        <HorizontalScrollView
-            android:id="@+id/hScrollView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:id="@+id/linearSceneList"
-                android:layout_width="wrap_content"
+                <LinearLayout
+                android:id="@+id/linearSlider"
+                android:layout_above="@id/bottomBar"
+                android:layout_below="@id/linearComponents"
+                android:layout_width="match_parent"
+                android:gravity="center"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" />
+                android:layout_marginLeft="@dimen/L_MARGIN"
+                android:layout_marginRight="@dimen/L_MARGIN">
 
-        </HorizontalScrollView>
+                <HorizontalScrollView
+                    android:id="@+id/hScrollView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:scrollbars="none">
 
-    </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/linearSceneList"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
 
+                </HorizontalScrollView>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:clickable="false"
+            android:id="@+id/linearDisabled"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            android:background="@color/tertiaryBgColor"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textColor="@color/yellow"
+                android:textStyle="bold"
+                android:text="Power is Off.\n Please switch on the main switch"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <FrameLayout
         android:id="@+id/bottomBar"
@@ -100,6 +129,7 @@
         android:foregroundGravity="top">
 
         <RelativeLayout
+            android:id="@+id/relativeBottomBar"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -135,6 +165,7 @@
                     android:gravity="center">
 
                     <ImageView
+                        android:id="@+id/imgFavorites"
                         android:layout_width="@dimen/ICON_BORDER_SIZE"
                         android:layout_height="@dimen/ICON_BORDER_SIZE"
                         android:background="@drawable/white_border_circle"
@@ -155,6 +186,7 @@
                     android:gravity="center">
 
                     <ImageView
+                        android:id="@+id/imgSchedulers"
                         android:layout_width="@dimen/ICON_BORDER_SIZE"
                         android:layout_height="@dimen/ICON_BORDER_SIZE"
                         android:background="@drawable/white_border_circle"

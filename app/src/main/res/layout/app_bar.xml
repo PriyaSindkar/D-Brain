@@ -23,6 +23,7 @@
 
     <ImageView
         android:id="@+id/btn"
+        android:visibility="gone"
         android:layout_width="@dimen/VS_TEXT_SIZE"
         android:layout_height="@dimen/VS_TEXT_SIZE"
         android:layout_gravity="right|center_vertical"

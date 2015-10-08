@@ -49,6 +49,7 @@ public class AnimationHelper {
     public void startPowerButtonAnimation() {
         animatorSet.start();
     }
+
     public void cancelPowerButtonAnimation() {
         animatorSet.cancel();
     }

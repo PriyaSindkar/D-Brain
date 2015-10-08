@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SensorListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SensorsListAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
@@ -116,7 +117,7 @@ public class SensorFragment extends Fragment {
         /*adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
-            Toast.makeText(getActivity(), "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -126,23 +127,10 @@ public class SensorFragment extends Fragment {
             public void onLongClick(int pos) {
                 Toast.makeText(getActivity(), "Options Will Open Here", Toast.LENGTH_SHORT).show();
             }
-        });
-
-        adapter.setDeleteClickListener(new onDeleteClickListener() {
-            @Override
-            public void onDeleteOptionClick(int pos) {
-                Toast.makeText(getActivity(), "Deleted Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setRenameClickListener(new onRenameClickListener() {
-
-            @Override
-            public void onRenameOptionClick(int pos) {
-                Toast.makeText(getActivity(), "Rename Sccessful!", Toast.LENGTH_SHORT).show();
-            }
         });*/
-        
+
+
+
         return view;
     }
 
@@ -253,12 +241,50 @@ public class SensorFragment extends Fragment {
                     adapter.notifyDataSetChanged();
                 }
 
-               /* adapter.setCheckedChangeListener(new onCheckedChangeListener() {
+                adapter.setRenameClickListener(new onRenameClickListener() {
+
                     @Override
-                    public void onCheckedChangeClick(int pos) {
-                        isDelay  = false;
+                    public void onRenameOptionClick(int pos, String oldName) {
                     }
-                });*/
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String _oldName, String _oldDetails) {
+                        final int position = pos;
+                        sensorListCursor.moveToPosition(position);
+                        final String componentId = sensorListCursor.getString(sensorListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+
+                        RenameDialog renameDialog = new RenameDialog(getActivity(), _oldName, _oldDetails);
+                        renameDialog.show();
+
+                        renameDialog.setRenameListener(new onRenameClickListener() {
+                            @Override
+                            public void onRenameOptionClick(int pos, String oldName) {
+
+                            }
+
+                            @Override
+                            public void onRenameOptionClick(int pos, String newName, String newDetails) {
+                                try {
+                                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                                    dbHelper.openDataBase();
+                                    dbHelper.renameComponent(componentId, newName, newDetails);
+                                    sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DBConstants.MACHINE1_IP);
+                                    dbHelper.close();
+                                    adapter.changeCursor(sensorListCursor);
+
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+
+            /*@Override
+            public void onRenameOptionClick(int pos) {
+
+            }*/
+                });
+
 
             } catch (Exception e) {
             }

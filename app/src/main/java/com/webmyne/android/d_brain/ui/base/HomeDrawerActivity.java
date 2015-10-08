@@ -83,15 +83,16 @@ public class HomeDrawerActivity extends AppCompatActivity {
             setSupportActionBar(toolbar);
         }
         initDrawer();
-        animObj = new AnimationHelper();
-        animObj.initPowerButtonAnimation(btn);
+       /* animObj = new AnimationHelper();
+        animObj.initPowerButtonAnimation(btn);*/
         btn.setVisibility(View.VISIBLE);
-        call();
+
+      //  call();
 
         txtClearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(txtClearButton.getText().toString().equals("Add Machine")) {
+                if (txtClearButton.getText().toString().equals("Add Machine")) {
                     AddMachineDialog machineDialog = new AddMachineDialog(HomeDrawerActivity.this);
                     machineDialog.show();
                 }
@@ -123,6 +124,33 @@ public class HomeDrawerActivity extends AppCompatActivity {
         toolbar.setSubtitle(subTitle);
     }
 
+    public void initPowerButton() {
+        animObj = new AnimationHelper();
+        animObj.initPowerButtonAnimation(btn);
+    }
+
+    public void setPowerButtonOff() {
+        btn.setAlpha(0.3f);
+    }
+
+    public void startPowerAnimation() {
+        animObj.startPowerButtonAnimation();
+    }
+
+    public void cancelPowerAnimation() {
+        animObj.cancelPowerButtonAnimation();
+    }
+
+    public void hideDrawer() {
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        drawerToggle.setDrawerIndicatorEnabled(false);
+    }
+
+    public void showDrawer() {
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        drawerToggle.setDrawerIndicatorEnabled(true);
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -136,7 +164,6 @@ public class HomeDrawerActivity extends AppCompatActivity {
     }
 
     private void initDrawer() {
-
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
 
             @Override
@@ -258,88 +285,5 @@ public class HomeDrawerActivity extends AppCompatActivity {
         }
     }
 
-    private void call() {
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //Do something after 100ms
-                new GetMachineStatus().execute();
-               // isPowerOn = !isPowerOn;
-                /*if (isPowerOn) {
-                    animObj.cancelPowerButtonAnimation();
-                } else {
-                    animObj.startPowerButtonAnimation();
-                }*/
-                handler.postDelayed(this, 1000);
-            }
-        }, 1000);
-    }
 
-    public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            setProgressBarIndeterminateVisibility(true);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_MACHINE_STATUS);
-                 Log.e("# urlValue", urlValue.toString());
-
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(1000*60);
-
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
-                Log.e("# inputStream", inputStream.toString());
-                MainXmlPullParser pullParser = new MainXmlPullParser();
-
-
-
-                powerStatus = pullParser.processXML(inputStream);
-               // Log.e("XML PARSERED", powerStatus.toString());
-
-
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            // Log.e("TAG_ASYNC", "Inside onPostExecute");
-           try {
-
-               int count = 0;
-               for (int i = 0; i < powerStatus.size(); i++) {
-                   if (powerStatus.get(i).tagName.equals("led0")) {
-                       Log.e("Power_status", powerStatus.get(i).tagValue);
-                       if (powerStatus.get(i).tagValue.equals("0")) {
-                           if (isPowerOn) {
-                               Toast.makeText(HomeDrawerActivity.this, "Machine is disconnected", Toast.LENGTH_LONG).show();
-                           }
-                           isPowerOn = false;
-                           animObj.cancelPowerButtonAnimation();
-                           count++;
-                       } else {
-                           isPowerOn = true;
-                           animObj.startPowerButtonAnimation();
-                       }
-                       break;
-                   }
-               }
-
-           }catch (Exception e){
-               Toast.makeText(HomeDrawerActivity.this, "Machine is disconnected", Toast.LENGTH_LONG).show();
-               isPowerOn = false;
-               animObj.cancelPowerButtonAnimation();
-           }
-
-
-        }
-    }
 }
