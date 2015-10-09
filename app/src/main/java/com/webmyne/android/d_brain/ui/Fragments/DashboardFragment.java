@@ -64,7 +64,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private boolean  isPowerOn = true;
     private  ArrayList<XMLValues> powerStatus;
     private FragmentActivity activity;
-
+    private int powerSignalCount = 0;
+    String previousLed = "";
+    String led = "";
 
     public static DashboardFragment newInstance() {
         DashboardFragment fragment = new DashboardFragment();
@@ -144,10 +146,10 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         parentSensors = (FrameLayout) row.findViewById(R.id.parentSensors);
         parentSensors.setOnClickListener(this);
 
-        parentSwitches.setClickable(false);
+       /* parentSwitches.setClickable(false);
         parentMotor.setClickable(false);
         parentSlider.setClickable(false);
-        parentSensors.setClickable(false);
+        parentSensors.setClickable(false);*/
 
         hScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
@@ -315,13 +317,10 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     }
 
                 } else {
-                    linearDisabled.setVisibility(View.GONE);
                     bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
                     bulb_image.setBackgroundResource(R.drawable.circle);
 
-                    imgOptions.setClickable(true);
-                    imgFavorites.setClickable(true);
-                    imgSchedulers.setClickable(true);
+                    showOnScreen();
                     ((HomeDrawerActivity) getActivity()).showDrawer();
 
                     // switch on all the previously on switches(prior to main power off)
@@ -655,8 +654,13 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 //  Log.e("# inputStream", inputStream.toString());
                 MainXmlPullParser pullParser = new MainXmlPullParser();
                 powerStatus = pullParser.processXML(inputStream);
-                // Log.e("XML PARSERED", powerStatus.toString());
-
+                 Log.e("XML PARSERED", powerStatus.toString());
+                for (int i = 0; i < powerStatus.size(); i++) {
+                    if (powerStatus.get(i).tagName.equals("led0")) {
+                        led = powerStatus.get(i).tagValue;
+                        break;
+                    }
+                }
 
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
@@ -667,8 +671,65 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         @Override
         protected void onPostExecute(Void aVoid) {
             // Log.e("TAG_ASYNC", "Inside onPostExecute");
+
+
             try {
 
+                Log.e("Power_status", led);
+                Log.e("Previous_status", previousLed);
+
+
+                if (led.equals(previousLed)) {
+                    powerSignalCount++;
+
+                    if(powerSignalCount > 10) {
+                       // Toast.makeText(activity, "Machine is disconnected", Toast.LENGTH_LONG).show();
+                        ((HomeDrawerActivity) activity).setPowerButtonOff();
+                        ((HomeDrawerActivity) activity).cancelPowerAnimation();
+                        showOffScreen();
+                        ((HomeDrawerActivity) activity).hideDrawer();
+                        bulb_image.setClickable(false);
+                    } else {
+                        ((HomeDrawerActivity) activity).startPowerAnimation();
+                        showOnScreen();
+                        bulb_image.setClickable(true);
+                        parentSwitches.setClickable(true);
+                        parentMotor.setClickable(true);
+                        parentSlider.setClickable(true);
+                        parentSensors.setClickable(true);
+                    }
+                } else {
+                    powerSignalCount = 0;
+                    ((HomeDrawerActivity) activity).startPowerAnimation();
+                    showOnScreen();
+                    bulb_image.setClickable(true);
+                    parentSwitches.setClickable(true);
+                    parentMotor.setClickable(true);
+                    parentSlider.setClickable(true);
+                    parentSensors.setClickable(true);
+                }
+                previousLed = led;
+
+            } catch(Exception e) {
+               // Toast.makeText(activity, "Machine is disconnected", Toast.LENGTH_LONG).show();
+                ((HomeDrawerActivity) activity).setPowerButtonOff();
+                ((HomeDrawerActivity) activity).cancelPowerAnimation();
+                showOffScreen();
+                ((HomeDrawerActivity) activity).hideDrawer();
+                bulb_image.setClickable(false);
+            }
+
+
+
+
+
+
+
+
+
+
+
+            /*try {
                 for (int i = 0; i < powerStatus.size(); i++) {
                     if (powerStatus.get(i).tagName.equals("led0")) {
                          Log.e("Power_status", powerStatus.get(i).tagValue);
@@ -706,7 +767,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 showOffScreen();
                 ((HomeDrawerActivity) activity).hideDrawer();
                 bulb_image.setClickable(false);
-            }
+            }*/
 
 
         }
@@ -719,5 +780,12 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         imgOptions.setClickable(false);
         imgFavorites.setClickable(false);
         imgSchedulers.setClickable(false);
+    }
+
+    private void showOnScreen() {
+        linearDisabled.setVisibility(View.GONE);
+        imgOptions.setClickable(true);
+        imgFavorites.setClickable(true);
+        imgSchedulers.setClickable(true);
     }
 }

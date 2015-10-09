@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/S_MARGIN"/>
-        <View
+        <!--<View
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:background="@color/secondaryBgColor" />
@@ -66,13 +66,7 @@
                 android:id="@+id/imgSwitch"
                 style="@style/MaterialDesignStyle" />
 
-            <!--<ImageView
-                android:id="@+id/imgSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_switch"/>-->
-
-        </LinearLayout>
+        </LinearLayout>-->
     </LinearLayout>
 
 
