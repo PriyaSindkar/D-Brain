@@ -2,6 +2,7 @@ package com.webmyne.android.d_brain.ui.Screens;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -10,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,9 +29,16 @@ import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
+import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class UserGuide extends ActionBarActivity implements View.OnClickListener {
@@ -37,12 +46,22 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
     private  TabsPagerAdapter mAdapter;
     protected PageIndicator mIndicator;
     private TextView txtSkip,txtNext;
+    private  ArrayList<XMLValues> powerStatus;
+    private String machineName, machineIP, productCode = "";
+    private Pattern pattern;
+    private Matcher matcher;
+
+    private static final String IPADDRESS_PATTERN =
+            "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                    "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                    "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+                    "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_guide);
-
+        pattern = Pattern.compile(IPADDRESS_PATTERN);
 
         init();
 
@@ -105,12 +124,18 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             case R.id.txtNext:
 
                 UserGuideSettingsFragment fragment = (UserGuideSettingsFragment) mAdapter.getItem(6);
+                machineName = fragment.getStrMachineName();
 
                 if(fragment.getStrMachineName().length() == 0) {
                     Toast.makeText(this, "Must Enter Machine Name!", Toast.LENGTH_LONG).show();
                 } else if(fragment.getIPAddress().length() == 0) {
                     Toast.makeText(this, "Must Enter Device IP Address!", Toast.LENGTH_LONG).show();
-                } else {
+                } /*else if( !validate(fragment.getIPAddress())) {
+                    Toast.makeText(this, "Please enter vaid IP Address", Toast.LENGTH_LONG).show();
+                } */  else {
+                    machineIP = fragment.getIPAddress();
+                    //get machine from IP and add to db
+                    new GetMachineStatus().execute();
 
                     if(Utils.validateProductCode(AppConstants.TEMP_PRODUCT_CODE)) {
                         SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
@@ -153,8 +178,8 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             } else {
                 for (int i = 0; i < totalNoOfSwitches; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX + idSuffix, AppConstants.SWITCH_TYPE + String.valueOf(i + 1), AppConstants.SWITCH_TYPE, "", DBConstants.MACHINE1_IP);
-                    switchItem.setMachineName("Machine-1");
+                    ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX + idSuffix, AppConstants.SWITCH_TYPE + String.valueOf(i + 1), AppConstants.SWITCH_TYPE, "", machineIP);
+                    switchItem.setMachineName(machineName);
                     listOfComponents.add(switchItem);
                 }
             }
@@ -165,8 +190,8 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             } else {
                 for (int i = 0; i < totalNoOfDimmers; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX + idSuffix, AppConstants.DIMMER_TYPE + String.valueOf(i + 1), AppConstants.DIMMER_TYPE, "", DBConstants.MACHINE1_IP);
-                    dimmerItem.setMachineName("Machine-1");
+                    ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX + idSuffix, AppConstants.DIMMER_TYPE + String.valueOf(i + 1), AppConstants.DIMMER_TYPE, "", machineIP);
+                    dimmerItem.setMachineName(machineName);
                     listOfComponents.add(dimmerItem);
                 }
             }
@@ -177,8 +202,8 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             } else {
                 for (int i = 0; i < totalNoOfMotors; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel motorItem = new ComponentModel(AppConstants.MOTOR_PREFIX + idSuffix, AppConstants.MOTOR_TYPE + String.valueOf(i + 1), AppConstants.MOTOR_TYPE, "", DBConstants.MACHINE1_IP);
-                    motorItem.setMachineName("Machine-1");
+                    ComponentModel motorItem = new ComponentModel(AppConstants.MOTOR_PREFIX + idSuffix, AppConstants.MOTOR_TYPE + String.valueOf(i + 1), AppConstants.MOTOR_TYPE, "", machineIP);
+                    motorItem.setMachineName(machineName);
                     listOfComponents.add(motorItem);
                 }
             }
@@ -190,8 +215,8 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             } else {
                 for (int i = 0; i < totalNoOfAlerts; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX + idSuffix, AppConstants.ALERT_TYPE + String.valueOf(i + 1), AppConstants.ALERT_TYPE, "", DBConstants.MACHINE1_IP);
-                    sensorItem.setMachineName("Machine-1");
+                    ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX + idSuffix, AppConstants.ALERT_TYPE + String.valueOf(i + 1), AppConstants.ALERT_TYPE, "", machineIP);
+                    sensorItem.setMachineName(machineName);
                     sensorItem.setDetails("Alert fired on breach");
                     listOfComponents.add(sensorItem);
                 }
@@ -265,6 +290,66 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
     public void onBackPressed() {
         super.onBackPressed();
         finish();
+    }
+
+    public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            // setProgressBarIndeterminateVisibility(true);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                URL urlValue = new URL("http://"+machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
+                Log.e("# urlValue", urlValue.toString());
+
+                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(1000*60);
+
+                httpUrlConnection.setRequestMethod("GET");
+                InputStream inputStream = httpUrlConnection.getInputStream();
+                //  Log.e("# inputStream", inputStream.toString());
+                MainXmlPullParser pullParser = new MainXmlPullParser();
+                powerStatus = pullParser.processXML(inputStream);
+                Log.e("XML PARSERED", powerStatus.toString());
+
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            // Log.e("TAG_ASYNC", "Inside onPostExecute");
+            DatabaseHelper dbHelper = new DatabaseHelper(UserGuide.this);
+            try {
+                dbHelper.openDataBase();
+                dbHelper.insertIntoMachine(powerStatus, machineName, machineIP);
+                dbHelper.close();
+
+                for(int i=0; i<powerStatus.size();i++) {
+                    if(powerStatus.get(i).tagName.equals("DPC")) {
+                        productCode = powerStatus.get(i).tagValue;
+                    }
+                }
+            }catch (Exception e) {}
+
+        }
+    }
+
+    /**
+     * Validate ip address with regular expression
+     * @param ip ip address for validation
+     * @return true valid ip address, false invalid ip address
+     */
+    public boolean validate(final String ip){
+        Log.e("ip", ip);
+        matcher = pattern.matcher(ip);
+        return matcher.matches();
     }
 
 }

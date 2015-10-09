@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.sax.RootElement;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -19,7 +18,6 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,13 +58,15 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private ArrayList<String> switchesWithOnStatus;
     private ArrayList<XMLValues> dimmersWithOnStatus;
     private ArrayList<XMLValues> switchStatusList, dimmerStatusList;
-    private Cursor switchListCursor, dimmerListCursor, motorListCursor, sensorListCursor;
+    private Cursor switchListCursor, dimmerListCursor, motorListCursor, sensorListCursor, machineCursor;
     private boolean  isPowerOn = true;
     private  ArrayList<XMLValues> powerStatus;
     private FragmentActivity activity;
     private int powerSignalCount = 0;
-    String previousLed = "";
-    String led = "";
+    String previousLed = "", led = "";
+    public static String URL_MACHINE_IP ="";
+    public static String MACHINE_IP = "";
+
 
     public static DashboardFragment newInstance() {
         DashboardFragment fragment = new DashboardFragment();
@@ -247,7 +247,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         }
 
         ((HomeDrawerActivity) getActivity()).initPowerButton();
-        call();
+        // call();
     }
 
     @Override
@@ -257,6 +257,22 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
         homeScreen.setTitle("Dashboard");
         homeScreen.hideAppBarButton();
+
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        try {
+            dbHelper.openDataBase();
+            machineCursor = dbHelper.getMachine();
+
+            if(machineCursor != null) {
+                machineCursor.moveToFirst();
+                URL_MACHINE_IP = "http://" + machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+            }
+            dbHelper.close();
+            Log.e("Machine IP", URL_MACHINE_IP);
+        } catch (Exception e) {
+            Log.e("EXP_MACHINE", e.toString());
+        }
 
         updateSceneList();
 

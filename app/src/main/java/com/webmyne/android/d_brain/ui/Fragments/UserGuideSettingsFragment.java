@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,9 @@ public class UserGuideSettingsFragment extends Fragment {
 
         edtMachineName = (EditText) convertView.findViewById(R.id.edtMachineName);
         edtIPAddress = (EditText) convertView.findViewById(R.id.edtIPAddress);
+
+        Log.e("edtIPAddress", edtIPAddress.getText().toString());
+        strIPAddress = edtIPAddress.getText().toString();
 
         edtIPAddress.addTextChangedListener(new TextWatcher() {
 

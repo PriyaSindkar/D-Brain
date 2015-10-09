@@ -1,9 +1,11 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
@@ -22,6 +25,10 @@ import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+
+import java.sql.SQLException;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -29,10 +36,11 @@ import jp.wasabeef.recyclerview.animators.LandingAnimator;
 public class AddMachineFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
-    private MachineListAdapter adapter;
+    private MachineListCursorAdapter adapter;
     private int totalNoOfMachines = 2;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
+    private Cursor machineCursor;
 
     public static AddMachineFragment newInstance() {
         AddMachineFragment fragment = new AddMachineFragment();
@@ -57,7 +65,7 @@ public class AddMachineFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_scene_list, container, false);
         init(view);
 
-        adapter.setSingleClickListener(new onSingleClickListener() {
+        /*adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
                 //Toast.makeText(DimmerListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
@@ -90,7 +98,7 @@ public class AddMachineFragment extends Fragment {
             public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
 
             }
-        });
+        });*/
 
         
         return view;
@@ -107,7 +115,22 @@ public class AddMachineFragment extends Fragment {
         txtEmptyView1 = (TextView) view.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) view.findViewById(R.id.txtEmptyView);
 
-        if(totalNoOfMachines == 0) {
+
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+
+        //insert switches in adapter ofr machine-1
+        try {
+            dbHelper.openDataBase();
+            machineCursor =  dbHelper.getMachine();
+            Log.e("machine cursor", machineCursor.getCount() + "");
+            dbHelper.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        if(machineCursor.getCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
 
@@ -125,8 +148,7 @@ public class AddMachineFragment extends Fragment {
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        adapter = new MachineListAdapter(getActivity(), totalNoOfMachines);
-        adapter.setType(0);
+        adapter = new MachineListCursorAdapter(getActivity(), machineCursor);
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
 

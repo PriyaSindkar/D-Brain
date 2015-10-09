@@ -7,10 +7,9 @@
     android:background="#2d3f4d"
     tools:context=".MainActivity">
 
-    <RelativeLayout
+    <FrameLayout
         android:id="@+id/frameMainBody"
         android:layout_width="match_parent"
-        android:orientation="vertical"
         android:layout_height="match_parent">
 
         <LinearLayout
@@ -72,14 +71,14 @@
                 </LinearLayout>
 
                 <LinearLayout
-                android:id="@+id/linearSlider"
-                android:layout_above="@id/bottomBar"
-                android:layout_below="@id/linearComponents"
-                android:layout_width="match_parent"
-                android:gravity="center"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/L_MARGIN"
-                android:layout_marginRight="@dimen/L_MARGIN">
+                    android:id="@+id/linearSlider"
+                    android:layout_above="@id/bottomBar"
+                    android:layout_below="@id/linearComponents"
+                    android:layout_width="match_parent"
+                    android:gravity="center"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/L_MARGIN"
+                    android:layout_marginRight="@dimen/L_MARGIN">
 
                 <HorizontalScrollView
                     android:id="@+id/hScrollView"
@@ -97,6 +96,7 @@
                 </HorizontalScrollView>
 
             </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -119,7 +119,7 @@
 
         </LinearLayout>
 
-    </RelativeLayout>
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/bottomBar"

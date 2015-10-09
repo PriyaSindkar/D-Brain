@@ -34,8 +34,8 @@ public class DBConstants {
     public static final String KEY_M_VERSION = "DV";
     public static final String KEY_M_PRODUCTCODE = "DPC";
     public static final String KEY_M_DATETIME = "DCT";
-    public static final String KEY_M_IP = "DIP";
-    public static final String KEY_M_NAME = "DNAME";
+    public static final String KEY_M_IP = "MACHINE_IP";
+    public static final String KEY_M_NAME = "NAME";
 
     // Component Table Column names
     public static final String KEY_C_ID = "_id";

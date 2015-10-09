@@ -17,6 +17,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -52,6 +53,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     private View divider;
     private FloatingActionButton fab;
     private Button btnAddSwitch, btnAddDimmer, btnAddMotor, btnAdd, btnCancel;
+    private ImageView imgBack, imgListGridToggle;
 
     private int selectedPanelPosition;
     private String selectedPanelId;
@@ -69,6 +71,11 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         }
         toolbarTitle = (TextView) findViewById(R.id.toolbarTitle);
         toolbarTitle.setText("Touch Panel");
+
+        imgBack = (ImageView) findViewById(R.id.imgBack);
+        imgListGridToggle = (ImageView) findViewById(R.id.imgListGridToggle);
+        imgBack.setOnClickListener(this);
+        imgListGridToggle.setVisibility(View.GONE);
 
         txtDisplayPanelName = (TextView) findViewById(R.id.txtDisplayPanelName);
         linearTouchPanelItems = (LinearLayout) findViewById(R.id.linearTouchPanelItems);
@@ -217,6 +224,8 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
                                 rightParent.startAnimation(AnimationUtils.loadAnimation(TouchPanelActivity.this,
                                         R.anim.slide_in_right));
+                                divider.startAnimation(AnimationUtils.loadAnimation(TouchPanelActivity.this,
+                                        R.anim.slide_in_right));
 
                                 linearPanelList.setVisibility(View.VISIBLE);
                                 //linearAddComponents.setVisibility(View.INVISIBLE);
@@ -345,6 +354,10 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                 fab.setVisibility(View.GONE);
                 FabTransformation.with(fab)
                         .transformFrom(linearAddCancel);
+                break;
+
+            case R.id.imgBack:
+                finish();
                 break;
         }
     }

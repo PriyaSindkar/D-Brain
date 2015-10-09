@@ -122,11 +122,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);*/
     }
 
-   public void insertIntoMachine(ArrayList<XMLValues> machineValuesList) {
+   public void insertIntoMachine(ArrayList<XMLValues> machineValuesList, String machineName, String machineIP) {
+
+       Log.e("TAG_DB", "Insert machine");
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-
        for(int i=0; i<machineValuesList.size(); i++) {
            if(machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_DA)){
                values.put(DBConstants.KEY_M_DA, machineValuesList.get(i).tagValue);
@@ -139,25 +140,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            } else if(machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_DATETIME)){
                values.put(DBConstants.KEY_M_DATETIME, machineValuesList.get(i).tagValue);
            }
+           values.put(DBConstants.KEY_M_NAME, machineName);
+           values.put(DBConstants.KEY_M_IP, machineIP);
        }
+
+       Log.e("Machine_CV", values.toString());
 
        db.insert(DBConstants.TABLE_MACHINE, null, values);
        db.close();
     }
 
-  /*   public MachineModel getMachine(int id) {
+    public Cursor getMachine() {
         SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(DBConstants.TABLE_MACHINE, new String[] { DBConstants.KEY_M_ID,
-                        DBConstants.KEY_M_NAME, DBConstants.KEY_M_IP }, DBConstants.KEY_M_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
-
-        MachineModel machine = new MachineModel(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2));
-        return machine;
-    }*/
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, null,null, null, null, null, null);
+            /*if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                        Log.e("MACHINEIP", cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP)));
+                    } while (cursor.moveToNext());
+                }
+            }*/
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
 
 
     public void insertIntoComponent(ArrayList<ComponentModel> componentModels) {
@@ -316,6 +326,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // to delete  scene
+    public void deleteScene(String sceneId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(DBConstants.TABLE_SCENE, DBConstants.KEY_S_ID + "='" + sceneId + "'", null);
+
+        db.close();
+    }
+
     public String getSceneStatus(String sceneId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
@@ -324,7 +343,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // TO:DO search machine-wise
 
            /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
-                    new String[]{machineIP}, null, null, null, null);*/
+                    new String[]{URL_MACHINE_IP}, null, null, null, null);*/
 
             cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_S_ID + "=?",
                     new String[]{sceneId}, null, null, null, null);
@@ -443,7 +462,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // TO:DO search machine-wise
 
            /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
-                    new String[]{machineIP}, null, null, null, null);*/
+                    new String[]{URL_MACHINE_IP}, null, null, null, null);*/
 
             cursor = db.query(DBConstants.TABLE_SCENE_COMPONENT, null, DBConstants.KEY_SC_SCENE_ID + "=? AND " + DBConstants.KEY_SC_COMPONENT_ID + "=?",
                     new String[]{sceneId, componentId}, null, null, null, null);
@@ -626,7 +645,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // TO:DO search machine-wise
 
            /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
-                    new String[]{machineIP}, null, null, null, null);*/
+                    new String[]{URL_MACHINE_IP}, null, null, null, null);*/
 
             cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_ITEM, null, DBConstants.KEY_TP_ITEM_PID + "=? AND "
                             + DBConstants.KEY_TP_ITEM_POS + "=? AND " + DBConstants.KEY_TP_ITEM_COMPONENT_ID + "=?",

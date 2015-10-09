@@ -5,7 +5,7 @@
     android:background="#fff"
     android:orientation="vertical">
 
-    <include layout="@layout/app_bar"></include>
+    <include layout="@layout/app_bar2"></include>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -1,19 +1,18 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,6 +25,7 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SceneAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
+import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -54,8 +54,7 @@ import java.util.ArrayList;
 
 public class SceneActivity extends AppCompatActivity implements View.OnClickListener{
     private Toolbar toolbar;
-    private TextView txtSwitch, txtDimmer, txtMotor;
-    private EditText edtSceneName;
+    private TextView txtSwitch, txtDimmer, txtMotor, edtSceneName;
     private ImageView imgHScrollLeft, imgHScrollRight, imgBack;
     private HorizontalScrollView hScrollView;
     private LinearLayout linearControls, linearPopup, linearSaveScene;
@@ -120,7 +119,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         imgHScrollLeft = (ImageView) findViewById(R.id.imgHScrollLeft);
         imgHScrollRight = (ImageView) findViewById(R.id.imgHScrollRight);
         imgBack = (ImageView) findViewById(R.id.imgBack);
-        edtSceneName = (EditText) findViewById(R.id.edtSceneName);
+        edtSceneName = (TextView) findViewById(R.id.edtSceneName);
         linearSaveScene = (LinearLayout) findViewById(R.id.linearSaveScene);
         sceneMainSwitch = (SwitchButton) findViewById(R.id.sceneMainSwitch);
 
@@ -347,6 +346,35 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             return true;
         }
 
+        if (id == R.id.action_delete) {
+
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SceneActivity.this);
+            alertDialogBuilder.setTitle("Delete Scene");
+            alertDialogBuilder
+                    .setMessage("Are you sure you want to delete the scene?")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                            try {
+                                dbHelper.openDataBase();
+                                dbHelper.deleteScene(currentSceneId);
+                                dbHelper.close();
+                                Toast.makeText(SceneActivity.this, "Scene deleted", Toast.LENGTH_LONG).show();
+                                finish();
+                            }catch (Exception e) {}
+                        }
+                    })
+                    .setNegativeButton("No",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -567,7 +595,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+            switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
             totalNoOfSwitches = switchListCursor.getCount();
@@ -606,7 +634,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            motorListCursor = dbHelper.getAllMotorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            motorListCursor = dbHelper.getAllMotorComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
             totalNoOfMotors = motorListCursor.getCount();
@@ -643,7 +671,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
             totalNoOfDimmers = dimmerListCursor.getCount();
@@ -704,7 +732,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         String defaultValue = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
 
                         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
-                        sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
+                        sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
                         sceneItemsDataObject.setSceneControlType(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE)));
                         sceneItemsDataObject.setSceneItemId(componentId);
 
@@ -794,7 +822,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     private void addSwitchToScene(int position){
         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
         sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
-        sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
+        sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
         sceneItemsDataObject.setMachineID("");
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
         mData.add(sceneItemsDataObject);
@@ -821,7 +849,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     private void addDimmerToScene(int position){
         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
         sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
-        sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
+        sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
         sceneItemsDataObject.setMachineID("");
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
         //mAdapter.add(mData.size(), sceneItemsDataObject);
@@ -861,9 +889,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     // set defaults for switch
                     if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
                         if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                            SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                         } else {
-                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
                         }
                     }
 
@@ -874,9 +902,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
                         }
                         if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE +dimmerValue;
+                            SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE +dimmerValue;
                         } else {
-                            SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
+                            SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
                         }
                     }
 
@@ -924,7 +952,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
                     // for switch
                     if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
-                        SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                        SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                     }
 
                     if(mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE) ) {
@@ -932,7 +960,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         if( !mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0")) {
                             dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
                         }
-                        SET_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
+                        SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
                     }
 
                     URL urlValue = new URL(SET_STATUS_URL);

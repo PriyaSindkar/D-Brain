@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.CreateSceneAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
+import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -330,7 +331,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
                             // set component_id in scene_component table
                             sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
-                            sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
+                            sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
                             sceneItemsDataObject.setMachineID("");
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
 
@@ -393,7 +394,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
                             // set component_id in scene_component table
                             sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
-                            sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
+                            sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
                             sceneItemsDataObject.setMachineID("");
                             sceneItemsDataObject.setDefaultValue(AppConstants.DIMMER_DEFAULT_VALUE);
 
@@ -452,7 +453,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                     public void onClick(View v) {
                         if (initMotors.get(position).isFocusable()) {
                             SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.MOTOR_TYPE, initMotors.get(position).getText());
-                            sceneItemsDataObject.setMachineIP(DBConstants.MACHINE1_IP);
+                            sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
                             sceneItemsDataObject.setMachineID("");
 
                             mAdapter.add(mData.size(), sceneItemsDataObject);
@@ -487,7 +488,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            Cursor switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+            Cursor switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
             totalNoOfSwitches = switchListCursor.getCount();
@@ -526,7 +527,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            Cursor motorListCursor = dbHelper.getAllMotorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            Cursor motorListCursor = dbHelper.getAllMotorComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
             totalNoOfMotors = motorListCursor.getCount();
@@ -558,7 +559,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            Cursor dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
+            Cursor dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
             totalNoOfDimmers = dimmerListCursor.getCount();
