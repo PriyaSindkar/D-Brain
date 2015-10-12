@@ -7,9 +7,11 @@ public class AppConstants {
 
     public static String SIMULATOR_URL = "http://ws-srv-net.in.webmyne.com/Applications/DsquareWS";
     public static String CHANGE_STATUS_SIMULATOR_URL="http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
-    public static final String TEMP_PRODUCT_CODE = "02109-6119";
+ //   public static final String TEMP_PRODUCT_CODE = "52115-0400";
 
-     public static String URL_MACHINE_IP = "http://192.168.1.199";
+    //02109-6119
+
+    // public static String URL_MACHINE_IP = "http://192.168.1.199";
     // for simulator
    // public static String URL_MACHINE_IP = "http://ws-srv-net.in.webmyne.com/Applications/DsquareWS/Simulator.svc/json/Update";
    // public static String URL_MACHINE_IP = "http://d2brain.com";

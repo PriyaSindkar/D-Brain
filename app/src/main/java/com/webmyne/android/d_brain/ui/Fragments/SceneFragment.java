@@ -182,7 +182,7 @@ public class SceneFragment extends Fragment {
         try {
             dbHelper.openDataBase();
 
-            sceneListCursor = dbHelper.getAllScenes(DBConstants.MACHINE1_IP);
+            sceneListCursor = dbHelper.getAllScenes(DashboardFragment.MACHINE_IP);
             dbHelper.close();
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());

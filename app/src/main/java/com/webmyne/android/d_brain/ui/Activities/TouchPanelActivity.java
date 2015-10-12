@@ -28,6 +28,7 @@ import com.konifar.fab_transformation.FabTransformation;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.TouchPComponentListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.TouchPanelItemListAdapter;
+import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemDeleteListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
@@ -368,7 +369,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -382,7 +383,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -396,7 +397,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            motorListCursor =  dbHelper.getAllMotorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            motorListCursor =  dbHelper.getAllMotorComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
         } catch (SQLException e) {

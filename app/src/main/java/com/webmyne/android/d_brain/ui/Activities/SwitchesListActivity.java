@@ -203,7 +203,7 @@ public class SwitchesListActivity extends AppCompatActivity {
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
             Log.e("switchListCursor", switchListCursor.getCount()+"");
             dbHelper.close();
 
@@ -232,7 +232,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                 MainXmlPullParser pullParser = new MainXmlPullParser();
 
                 switchStatusList = pullParser.processXML(inputStream);
-               // Log.e("XML PARSERED", dimmerStatusList.toString());
+                Log.e("XML PARSERED", switchStatusList.toString());
 
 
             } catch (Exception e) {
@@ -285,7 +285,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                                     DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
                                     dbHelper.openDataBase();
                                     dbHelper.renameComponent(componentId, newName);
-                                    switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
+                                    switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
                                     dbHelper.close();
                                     adapter.changeCursor(switchListCursor);
 

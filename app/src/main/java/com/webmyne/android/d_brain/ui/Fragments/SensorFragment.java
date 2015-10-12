@@ -186,7 +186,7 @@ public class SensorFragment extends Fragment {
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -204,7 +204,7 @@ public class SensorFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_SENSOR_STATUS);
+                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_SENSOR_STATUS);
                 // Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
@@ -268,7 +268,7 @@ public class SensorFragment extends Fragment {
                                     DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                                     dbHelper.openDataBase();
                                     dbHelper.renameComponent(componentId, newName, newDetails);
-                                    sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DBConstants.MACHINE1_IP);
+                                    sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DashboardFragment.MACHINE_IP);
                                     dbHelper.close();
                                     adapter.changeCursor(sensorListCursor);
 

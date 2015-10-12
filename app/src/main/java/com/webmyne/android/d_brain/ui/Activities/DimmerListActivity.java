@@ -241,7 +241,7 @@ public class DimmerListActivity extends AppCompatActivity {
         //insert dimmers in adapter for machine-1
         try {
             dbHelper.openDataBase();
-            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
+            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -321,7 +321,7 @@ public class DimmerListActivity extends AppCompatActivity {
                                     DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
                                     dbHelper.openDataBase();
                                     dbHelper.renameComponent(componentId, newName);
-                                    dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
+                                    dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DashboardFragment.MACHINE_IP);
                                     dbHelper.close();
                                     adapter.changeCursor(dimmerListCursor);
 

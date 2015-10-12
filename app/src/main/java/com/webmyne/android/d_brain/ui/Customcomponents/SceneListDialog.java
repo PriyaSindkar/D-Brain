@@ -18,6 +18,7 @@ import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Adapters.SceneListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SceneListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
@@ -158,7 +159,7 @@ public class SceneListDialog extends BaseDialog {
         try {
             dbHelper.openDataBase();
 
-            sceneListCursor = dbHelper.getAllScenes(DBConstants.MACHINE1_IP);
+            sceneListCursor = dbHelper.getAllScenes(DashboardFragment.MACHINE_IP);
             dbHelper.close();
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());

@@ -137,7 +137,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                     //get machine from IP and add to db
                     new GetMachineStatus().execute();
 
-                    if(Utils.validateProductCode(AppConstants.TEMP_PRODUCT_CODE)) {
+                    /*if(Utils.validateProductCode(AppConstants.TEMP_PRODUCT_CODE)) {
                         SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putBoolean("hasLoggedIn", true);
@@ -150,13 +150,13 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                         startActivity(intent);
                     } else {
                         Toast.makeText(this, "Invalid Product Code", Toast.LENGTH_LONG).show();
-                    }
+                    }*/
                 }
                 break;
         }
     }
 
-    private void initDatabaseComponents() {
+    private void initDatabaseComponents(String productCode) {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
 
         //insert switches in component table for the given machine
@@ -164,7 +164,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             dbHelper.openDataBase();
 
             // product code and machine IP are hard-coded
-            String productCode = AppConstants.TEMP_PRODUCT_CODE;
+            //String productCode = AppConstants.TEMP_PRODUCT_CODE;
             ArrayList<ComponentModel> listOfComponents = new ArrayList<>();
             ArrayList<TouchPanelModel> listOfTouchPanels = new ArrayList<>();
 
@@ -172,6 +172,8 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             int totalNoOfSwitches = Integer.parseInt(productCode.substring(1,2)) * 11;
             int totalNoOfDimmers = Integer.parseInt(productCode.substring(2,3)) * 11;
             int totalNoOfMotors = Integer.parseInt(productCode.substring(3,4)) * 11;
+
+            Log.e("totalNoOfSwitches", totalNoOfSwitches+"");
 
             if(totalNoOfSwitches == 0) {
 
@@ -336,6 +338,21 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                         productCode = powerStatus.get(i).tagValue;
                     }
                 }
+
+                if(Utils.validateProductCode(productCode)) {
+                        SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.putBoolean("hasLoggedIn", true);
+                        editor.commit();
+
+                        initDatabaseComponents(productCode);
+
+                        Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(UserGuide.this, "Invalid Product Code", Toast.LENGTH_LONG).show();
+                    }
             }catch (Exception e) {}
 
         }

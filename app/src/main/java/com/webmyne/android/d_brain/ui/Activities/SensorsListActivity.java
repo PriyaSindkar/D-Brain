@@ -169,7 +169,7 @@ public class SensorsListActivity extends AppCompatActivity {
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -272,7 +272,7 @@ public class SensorsListActivity extends AppCompatActivity {
                                     DatabaseHelper dbHelper = new DatabaseHelper(SensorsListActivity.this);
                                     dbHelper.openDataBase();
                                     dbHelper.renameComponent(componentId, newName, newDetails);
-                                    sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DBConstants.MACHINE1_IP);
+                                    sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DashboardFragment.MACHINE_IP);
                                     dbHelper.close();
                                     adapter.changeCursor(sensorListCursor);
 

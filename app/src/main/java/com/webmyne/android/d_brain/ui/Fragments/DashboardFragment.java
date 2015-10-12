@@ -189,24 +189,42 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             }
         });
 
-        //check total components in adapter ofr machine-1
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();
-            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DBConstants.MACHINE1_IP);
-            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DBConstants.MACHINE1_IP);
-            motorListCursor =  dbHelper.getAllMotorComponentsForAMachine(DBConstants.MACHINE1_IP);
-            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DBConstants.MACHINE1_IP);
+            machineCursor = dbHelper.getMachine();
+
+            if(machineCursor != null) {
+                machineCursor.moveToFirst();
+                URL_MACHINE_IP = "http://" + machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+            }
+            /*dbHelper.close();
+            Log.e("Machine IP", URL_MACHINE_IP);
+        } catch (Exception e) {
+            Log.e("EXP_MACHINE", e.toString());
+        }
+
+        //check total components in adapter ofr machine-1
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        try {
+            dbHelper.openDataBase();*/
+            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(MACHINE_IP);
+            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(MACHINE_IP);
+            motorListCursor =  dbHelper.getAllMotorComponentsForAMachine(MACHINE_IP);
+            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(MACHINE_IP);
             dbHelper.close();
 
             // get no of switches from db, if 0 no, switches not shown
             if(switchListCursor != null) {
+                Log.e("no of switches", switchListCursor.getCount()+"");
                 if (switchListCursor.getCount() == 0) {
                     parentSwitches.setVisibility(View.GONE);
                 } else {
                     txtNoOfSwitchUnits.setText(String.valueOf(switchListCursor.getCount()));
                 }
             } else {
+                Log.e("no of switches", "null");
                 parentSwitches.setVisibility(View.GONE);
             }
 
@@ -258,7 +276,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         homeScreen.setTitle("Dashboard");
         homeScreen.hideAppBarButton();
 
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        /*DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();
             machineCursor = dbHelper.getMachine();
@@ -272,7 +290,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             Log.e("Machine IP", URL_MACHINE_IP);
         } catch (Exception e) {
             Log.e("EXP_MACHINE", e.toString());
-        }
+        }*/
 
         updateSceneList();
 
@@ -343,7 +361,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     if(switchesWithOnStatus != null && !switchesWithOnStatus.isEmpty()) {
                         for (int i = 0; i < switchesWithOnStatus.size(); i++) {
                             String strPosition = switchesWithOnStatus.get(i).substring(2, 4);
-                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }
                     }
@@ -354,7 +372,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                             XMLValues dimmer = dimmersWithOnStatus.get(i);
                             String strPosition = dimmer.tagName.substring(2, 4);
                             String strProgress = dimmer.tagValue.substring(2, 4);
-                            String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                         }
                     }
@@ -419,7 +437,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         try {
             dbHelper.openDataBase();
 
-            final Cursor sceneCursor = dbHelper.getAllScenes(DBConstants.MACHINE1_IP);
+            final Cursor sceneCursor = dbHelper.getAllScenes(DashboardFragment.MACHINE_IP);
             dbHelper.close();
 
             if (sceneCursor != null) {
@@ -482,7 +500,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
+                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
                 // Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
@@ -517,7 +535,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             // turn off all the on switches
             for(int i=0; i< switchesWithOnStatus.size();i++) {
                 String strPosition = switchesWithOnStatus.get(i).substring(2,4);
-                String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                 new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
             }
         }
@@ -536,7 +554,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_DIMMER_STATUS);
+                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_DIMMER_STATUS);
                 // Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
@@ -573,7 +591,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 XMLValues dimmer = dimmersWithOnStatus.get(i);
                 String strPosition =  dimmer.tagName.substring(2, 4);
                 String strProgress = dimmer.tagValue.substring(2, 4);
-                String CHANGE_STATUS_URL = AppConstants.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                 new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
             }
         }
@@ -659,7 +677,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                URL urlValue = new URL(AppConstants.URL_MACHINE_IP + AppConstants.URL_FETCH_MACHINE_STATUS);
+                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_MACHINE_STATUS);
                  Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();

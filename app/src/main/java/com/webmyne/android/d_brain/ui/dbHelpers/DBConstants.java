@@ -71,7 +71,7 @@ public class DBConstants {
 
 
     //Machine Config
-    public static final String MACHINE1_IP = "192.168.1.199";
+  //  public static final String MACHINE1_IP = "192.168.1.199";
 
     /*public static final String CREATE_MACHINE_TABLE = "CREATE TABLE " + TABLE_MACHINE + "("
             + DBConstants.KEY_M_ID + " INTEGER PRIMARY KEY,"
