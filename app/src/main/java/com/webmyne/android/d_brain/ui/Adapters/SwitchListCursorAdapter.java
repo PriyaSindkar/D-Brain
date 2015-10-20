@@ -16,6 +16,7 @@ import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
+import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
@@ -70,7 +71,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
 
     public class ListViewHolder extends ViewHolder {
-        public  TextView txtSwitchName;
+        public  TextView txtSwitchName, txtMachineName;
         public ImageView imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
         public LinearLayout linearSwitch;
         public SwitchButton imgSwitch;
@@ -78,6 +79,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         public ListViewHolder ( View view ) {
             super ( view );
             this.txtSwitchName = (TextView) view.findViewById(R.id.txtSwitchName);
+            this.txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
 
             this.imgFavoriteOption = (ImageView) view.findViewById(R.id.imgFavoriteOption);
@@ -90,13 +92,14 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     }
 
     public class GridViewHolder extends ViewHolder{
-        public  TextView txtSwitchName;
+        public  TextView txtSwitchName, txtMachineName;
         public LinearLayout linearSwitch;
         public SwitchButton imgSwitch;
 
         public GridViewHolder ( View view ) {
             super ( view );
             this.txtSwitchName = (TextView) view.findViewById(R.id.txtSwitchName);
+            this.txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
             this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
         }
@@ -142,6 +145,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         int switchNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
@@ -149,7 +153,14 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-                listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
+
+                AdvancedSpannableString sp = new AdvancedSpannableString("Switch Name: "+ cursor.getString(switchNameIndex));
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Switch Name:");
+                listHolder.txtSwitchName.setText(sp);
+
+                sp = new AdvancedSpannableString("Machine Name: "+ cursor.getString(machineNameIndex));
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");
+                listHolder.txtMachineName.setText(sp);
 
                 if( switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
                     listHolder.imgSwitch.setChecked(false);
@@ -191,17 +202,17 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     }
                 });
 
-                /*listHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _singleClick.onSingleClick(position);
-                    }
-                });
-
                 listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         _favoriteClick.onFavoriteOptionClick(position);
+                    }
+                });
+
+                /*listHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        _singleClick.onSingleClick(position);
                     }
                 });
 
@@ -215,6 +226,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
             case 1:
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
                 groupViewHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
+                groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                 if( switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
                     groupViewHolder.imgSwitch.setChecked(false);

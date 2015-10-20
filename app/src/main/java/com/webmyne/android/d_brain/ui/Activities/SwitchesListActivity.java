@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
@@ -25,6 +26,7 @@ import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
+import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -123,9 +125,6 @@ public class SwitchesListActivity extends AppCompatActivity {
         // fetch switch status periodically
         ResumeTimer();
 
-
-
-
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
         mRecyclerView.getItemAnimator().setSupportsChangeAnimations(false);
@@ -139,13 +138,6 @@ public class SwitchesListActivity extends AppCompatActivity {
             @Override
             public void onLongClick(int pos) {
                 Toast.makeText(SwitchesListActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setFavoriteClickListener(new onFavoriteClickListener() {
-            @Override
-            public void onFavoriteOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Added to Favorite Sccessful!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -315,10 +307,38 @@ public class SwitchesListActivity extends AppCompatActivity {
                         switchListCursor.moveToPosition(pos);
                         String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
                         String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
-                        SceneListDialog dialog = new SceneListDialog(SwitchesListActivity.this,componentId, componentType );
+                        SceneListDialog dialog = new SceneListDialog(SwitchesListActivity.this, componentId, componentType);
                         dialog.show();
 
                         //Toast.makeText(SwitchesListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                adapter.setFavoriteClickListener(new onFavoriteClickListener() {
+                    @Override
+                    public void onFavoriteOptionClick(int pos) {
+                        switchListCursor.moveToPosition(pos);
+                        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        String componentName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+                        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+                        String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+                        String machineName = "";
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                            dbHelper.openDataBase();
+                            machineName = dbHelper.getMachineNameByIP(machineIP);
+                            boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentId, componentName,componentType, machineIP, machineName);
+                            dbHelper.close();
+
+                            if(isAlreadyAFavourite) {
+                                Toast.makeText(SwitchesListActivity.this, "Already added to Favorite!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(SwitchesListActivity.this, "Added to Favorite Successfully!", Toast.LENGTH_SHORT).show();
+                            }
+
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
 

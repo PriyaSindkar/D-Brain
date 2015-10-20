@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
@@ -23,6 +24,7 @@ import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
+import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -144,13 +146,6 @@ public class DimmerListActivity extends AppCompatActivity {
             }
         });
 
-        adapter.setFavoriteClickListener(new onFavoriteClickListener() {
-            @Override
-            public void onFavoriteOptionClick(int pos) {
-                Toast.makeText(DimmerListActivity.this, "Added to Favorite Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
         adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
 
             @Override
@@ -269,7 +264,7 @@ public class DimmerListActivity extends AppCompatActivity {
                 MainXmlPullParser pullParser = new MainXmlPullParser();
 
                 dimmerStatusList = pullParser.processXML(inputStream);
-                 //Log.e("XML PARSERED", dimmerStatusList.toString());
+                Log.e("XML PARSERED", dimmerStatusList.toString());
 
 
             } catch (Exception e) {
@@ -355,6 +350,34 @@ public class DimmerListActivity extends AppCompatActivity {
                         dialog.show();
 
                         //Toast.makeText(SwitchesListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                adapter.setFavoriteClickListener(new onFavoriteClickListener() {
+                    @Override
+                    public void onFavoriteOptionClick(int pos) {
+                        dimmerListCursor.moveToPosition(pos);
+                        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+                        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+                        String machineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+                        String machineName = "";
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+                            dbHelper.openDataBase();
+                            machineName = dbHelper.getMachineNameByIP(machineIP);
+                            boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentId, componentName,componentType, machineIP, machineName);
+                            dbHelper.close();
+
+                            if(isAlreadyAFavourite) {
+                                Toast.makeText(DimmerListActivity.this, "Already added to Favorite!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(DimmerListActivity.this, "Added to Favorite Successfully!", Toast.LENGTH_SHORT).show();
+                            }
+
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
 

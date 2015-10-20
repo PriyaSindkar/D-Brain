@@ -13,6 +13,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,9 +48,10 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
     protected PageIndicator mIndicator;
     private TextView txtSkip,txtNext;
     private  ArrayList<XMLValues> powerStatus;
-    private String machineName, machineIP, productCode = "";
+    private String machineName, machineIP, productCode = "", machineSerialNo = "", userEnteredSerialNo = "";
     private Pattern pattern;
     private Matcher matcher;
+    private ProgressBar progressBar;
 
     private static final String IPADDRESS_PATTERN =
             "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
@@ -88,6 +90,8 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         viewPager = (CustomViewPager) findViewById(R.id.pager);
         mIndicator = (CirclePageIndicator)findViewById(R.id.guideIndicator);
 
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+
         mIndicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -122,18 +126,19 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                 viewPager.setCurrentItem(6);
                 break;
             case R.id.txtNext:
-
                 UserGuideSettingsFragment fragment = (UserGuideSettingsFragment) mAdapter.getItem(6);
                 machineName = fragment.getStrMachineName();
 
-                if(fragment.getStrMachineName().length() == 0) {
-                    Toast.makeText(this, "Must Enter Machine Name!", Toast.LENGTH_LONG).show();
-                } else if(fragment.getIPAddress().length() == 0) {
-                    Toast.makeText(this, "Must Enter Device IP Address!", Toast.LENGTH_LONG).show();
-                } /*else if( !validate(fragment.getIPAddress())) {
-                    Toast.makeText(this, "Please enter vaid IP Address", Toast.LENGTH_LONG).show();
-                } */  else {
+                if(fragment.getIPAddress().length() == 0) {
+                    Toast.makeText(this, "Must Enter Device IP Address.", Toast.LENGTH_LONG).show();
+                } else if(fragment.getStrMachineName().length() == 0) {
+                    Toast.makeText(this, "Must Enter Machine Name.", Toast.LENGTH_LONG).show();
+                }  else if(fragment.getStrMachineSerialNo().length() == 0) {
+                    Toast.makeText(this, "Must Enter Machine Serial No.", Toast.LENGTH_LONG).show();
+                }
+                else {
                     machineIP = fragment.getIPAddress();
+                    userEnteredSerialNo = fragment.getStrMachineSerialNo();
                     //get machine from IP and add to db
                     new GetMachineStatus().execute();
 
@@ -295,20 +300,28 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
     }
 
     public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
+        boolean isError = false;
 
         @Override
         protected void onPreExecute() {
-            // setProgressBarIndeterminateVisibility(true);
+             //setProgressBarIndeterminateVisibility(true);
+            progressBar.setVisibility(View.VISIBLE);
+            txtNext.setClickable(false);
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                URL urlValue = new URL("http://"+machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
+                URL urlValue;
+                if(!machineIP.contains("http://")) {
+                    urlValue = new URL("http://" + machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
+                } else {
+                    urlValue = new URL( machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
+                }
                 Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(1000*60);
+                httpUrlConnection.setConnectTimeout(1000 * 30);
 
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
@@ -320,6 +333,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
 
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
+                isError = true;
             }
             return null;
         }
@@ -327,34 +341,52 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         @Override
         protected void onPostExecute(Void aVoid) {
             // Log.e("TAG_ASYNC", "Inside onPostExecute");
-            DatabaseHelper dbHelper = new DatabaseHelper(UserGuide.this);
-            try {
-                dbHelper.openDataBase();
-                dbHelper.insertIntoMachine(powerStatus, machineName, machineIP);
-                dbHelper.close();
+            progressBar.setVisibility(View.GONE);
+            txtNext.setClickable(true);
 
-                for(int i=0; i<powerStatus.size();i++) {
-                    if(powerStatus.get(i).tagName.equals("DPC")) {
-                        productCode = powerStatus.get(i).tagValue;
+            //temp -> only for testing
+            productCode = "12115-0400";
+            if(!isError) {
+                try {
+                    for (int i = 0; i < powerStatus.size(); i++) {
+                        if (powerStatus.get(i).tagName.equals("DPC")) {
+                           // productCode = powerStatus.get(i).tagValue;
+                        } else if (powerStatus.get(i).tagName.equals("DSN")) {
+                            machineSerialNo = powerStatus.get(i).tagValue;
+                        }
                     }
+
+                   // if (machineSerialNo.equals(userEnteredSerialNo)) {
+                       // if (Utils.validateProductCode(productCode)) {
+                            DatabaseHelper dbHelper = new DatabaseHelper(UserGuide.this);
+
+                            dbHelper.openDataBase();
+                            dbHelper.insertIntoMachine(powerStatus, machineName, machineIP);
+                            dbHelper.close();
+
+
+                            initDatabaseComponents(productCode);
+
+                            SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putBoolean("hasLoggedIn", true);
+                            editor.commit();
+
+                            Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        /*} else {
+                            Toast.makeText(UserGuide.this, "Invalid Product Code.", Toast.LENGTH_LONG).show();
+                        }*/
+                    /*} else {
+                        Toast.makeText(UserGuide.this, "Invalid Serial No.", Toast.LENGTH_LONG).show();
+                    }*/
+                } catch (Exception e) {
+                    Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address", Toast.LENGTH_LONG).show();
                 }
-
-                if(Utils.validateProductCode(productCode)) {
-                        SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = preferences.edit();
-                        editor.putBoolean("hasLoggedIn", true);
-                        editor.commit();
-
-                        initDatabaseComponents(productCode);
-
-                        Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(UserGuide.this, "Invalid Product Code", Toast.LENGTH_LONG).show();
-                    }
-            }catch (Exception e) {}
-
+            } else {
+                Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address", Toast.LENGTH_LONG).show();
+            }
         }
     }
 

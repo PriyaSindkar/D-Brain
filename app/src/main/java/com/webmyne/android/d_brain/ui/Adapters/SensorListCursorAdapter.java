@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
+import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
@@ -121,18 +122,23 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
-                final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-                listHolder.txtSensorName.setText(cursor.getString(nameIndex));
-                listHolder.txtSensorDetails.setText(cursor.getString(detailsNameIndex));
-                listHolder.txtMachineName.setText("Machine Name: "+cursor.getString(machineNameIndex));
-                listHolder.txtSensorDetails.setText((cursor.getString(detailsNameIndex)));
+        final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
+        AdvancedSpannableString sp = new AdvancedSpannableString("Sensor Name: "+cursor.getString(nameIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Sensor Name:");
+        listHolder.txtSensorName.setText(sp);
 
-                listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position, listHolder.txtSensorName.getText().toString().trim(), listHolder.txtSensorDetails.getText().toString().trim());
-                    }
-                });
+        listHolder.txtSensorDetails.setText(cursor.getString(detailsNameIndex));
+
+        sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");
+        listHolder.txtMachineName.setText(sp);
+
+        listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                _renameClick.onRenameOptionClick(position, listHolder.txtSensorName.getText().toString().trim(), listHolder.txtSensorDetails.getText().toString().trim());
+            }
+        });
 
     }
 

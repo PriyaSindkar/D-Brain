@@ -47,7 +47,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     private TextView txtSwitch, txtDimmer, txtMotor, txtSceneTitle;
     private ImageView imgHScrollLeft, imgHScrollRight, imgBack;
     private HorizontalScrollView hScrollView;
-    private LinearLayout linearControls, linearPopup, linearSaveScene;
+    private LinearLayout linearControls, linearPopup, linearSaveScene, layoutBottom;
     private RelativeLayout parentRelativeLayout;
     private EditText edtIPAddress;
     private View switchDivider;
@@ -120,6 +120,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         linearPopup =  (LinearLayout) findViewById(R.id.linearPopup);
         parentRelativeLayout = (RelativeLayout) findViewById(R.id.parentRelativeLayout);
 
+        layoutBottom = (LinearLayout) findViewById(R.id.layoutBottom);
+
         mRecycler = (RecyclerView) findViewById(R.id.recycler_view);
         mRecycler = (RecyclerView) findViewById(R.id.recycler_view);
         mRecycler.setHasFixedSize(true);
@@ -183,6 +185,10 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         initSwitches();
         initMotors();
         initDimmers();
+
+        if( totalNoOfMotors==0 && totalNoOfDimmers == 0 && totalNoOfSwitches == 0) {
+            layoutBottom.setVisibility(View.GONE);
+        }
 
         parentRelativeLayout.setOnClickListener(this);
 
@@ -331,8 +337,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
                             // set component_id in scene_component table
                             sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
-                            sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
-                            sceneItemsDataObject.setMachineID("");
+                            sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
+                            sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
 
                            // mAdapter.add(mData.size(), sceneItemsDataObject);
@@ -394,8 +400,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
                             // set component_id in scene_component table
                             sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
-                            sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
-                            sceneItemsDataObject.setMachineID("");
+                            sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
+                            sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
                             sceneItemsDataObject.setDefaultValue(AppConstants.DIMMER_DEFAULT_VALUE);
 
                           //  mAdapter.add(mData.size(), sceneItemsDataObject);
@@ -454,7 +460,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                         if (initMotors.get(position).isFocusable()) {
                             SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(AppConstants.MOTOR_TYPE, initMotors.get(position).getText());
                             sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
-                            sceneItemsDataObject.setMachineID("");
+                            sceneItemsDataObject.setMachineName("");
 
                             mAdapter.add(mData.size(), sceneItemsDataObject);
                             initMotors.get(position).setFocusable(false);
@@ -501,6 +507,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                         sceneSwitchItem.setText(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
                         //switch id from main component table
                         sceneSwitchItem.setSwitchId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID)));
+                        sceneSwitchItem.setMachineIP(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
+                        sceneSwitchItem.setMachineName(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
                         initSwitches.add(sceneSwitchItem);
                     } while (switchListCursor.moveToNext());
@@ -572,7 +580,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                         sceneSwitchItem.setText(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
                         //dimmer id from main component table
                         sceneSwitchItem.setSwitchId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID)));
-
+                        sceneSwitchItem.setMachineIP(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
+                        sceneSwitchItem.setMachineName(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
                         initDimmers.add(sceneSwitchItem);
                     } while (dimmerListCursor.moveToNext());
                 } else {

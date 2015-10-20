@@ -63,6 +63,10 @@
         <activity android:name=".ui.Activities.TouchPanelActivity"
             android:screenOrientation="landscape">
         </activity>
+        <activity android:name=".ui.Activities.FavouriteListActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
 
     </application>
 

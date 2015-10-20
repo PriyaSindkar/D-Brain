@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/parentRelativeLayout"
-    android:background="#2d3f4d"
+    android:background="@drawable/dashboard_bg"
     tools:context=".MainActivity">
 
     <FrameLayout
@@ -27,6 +27,7 @@
                     android:orientation="vertical">
 
                     <LinearLayout
+                        android:id="@+id/linearTopComponentRow"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
                         android:layout_marginBottom="@dimen/STD_MARGIN"
@@ -49,8 +50,9 @@
 
 
                     <LinearLayout
+                        android:id="@+id/linearBottomComponentRow"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
                         android:layout_marginBottom="@dimen/STD_MARGIN"
                         android:orientation="horizontal">
 
@@ -159,8 +161,9 @@
                     android:background="@color/secondaryBgColor" />
 
                 <LinearLayout
+                    android:id="@+id/linearFavorites"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center">
 
@@ -181,7 +184,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center">
 

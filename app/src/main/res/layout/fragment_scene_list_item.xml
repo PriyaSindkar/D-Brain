@@ -32,16 +32,6 @@
                 android:textColor="@color/white"
                 android:src="@drawable/ic_arrow_left"/>
 
-            <TextView
-                android:padding="@dimen/STD_MARGIN"
-                android:id="@+id/txtMachineName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Machine Name: "
-                android:textColor="@color/white"
-                android:src="@drawable/ic_arrow_left"/>
-
-
         </LinearLayout>
 
         <!--<ImageView

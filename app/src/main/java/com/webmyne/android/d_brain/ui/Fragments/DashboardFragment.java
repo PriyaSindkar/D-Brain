@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.DimmerListActivity;
+import com.webmyne.android.d_brain.ui.Activities.FavouriteListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MachineListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MotorListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
@@ -54,7 +55,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private HorizontalScrollView hScrollView;
     private FrameLayout parentMotor, parentSlider, parentSwitches, parentSensors, linearLeft ;
     private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits;
-    private LinearLayout linearCreateScene, linearAddMachine, linearAddScheduler, firstBottomItem;
+    private LinearLayout linearCreateScene, linearAddMachine, linearAddScheduler, firstBottomItem, linearTopComponentRow, linearBottomComponentRow, linearFavorites;
     private ArrayList<String> switchesWithOnStatus;
     private ArrayList<XMLValues> dimmersWithOnStatus;
     private ArrayList<XMLValues> switchStatusList, dimmerStatusList;
@@ -63,9 +64,12 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private  ArrayList<XMLValues> powerStatus;
     private FragmentActivity activity;
     private int powerSignalCount = 0;
-    String previousLed = "", led = "";
+    private String previousLed = "", led = "";
     public static String URL_MACHINE_IP ="";
     public static String MACHINE_IP = "";
+
+    private int topRowComponentCount = 0; // fix-> switches and motors
+    private int bottomRowComponentCount = 0; // fix -> Dimmers and sensors
 
 
     public static DashboardFragment newInstance() {
@@ -146,6 +150,12 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         parentSensors = (FrameLayout) row.findViewById(R.id.parentSensors);
         parentSensors.setOnClickListener(this);
 
+        linearBottomComponentRow = (LinearLayout) row.findViewById(R.id.linearBottomComponentRow);
+        linearTopComponentRow = (LinearLayout) row.findViewById(R.id.linearTopComponentRow);
+
+        linearFavorites = (LinearLayout) row.findViewById(R.id.linearFavorites);
+        linearFavorites.setOnClickListener(this);
+
        /* parentSwitches.setClickable(false);
         parentMotor.setClickable(false);
         parentSlider.setClickable(false);
@@ -196,7 +206,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
             if(machineCursor != null) {
                 machineCursor.moveToFirst();
-                URL_MACHINE_IP = "http://" + machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                if(!machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP)).contains("http://")) {
+                    URL_MACHINE_IP = "http://" + machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                } else {
+                    URL_MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                }
                 MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
             }
             /*dbHelper.close();
@@ -217,14 +231,13 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
             // get no of switches from db, if 0 no, switches not shown
             if(switchListCursor != null) {
-                Log.e("no of switches", switchListCursor.getCount()+"");
                 if (switchListCursor.getCount() == 0) {
                     parentSwitches.setVisibility(View.GONE);
                 } else {
+                    topRowComponentCount ++;
                     txtNoOfSwitchUnits.setText(String.valueOf(switchListCursor.getCount()));
                 }
             } else {
-                Log.e("no of switches", "null");
                 parentSwitches.setVisibility(View.GONE);
             }
 
@@ -233,6 +246,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 if (dimmerListCursor.getCount() == 0) {
                     parentSlider.setVisibility(View.GONE);
                 } else {
+                    bottomRowComponentCount++;
                     txtNoOfSliderUnits.setText(String.valueOf(dimmerListCursor.getCount()));
                 }
             } else {
@@ -243,7 +257,12 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             if(motorListCursor != null) {
                 if (motorListCursor.getCount() == 0) {
                     parentMotor.setVisibility(View.GONE);
+                    // set right margin of left side block to 0
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1f);
+                    lp.rightMargin = 0;
+                    parentSwitches.setLayoutParams(lp);
                 } else {
+                    topRowComponentCount++;
                     txtNoOfMotorUnits.setText(String.valueOf(motorListCursor.getCount()));
                 }
             } else {
@@ -254,7 +273,12 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             if(sensorListCursor != null) {
                 if (sensorListCursor.getCount() == 0) {
                     parentSensors.setVisibility(View.GONE);
+                    // set right margin of left side block to 0
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1f);
+                    lp.rightMargin = 0;
+                    parentSlider.setLayoutParams(lp);
                 } else {
+                    bottomRowComponentCount++;
                     txtNoOfSensorUnits.setText(String.valueOf(sensorListCursor.getCount()));
                 }
             } else {
@@ -262,6 +286,45 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+
+        if(topRowComponentCount < 2 && topRowComponentCount > 0) {
+            parentSwitches.setBackgroundColor(getResources().getColor(R.color.baseButtonColorTint));
+            parentMotor.setBackgroundColor(getResources().getColor(R.color.baseButtonColorTint));
+
+            parentSlider.setBackgroundColor(getResources().getColor(R.color.primaryColorTint));
+            parentSensors.setBackgroundColor(getResources().getColor(R.color.primaryColorTint));
+        } else if (topRowComponentCount == 0) {
+            //check if any top row is empty, if yes, shift bottom component above
+            if(bottomRowComponentCount == 2) {
+                linearBottomComponentRow.removeView(parentSlider);
+                linearTopComponentRow.addView(parentSlider);
+
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1f);
+                lp.rightMargin = 0;
+                parentSlider.setLayoutParams(lp);
+            } else {
+                linearTopComponentRow.setVisibility(View.GONE);
+            }
+        }
+        if(bottomRowComponentCount < 2 && bottomRowComponentCount > 0) {
+            parentSwitches.setBackgroundColor(getResources().getColor(R.color.baseButtonColorTint));
+            parentMotor.setBackgroundColor(getResources().getColor(R.color.baseButtonColorTint));
+
+            parentSlider.setBackgroundColor(getResources().getColor(R.color.primaryColorTint));
+            parentSensors.setBackgroundColor(getResources().getColor(R.color.primaryColorTint));
+        } else if (bottomRowComponentCount == 0) {
+            //check if any bottom row is empty, if yes, shift bottom component above
+            if(topRowComponentCount == 2) {
+                linearTopComponentRow.removeView(parentMotor);
+                linearBottomComponentRow.addView(parentMotor);
+
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1f);
+                lp.rightMargin = 0;
+                parentSwitches.setLayoutParams(lp);
+            } else {
+                linearBottomComponentRow.setVisibility(View.GONE);
+            }
         }
 
         ((HomeDrawerActivity) getActivity()).initPowerButton();
@@ -421,6 +484,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                         isImageUp = true;
                     }
                 });
+                break;
+
+            case R.id.imgFavorites:
+                intent = new Intent(getActivity(), FavouriteListActivity.class);
+                startActivity(intent);
                 break;
         }
     }

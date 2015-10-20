@@ -13,9 +13,11 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.DimmerListActivity;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
+import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
@@ -69,18 +71,22 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
 
     public class ListViewHolder extends ViewHolder {
-        public TextView txtDimmerName, txtValue;
+        public TextView txtDimmerName, txtValue, txtMachineName;
         private SeekBar seekBar;
         private ImageView  imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
         private LinearLayout linearParent;
+        private SwitchButton imgSwitch;
 
         public ListViewHolder(View view) {
             super(view);
             this.txtDimmerName = (TextView) view.findViewById(R.id.txtDimmerName);
+            this.txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.seekBar = (SeekBar) view.findViewById(R.id.seekBar);
             this.txtValue = (TextView) view.findViewById(R.id.txtValue);
             this.linearParent = (LinearLayout) view.findViewById(R.id.linearParent);
             txtValue.setText("0");
+
+            this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
 
             this.imgFavoriteOption = (ImageView) view.findViewById(R.id.imgFavoriteOption);
             this.imgAddToSceneOption = (ImageView) view.findViewById(R.id.imgAddToSceneOption);
@@ -91,17 +97,20 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
     }
 
     public class GridViewHolder extends ViewHolder {
-        private TextView txtDimmerName, txtValue;
+        private TextView txtDimmerName, txtValue, txtMachineName;
         private LinearLayout linearParent;
         private SeekBar seekBar;
+        private SwitchButton imgSwitch;
 
         public GridViewHolder(View view) {
             super(view);
             this.txtDimmerName = (TextView) view.findViewById(R.id.txtDimmerName);
+            txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.linearParent = (LinearLayout) view.findViewById(R.id.linearParent);
             this.seekBar = (SeekBar) view.findViewById(R.id.seekBar);
             this.txtValue = (TextView) view.findViewById(R.id.txtValue);
             txtValue.setText("0");
+            this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
         }
     }
 
@@ -145,25 +154,44 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         final int dimmerNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        final int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
+
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
         String dimmerOnOffStatus = (dimmerStatus.get(position).tagValue).substring(0, 2);
-        int seekProgress  = Integer.parseInt((dimmerStatus.get(position).tagValue).substring(2,4))+1;
+        int seekProgress  = 0;//Integer.parseInt((dimmerStatus.get(position).tagValue).substring(2,4))+1;
+        if((dimmerStatus.get(position).tagValue).substring(2,4).equals("00")) {
+            seekProgress = 0;
+        } else {
+            seekProgress  = Integer.parseInt((dimmerStatus.get(position).tagValue).substring(2,4))+1;
+        }
 
         switch (viewHolder.getItemViewType () ) {
 
             case 0:
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-                listHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
+                AdvancedSpannableString sp = new AdvancedSpannableString("Dimmer Name: "+cursor.getString(dimmerNameIndex));
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Dimmer Name:");
+                listHolder.txtDimmerName.setText(sp);
+
+                sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");
+                listHolder.txtMachineName.setText(sp);
 
                 if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
-                    listHolder.txtValue.setText("0");
-                    listHolder.seekBar.setProgress(0);
+                    /*listHolder.txtValue.setText("0");
+                    listHolder.seekBar.setProgress(0);*/
+                    listHolder.imgSwitch.setChecked(false);
                 } else {
-                    listHolder.txtValue.setText(String.valueOf(seekProgress));
-                    listHolder.seekBar.setProgress(seekProgress);
+                   /* listHolder.txtValue.setText(String.valueOf(seekProgress));
+                    listHolder.seekBar.setProgress(seekProgress);*/
+                    listHolder.imgSwitch.setChecked(true);
                 }
+
+                // added on 19-10
+                listHolder.txtValue.setText(String.valueOf(seekProgress));
+                listHolder.seekBar.setProgress(seekProgress);
 
                 listHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
@@ -195,6 +223,30 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                     }
                 });
 
+                listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        listHolder.imgSwitch.toggle();
+                        String strProgress = "00";
+                        String CHANGE_STATUS_URL = "";
+
+                        if (listHolder.seekBar.getProgress() > 0) {
+                            strProgress = String.format("%02d", (listHolder.seekBar.getProgress() - 1));
+                        }
+
+                        if (listHolder.imgSwitch.isChecked()) {
+                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                             //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                        } else {
+                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                        }
+
+                        DimmerListActivity.isDelay = true;
+                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                    }
+                });
+
                 listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -209,18 +261,20 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                     }
                 });
 
-                /*listHolder.linearParent.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _singleClick.onSingleClick(position);
-                    }
-                });
                 listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         _favoriteClick.onFavoriteOptionClick(position);
                     }
                 });
+
+                /*listHolder.linearParent.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        _singleClick.onSingleClick(position);
+                    }
+                });
+
 
                 listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -242,14 +296,20 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             case 1:
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
                 groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
+                groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                 if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
-                    groupViewHolder.txtValue.setText("0");
-                    groupViewHolder.seekBar.setProgress(0);
+                    /*groupViewHolder.txtValue.setText("0");
+                    groupViewHolder.seekBar.setProgress(0);*/
+                    groupViewHolder.imgSwitch.setChecked(false);
                 } else {
-                    groupViewHolder.txtValue.setText(String.valueOf(seekProgress));
-                    groupViewHolder.seekBar.setProgress(seekProgress);
+                    /*groupViewHolder.txtValue.setText(String.valueOf(seekProgress));
+                    groupViewHolder.seekBar.setProgress(seekProgress);*/
+                    groupViewHolder.imgSwitch.setChecked(true);
                 }
+                //added on 19-10
+                groupViewHolder.txtValue.setText(String.valueOf(seekProgress));
+                groupViewHolder.seekBar.setProgress(seekProgress);
 
                 groupViewHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
@@ -278,6 +338,30 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                         DimmerListActivity.isDelay = true;
                         new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
 
+                    }
+                });
+
+                groupViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        groupViewHolder.imgSwitch.toggle();
+                        String strProgress = "00";
+                        String CHANGE_STATUS_URL = "";
+
+                        if (groupViewHolder.seekBar.getProgress() > 0) {
+                            strProgress = String.format("%02d", (groupViewHolder.seekBar.getProgress() - 1));
+                        }
+
+                        if (groupViewHolder.imgSwitch.isChecked()) {
+                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                            //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                        } else {
+                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                        }
+
+                        DimmerListActivity.isDelay = true;
+                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                     }
                 });
 

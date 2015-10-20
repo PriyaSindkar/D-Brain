@@ -169,6 +169,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    public void renameMachine(String machineId, String machineName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // save new machine name
+        ContentValues values = new ContentValues();
+        values.put(DBConstants.KEY_M_NAME, machineName);
+        db.update(DBConstants.TABLE_MACHINE, values, DBConstants.KEY_M_ID + "='" + machineId+"'", null);
+        db.close();
+    }
+
+    public String getMachineNameByIP(String machineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        String machineName = "";
+        try {
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?" ,
+                    new String[]{machineIP}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                machineName =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return machineName;
+    }
+
 
     public void insertIntoComponent(ArrayList<ComponentModel> componentModels) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -305,6 +334,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
             values.put(DBConstants.KEY_SC_TYPE, componentModels.get(i).getSceneControlType());
             values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
+            values.put(DBConstants.KEY_SC_MNAME, componentModels.get(i).getMachineName());
             values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
 
             db.insert(DBConstants.TABLE_SCENE_COMPONENT, null, values);
@@ -402,6 +432,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
             values.put(DBConstants.KEY_SC_TYPE, componentModels.get(i).getSceneControlType());
             values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
+            values.put(DBConstants.KEY_SC_MNAME, componentModels.get(i).getMachineName());
             values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
 
             if( !isComponentAlreadyExists(componentModels.get(i).getSceneItemId(), sceneId))
@@ -443,7 +474,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    // to update scene component default values
+    // to delete scene components
     public void deleteSceneComponents(ArrayList<SceneItemsDataObject> componentModels) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -679,5 +710,72 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
+    }
+
+    public boolean insertIntoFavorite(String componentId, String componentName, String componentType, String machineIP, String machineName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        boolean flag = false;
+
+        ContentValues values = new ContentValues();
+        values.put(DBConstants.KEY_C_COMPONENT_ID, componentId);
+        values.put(DBConstants.KEY_F_CNAME, componentName);
+        values.put(DBConstants.KEY_C_TYPE, componentType);
+        values.put(DBConstants.KEY_C_MIP, machineIP);
+        values.put(DBConstants.KEY_F_MNAME, machineName);
+
+        if(!isAlreadyAFavourite(componentId, machineIP)) {
+            db.insert(DBConstants.TABLE_FAVOURITE, null, values);
+        } else {
+            flag = true;
+        }
+
+        db.close();
+        return flag;
+    }
+
+    public boolean isAlreadyAFavourite(String componentId, String machineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        boolean result = true;
+        try {
+            // TO:DO search machine-wise
+
+           /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
+                    new String[]{URL_MACHINE_IP}, null, null, null, null);*/
+
+            cursor = db.query(DBConstants.TABLE_FAVOURITE, null, DBConstants.KEY_C_COMPONENT_ID + "=? AND " + DBConstants.KEY_C_MIP + "=?",
+                    new String[]{componentId, machineIP}, null, null, null, null);
+            if (cursor != null) {
+                if(cursor.getCount() == 0) {
+                    result =  false;
+                } else {
+                    result =  true;
+                }
+            } else {
+                result =  false;
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return result;
+    }
+
+    public Cursor getAllFavouriteComponents() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_FAVOURITE, null, null,null, null, null, null, null);
+            /*if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                        Log.e("MACHINEIP", cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP)));
+                    } while (cursor.moveToNext());
+                }
+            }*/
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
     }
 }

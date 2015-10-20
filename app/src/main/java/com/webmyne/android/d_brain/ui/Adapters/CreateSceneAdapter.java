@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
@@ -44,7 +45,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
 
 
     public class SwitchViewHolder extends ViewHolder {
-        public TextView txtSwitchName;
+        public TextView txtSwitchName, txtMachineName;
         public LinearLayout linearSwitch;
         private ImageView imgDeleteOption;
         public SwitchButton imgSwitch;
@@ -52,6 +53,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
         public SwitchViewHolder ( View itemView ) {
             super ( itemView );
             this.txtSwitchName = (TextView) itemView.findViewById(R.id.txtSwitchName);
+            this.txtMachineName = (TextView) itemView.findViewById(R.id.txtMachineName);
             this.linearSwitch = (LinearLayout) itemView.findViewById(R.id.linearSwitch);
             this.imgDeleteOption = (ImageView) itemView.findViewById(R.id.imgDeleteOption);
             this.imgSwitch = (SwitchButton) itemView.findViewById(R.id.imgSwitch);
@@ -59,7 +61,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
     }
 
     public class DimmerViewHolder extends ViewHolder{
-        public TextView txtDimmerName, txtValue;
+        public TextView txtDimmerName, txtValue, txtMachineName;
         private SeekBar seekBar;
         public  ImageView  imgDeleteOption;
         private LinearLayout linearItem;
@@ -67,6 +69,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
         public DimmerViewHolder ( View itemView ) {
             super ( itemView );
             this.txtDimmerName = (TextView) itemView.findViewById(R.id.txtDimmerName);
+            this.txtMachineName = (TextView) itemView.findViewById(R.id.txtMachineName);
             this.seekBar = (SeekBar) itemView.findViewById(R.id.seekBar);
             this.txtValue = (TextView) itemView.findViewById(R.id.txtValue);
             this.linearItem = (LinearLayout) itemView.findViewById(R.id.linearItem);
@@ -192,7 +195,13 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
-                switchHolder.txtSwitchName.setText(mDataset.get(position).getName());
+                AdvancedSpannableString sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");
+                switchHolder.txtSwitchName.setText(sp);
+
+                sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");
+                switchHolder.txtMachineName.setText(sp);
 
                 if( mDataset.get(position).getDefaultValue().equals(AppConstants.OFF_VALUE))
                     switchHolder.imgSwitch.setChecked(false);
@@ -215,12 +224,12 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
 
 
 
-                switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
+               /* switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         _onItemClick._onItemClickListener();
                     }
-                });
+                });*/
                 switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -233,7 +242,14 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-                dimmerHolder.txtDimmerName.setText(mDataset.get(position).getName());
+                sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");
+                dimmerHolder.txtDimmerName.setText(sp);
+
+                sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");
+                dimmerHolder.txtMachineName.setText(sp);
+
                 dimmerHolder.txtValue.setText(mDataset.get(position).getDefaultValue());
                 dimmerHolder.seekBar.setProgress(Integer.parseInt(mDataset.get(position).getDefaultValue()));
 

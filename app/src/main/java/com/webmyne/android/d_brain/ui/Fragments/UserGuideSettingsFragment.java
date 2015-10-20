@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.webmyne.android.d_brain.R;
 
@@ -20,8 +22,10 @@ public class UserGuideSettingsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private int mParam1;
     private String mParam2;
-    public EditText edtMachineName, edtIPAddress;
-    static   String strMachineName ="", strIPAddress="";
+    public EditText edtMachineName, edtIPAddress,edtMachineSerialNo;
+    private LinearLayout linearMainContent;
+    private ProgressBar progressBar;
+    static String strMachineName = "", strIPAddress = "", strMachineSerialNo = "";
     View convertView;
 
     public static UserGuideSettingsFragment newInstance(int param1, String param2) {
@@ -56,8 +60,10 @@ public class UserGuideSettingsFragment extends Fragment {
 
         edtMachineName = (EditText) convertView.findViewById(R.id.edtMachineName);
         edtIPAddress = (EditText) convertView.findViewById(R.id.edtIPAddress);
+        edtMachineSerialNo = (EditText) convertView.findViewById(R.id.edtMachineSerialNo);
+        linearMainContent = (LinearLayout) convertView.findViewById(R.id.linearMainContent);
+        progressBar = (ProgressBar) convertView.findViewById(R.id.progress_bar);
 
-        Log.e("edtIPAddress", edtIPAddress.getText().toString());
         strIPAddress = edtIPAddress.getText().toString();
 
         edtIPAddress.addTextChangedListener(new TextWatcher() {
@@ -92,6 +98,22 @@ public class UserGuideSettingsFragment extends Fragment {
             }
         });
 
+        edtMachineSerialNo.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+
+            }
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+                strMachineSerialNo = s.toString().trim();
+            }
+        });
+
         return convertView;
     }
 
@@ -102,6 +124,22 @@ public class UserGuideSettingsFragment extends Fragment {
     public String getStrMachineName() {
         return strMachineName;
     }
+
+    public String getStrMachineSerialNo() {
+        return strMachineSerialNo;
+    }
+
+    public void showProgressBar () {
+        progressBar.setVisibility(View.VISIBLE);
+        linearMainContent.setVisibility(View.GONE);
+    }
+
+    public void hideProgressBar () {
+        progressBar.setVisibility(View.GONE);
+        linearMainContent.setVisibility(View.VISIBLE);
+    }
+
+
 
 
 }

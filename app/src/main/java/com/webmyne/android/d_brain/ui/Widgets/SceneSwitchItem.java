@@ -20,7 +20,7 @@ public class SceneSwitchItem extends LinearLayout{
     View viewLine;
     private ImageView imgSwitch;
     private TextView txtSwitchName;
-    private String switchId;
+    private String switchId, machineIP, machineName;
 
     public SceneSwitchItem(Context _context) {
         super(_context);
@@ -68,6 +68,22 @@ public class SceneSwitchItem extends LinearLayout{
 
     public void setSwitchId(String switchId) {
         this.switchId = switchId;
+    }
+
+    public String getMachineIP() {
+        return machineIP;
+    }
+
+    public void setMachineIP(String machineIP) {
+        this.machineIP = machineIP;
+    }
+
+    public String getMachineName() {
+        return machineName;
+    }
+
+    public void setMachineName(String machineName) {
+        this.machineName = machineName;
     }
 
     @Override

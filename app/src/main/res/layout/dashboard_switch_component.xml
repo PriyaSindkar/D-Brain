@@ -8,7 +8,7 @@
         android:layout_width="@dimen/DASHBOARD_CARD_WIDTH"
         android:layout_height="@dimen/DASHBOARD_CARD_HEIGHT"
         android:gravity="center"
-        android:background="@color/primaryColor">
+        android:background="@color/baseButtonColorTint">
 
             <TextView
                 android:layout_gravity="top|right"

@@ -607,6 +607,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
                         sceneSwitchItem.setText(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
                         sceneSwitchItem.setSwitchId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
+                        sceneSwitchItem.setMachineIP(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
+                        sceneSwitchItem.setMachineName(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
                         // check if this component is already added to the scene or not
                         for(int i=0; i<mData.size(); i++) {
@@ -683,6 +685,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
                         sceneSwitchItem.setText(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
                         sceneSwitchItem.setSwitchId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
+                        sceneSwitchItem.setMachineIP(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
+                        sceneSwitchItem.setMachineName(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
                         // check if this component is already added or not
                         for(int i=0; i<mData.size(); i++) {
@@ -730,9 +734,12 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     do {
                         String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID));
                         String defaultValue = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
+                        String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
+                        String machineName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MNAME));
 
                         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
-                        sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
+                        sceneItemsDataObject.setMachineIP(machineIP);
+                        sceneItemsDataObject.setMachineName(machineName);
                         sceneItemsDataObject.setSceneControlType(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE)));
                         sceneItemsDataObject.setSceneItemId(componentId);
 
@@ -800,7 +807,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     if (initSwitches.get(i).isFocusable()) {
                         addSwitchToScene(i);
                     } else {
-                        Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SceneActivity.this, "Component Already Added To Scene", Toast.LENGTH_SHORT).show();
                     }
                     break;
                 }
@@ -811,7 +818,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     if (initDimmers.get(i).isFocusable()) {
                         addDimmerToScene(i);
                     } else {
-                        Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SceneActivity.this, "Component Already Added To Scene", Toast.LENGTH_SHORT).show();
                     }
                     break;
                 }
@@ -822,8 +829,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     private void addSwitchToScene(int position){
         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
         sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
-        sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
-        sceneItemsDataObject.setMachineID("");
+        sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
+        sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
         mData.add(sceneItemsDataObject);
 
@@ -849,8 +856,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     private void addDimmerToScene(int position){
         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
         sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
-        sceneItemsDataObject.setMachineIP(DashboardFragment.MACHINE_IP);
-        sceneItemsDataObject.setMachineID("");
+        sceneItemsDataObject.setMachineIP(initDimmers.get(position).getMachineIP());
+        sceneItemsDataObject.setMachineName(initDimmers.get(position).getMachineName());
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
         //mAdapter.add(mData.size(), sceneItemsDataObject);
         mData.add(sceneItemsDataObject);

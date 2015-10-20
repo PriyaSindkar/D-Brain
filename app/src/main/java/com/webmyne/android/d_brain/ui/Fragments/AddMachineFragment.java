@@ -18,6 +18,7 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
@@ -78,7 +79,7 @@ public class AddMachineFragment extends Fragment {
             public void onLongClick(int pos) {
                 Toast.makeText(getActivity(), "Options Will Open Here", Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
 
         adapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
@@ -91,14 +92,43 @@ public class AddMachineFragment extends Fragment {
 
             @Override
             public void onRenameOptionClick(int pos, String _oldName) {
-                Toast.makeText(getActivity(), "Rename Sccessful!", Toast.LENGTH_SHORT).show();
+                machineCursor.moveToPosition(pos);
+                final String machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+
+                RenameDialog renameDialog = new RenameDialog(getActivity(), _oldName);
+                renameDialog.show();
+
+                renameDialog.setRenameListener(new onRenameClickListener() {
+                    @Override
+                    public void onRenameOptionClick(int pos, String newName) {
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                            dbHelper.openDataBase();
+                            dbHelper.renameMachine(machineId, newName);
+                            adapter.notifyDataSetChanged();
+                            dbHelper.close();
+                            machineCursor = dbHelper.getMachine();
+                            adapter.changeCursor(machineCursor);
+
+
+                        } catch (SQLException e) {
+                            Log.e("TAG EXP", e.toString());
+                        }
+
+                    }
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String newName, String newDetails) {
+
+                    }
+                });
             }
 
             @Override
             public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
 
             }
-        });*/
+        });
 
         
         return view;

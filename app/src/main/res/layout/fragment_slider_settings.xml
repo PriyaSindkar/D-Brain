@@ -33,8 +33,15 @@
             android:layout_height="15dp" />
     </RelativeLayout>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
 
     <LinearLayout
+        android:id="@+id/linearMainContent"
         android:layout_below="@id/parentLogo"
         android:orientation="vertical"
         android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
@@ -56,7 +63,7 @@
                 android:hint="Device IP Address"
                 android:inputType="text"
                 android:singleLine="true"
-                android:text="192.168.1.199"
+                android:text="http://ws-srv-net.in.webmyne.com/Applications/DsquareWS"
                 android:backgroundTint="@color/white"
                 android:textColor="#ffffff"
                 android:textColorHint="#d1d1d1"
@@ -73,6 +80,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Machine Name"
+                android:inputType="text"
+                android:singleLine="true"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/white"
+                android:textColorHint="@color/lightGrey"
+                android:textSize="@dimen/L_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/TextLabel">
+
+            <EditText
+                android:id="@+id/edtMachineSerialNo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Machine Serial No."
                 android:inputType="text"
                 android:singleLine="true"
                 android:backgroundTint="@color/white"

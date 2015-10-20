@@ -27,6 +27,9 @@ public class DBConstants {
     // TouchPanel table name
     public static final String TABLE_TOUCH_PANEL_ITEM = "TouchPanelItem";
 
+    // Favorite table name
+    public static final String TABLE_FAVOURITE = "FavouriteComponent";
+
     // Machine Table Columns names
     public static final String KEY_M_ID = "_id";
     public static final String KEY_M_DA = "DA";
@@ -59,6 +62,7 @@ public class DBConstants {
     public static final String KEY_SC_TYPE = "COMPONENT_TYPE";
     public static final String KEY_SC_MIP = "MACHINE_IP";
     public static final String KEY_SC_DEFAULT = "DEF_VALUE";
+    public static final String KEY_SC_MNAME = "MACHINE_NAME";
 
     // Touch_Panel_item Table Column names
     public static final String KEY_TP_ITEM_ID = "_id";
@@ -68,6 +72,10 @@ public class DBConstants {
     public static final String KEY_TP_ITEM_COMPONENT_NAME = "COMPONENT_NAME";
     public static final String KEY_TP_ITEM_COMPONENT_TYPE = "COMPONENT_TYPE";
     public static final String KEY_TP_ITEM_DEF_VALUE = "DEF_VALUE";
+
+    //Favourite table column names
+    public static final String KEY_F_CNAME = "COMPONENT_NAME";
+    public static final String KEY_F_MNAME = "MACHINE_NAME";
 
 
     //Machine Config

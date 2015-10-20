@@ -47,11 +47,11 @@ public class Utils {
                     if(totalNoOfMotors > 3) {
                         return false;
                     } else {
-                        if( !identifier.equals("-")) {
+                        /*if( !identifier.equals("-")) {
                             return false;
                         } else {
 
-                        }
+                        }*/
                     }
                 }
             }

@@ -42,7 +42,16 @@
         android:id="@+id/imgCancel"
         android:src="@drawable/ic_navigation_cancel"/>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_below="@id/parentLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_centerInParent="true"/>
+
     <RelativeLayout
+        android:id="@+id/relativeContent"
         android:layout_centerInParent="true"
         android:layout_below="@id/parentLogo"
         android:orientation="vertical"
@@ -73,7 +82,7 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/txtInputSerialNo"
+            android:id="@+id/txtInputMachine"
             android:layout_width="match_parent"
             android:layout_below="@id/txtInputIP"
             android:layout_height="wrap_content"
@@ -84,6 +93,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Machine Name"
+                android:inputType="text"
+                android:singleLine="true"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/white"
+                android:textColorHint="@color/lightGrey"
+                android:textSize="@dimen/M1_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/txtInputSerialNo"
+            android:layout_width="match_parent"
+            android:layout_below="@id/txtInputMachine"
+            android:layout_height="wrap_content"
+            android:theme="@style/TextLabel">
+
+            <EditText
+                android:id="@+id/edtMachineSerialNo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Machine Serial No."
                 android:inputType="text"
                 android:singleLine="true"
                 android:backgroundTint="@color/white"

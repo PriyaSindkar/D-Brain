@@ -16,9 +16,11 @@ import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
+import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
+import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
@@ -41,14 +43,10 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
     static int VIEW_TYPE;
     private int totalNoOfSwitches;
     private ArrayList<XMLValues> switchStatus;
+    private Cursor mCursor;
 
-    public onLongClickListener _longClick;
-    public onSingleClickListener _singleClick;
-    public onFavoriteClickListener _favoriteClick;
-    public onAddToSceneClickListener _addToSceneClick;
-    public onAddSchedulerClickListener _addSchedulerClick;
     public onRenameClickListener _renameClick;
-    public onCheckedChangeListener _switchClick;
+    public onDeleteClickListener _deleteClick;
 
     public MachineListCursorAdapter(Context context){
         super(context );
@@ -59,6 +57,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
     public MachineListCursorAdapter(Context context, Cursor cursor){
         super(context,cursor);
         mCtx = context;
+        mCursor = cursor;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -70,7 +69,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
 
     public class ListViewHolder extends ViewHolder {
         public  TextView txtMachineName, txtMachineIPAddress, txtMachineSerialNo;
-        public ImageView imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
+        public ImageView imgDeleteOption, imgRenameOption;
         public LinearLayout linearSwitch;
 
         public ListViewHolder ( View view ) {
@@ -80,9 +79,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
             this.txtMachineSerialNo = (TextView) view.findViewById(R.id.txtMachineSerialNo);
             this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
 
-            this.imgFavoriteOption = (ImageView) view.findViewById(R.id.imgFavoriteOption);
-            this.imgAddToSceneOption = (ImageView) view.findViewById(R.id.imgAddToSceneOption);
-            this.imgAddSchedulerOption = (ImageView) view.findViewById(R.id.imgAddSchedulerOption);
+            this.imgDeleteOption = (ImageView) view.findViewById(R.id.imgDeleteOption);
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
         }
     }
@@ -93,6 +90,11 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
             return 0;
         else
             return 1;
+    }
+
+    @Override
+    public int getItemCount() {
+        return mCursor.getCount();
     }
 
     public void setType(int type){
@@ -120,58 +122,39 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
         final String strPosition = String.format("%02d", (position + 1));
 
         final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-        listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
-        listHolder.txtMachineIPAddress.setText(cursor.getString(machineIPIndex));
-        listHolder.txtMachineSerialNo.setText(cursor.getString(machineSerialNoIndex));
+        AdvancedSpannableString sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name: ");
+        listHolder.txtMachineName.setText(sp);
 
+        sp = new AdvancedSpannableString("Machine IP Address: " + cursor.getString(machineIPIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine IP Address: ");
+        listHolder.txtMachineIPAddress.setText(sp);
 
+        sp = new AdvancedSpannableString("Machine Serial No.: "+cursor.getString(machineSerialNoIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Serial No.: ");
+        listHolder.txtMachineSerialNo.setText(sp);
 
-                /*listHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _singleClick.onSingleClick(position);
-                    }
-                });
+        listHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                _deleteClick.onDeleteOptionClick(position);
+            }
+        });
 
-                listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _favoriteClick.onFavoriteOptionClick(position);
-                    }
-                });
-
-                listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addSchedulerClick.onAddSchedulerOptionClick(position);
-                    }
-                }); */
-
-
-
-    }
-
-    public void setSingleClickListener(onSingleClickListener obj){
-        this._singleClick = obj;
-    }
-    public void setLongClickListener(onLongClickListener obj){
-        this._longClick = obj;
-    }
-
-    public void setFavoriteClickListener(onFavoriteClickListener obj){
-        this._favoriteClick = obj;
-    }
-
-    public void setAddToSceneClickListener(onAddToSceneClickListener obj){
-        this._addToSceneClick = obj;
-    }
-
-    public void setAddSchedulerClickListener(onAddSchedulerClickListener obj){
-        this._addSchedulerClick = obj;
+        listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                _renameClick.onRenameOptionClick(position, listHolder.txtMachineName.getText().toString().trim());
+            }
+        });
     }
 
     public void setRenameClickListener(onRenameClickListener obj){
         this._renameClick = obj;
+    }
+
+    public void setDeleteClickListener(onDeleteClickListener obj){
+        this._deleteClick = obj;
     }
 
 

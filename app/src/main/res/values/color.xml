@@ -6,7 +6,9 @@
     <color name="blue">#FF375BF1</color>
     <color name="yellow">#edbe4c</color>
     <color name="primaryColor">#18516e</color>
+    <color name="primaryColorTint">#E018516e</color>
     <color name="baseButtonColor">#009987</color>
+    <color name="baseButtonColorTint">#AA009987</color>
 
 
     <color name="baseButtonColor2">#4DB8AB</color>

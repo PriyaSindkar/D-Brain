@@ -16,9 +16,15 @@
         android:layout_weight="2"
         android:orientation="vertical">
 
+
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
+            <com.kyleduo.switchbutton.SwitchButton
+                android:id="@+id/imgSwitch"
+                style="@style/MaterialDesignStyle" />
 
             <TextView
                 android:id="@+id/txtValue"
@@ -45,7 +51,7 @@
 
 
             <TextView
-                android:layout_centerInParent="true"
+                android:layout_centerHorizontal="true"
                 android:layout_below="@id/seekBar"
                 android:id="@+id/txtDimmerName"
                 android:layout_width="wrap_content"
@@ -53,17 +59,19 @@
                 android:padding="@dimen/S_MARGIN"
                 android:text="Dimmer Name"
                 android:textColor="#fff" />
+
+            <TextView
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/txtDimmerName"
+                android:id="@+id/txtMachineName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/S_MARGIN"
+                android:text="Machine Name"
+                android:textColor="@color/yellow" />
+
+
         </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-
-        </LinearLayout>
-
-
 
     </LinearLayout>
 

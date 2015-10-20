@@ -73,13 +73,12 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     }
 
     public class ListViewHolder extends ViewHolder{
-        public  TextView txtSceneName, txtMachineName;
+        public  TextView txtSceneName;
         public LinearLayout linearScene;
 
         public ListViewHolder(View view) {
             super ( view );
             this.txtSceneName = (TextView) view.findViewById(R.id.txtSceneName);
-            this.txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.linearScene = (LinearLayout) view.findViewById(R.id.linearScene);
         }
     }
@@ -121,6 +120,7 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         int sceneNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
         final int position = cursor.getPosition();
 
 
@@ -140,7 +140,6 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
             case 1:
                 final ListViewHolder groupViewHolder = (ListViewHolder) viewHolder;
                 groupViewHolder.txtSceneName.setText(cursor.getString(sceneNameIndex));
-                groupViewHolder.txtMachineName.setText("Machine-1");
 
                 groupViewHolder.linearScene.setOnClickListener(new View.OnClickListener() {
                     @Override
