@@ -115,7 +115,8 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
-        int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME);
+        final int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME);
+        final String machineName = cursor.getString(machineNameIndex);
         int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP);
         int machineSerialNoIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_SERIALNO);
         final int position = cursor.getPosition();
@@ -134,17 +135,17 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
         sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Serial No.: ");
         listHolder.txtMachineSerialNo.setText(sp);
 
-        listHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+        /*listHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 _deleteClick.onDeleteOptionClick(position);
             }
-        });
+        });*/
 
         listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                _renameClick.onRenameOptionClick(position, listHolder.txtMachineName.getText().toString().trim());
+                _renameClick.onRenameOptionClick(position, machineName);
             }
         });
     }

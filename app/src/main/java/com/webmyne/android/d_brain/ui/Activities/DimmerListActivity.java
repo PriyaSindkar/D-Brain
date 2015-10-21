@@ -366,13 +366,19 @@ public class DimmerListActivity extends AppCompatActivity {
                             DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
                             dbHelper.openDataBase();
                             machineName = dbHelper.getMachineNameByIP(machineIP);
-                            boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentId, componentName,componentType, machineIP, machineName);
-                            dbHelper.close();
+                            int dimmerCount = dbHelper.getComponentTypeCountInFavourite(componentType);
 
-                            if(isAlreadyAFavourite) {
-                                Toast.makeText(DimmerListActivity.this, "Already added to Favorite!", Toast.LENGTH_SHORT).show();
+                            if(dimmerCount <10) {
+                                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentId, componentName, componentType, machineIP, machineName);
+                                dbHelper.close();
+
+                                if (isAlreadyAFavourite) {
+                                    Toast.makeText(DimmerListActivity.this, "Already added to Favorite!", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(DimmerListActivity.this, "Added to Favorite Successfully!", Toast.LENGTH_SHORT).show();
+                                }
                             } else {
-                                Toast.makeText(DimmerListActivity.this, "Added to Favorite Successfully!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(DimmerListActivity.this, "Cannot add more than 10 dimmers to favourites.", Toast.LENGTH_SHORT).show();
                             }
 
                         } catch (SQLException e) {

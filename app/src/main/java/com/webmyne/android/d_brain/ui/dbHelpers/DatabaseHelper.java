@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Model.TouchPanelModel;
@@ -733,6 +734,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return flag;
     }
 
+    public int getComponentTypeCountInFavourite( String comopnentType) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        int count = 0;
+        try {
+            cursor = db.query(DBConstants.TABLE_FAVOURITE, null,  DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{comopnentType}, null, null, null, null);
+            if (cursor != null) {
+                count = cursor.getCount();
+            } else {
+                Log.e("CURSOR", "null");
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return count;
+    }
+
     public boolean isAlreadyAFavourite(String componentId, String machineIP) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
@@ -777,5 +796,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.e("EXP ", e.toString());
         }
         return cursor;
+    }
+
+    // to delete fav component
+    public void deleteComponentFromFavourite(String componentId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(DBConstants.TABLE_FAVOURITE, DBConstants.KEY_SC_COMPONENT_ID + "='" + componentId + "'", null);
+        db.close();
     }
 }

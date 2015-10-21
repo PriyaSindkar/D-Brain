@@ -327,13 +327,21 @@ public class SwitchesListActivity extends AppCompatActivity {
                             DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
                             dbHelper.openDataBase();
                             machineName = dbHelper.getMachineNameByIP(machineIP);
-                            boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentId, componentName,componentType, machineIP, machineName);
-                            dbHelper.close();
+                            int switchCount = dbHelper.getComponentTypeCountInFavourite(componentType);
 
-                            if(isAlreadyAFavourite) {
-                                Toast.makeText(SwitchesListActivity.this, "Already added to Favorite!", Toast.LENGTH_SHORT).show();
+                            Log.e("switchCount", switchCount+"");
+
+                            if(switchCount <10) {
+                                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentId, componentName, componentType, machineIP, machineName);
+                                dbHelper.close();
+
+                                if (isAlreadyAFavourite) {
+                                    Toast.makeText(SwitchesListActivity.this, "Already added to Favorite.", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(SwitchesListActivity.this, "Added to Favorite Successfully.", Toast.LENGTH_SHORT).show();
+                                }
                             } else {
-                                Toast.makeText(SwitchesListActivity.this, "Added to Favorite Successfully!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(SwitchesListActivity.this, "Cannot add more than 10 switches to favourites.", Toast.LENGTH_SHORT).show();
                             }
 
                         } catch (SQLException e) {

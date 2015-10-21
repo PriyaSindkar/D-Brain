@@ -22,6 +22,7 @@ import com.webmyne.android.d_brain.ui.Adapters.FavouriteListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -306,6 +307,29 @@ public class FavouriteListActivity extends AppCompatActivity {
                 adapter.setHasStableIds(true);
                 mRecyclerView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
+
+                adapter.setDeleteClickListener(new onDeleteClickListener() {
+                    @Override
+                    public void onDeleteOptionClick(int pos) {
+                        /*favouriteListCursor.moveToPosition(pos);
+
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(FavouriteListActivity.this);
+                            dbHelper.openDataBase();
+                            String componentId = favouriteListCursor.getString(favouriteListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+
+                            dbHelper.deleteComponentFromFavourite(componentId);
+                            favouriteListCursor = dbHelper.getAllFavouriteComponents();
+                            favouriteComponentStatusList.remove(pos);
+                            adapter.setComponentStatus(favouriteComponentStatusList);
+                            adapter.changeCursor(favouriteListCursor);
+
+                            dbHelper.close();
+                        } catch(Exception e) {
+                            Log.e("DB EXP", e.toString());
+                        }*/
+                    }
+                });
 
             } catch (Exception e) {
             }

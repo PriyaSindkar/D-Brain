@@ -154,6 +154,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         final int dimmerNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        final String dimmerName = cursor.getString(dimmerNameIndex);
         final int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
 
         final int position = cursor.getPosition();
@@ -250,7 +251,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                 listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position, listHolder.txtDimmerName.getText().toString().trim());
+                        _renameClick.onRenameOptionClick(position, dimmerName);
                     }
                 });
 

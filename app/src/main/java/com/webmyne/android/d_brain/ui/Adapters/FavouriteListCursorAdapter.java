@@ -20,6 +20,7 @@ import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
+import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
@@ -45,12 +46,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
     private ArrayList<XMLValues> dimmerStatus;
     private Cursor mCursor;
 
-    public onLongClickListener _longClick;
-    public onSingleClickListener _singleClick;
-    public onFavoriteClickListener _favoriteClick;
-    public onAddToSceneClickListener _addToSceneClick;
-    public onAddSchedulerClickListener _addSchedulerClick;
-    public onRenameClickListener _renameClick;
+    public onDeleteClickListener _onDeleteClick;
     public onCheckedChangeListener _switchClick;
 
     public FavouriteListCursorAdapter(Context context){
@@ -169,7 +165,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                 SwitchViewHolder switchHolder = new SwitchViewHolder (viewgroup1);
                 return switchHolder;
             case 1:
-                ViewGroup viewgroup2 = ( ViewGroup ) mInflater.inflate(R.layout.create_scene_dimmer_item, parent, false);
+                ViewGroup viewgroup2 = ( ViewGroup ) mInflater.inflate(R.layout.favourite_dimmer_item, parent, false);
                 DimmerViewHolder dimmerHolder = new DimmerViewHolder (viewgroup2);
                 return dimmerHolder;
             case 2:
@@ -224,6 +220,13 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                            // SwitchesListActivity.isDelay  = true;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }
+                    }
+                });
+
+                switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        _onDeleteClick.onDeleteOptionClick(position);
                     }
                 });
 
@@ -291,7 +294,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                             componentStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             dimmerHolder.imgSwitch.setChecked(false);
                         }
-                       // DimmerListActivity.isDelay = true;
+                        // DimmerListActivity.isDelay = true;
                         new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                     }
                 });
@@ -317,6 +320,14 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
                         // DimmerListActivity.isDelay = true;
                         new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                    }
+                });
+
+                dimmerHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        _onDeleteClick.onDeleteOptionClick(position);
+                        componentStatus.remove(position);
                     }
                 });
 
@@ -358,27 +369,8 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
     }
 
-    public void setSingleClickListener(onSingleClickListener obj){
-        this._singleClick = obj;
-    }
-    public void setLongClickListener(onLongClickListener obj){
-        this._longClick = obj;
-    }
-
-    public void setFavoriteClickListener(onFavoriteClickListener obj){
-        this._favoriteClick = obj;
-    }
-
-    public void setAddToSceneClickListener(onAddToSceneClickListener obj){
-        this._addToSceneClick = obj;
-    }
-
-    public void setAddSchedulerClickListener(onAddSchedulerClickListener obj){
-        this._addSchedulerClick = obj;
-    }
-
-    public void setRenameClickListener(onRenameClickListener obj){
-        this._renameClick = obj;
+    public void setDeleteClickListener(onDeleteClickListener obj){
+        this._onDeleteClick = obj;
     }
 
     public void setCheckedChangeListener(onCheckedChangeListener obj){

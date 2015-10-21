@@ -22,10 +22,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.kyleduo.switchbutton.SwitchButton
-                android:id="@+id/imgSwitch"
-                style="@style/MaterialDesignStyle" />
-
             <TextView
                 android:id="@+id/txtValue"
                 android:layout_width="40dp"
@@ -49,7 +45,17 @@
                 android:secondaryProgress="0"
                 android:thumb="@drawable/thumb" />
 
+            <LinearLayout
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:layout_below="@id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
+            <com.kyleduo.switchbutton.SwitchButton
+                android:id="@+id/imgSwitch"
+                style="@style/MaterialDesignStyle" />
             <TextView
                 android:layout_centerHorizontal="true"
                 android:layout_below="@id/seekBar"
@@ -69,7 +75,7 @@
                 android:padding="@dimen/S_MARGIN"
                 android:text="Machine Name"
                 android:textColor="@color/yellow" />
-
+            </LinearLayout>
 
         </RelativeLayout>
 

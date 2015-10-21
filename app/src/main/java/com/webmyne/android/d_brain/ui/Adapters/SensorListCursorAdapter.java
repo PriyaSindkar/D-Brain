@@ -117,8 +117,10 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         int nameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        final String sensorName = cursor.getString(nameIndex);
         int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
         int detailsNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_DETAILS);
+        final String sensorDetails = cursor.getColumnName(detailsNameIndex);
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
@@ -127,7 +129,7 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
         sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Sensor Name:");
         listHolder.txtSensorName.setText(sp);
 
-        listHolder.txtSensorDetails.setText(cursor.getString(detailsNameIndex));
+        listHolder.txtSensorDetails.setText(sensorDetails);
 
         sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
         sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");
@@ -136,7 +138,7 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
         listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                _renameClick.onRenameOptionClick(position, listHolder.txtSensorName.getText().toString().trim(), listHolder.txtSensorDetails.getText().toString().trim());
+                _renameClick.onRenameOptionClick(position, sensorName, sensorDetails);
             }
         });
 

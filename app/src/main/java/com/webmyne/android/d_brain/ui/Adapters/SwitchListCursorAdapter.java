@@ -144,7 +144,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
-        int switchNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        final int switchNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        final String switchName = cursor.getString(switchNameIndex);
         int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
@@ -191,7 +192,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position, listHolder.txtSwitchName.getText().toString().trim());
+                        _renameClick.onRenameOptionClick(position, switchName);
                     }
                 });
 
