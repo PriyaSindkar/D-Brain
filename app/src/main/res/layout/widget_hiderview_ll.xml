@@ -10,10 +10,10 @@
     android:paddingRight="12dp"
     android:paddingTop="6dp" >
 
-    <ImageView
+  <!--  <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/girl" />
+        android:src="@drawable/girl" />-->
 
     <TextView
 

@@ -58,6 +58,7 @@ public class DBConstants {
     // Scene-Component Table Column names
     public static final String KEY_SC_ID = "_id";
     public static final String KEY_SC_COMPONENT_ID = "COMPONENT_ID";
+    public static final String KEY_SC_COMP_PRIMARY_ID = "SCENE_COMPONENT_ID";
     public static final String KEY_SC_SCENE_ID = "SCENE_ID";
     public static final String KEY_SC_TYPE = "COMPONENT_TYPE";
     public static final String KEY_SC_MIP = "MACHINE_IP";
@@ -76,6 +77,8 @@ public class DBConstants {
     //Favourite table column names
     public static final String KEY_F_CNAME = "COMPONENT_NAME";
     public static final String KEY_F_MNAME = "MACHINE_NAME";
+    public static final String KEY_F_CID = "PRIMARY_COMP_ID";
+
 
 
     //Machine Config

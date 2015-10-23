@@ -2,6 +2,7 @@ package com.webmyne.android.d_brain.ui.base;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -95,6 +96,17 @@ public class HomeDrawerActivity extends AppCompatActivity {
                 if (txtClearButton.getText().toString().equals("Add Machine")) {
                     AddMachineDialog machineDialog = new AddMachineDialog(HomeDrawerActivity.this);
                     machineDialog.show();
+
+                   /* try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(HomeDrawerActivity.this);
+                        dbHelper.openDataBase();
+                        Cursor machineCursor = dbHelper.getAllMachines();
+                        adapter.changeCursor(machineCursor);
+                        dbHelper.close();
+
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }*/
                 }
             }
         });

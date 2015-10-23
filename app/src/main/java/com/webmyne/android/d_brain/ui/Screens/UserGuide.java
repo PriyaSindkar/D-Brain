@@ -345,19 +345,19 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             txtNext.setClickable(true);
 
             //temp -> only for testing
-            productCode = "12115-0400";
+           // productCode = "12115-0400";
             if(!isError) {
                 try {
                     for (int i = 0; i < powerStatus.size(); i++) {
                         if (powerStatus.get(i).tagName.equals("DPC")) {
-                           // productCode = powerStatus.get(i).tagValue;
+                            productCode = powerStatus.get(i).tagValue;
                         } else if (powerStatus.get(i).tagName.equals("DSN")) {
                             machineSerialNo = powerStatus.get(i).tagValue;
                         }
                     }
 
-                   // if (machineSerialNo.equals(userEnteredSerialNo)) {
-                       // if (Utils.validateProductCode(productCode)) {
+                    if (machineSerialNo.equals(userEnteredSerialNo)) {
+                        if (Utils.validateProductCode(productCode)) {
                             DatabaseHelper dbHelper = new DatabaseHelper(UserGuide.this);
 
                             dbHelper.openDataBase();
@@ -375,12 +375,12 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                             Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
-                        /*} else {
+                        } else {
                             Toast.makeText(UserGuide.this, "Invalid Product Code.", Toast.LENGTH_LONG).show();
-                        }*/
-                    /*} else {
+                        }
+                    } else {
                         Toast.makeText(UserGuide.this, "Invalid Serial No.", Toast.LENGTH_LONG).show();
-                    }*/
+                    }
                 } catch (Exception e) {
                     Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address", Toast.LENGTH_LONG).show();
                 }

@@ -120,7 +120,6 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         int sceneNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
-        int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
         final int position = cursor.getPosition();
 
 

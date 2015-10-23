@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
@@ -27,11 +28,13 @@ import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -181,8 +184,26 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
-        int componentNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_F_CNAME);
+        int componentIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_F_CID);
+        String componentId = cursor.getString(componentIdIndex);
+        String componentName = "";
+
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
+            dbHelper.openDataBase();
+            componentName = dbHelper.getComponentNameByPrimaryId(componentId);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_F_MNAME);
+        final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP);
+
+        String machineIP = cursor.getString(machineIPIndex);
+        if(!machineIP.contains("http://")) {
+            machineIP = "http://" + machineIP;
+        }
 
         final int position = cursor.getPosition();
 
@@ -190,7 +211,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
             case 0:
 
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
-                AdvancedSpannableString sp = new AdvancedSpannableString("Component: "+cursor.getString(componentNameIndex));
+                AdvancedSpannableString sp = new AdvancedSpannableString("Component: "+componentName);
                 sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Component: ");
                 switchHolder.txtSwitchName.setText(sp);
 
@@ -206,17 +227,19 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                     switchHolder.imgSwitch.setChecked(true);
                 }
 
+                final String finalMachineIP = machineIP;
+
                 switchHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         switchHolder.imgSwitch.toggle();
 
                         if(switchHolder.imgSwitch.isChecked()){
-                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.OFF_VALUE;
+                            String CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.OFF_VALUE;
                           //  SwitchesListActivity.isDelay  = true;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }else{
-                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.ON_VALUE;
+                            String CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.ON_VALUE;
                            // SwitchesListActivity.isDelay  = true;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }
@@ -235,7 +258,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-                sp = new AdvancedSpannableString("Component: "+cursor.getString(componentNameIndex));
+                sp = new AdvancedSpannableString("Component: "+componentName);
                 sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Component: ");
                 dimmerHolder.txtDimmerName.setText(sp);
 
@@ -263,6 +286,8 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                     dimmerHolder.imgSwitch.setChecked(true);
                 }
 
+                final String finalMachineIP1 = machineIP;
+
                 // added on 19-10
                 dimmerHolder.txtValue.setText(String.valueOf(seekProgress));
                 dimmerHolder.seekBar.setProgress(seekProgress);
@@ -286,11 +311,11 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
                         if (seekBar.getProgress() > 0) {
                             strProgress = String.format("%02d", (seekBar.getProgress() - 1));
-                            CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL/*DashboardFragment.URL_MACHINE_IP*/ + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.ON_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.ON_VALUE + strProgress;
                             componentStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
                             dimmerHolder.imgSwitch.setChecked(true);
                         } else if (seekBar.getProgress() == 0) {
-                            CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL/*DashboardFragment.URL_MACHINE_IP*/ + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.OFF_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.OFF_VALUE + strProgress;
                             componentStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             dimmerHolder.imgSwitch.setChecked(false);
                         }
@@ -311,10 +336,10 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                         }
 
                         if (dimmerHolder.imgSwitch.isChecked()) {
-                            CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL/*DashboardFragment.URL_MACHINE_IP*/ + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.OFF_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.OFF_VALUE + strProgress;
                             //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
                         } else {
-                            CHANGE_STATUS_URL = AppConstants.CHANGE_STATUS_SIMULATOR_URL/*DashboardFragment.URL_MACHINE_IP*/ + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.ON_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.ON_VALUE + strProgress;
                             //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
 
@@ -335,7 +360,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
             case 2:
                 final MotorViewHolder motorViewHolder = ( MotorViewHolder ) viewHolder;
-                motorViewHolder.txtMotorName.setText(cursor.getString(componentNameIndex));
+                motorViewHolder.txtMotorName.setText("");
 
                 /*motorViewHolder.imgRotateSwitches.setOnClickListener(new View.OnClickListener() {
                     @Override

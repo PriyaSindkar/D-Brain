@@ -19,8 +19,8 @@ public class SceneSwitchItem extends LinearLayout{
     LayoutInflater inflater;
     View viewLine;
     private ImageView imgSwitch;
-    private TextView txtSwitchName;
-    private String switchId, machineIP, machineName;
+    private TextView txtSwitchName, txtMachineName;
+    private String switchId, machineIP, componentPrimaryId;
 
     public SceneSwitchItem(Context _context) {
         super(_context);
@@ -50,6 +50,7 @@ public class SceneSwitchItem extends LinearLayout{
         imgSwitch = (ImageView) findViewById(R.id.imgMotorLeftArrow);
 
         txtSwitchName = (TextView) findViewById(R.id.txtSwitchName);
+        txtMachineName = (TextView) findViewById(R.id.txtMachineName);
         viewLine = findViewById(R.id.viewLine);
 
         setFocusable(true);
@@ -70,6 +71,14 @@ public class SceneSwitchItem extends LinearLayout{
         this.switchId = switchId;
     }
 
+    public String getComponentPrimaryId() {
+        return componentPrimaryId;
+    }
+
+    public void setComponentPrimaryId(String componentPrimaryId) {
+        this.componentPrimaryId = componentPrimaryId;
+    }
+
     public String getMachineIP() {
         return machineIP;
     }
@@ -79,11 +88,11 @@ public class SceneSwitchItem extends LinearLayout{
     }
 
     public String getMachineName() {
-        return machineName;
+        return txtMachineName.getText().toString().trim();
     }
 
     public void setMachineName(String machineName) {
-        this.machineName = machineName;
+        txtMachineName.setText(machineName);
     }
 
     @Override

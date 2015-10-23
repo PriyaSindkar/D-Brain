@@ -46,8 +46,9 @@ public class SensorsListActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ImageView imgBack, imgListGridToggle;
     private TextView toolbarTitle;
-    private Cursor sensorListCursor;
-    private ArrayList<XMLValues> sensorStatusList;
+    private Cursor sensorListCursor, machineListCursor;
+    private ArrayList<XMLValues> sensorStatusList, allSensorsStatusList;
+    private String[] machineIPs;
     private boolean isFirstTime = true;
     private ProgressBar progressBar;
     private Timer timer;
@@ -71,7 +72,7 @@ public class SensorsListActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (!isDelay) {
-                            new GetSensorStatus().execute();
+                            new GetSensorStatus().execute(machineIPs);
                             Log.e("TIMER", "Timer Start");
                         } else {
                             PauseTimer();
@@ -169,7 +170,21 @@ public class SensorsListActivity extends AppCompatActivity {
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            sensorListCursor =  dbHelper.getAllSensorsComponents();
+            machineListCursor = dbHelper.getAllMachines();
+
+            if(machineListCursor != null) {
+                if(machineListCursor.getCount() > 0) {
+                    machineIPs = new String[machineListCursor.getCount()];
+                    machineListCursor.moveToFirst();
+                    int i = 0;
+                    do {
+                        String machineIP = machineListCursor.getString(machineListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                        machineIPs[i] = machineIP;
+                        i++;
+                    } while(machineListCursor.moveToNext());
+                }
+            }
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -198,7 +213,7 @@ public class SensorsListActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public class GetSensorStatus extends AsyncTask<Void, Void, Void> {
+    public class GetSensorStatus extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -206,20 +221,30 @@ public class SensorsListActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
             try {
-                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_SENSOR_STATUS);
-                // Log.e("# urlValue", urlValue.toString());
+                allSensorsStatusList = new ArrayList<>();
+                for(int i=0; i<params.length; i++) {
+                    String machineBaseURL = "";
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
-                //  Log.e("# inputStream", inputStream.toString());
-                MainXmlPullParser pullParser = new MainXmlPullParser();
+                    if (params[i].contains("http://")) {
+                        machineBaseURL = params[i];
+                    } else {
+                        machineBaseURL = "http://" + params[i];
+                    }
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SENSOR_STATUS);
+                    // Log.e("# urlValue", urlValue.toString());
 
-                sensorStatusList = pullParser.processXML(inputStream);
-                // Log.e("XML PARSERED", dimmerStatusList.toString());
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    //  Log.e("# inputStream", inputStream.toString());
+                    MainXmlPullParser pullParser = new MainXmlPullParser();
 
+                    sensorStatusList = pullParser.processXML(inputStream);
+                    allSensorsStatusList.addAll(sensorStatusList);
+                    // Log.e("XML PARSERED", dimmerStatusList.toString());
+                }
 
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
@@ -255,7 +280,7 @@ public class SensorsListActivity extends AppCompatActivity {
                     public void onRenameOptionClick(int pos, String _oldName, String _oldDetails) {
                         final int position = pos;
                         sensorListCursor.moveToPosition(position);
-                        final String componentId = sensorListCursor.getString(sensorListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        final String componentId = sensorListCursor.getString(sensorListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
 
                         RenameDialog renameDialog = new RenameDialog(SensorsListActivity.this, _oldName, _oldDetails);
                         renameDialog.show();
@@ -272,7 +297,7 @@ public class SensorsListActivity extends AppCompatActivity {
                                     DatabaseHelper dbHelper = new DatabaseHelper(SensorsListActivity.this);
                                     dbHelper.openDataBase();
                                     dbHelper.renameComponent(componentId, newName, newDetails);
-                                    sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DashboardFragment.MACHINE_IP);
+                                    sensorListCursor =  dbHelper.getAllSensorsComponents();
                                     dbHelper.close();
                                     adapter.changeCursor(sensorListCursor);
 

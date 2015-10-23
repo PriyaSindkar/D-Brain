@@ -63,7 +63,7 @@
                 android:hint="Device IP Address"
                 android:inputType="text"
                 android:singleLine="true"
-                android:text="http://ws-srv-net.in.webmyne.com/Applications/DsquareWS"
+                android:text=""
                 android:backgroundTint="@color/white"
                 android:textColor="#ffffff"
                 android:textColorHint="#d1d1d1"

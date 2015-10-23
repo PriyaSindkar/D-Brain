@@ -85,7 +85,7 @@ public class SchedulerListAdapter extends RecyclerView.Adapter<SchedulerListAdap
 
             final GridViewHolder holder = ( GridViewHolder ) viewHolder;
             holder.txtSchedulerName.setText("Scheduler Name: "+ "Scheduler " + position);
-            holder.txtMachineName.setText("Machine Name: My Machine");
+         //   holder.txtMachineName.setText("Machine Name: My Machine");
 
 
 

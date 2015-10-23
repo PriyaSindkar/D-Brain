@@ -21,7 +21,6 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
-import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
@@ -53,8 +52,9 @@ public class SwitchesListActivity extends AppCompatActivity {
     private TextView toolbarTitle;
 
     private boolean isListView = true, isFirstTime = true;
-    private Cursor switchListCursor;
-    ArrayList<XMLValues> switchStatusList;
+    private Cursor switchListCursor, machineListCursor;
+    private String[] machineIPs;
+    ArrayList<XMLValues> switchStatusList, allSwitchesStatusList;
     private InputStream inputStream;
     private ProgressBar progressBar;
     private Timer timer;
@@ -78,7 +78,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (!isDelay) {
-                            new GetSwitchStatus().execute();
+                            new GetSwitchStatus().execute(machineIPs);
                             Log.e("TIMER switch", "Timer Start");
                         } else {
                             PauseTimer();
@@ -195,16 +195,33 @@ public class SwitchesListActivity extends AppCompatActivity {
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
-            Log.e("switchListCursor", switchListCursor.getCount()+"");
+           // switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            switchListCursor =  dbHelper.getAllSwitchComponents();
+            machineListCursor = dbHelper.getAllMachines();
+
+            if(machineListCursor != null) {
+                if(machineListCursor.getCount() > 0) {
+                    machineIPs = new String[machineListCursor.getCount()];
+                    machineListCursor.moveToFirst();
+                    int i = 0;
+                    do {
+                        String machineIP = machineListCursor.getString(machineListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                        machineIPs[i] = machineIP;
+                        i++;
+                    } while(machineListCursor.moveToNext());
+                }
+            }
+
             dbHelper.close();
+
+
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public class GetSwitchStatus extends AsyncTask<Void, Void, Void> {
+    public class GetSwitchStatus extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -212,23 +229,48 @@ public class SwitchesListActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
             try {
-                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
-               // Log.e("# urlValue", urlValue.toString());
+                allSwitchesStatusList = new ArrayList<>();
+                for(int i=0; i<params.length; i++) {
+                    String machineBaseURL = "";
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                inputStream = httpUrlConnection.getInputStream();
-              //  Log.e("# inputStream", inputStream.toString());
-                MainXmlPullParser pullParser = new MainXmlPullParser();
+                    if(params[i].contains("http://")) {
+                        machineBaseURL = params[i];
+                    } else {
+                        machineBaseURL = "http://" + params[i];
+                    }
 
-                switchStatusList = pullParser.processXML(inputStream);
-                Log.e("XML PARSERED", switchStatusList.toString());
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
+                    Log.e("# urlValue", urlValue.toString());
 
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    inputStream = httpUrlConnection.getInputStream();
+                  //  Log.e("# inputStream", inputStream.toString());
+                    MainXmlPullParser pullParser = new MainXmlPullParser();
 
+                    switchStatusList = pullParser.processXML(inputStream);
+                    //Log.e("XML PARSERED", switchStatusList.toString());
+                    DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                    try {
+                        dbHelper.openDataBase();
+                        Cursor cursor =  dbHelper.getAllSwitchComponentsForAMachine(params[i]);
+                        int totalSwitchesofMachine = 0;
+                        if(cursor != null) {
+                            totalSwitchesofMachine = cursor.getCount();
+                        }
+                        for(int j=0 ;j <totalSwitchesofMachine ; j++) {
+                            allSwitchesStatusList.add(switchStatusList.get(j));
+                        }
+                        dbHelper.close();
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+                Log.e("# EXP123", e.toString());
             }
             return null;
         }
@@ -240,7 +282,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 if(isFirstTime) {
                     //init adapter
-                    adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, switchStatusList);
+                    adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, allSwitchesStatusList);
                     adapter.setType(0);
                     adapter.setHasStableIds(true);
                     mRecyclerView.setAdapter(adapter);
@@ -248,7 +290,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                     isFirstTime = false;
                 } else {
                     //set adapter again
-                    adapter.setSwitchStatus(switchStatusList);
+                    adapter.setSwitchStatus(allSwitchesStatusList);
                     adapter.notifyDataSetChanged();
                 }
 
@@ -265,7 +307,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                     public void onRenameOptionClick(int pos, String _oldName) {
                         final int position = pos;
                         switchListCursor.moveToPosition(position);
-                        final String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        final String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
 
                         RenameDialog renameDialog = new RenameDialog(SwitchesListActivity.this, _oldName);
                         renameDialog.show();
@@ -277,7 +319,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                                     DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
                                     dbHelper.openDataBase();
                                     dbHelper.renameComponent(componentId, newName);
-                                    switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
+                                    switchListCursor = dbHelper.getAllSwitchComponents();
                                     dbHelper.close();
                                     adapter.changeCursor(switchListCursor);
 
@@ -305,7 +347,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                     public void onAddToSceneOptionClick(int pos) {
                         timer.cancel();
                         switchListCursor.moveToPosition(pos);
-                        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
                         String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
                         SceneListDialog dialog = new SceneListDialog(SwitchesListActivity.this, componentId, componentType);
                         dialog.show();
@@ -319,6 +361,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                     public void onFavoriteOptionClick(int pos) {
                         switchListCursor.moveToPosition(pos);
                         String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        String componentPrimaryId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
                         String componentName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
                         String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
                         String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
@@ -329,10 +372,8 @@ public class SwitchesListActivity extends AppCompatActivity {
                             machineName = dbHelper.getMachineNameByIP(machineIP);
                             int switchCount = dbHelper.getComponentTypeCountInFavourite(componentType);
 
-                            Log.e("switchCount", switchCount+"");
-
                             if(switchCount <10) {
-                                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentId, componentName, componentType, machineIP, machineName);
+                                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentPrimaryId, componentId, componentName, componentType, machineIP, machineName);
                                 dbHelper.close();
 
                                 if (isAlreadyAFavourite) {

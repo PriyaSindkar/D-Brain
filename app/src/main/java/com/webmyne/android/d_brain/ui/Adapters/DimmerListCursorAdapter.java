@@ -156,9 +156,19 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
         final int dimmerNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
         final String dimmerName = cursor.getString(dimmerNameIndex);
         final int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
+        final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP);
+
+        int componentIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID);
+        String componentName = cursor.getString(componentIdIndex);
+
+        String machineIP = cursor.getString(machineIPIndex);
+        if(!machineIP.contains("http://")) {
+            machineIP = "http://" + machineIP;
+        }
 
         final int position = cursor.getPosition();
-        final String strPosition = String.format("%02d", (position + 1));
+       // final String strPosition = String.format("%02d", (position + 1));
+        final String strPosition = componentName.substring(2,4);
 
         String dimmerOnOffStatus = (dimmerStatus.get(position).tagValue).substring(0, 2);
         int seekProgress  = 0;//Integer.parseInt((dimmerStatus.get(position).tagValue).substring(2,4))+1;
@@ -172,6 +182,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
             case 0:
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
+
                 AdvancedSpannableString sp = new AdvancedSpannableString("Dimmer Name: "+cursor.getString(dimmerNameIndex));
                 sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Dimmer Name:");
                 listHolder.txtDimmerName.setText(sp);
@@ -194,6 +205,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                 listHolder.txtValue.setText(String.valueOf(seekProgress));
                 listHolder.seekBar.setProgress(seekProgress);
 
+                final String finalMachineIP = machineIP;
                 listHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -213,10 +225,10 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
                         if (seekBar.getProgress() > 0) {
                             strProgress = String.format("%02d", (seekBar.getProgress() - 1));
-                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
                         } else if (seekBar.getProgress() == 0) {
-                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
                         DimmerListActivity.isDelay = true;
@@ -236,10 +248,10 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                         }
 
                         if (listHolder.imgSwitch.isChecked()) {
-                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                              //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
                         } else {
-                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
 
@@ -298,6 +310,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
                 groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
                 groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
+                final String finalMachineIP1 = machineIP;
 
                 if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
                     /*groupViewHolder.txtValue.setText("0");
@@ -330,10 +343,10 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
                         if (seekBar.getProgress() > 0) {
                             strProgress = String.format("%02d", (seekBar.getProgress() - 1));
-                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
                         } else if (seekBar.getProgress() == 0) {
-                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
                         DimmerListActivity.isDelay = true;
@@ -354,10 +367,10 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                         }
 
                         if (groupViewHolder.imgSwitch.isChecked()) {
-                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                             //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
                         } else {
-                            CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
 

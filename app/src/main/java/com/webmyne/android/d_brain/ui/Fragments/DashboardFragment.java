@@ -65,8 +65,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private FragmentActivity activity;
     private int powerSignalCount = 0;
     private String previousLed = "", led = "";
-    public static String URL_MACHINE_IP ="";
-    public static String MACHINE_IP = "";
+    private static String URL_MACHINE_IP ="";
+    private static String MACHINE_IP = "";
 
     private int topRowComponentCount = 0; // fix-> switches and motors
     private int bottomRowComponentCount = 0; // fix -> Dimmers and sensors
@@ -202,7 +202,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();
-            machineCursor = dbHelper.getMachine();
+            machineCursor = dbHelper.getAllMachines();
 
             if(machineCursor != null) {
                 machineCursor.moveToFirst();
@@ -223,10 +223,10 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();*/
-            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(MACHINE_IP);
-            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(MACHINE_IP);
-            motorListCursor =  dbHelper.getAllMotorComponentsForAMachine(MACHINE_IP);
-            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(MACHINE_IP);
+            switchListCursor =  dbHelper.getAllSwitchComponents();
+            dimmerListCursor =  dbHelper.getAllDimmerComponents();
+            motorListCursor =  dbHelper.getAllMotorComponents();
+            sensorListCursor =  dbHelper.getAllSensorsComponents();
             dbHelper.close();
 
             // get no of switches from db, if 0 no, switches not shown
@@ -342,7 +342,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         /*DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();
-            machineCursor = dbHelper.getMachine();
+            machineCursor = dbHelper.getAllMachines();
 
             if(machineCursor != null) {
                 machineCursor.moveToFirst();

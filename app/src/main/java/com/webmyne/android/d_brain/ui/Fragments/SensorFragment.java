@@ -52,8 +52,9 @@ public class SensorFragment extends Fragment {
     private int totalNoOfSensors = 9;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
-    private Cursor sensorListCursor;
-    private ArrayList<XMLValues> sensorStatusList;
+    private Cursor sensorListCursor, machineListCursor;
+    private ArrayList<XMLValues> sensorStatusList, allSensorsStatusList;
+    private String[] machineIPs;
     private boolean isFirstTime = true;
     private ProgressBar progressBar;
     private Timer timer;
@@ -186,7 +187,21 @@ public class SensorFragment extends Fragment {
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            sensorListCursor =  dbHelper.getAllSensorsComponents();
+            machineListCursor = dbHelper.getAllMachines();
+
+            if(machineListCursor != null) {
+                if(machineListCursor.getCount() > 0) {
+                    machineIPs = new String[machineListCursor.getCount()];
+                    machineListCursor.moveToFirst();
+                    int i = 0;
+                    do {
+                        String machineIP = machineListCursor.getString(machineListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                        machineIPs[i] = machineIP;
+                        i++;
+                    } while(machineListCursor.moveToNext());
+                }
+            }
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -194,7 +209,7 @@ public class SensorFragment extends Fragment {
         }
     }
 
-    public class GetSensorStatus extends AsyncTask<Void, Void, Void> {
+    public class GetSensorStatus extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -202,21 +217,31 @@ public class SensorFragment extends Fragment {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
             try {
-                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_SENSOR_STATUS);
-                // Log.e("# urlValue", urlValue.toString());
+                allSensorsStatusList = new ArrayList<>();
+                for(int i=0; i<params.length; i++) {
+                    String machineBaseURL = "";
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
-                //  Log.e("# inputStream", inputStream.toString());
-                MainXmlPullParser pullParser = new MainXmlPullParser();
+                    if (params[i].contains("http://")) {
+                        machineBaseURL = params[i];
+                    } else {
+                        machineBaseURL = "http://" + params[i];
+                    }
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SENSOR_STATUS);
+                    // Log.e("# urlValue", urlValue.toString());
 
-                sensorStatusList = pullParser.processXML(inputStream);
-                 Log.e("XML PARSERED", sensorStatusList.toString());
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    //  Log.e("# inputStream", inputStream.toString());
+                    MainXmlPullParser pullParser = new MainXmlPullParser();
 
+                    sensorStatusList = pullParser.processXML(inputStream);
+                    allSensorsStatusList.addAll(sensorStatusList);
+                    Log.e("XML PARSERED", sensorStatusList.toString());
 
+                }
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
             }
@@ -268,7 +293,7 @@ public class SensorFragment extends Fragment {
                                     DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                                     dbHelper.openDataBase();
                                     dbHelper.renameComponent(componentId, newName, newDetails);
-                                    sensorListCursor =  dbHelper.getAllSensorComponentsForAMachine(DashboardFragment.MACHINE_IP);
+                                    sensorListCursor =  dbHelper.getAllSensorsComponents();
                                     dbHelper.close();
                                     adapter.changeCursor(sensorListCursor);
 

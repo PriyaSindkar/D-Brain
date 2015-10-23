@@ -9,22 +9,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
-import com.webmyne.android.d_brain.ui.Adapters.MachineListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
-import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -107,7 +102,7 @@ public class AddMachineFragment extends Fragment {
                             dbHelper.renameMachine(machineId, newName);
                             adapter.notifyDataSetChanged();
                             dbHelper.close();
-                            machineCursor = dbHelper.getMachine();
+                            machineCursor = dbHelper.getAllMachines();
                             adapter.changeCursor(machineCursor);
 
 
@@ -151,7 +146,7 @@ public class AddMachineFragment extends Fragment {
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            machineCursor =  dbHelper.getMachine();
+            machineCursor =  dbHelper.getAllMachines();
             Log.e("machine cursor", machineCursor.getCount() + "");
             dbHelper.close();
 

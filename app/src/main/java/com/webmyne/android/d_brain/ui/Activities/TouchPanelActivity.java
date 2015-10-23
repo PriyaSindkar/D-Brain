@@ -369,7 +369,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachine("");
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -383,7 +383,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            dimmerListCursor =  dbHelper.getAllDimmerComponents();
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -397,7 +397,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            motorListCursor =  dbHelper.getAllMotorComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            motorListCursor =  dbHelper.getAllMotorComponents();
             dbHelper.close();
 
         } catch (SQLException e) {

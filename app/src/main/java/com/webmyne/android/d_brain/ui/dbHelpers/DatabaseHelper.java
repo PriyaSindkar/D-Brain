@@ -151,7 +151,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
        db.close();
     }
 
-    public Cursor getMachine() {
+    public Cursor getAllMachines() {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         try {
@@ -225,7 +225,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // save new component name
         ContentValues values = new ContentValues();
         values.put(DBConstants.KEY_C_NAME, componentName);
-        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_COMPONENT_ID + "='" + componentId+"'", null);
+        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_ID + "='" + componentId+"'", null);
         db.close();
     }
 
@@ -236,7 +236,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(DBConstants.KEY_C_NAME, componentName);
         values.put(DBConstants.KEY_C_DETAILS, componentDetails);
-        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_COMPONENT_ID + "='" + componentId+"'", null);
+        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_ID + "='" + componentId+"'", null);
         db.close();
     }
 
@@ -259,6 +259,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    //get all switches from all machines
+    public Cursor getAllSwitchComponents() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{AppConstants.SWITCH_TYPE}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+
     public Cursor getAllDimmerComponentsForAMachine(String machineIP) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
@@ -278,12 +299,52 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    //get all switches from all dimmers
+    public Cursor getAllDimmerComponents() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{AppConstants.DIMMER_TYPE}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
     public Cursor getAllMotorComponentsForAMachine(String machineIP) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         try {
             cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
                     new String[]{machineIP, AppConstants.MOTOR_TYPE}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+    //get all switches from all motors
+    public Cursor getAllMotorComponents() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{AppConstants.MOTOR_TYPE}, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getCount() > 0) {
@@ -317,6 +378,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    //get all switches from all sensors
+    public Cursor getAllSensorsComponents() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{AppConstants.ALERT_TYPE}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
 
     public void createNewScene(String sceneName, ArrayList<SceneItemsDataObject> componentModels) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -333,6 +414,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         for(int i=0; i<componentModels.size(); i++) {
             values.put(DBConstants.KEY_SC_SCENE_ID, String.valueOf(sceneId));
             values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
+            values.put(DBConstants.KEY_SC_COMP_PRIMARY_ID, componentModels.get(i).getSceneComponentPrimaryId());
             values.put(DBConstants.KEY_SC_TYPE, componentModels.get(i).getSceneControlType());
             values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
             values.put(DBConstants.KEY_SC_MNAME, componentModels.get(i).getMachineName());
@@ -431,15 +513,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             values.put(DBConstants.KEY_SC_SCENE_ID, sceneId);
             values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
+            values.put(DBConstants.KEY_SC_COMP_PRIMARY_ID, componentModels.get(i).getSceneComponentPrimaryId());
             values.put(DBConstants.KEY_SC_TYPE, componentModels.get(i).getSceneControlType());
             values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
             values.put(DBConstants.KEY_SC_MNAME, componentModels.get(i).getMachineName());
             values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
 
-            if( !isComponentAlreadyExists(componentModels.get(i).getSceneItemId(), sceneId))
+            if( !isComponentAlreadyExists(componentModels.get(i).getSceneComponentPrimaryId(), sceneId))
                 db.insert(DBConstants.TABLE_SCENE_COMPONENT, null, values);
             else {
-                db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMPONENT_ID + " = '" + componentModels.get(i).getSceneItemId() + "'", null);
+                db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMP_PRIMARY_ID + " = '" + componentModels.get(i).getSceneComponentPrimaryId() + "'", null);
             }
         }
 
@@ -469,7 +552,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
             }
 
-            db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMPONENT_ID + " = '" + componentModels.get(i).getSceneItemId() + "'", null);
+            db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMP_PRIMARY_ID + " = '" + componentModels.get(i).getSceneComponentPrimaryId() + "'", null);
         }
 
         db.close();
@@ -480,7 +563,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         for(int i=0; i<componentModels.size(); i++) {
-            db.delete(DBConstants.TABLE_SCENE_COMPONENT, DBConstants.KEY_SC_COMPONENT_ID + "='" + componentModels.get(i).getSceneItemId() + "'", null);
+            db.delete(DBConstants.TABLE_SCENE_COMPONENT, DBConstants.KEY_SC_COMP_PRIMARY_ID + "='" + componentModels.get(i).getSceneComponentPrimaryId() + "'", null);
         }
 
         db.close();
@@ -496,7 +579,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
                     new String[]{URL_MACHINE_IP}, null, null, null, null);*/
 
-            cursor = db.query(DBConstants.TABLE_SCENE_COMPONENT, null, DBConstants.KEY_SC_SCENE_ID + "=? AND " + DBConstants.KEY_SC_COMPONENT_ID + "=?",
+            cursor = db.query(DBConstants.TABLE_SCENE_COMPONENT, null, DBConstants.KEY_SC_SCENE_ID + "=? AND " + DBConstants.KEY_SC_COMP_PRIMARY_ID + "=?",
                     new String[]{sceneId, componentId}, null, null, null, null);
             if (cursor != null) {
                 if(cursor.getCount() == 0) {
@@ -560,6 +643,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_COMPONENT_ID + "=?" ,
                     new String[]{componentId}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                componentName =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return componentName;
+    }
+
+    public String getComponentNameByPrimaryId(String _componentId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        String componentName = "";
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_ID + "=?" ,
+                    new String[]{_componentId}, null, null, null, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();
@@ -713,11 +815,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public boolean insertIntoFavorite(String componentId, String componentName, String componentType, String machineIP, String machineName) {
+    public boolean insertIntoFavorite(String componentPrimaryId, String componentId, String componentName, String componentType, String machineIP, String machineName) {
         SQLiteDatabase db = this.getWritableDatabase();
         boolean flag = false;
 
         ContentValues values = new ContentValues();
+        values.put(DBConstants.KEY_F_CID, componentPrimaryId);
         values.put(DBConstants.KEY_C_COMPONENT_ID, componentId);
         values.put(DBConstants.KEY_F_CNAME, componentName);
         values.put(DBConstants.KEY_C_TYPE, componentType);

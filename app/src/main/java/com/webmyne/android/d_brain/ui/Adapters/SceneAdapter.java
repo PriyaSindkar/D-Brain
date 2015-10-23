@@ -23,6 +23,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Model.onItemClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
 import java.util.ArrayList;
 
@@ -193,11 +194,23 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
        /* final SceneItemsDataObject name = (SceneItemsDataObject) mDataset.get(position);*/
+        String componentPrimaryKey = mDataset.get(position).getSceneComponentPrimaryId();
+        DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
+        String componentName = "";
+        try {
+            dbHelper.openDataBase();
+            componentName = dbHelper.getComponentNameByPrimaryId(componentPrimaryKey);
+
+        } catch(Exception e) {
+
+        }
+
 
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
-                AdvancedSpannableString sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
+
+                AdvancedSpannableString sp = new AdvancedSpannableString("Component Name: "+ componentName);
                 sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");
                 switchHolder.txtSwitchName.setText(sp);
 
@@ -255,7 +268,7 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-                sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
+                sp = new AdvancedSpannableString("Component Name: "+componentName);
                 sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");
                 dimmerHolder.txtDimmerName.setText(sp);
 

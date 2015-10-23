@@ -199,18 +199,18 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     newMData.remove(mData.get(pos));
                 }
 
-                String componentId = mData.get(pos).getSceneItemId();
+                String componentId = mData.get(pos).getSceneComponentPrimaryId();
 
                 if (mData.get(pos).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
                     for(int i=0;i<initSwitches.size();i++) {
-                        if( initSwitches.get(i).getSwitchId().equals(componentId)){
+                        if( initSwitches.get(i).getComponentPrimaryId().equals(componentId)){
                             initSwitches.get(i).setFocusable(true);
                             break;
                         }
                     }
                 } else if (mData.get(pos).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
                     for(int i=0;i<initDimmers.size();i++) {
-                        if( initDimmers.get(i).getSwitchId().equals(componentId)){
+                        if( initDimmers.get(i).getComponentPrimaryId().equals(componentId)){
                             initDimmers.get(i).setFocusable(true);
                             break;
                         }
@@ -417,10 +417,10 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 String sceneStatus="";
                 if(sceneMainSwitch.isChecked()) {
                     sceneStatus = "no";
-                    new CallSceneOff().execute();
+                   // new CallSceneOff().execute();
                 } else {
                     sceneStatus = "yes";
-                    new CallSceneOn().execute();
+                  //  new CallSceneOn().execute();
                 }
 
                 DatabaseHelper dbHelper = new DatabaseHelper(this);
@@ -595,7 +595,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            switchListCursor = dbHelper.getAllSwitchComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            switchListCursor = dbHelper.getAllSwitchComponents();
             dbHelper.close();
 
             totalNoOfSwitches = switchListCursor.getCount();
@@ -607,12 +607,13 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
                         sceneSwitchItem.setText(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
                         sceneSwitchItem.setSwitchId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
+                        sceneSwitchItem.setComponentPrimaryId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
                         sceneSwitchItem.setMachineIP(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
                         // check if this component is already added to the scene or not
                         for(int i=0; i<mData.size(); i++) {
-                            if(mData.get(i).getSceneItemId().equals(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)))) {
+                            if(mData.get(i).getSceneComponentPrimaryId().equals(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)))) {
                                 sceneSwitchItem.setFocusable(false);
                             }
                         }
@@ -636,7 +637,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            motorListCursor = dbHelper.getAllMotorComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            motorListCursor = dbHelper.getAllMotorComponents();
             dbHelper.close();
 
             totalNoOfMotors = motorListCursor.getCount();
@@ -673,7 +674,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            dimmerListCursor = dbHelper.getAllDimmerComponents();
             dbHelper.close();
 
             totalNoOfDimmers = dimmerListCursor.getCount();
@@ -685,12 +686,13 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
                         sceneSwitchItem.setText(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
                         sceneSwitchItem.setSwitchId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
+                        sceneSwitchItem.setComponentPrimaryId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
                         sceneSwitchItem.setMachineIP(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
                         // check if this component is already added or not
                         for(int i=0; i<mData.size(); i++) {
-                            if(mData.get(i).getSceneItemId().equals(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)))) {
+                            if(mData.get(i).getSceneComponentPrimaryId().equals(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)))) {
                                 sceneSwitchItem.setFocusable(false);
                             }
                         }
@@ -733,6 +735,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 if (switchListCursor.getCount() > 0) {
                     do {
                         String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID));
+                        String componentPrimaryId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMP_PRIMARY_ID));
                         String defaultValue = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
                         String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
                         String machineName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MNAME));
@@ -742,8 +745,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         sceneItemsDataObject.setMachineName(machineName);
                         sceneItemsDataObject.setSceneControlType(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE)));
                         sceneItemsDataObject.setSceneItemId(componentId);
+                        sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
 
-                        String componentName = dbHelper.getComponentNameById(componentId);
+                        String componentName = dbHelper.getComponentNameByPrimaryId(componentId);
                         //String componentName = componentCursor.getString(componentCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
 
                         sceneItemsDataObject.setName(componentName);
@@ -803,7 +807,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     private void addComponentToScene(String componentId, String componentType) {
         if(componentType.equals(AppConstants.SWITCH_TYPE)) {
             for (int i = 0; i < initSwitches.size(); i++) {
-                if (initSwitches.get(i).getSwitchId().equals(componentId)) {
+                if (initSwitches.get(i).getComponentPrimaryId().equals(componentId)) {
                     if (initSwitches.get(i).isFocusable()) {
                         addSwitchToScene(i);
                     } else {
@@ -814,7 +818,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }
         } else if(componentType.equals(AppConstants.DIMMER_TYPE)) {
             for (int i = 0; i < initDimmers.size(); i++) {
-                if (initDimmers.get(i).getSwitchId().equals(componentId)) {
+                if (initDimmers.get(i).getComponentPrimaryId().equals(componentId)) {
                     if (initDimmers.get(i).isFocusable()) {
                         addDimmerToScene(i);
                     } else {
@@ -829,6 +833,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     private void addSwitchToScene(int position){
         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
         sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
+        sceneItemsDataObject.setSceneComponentPrimaryId(initSwitches.get(position).getComponentPrimaryId());
         sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
         sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
@@ -856,6 +861,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     private void addDimmerToScene(int position){
         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
         sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
+        sceneItemsDataObject.setSceneComponentPrimaryId(initDimmers.get(position).getComponentPrimaryId());
         sceneItemsDataObject.setMachineIP(initDimmers.get(position).getMachineIP());
         sceneItemsDataObject.setMachineName(initDimmers.get(position).getMachineName());
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
@@ -881,7 +887,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-    public class CallSceneOn extends AsyncTask<Void, Void, Void> {
+    /*public class CallSceneOn extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -1000,5 +1006,5 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }catch(Exception e){
             }
         }
-    }
+    }*/
 }

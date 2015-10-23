@@ -101,7 +101,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
             this.txtSwitchName = (TextView) view.findViewById(R.id.txtSwitchName);
             this.txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
-            this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
+              this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
         }
     }
 
@@ -147,8 +147,14 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         final int switchNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
         final String switchName = cursor.getString(switchNameIndex);
         int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
+        final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP);
+
+        int componentIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID);
+        String componentName = cursor.getString(componentIdIndex);
+
         final int position = cursor.getPosition();
-        final String strPosition = String.format("%02d", (position + 1));
+        //final String strPosition = String.format("%02d", (position + 1));
+        final String strPosition = componentName.substring(2,4);
 
 
         switch (viewHolder.getItemViewType () ) {
@@ -175,14 +181,18 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     @Override
                     public void onClick(View v) {
                         listHolder.imgSwitch.toggle();
+                        String machineIP = cursor.getString(machineIPIndex);
+                        if(!machineIP.contains("http://")) {
+                            machineIP = "http://" + machineIP;
+                        }
 
                         if(listHolder.imgSwitch.isChecked()){// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                            String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                             SwitchesListActivity.isDelay  = true;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }else{
                             //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
                             SwitchesListActivity.isDelay  = true;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }
@@ -242,13 +252,18 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     public void onClick(View v) {
                         groupViewHolder.imgSwitch.toggle();
 
+                        String machineIP = cursor.getString(machineIPIndex);
+                        if(!machineIP.contains("http://")) {
+                            machineIP = "http://" + machineIP;
+                        }
+
                         if (groupViewHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                            String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                             SwitchesListActivity.isDelay = true;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         } else {
                             //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
                             SwitchesListActivity.isDelay = true;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }

@@ -16,9 +16,9 @@
 
         <LinearLayout
             android:padding="@dimen/S_MARGIN"
-            android:layout_weight="1"
+            android:layout_weight="1.8"
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content">
 
             <LinearLayout
@@ -27,12 +27,13 @@
                 android:layout_height="wrap_content">
 
             <TextView
+                android:layout_weight="1.9"
                 android:padding="@dimen/STD_MARGIN"
                 android:id="@+id/txtSwitchName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Switch Name"
-                android:layout_weight="1.9"
+                android:singleLine="false"
                 android:textColor="@color/white"
                 android:src="@drawable/ic_arrow_left"/>
 
@@ -52,6 +53,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Machine Name"
+                android:singleLine="true"
                 android:textColor="@color/white"
                 android:src="@drawable/ic_arrow_left"/>
 
@@ -67,7 +69,7 @@
             android:layout_weight="1"
             android:orientation="horizontal"
             android:background="@color/primaryColor"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_gravity="center"
             android:gravity="center"
             android:layout_height="wrap_content">

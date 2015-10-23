@@ -19,7 +19,6 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
-import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
@@ -49,8 +48,9 @@ public class DimmerListActivity extends AppCompatActivity {
     private ImageView imgBack, imgListGridToggle;
     private RecyclerView mRecyclerView;
     private DimmerListCursorAdapter adapter;
-    private Cursor dimmerListCursor;
-    ArrayList<XMLValues> dimmerStatusList;
+    private Cursor dimmerListCursor, machineListCursor;
+    ArrayList<XMLValues> dimmerStatusList, allDimmerStatusList;
+    private String[] machineIPs;
 
     private ProgressBar progressBar;
     private int totalNoOfDimmers = 77;
@@ -78,7 +78,7 @@ public class DimmerListActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (!isDelay) {
-                            new GetDimmerStatus().execute();
+                            new GetDimmerStatus().execute(machineIPs);
                             Log.e("TIMER", "Timer Start");
                         } else {
                             PauseTimer();
@@ -124,52 +124,6 @@ public class DimmerListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setRemoveDuration(500);
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(500);
-
-        /*adapter = new DimmerListAdapter(DimmerListActivity.this, totalNoOfDimmers);
-        adapter.setType(0);
-        adapter.setHasStableIds(true);*/
-
-        //mRecyclerView.setAdapter(adapter);
-
-        /*adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                //Toast.makeText(DimmerListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setLongClickListener(new onLongClickListener() {
-
-            @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(DimmerListActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-
-            @Override
-            public void onAddSchedulerOptionClick(int pos) {
-                Toast.makeText(DimmerListActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
-            @Override
-            public void onAddToSceneOptionClick(int pos) {
-                SceneListDialog dialog = new SceneListDialog(DimmerListActivity.this);
-                dialog.show();
-               // Toast.makeText(DimmerListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setRenameClickListener(new onRenameClickListener() {
-
-            @Override
-            public void onRenameOptionClick(int pos) {
-                Toast.makeText(DimmerListActivity.this, "Rename Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });*/
 
         imgListGridToggle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -236,7 +190,24 @@ public class DimmerListActivity extends AppCompatActivity {
         //insert dimmers in adapter for machine-1
         try {
             dbHelper.openDataBase();
-            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(DashboardFragment.MACHINE_IP);
+            dimmerListCursor =  dbHelper.getAllDimmerComponents();
+            machineListCursor = dbHelper.getAllMachines();
+
+            if(machineListCursor != null) {
+                if(machineListCursor.getCount() > 0) {
+                    machineIPs = new String[machineListCursor.getCount()];
+                    machineListCursor.moveToFirst();
+                    int i = 0;
+                    do {
+                        String machineIP = machineListCursor.getString(machineListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                        machineIPs[i] = machineIP;
+                        i++;
+
+                    } while(machineListCursor.moveToNext());
+                }
+            }
+
+
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -244,7 +215,7 @@ public class DimmerListActivity extends AppCompatActivity {
         }
     }
 
-    public class GetDimmerStatus extends AsyncTask<Void, Void, Void> {
+    public class GetDimmerStatus extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -252,21 +223,48 @@ public class DimmerListActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
             try {
-                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_DIMMER_STATUS);
-                 Log.e("# urlValue", urlValue.toString());
+                allDimmerStatusList = new ArrayList<>();
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
-                //  Log.e("# inputStream", inputStream.toString());
-                MainXmlPullParser pullParser = new MainXmlPullParser();
+                for(int i=0; i<params.length; i++) {
+                    String machineBaseURL = "";
 
-                dimmerStatusList = pullParser.processXML(inputStream);
-                Log.e("XML PARSERED", dimmerStatusList.toString());
+                    if(params[i].contains("http://")) {
+                        machineBaseURL = params[i];
+                    } else {
+                        machineBaseURL = "http://" + params[i];
+                    }
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
+                    Log.e("# urlValue", urlValue.toString());
 
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    //  Log.e("# inputStream", inputStream.toString());
+                    MainXmlPullParser pullParser = new MainXmlPullParser();
 
+                    dimmerStatusList = pullParser.processXML(inputStream);
+                    Log.e("XML PARSERED", dimmerStatusList.toString());
+
+                    DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+                    try {
+                        dbHelper.openDataBase();
+                        Cursor cursor =  dbHelper.getAllDimmerComponentsForAMachine(params[i]);
+                        int totalDimmersofMachine = 0;
+                        if(cursor != null) {
+                            totalDimmersofMachine = cursor.getCount();
+                        }
+
+                        for(int j=0 ;j <totalDimmersofMachine ; j++) {
+                            allDimmerStatusList.add(dimmerStatusList.get(j));
+                        }
+                        dbHelper.close();
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
             }
@@ -279,7 +277,7 @@ public class DimmerListActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 if(isFirstTime) {
                     //init adapter
-                    adapter = new DimmerListCursorAdapter(DimmerListActivity.this, dimmerListCursor, dimmerStatusList);
+                    adapter = new DimmerListCursorAdapter(DimmerListActivity.this, dimmerListCursor, allDimmerStatusList);
                     adapter.setType(0);
                     adapter.setHasStableIds(true);
                     mRecyclerView.setAdapter(adapter);
@@ -287,7 +285,7 @@ public class DimmerListActivity extends AppCompatActivity {
                     isFirstTime = false;
                 } else {
                     //set adapter again
-                    adapter.setDimmerStatus(dimmerStatusList);
+                    adapter.setDimmerStatus(allDimmerStatusList);
                     adapter.notifyDataSetChanged();
                 }
 
@@ -304,7 +302,7 @@ public class DimmerListActivity extends AppCompatActivity {
                     public void onRenameOptionClick(int pos, String _oldName) {
                         final int position = pos;
                         dimmerListCursor.moveToPosition(position);
-                        final String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        final String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
 
                         RenameDialog renameDialog = new RenameDialog(DimmerListActivity.this, _oldName);
                         renameDialog.show();
@@ -316,7 +314,7 @@ public class DimmerListActivity extends AppCompatActivity {
                                     DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
                                     dbHelper.openDataBase();
                                     dbHelper.renameComponent(componentId, newName);
-                                    dimmerListCursor = dbHelper.getAllDimmerComponentsForAMachine(DashboardFragment.MACHINE_IP);
+                                    dimmerListCursor = dbHelper.getAllDimmerComponents();
                                     dbHelper.close();
                                     adapter.changeCursor(dimmerListCursor);
 
@@ -344,7 +342,7 @@ public class DimmerListActivity extends AppCompatActivity {
                     public void onAddToSceneOptionClick(int pos) {
                         timer.cancel();
                         dimmerListCursor.moveToPosition(pos);
-                        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
                         String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
                         SceneListDialog dialog = new SceneListDialog(DimmerListActivity.this, componentId, componentType);
                         dialog.show();
@@ -358,6 +356,7 @@ public class DimmerListActivity extends AppCompatActivity {
                     public void onFavoriteOptionClick(int pos) {
                         dimmerListCursor.moveToPosition(pos);
                         String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        String componentPrimaryId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
                         String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
                         String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
                         String machineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
@@ -369,7 +368,7 @@ public class DimmerListActivity extends AppCompatActivity {
                             int dimmerCount = dbHelper.getComponentTypeCountInFavourite(componentType);
 
                             if(dimmerCount <10) {
-                                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentId, componentName, componentType, machineIP, machineName);
+                                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentPrimaryId, componentId, componentName, componentType, machineIP, machineName);
                                 dbHelper.close();
 
                                 if (isAlreadyAFavourite) {

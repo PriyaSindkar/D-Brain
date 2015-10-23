@@ -47,9 +47,10 @@ public class FavouriteListActivity extends AppCompatActivity {
     private ImageView imgBack, imgListGridToggle;
     private TextView toolbarTitle, txtEmptyView;
 
-    private Cursor favouriteListCursor;
+    private Cursor favouriteListCursor, machineListCursor;
     ArrayList<XMLValues> switchStatusList, dimmerStatusList;
     ArrayList<XMLValues> favouriteComponentStatusList;
+    private String[] machineIPs;
     private InputStream inputStream;
     private ProgressBar progressBar;
     private Timer timer;
@@ -112,7 +113,7 @@ public class FavouriteListActivity extends AppCompatActivity {
         txtEmptyView = (TextView) findViewById(R.id.txtEmptyView);
 
         initArrayOfFavourties();
-        new GetSwitchStatus().execute();
+        new GetSwitchStatus().execute(machineIPs);
 
        /* adapter = new FavouriteListCursorAdapter(FavouriteListActivity.this, favouriteListCursor, switchStatusList);
         adapter.setHasStableIds(true);
@@ -181,6 +182,20 @@ public class FavouriteListActivity extends AppCompatActivity {
             favouriteListCursor =  dbHelper.getAllFavouriteComponents();
             Log.e("favouriteListCursor", favouriteListCursor.getCount()+"");
 
+            machineListCursor = dbHelper.getAllMachines();
+
+            if(machineListCursor != null) {
+                if(machineListCursor.getCount() > 0) {
+                    machineIPs = new String[machineListCursor.getCount()];
+                    machineListCursor.moveToFirst();
+                    int i = 0;
+                    do {
+                        String machineIP = machineListCursor.getString(machineListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                        machineIPs[i] = machineIP;
+                        i++;
+                    } while(machineListCursor.moveToNext());
+                }
+            }
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -188,7 +203,7 @@ public class FavouriteListActivity extends AppCompatActivity {
         }
     }
 
-    public class GetSwitchStatus extends AsyncTask<Void, Void, Void> {
+    public class GetSwitchStatus extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -196,23 +211,52 @@ public class FavouriteListActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
             try {
-                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
-               // Log.e("# urlValue", urlValue.toString());
+                switchStatusList = new ArrayList<>();
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                inputStream = httpUrlConnection.getInputStream();
-              //  Log.e("# inputStream", inputStream.toString());
-                MainXmlPullParser pullParser = new MainXmlPullParser();
+                for(int i=0; i<params.length; i++) {
 
-                switchStatusList = pullParser.processXML(inputStream);
-                Log.e("XML PARSERED", switchStatusList.toString());
+                    String machineBaseURL = "";
 
+                    if(params[i].contains("http://")) {
+                        machineBaseURL = params[i];
+                    } else {
+                        machineBaseURL = "http://" + params[i];
+                    }
+
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
+                     Log.e("# urlValue", urlValue.toString());
+
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    inputStream = httpUrlConnection.getInputStream();
+                    //  Log.e("# inputStream", inputStream.toString());
+                    MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                    ArrayList<XMLValues> tempSwitchStatusList = pullParser.processXML(inputStream);
+                    Log.e("XML PARSERED", tempSwitchStatusList.toString());
+
+                    DatabaseHelper dbHelper = new DatabaseHelper(FavouriteListActivity.this);
+                    try {
+                        dbHelper.openDataBase();
+                        Cursor cursor = dbHelper.getAllSwitchComponentsForAMachine(params[i]);
+                        int totalSwitchesofMachine = 0;
+                        if (cursor != null) {
+                            totalSwitchesofMachine = cursor.getCount();
+                        }
+                        for (int j = 0; j < totalSwitchesofMachine; j++) {
+                            switchStatusList.add(tempSwitchStatusList.get(j));
+                        }
+                        dbHelper.close();
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
 
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+                Log.e("# EXP123", e.toString());
             }
             return null;
         }
@@ -221,15 +265,15 @@ public class FavouriteListActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
            // Log.e("TAG_ASYNC", "Inside onPostExecute");
             try {
-                //init adapter
-               new GetDimmerStatus().execute();
+                //init dimmer status
+               new GetDimmerStatus().execute(machineIPs);
 
             } catch (Exception e) {
             }
         }
     }
 
-    public class GetDimmerStatus extends AsyncTask<Void, Void, Void> {
+    public class GetDimmerStatus extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -237,24 +281,54 @@ public class FavouriteListActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
             try {
-                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_DIMMER_STATUS);
-                Log.e("# urlValue", urlValue.toString());
+                dimmerStatusList =  new ArrayList<>();
+                for (int i = 0; i < params.length; i++) {
+                    String machineBaseURL = "";
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
-                //  Log.e("# inputStream", inputStream.toString());
-                MainXmlPullParser pullParser = new MainXmlPullParser();
+                    if(params[i].contains("http://")) {
+                        machineBaseURL = params[i];
+                    } else {
+                        machineBaseURL = "http://" + params[i];
+                    }
 
-                dimmerStatusList = pullParser.processXML(inputStream);
-                //Log.e("XML PARSERED", dimmerStatusList.toString());
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
+                    Log.e("# urlValue", urlValue.toString());
 
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    //  Log.e("# inputStream", inputStream.toString());
+                    MainXmlPullParser pullParser = new MainXmlPullParser();
 
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
+                    ArrayList<XMLValues> tempDimmerStatusList = pullParser.processXML(inputStream);
+                    //Log.e("XML PARSERED", dimmerStatusList.toString());
+
+                    DatabaseHelper dbHelper = new DatabaseHelper(FavouriteListActivity.this);
+                    try {
+                        dbHelper.openDataBase();
+                        Cursor cursor = dbHelper.getAllDimmerComponentsForAMachine(params[i]);
+                        int totalDimmersofMachine = 0;
+                        if (cursor != null) {
+                            totalDimmersofMachine = cursor.getCount();
+                        }
+                        for (int j = 0; j < totalDimmersofMachine; j++) {
+                            dimmerStatusList.add(tempDimmerStatusList.get(j));
+                        }
+
+                        dbHelper.close();
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+                }catch(Exception e){
+                    Log.e("# EXP456", e.toString());
+                }
+
             return null;
         }
 
@@ -291,8 +365,8 @@ public class FavouriteListActivity extends AppCompatActivity {
                                 }
                             }
 
-
                         } while (favouriteListCursor.moveToNext());
+
                     } else {
                         txtEmptyView.setVisibility(View.VISIBLE);
                         txtEmptyView.setText("You Have No Favourites");
@@ -308,10 +382,10 @@ public class FavouriteListActivity extends AppCompatActivity {
                 mRecyclerView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
 
-                adapter.setDeleteClickListener(new onDeleteClickListener() {
+                /*adapter.setDeleteClickListener(new onDeleteClickListener() {
                     @Override
                     public void onDeleteOptionClick(int pos) {
-                        /*favouriteListCursor.moveToPosition(pos);
+                        favouriteListCursor.moveToPosition(pos);
 
                         try {
                             DatabaseHelper dbHelper = new DatabaseHelper(FavouriteListActivity.this);
@@ -327,9 +401,9 @@ public class FavouriteListActivity extends AppCompatActivity {
                             dbHelper.close();
                         } catch(Exception e) {
                             Log.e("DB EXP", e.toString());
-                        }*/
+                        }
                     }
-                });
+                });*/
 
             } catch (Exception e) {
             }
