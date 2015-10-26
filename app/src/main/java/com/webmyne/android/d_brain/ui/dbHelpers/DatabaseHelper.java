@@ -209,6 +209,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_C_COMPONENT_ID, componentModels.get(i).getComponentId());
             values.put(DBConstants.KEY_C_NAME, componentModels.get(i).getName());
             values.put(DBConstants.KEY_C_TYPE, componentModels.get(i).getType());
+            values.put(DBConstants.KEY_C_DETAILS, componentModels.get(i).getDetails());
             values.put(DBConstants.KEY_C_MID, componentModels.get(i).getMid());
             values.put(DBConstants.KEY_C_MIP, componentModels.get(i).getMip());
             values.put(DBConstants.KEY_C_MNAME, componentModels.get(i).getMachineName());
@@ -442,9 +443,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // to delete  scene
     public void deleteScene(String sceneId) {
         SQLiteDatabase db = this.getWritableDatabase();
-
         db.delete(DBConstants.TABLE_SCENE, DBConstants.KEY_S_ID + "='" + sceneId + "'", null);
-
+        deleteSceneComponentsBySceneId(sceneId);
         db.close();
     }
 
@@ -538,7 +538,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         for(int i=0; i<componentModels.size(); i++) {
 
-            if(componentModels.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
+            /*if(componentModels.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
                 String strDefault = "00";
                 if(!componentModels.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
                     if(componentModels.get(i).getDefaultValue().equals("100") ){
@@ -547,10 +547,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         strDefault = String.format("%02d", (Integer.parseInt(componentModels.get(i).getDefaultValue())));
                     }
                 }
-                values.put(DBConstants.KEY_SC_DEFAULT, strDefault);
-            } else {
+                values.put(DBConstants.KEY_SC_DEFAULT, strDefault);*/
+          //  } else {
                 values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
-            }
+          //  }
 
             db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMP_PRIMARY_ID + " = '" + componentModels.get(i).getSceneComponentPrimaryId() + "'", null);
         }
@@ -565,6 +565,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         for(int i=0; i<componentModels.size(); i++) {
             db.delete(DBConstants.TABLE_SCENE_COMPONENT, DBConstants.KEY_SC_COMP_PRIMARY_ID + "='" + componentModels.get(i).getSceneComponentPrimaryId() + "'", null);
         }
+
+        db.close();
+    }
+
+    // to delete scene components
+    public void deleteSceneComponentsBySceneId(String sceneId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(DBConstants.TABLE_SCENE_COMPONENT, DBConstants.KEY_SC_SCENE_ID + "='" + sceneId + "'", null);
 
         db.close();
     }

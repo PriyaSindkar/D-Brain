@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,7 +92,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         }
     }
 
-    public class GridViewHolder extends ViewHolder{
+    public class GridViewHolder extends ViewHolder  {
         public  TextView txtSwitchName, txtMachineName;
         public LinearLayout linearSwitch;
         public SwitchButton imgSwitch;
@@ -101,7 +102,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
             this.txtSwitchName = (TextView) view.findViewById(R.id.txtSwitchName);
             this.txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
-              this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
+            this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
         }
     }
 
@@ -182,7 +183,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     public void onClick(View v) {
                         listHolder.imgSwitch.toggle();
                         String machineIP = cursor.getString(machineIPIndex);
-                        if(!machineIP.contains("http://")) {
+                        if(!machineIP.startsWith("http://")) {
                             machineIP = "http://" + machineIP;
                         }
 
@@ -253,7 +254,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                         groupViewHolder.imgSwitch.toggle();
 
                         String machineIP = cursor.getString(machineIPIndex);
-                        if(!machineIP.contains("http://")) {
+                        if(!machineIP.startsWith("http://")) {
                             machineIP = "http://" + machineIP;
                         }
 
@@ -273,7 +274,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 groupViewHolder.linearSwitch.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        _longClick.onLongClick(position);
+                        _longClick.onLongClick(position,  view);
                         return false;
                     }
                 });

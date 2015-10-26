@@ -162,7 +162,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
         String componentName = cursor.getString(componentIdIndex);
 
         String machineIP = cursor.getString(machineIPIndex);
-        if(!machineIP.contains("http://")) {
+        if(!machineIP.startsWith("http://")) {
             machineIP = "http://" + machineIP;
         }
 
@@ -382,7 +382,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                 groupViewHolder.linearParent.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        _longClick.onLongClick(position);
+                        _longClick.onLongClick(position, view);
                         return false;
                     }
                 });

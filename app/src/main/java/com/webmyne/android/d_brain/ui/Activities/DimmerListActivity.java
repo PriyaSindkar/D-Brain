@@ -6,9 +6,11 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -24,6 +26,7 @@ import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -230,7 +233,7 @@ public class DimmerListActivity extends AppCompatActivity {
                 for(int i=0; i<params.length; i++) {
                     String machineBaseURL = "";
 
-                    if(params[i].contains("http://")) {
+                    if(params[i].startsWith("http://")) {
                         machineBaseURL = params[i];
                     } else {
                         machineBaseURL = "http://" + params[i];
@@ -300,35 +303,7 @@ public class DimmerListActivity extends AppCompatActivity {
 
                     @Override
                     public void onRenameOptionClick(int pos, String _oldName) {
-                        final int position = pos;
-                        dimmerListCursor.moveToPosition(position);
-                        final String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-
-                        RenameDialog renameDialog = new RenameDialog(DimmerListActivity.this, _oldName);
-                        renameDialog.show();
-
-                        renameDialog.setRenameListener(new onRenameClickListener() {
-                            @Override
-                            public void onRenameOptionClick(int pos, String newName) {
-                                try {
-                                    DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
-                                    dbHelper.openDataBase();
-                                    dbHelper.renameComponent(componentId, newName);
-                                    dimmerListCursor = dbHelper.getAllDimmerComponents();
-                                    dbHelper.close();
-                                    adapter.changeCursor(dimmerListCursor);
-
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-
-                            @Override
-                            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
-
-                            }
-                        });
+                        renameComponent(pos);
                     }
 
                     @Override
@@ -340,54 +315,124 @@ public class DimmerListActivity extends AppCompatActivity {
                 adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
                     @Override
                     public void onAddToSceneOptionClick(int pos) {
-                        timer.cancel();
-                        dimmerListCursor.moveToPosition(pos);
-                        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-                        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
-                        SceneListDialog dialog = new SceneListDialog(DimmerListActivity.this, componentId, componentType);
-                        dialog.show();
-
-                        //Toast.makeText(SwitchesListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
+                        addComponentToScene(pos);
                     }
                 });
 
                 adapter.setFavoriteClickListener(new onFavoriteClickListener() {
                     @Override
                     public void onFavoriteOptionClick(int pos) {
-                        dimmerListCursor.moveToPosition(pos);
-                        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-                        String componentPrimaryId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-                        String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
-                        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
-                        String machineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
-                        String machineName = "";
-                        try {
-                            DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
-                            dbHelper.openDataBase();
-                            machineName = dbHelper.getMachineNameByIP(machineIP);
-                            int dimmerCount = dbHelper.getComponentTypeCountInFavourite(componentType);
+                        addComponentToFavourite(pos);
+                    }
+                });
 
-                            if(dimmerCount <10) {
-                                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentPrimaryId, componentId, componentName, componentType, machineIP, machineName);
-                                dbHelper.close();
+                adapter.setLongClickListener(new onLongClickListener() {
 
-                                if (isAlreadyAFavourite) {
-                                    Toast.makeText(DimmerListActivity.this, "Already added to Favorite!", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(DimmerListActivity.this, "Added to Favorite Successfully!", Toast.LENGTH_SHORT).show();
-                                }
-                            } else {
-                                Toast.makeText(DimmerListActivity.this, "Cannot add more than 10 dimmers to favourites.", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onLongClick(final int pos, View view) {
+                        PopupMenu popup = new PopupMenu(DimmerListActivity.this, view);
+                        popup.getMenuInflater().inflate(R.menu.menu_components, popup.getMenu());
+
+                        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            public boolean onMenuItemClick(MenuItem item) {
+
+                                switch (item.getItemId()) {
+                                    case R.id.action_rename:
+                                        renameComponent(pos);
+                                        break;
+
+                                    case R.id.action_add_to_scene:
+                                        addComponentToScene(pos);
+                                        break;
+
+                                    case R.id.action_add_to_favorite:
+                                        addComponentToFavourite(pos);
+                                        break;
+                                } //switch end
+                                return true;
                             }
+                        });
 
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                        popup.show();//showing popup menu
                     }
                 });
 
             } catch (Exception e) {
             }
+        }
+    }
+
+    private void renameComponent(int pos) {
+        final int position = pos;
+        dimmerListCursor.moveToPosition(position);
+        final String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        final String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+
+        RenameDialog renameDialog = new RenameDialog(DimmerListActivity.this, componentName);
+        renameDialog.show();
+
+        renameDialog.setRenameListener(new onRenameClickListener() {
+            @Override
+            public void onRenameOptionClick(int pos, String newName) {
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+                    dbHelper.openDataBase();
+                    dbHelper.renameComponent(componentId, newName);
+                    dimmerListCursor = dbHelper.getAllDimmerComponents();
+                    dbHelper.close();
+                    adapter.changeCursor(dimmerListCursor);
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+            }
+        });
+    }
+
+    private void addComponentToScene(int pos) {
+        timer.cancel();
+        dimmerListCursor.moveToPosition(pos);
+        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        SceneListDialog dialog = new SceneListDialog(DimmerListActivity.this, componentId, componentType);
+        dialog.show();
+    }
+
+    private void addComponentToFavourite(int pos) {
+        dimmerListCursor.moveToPosition(pos);
+        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+        String componentPrimaryId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        String machineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+        String machineName = "";
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+            dbHelper.openDataBase();
+            machineName = dbHelper.getMachineNameByIP(machineIP);
+            int dimmerCount = dbHelper.getComponentTypeCountInFavourite(componentType);
+
+            if(dimmerCount <10) {
+                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentPrimaryId, componentId, componentName, componentType, machineIP, machineName);
+                dbHelper.close();
+
+                if (isAlreadyAFavourite) {
+                    Toast.makeText(DimmerListActivity.this, "Already added to Favorite!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(DimmerListActivity.this, "Added to Favorite Successfully!", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(DimmerListActivity.this, "Cannot add more than 10 dimmers to favourites.", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

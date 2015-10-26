@@ -1,0 +1,24 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/action_rename"
+        android:title="@string/action_rename_scene"
+        app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/action_add_to_scene"
+        android:title="@string/action_add_to_scene"
+        app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/action_add_to_favorite"
+        android:title="@string/action_add_to_favorite"
+        app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/action_add_to_scheduler"
+        android:title="@string/action_add_to_scheduler"
+        app:showAsAction="collapseActionView" />
+</menu>

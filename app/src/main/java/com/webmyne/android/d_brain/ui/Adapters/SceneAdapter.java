@@ -299,7 +299,9 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                         } else if(seekBar.getProgress() == 100) {
                             strProgress = "100";
                         }
+
                         mDataset.get(position).setDefaultValue(strProgress);
+
                         _switchClick.onCheckedChangeClick(position);
                     }
                 });

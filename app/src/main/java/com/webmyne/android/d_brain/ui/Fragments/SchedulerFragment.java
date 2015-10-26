@@ -65,7 +65,7 @@ public class SchedulerFragment extends Fragment {
         adapter.setLongClickListener(new onLongClickListener() {
 
             @Override
-            public void onLongClick(int pos) {
+            public void onLongClick(int pos, View view) {
                 Toast.makeText(getActivity(), "Options Will Open Here", Toast.LENGTH_SHORT).show();
             }
         });

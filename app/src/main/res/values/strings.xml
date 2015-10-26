@@ -25,4 +25,7 @@
     <string name="contact_us_phone">Phone Number: +91 99244 83382</string>
 
     <string name="rename_text">Rename</string>
+    <string name="action_add_to_scene">Add To Scene</string>
+    <string name="action_add_to_favorite">Add To Favourite</string>
+    <string name="action_add_to_scheduler">Add To Scheduler</string>
 </resources>

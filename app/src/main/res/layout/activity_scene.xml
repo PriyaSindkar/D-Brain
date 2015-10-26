@@ -36,7 +36,6 @@
         <com.kyleduo.switchbutton.SwitchButton
             android:layout_width="@dimen/BULB_SIZE"
             android:layout_height="@dimen/CIRCLE_SIZE"
-            android:visibility="gone"
             android:id="@+id/sceneMainSwitch"
             style="@style/MaterialDesignStyle"
             android:layout_marginLeft="@dimen/STD_MARGIN" />

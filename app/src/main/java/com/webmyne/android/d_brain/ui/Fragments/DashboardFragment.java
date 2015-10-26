@@ -33,6 +33,7 @@ import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
+import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -56,10 +57,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private FrameLayout parentMotor, parentSlider, parentSwitches, parentSensors, linearLeft ;
     private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits;
     private LinearLayout linearCreateScene, linearAddMachine, linearAddScheduler, firstBottomItem, linearTopComponentRow, linearBottomComponentRow, linearFavorites;
-    private ArrayList<String> switchesWithOnStatus;
-    private ArrayList<XMLValues> dimmersWithOnStatus;
     private ArrayList<XMLValues> switchStatusList, dimmerStatusList;
-    private Cursor switchListCursor, dimmerListCursor, motorListCursor, sensorListCursor, machineCursor;
+    private Cursor switchListCursor, dimmerListCursor, motorListCursor, sensorListCursor, machineCursor, machineListCursor;
     private boolean  isPowerOn = true;
     private  ArrayList<XMLValues> powerStatus;
     private FragmentActivity activity;
@@ -67,6 +66,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private String previousLed = "", led = "";
     private static String URL_MACHINE_IP ="";
     private static String MACHINE_IP = "";
+    private String[] machineIPs;
+
+    private ArrayList<ComponentModel> allOnSwitchesList, allOnDimmersList;
 
     private int topRowComponentCount = 0; // fix-> switches and motors
     private int bottomRowComponentCount = 0; // fix -> Dimmers and sensors
@@ -227,6 +229,20 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             dimmerListCursor =  dbHelper.getAllDimmerComponents();
             motorListCursor =  dbHelper.getAllMotorComponents();
             sensorListCursor =  dbHelper.getAllSensorsComponents();
+            machineListCursor = dbHelper.getAllMachines();
+
+            if(machineListCursor != null) {
+                if(machineListCursor.getCount() > 0) {
+                    machineIPs = new String[machineListCursor.getCount()];
+                    machineListCursor.moveToFirst();
+                    int i = 0;
+                    do {
+                        String machineIP = machineListCursor.getString(machineListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                        machineIPs[i] = machineIP;
+                        i++;
+                    } while(machineListCursor.moveToNext());
+                }
+            }
             dbHelper.close();
 
             // get no of switches from db, if 0 no, switches not shown
@@ -401,7 +417,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
                     // if switches exist, fetch their status
                     if(switchListCursor != null && switchListCursor.getCount() > 0) {
-                        new GetSwitchStatus().execute();
+                        new GetSwitchStatus().execute(machineIPs);
                     } else {
                         Log.e("TAG_DASHBOARD", "No switches");
                     }
@@ -421,21 +437,21 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     ((HomeDrawerActivity) getActivity()).showDrawer();
 
                     // switch on all the previously on switches(prior to main power off)
-                    if(switchesWithOnStatus != null && !switchesWithOnStatus.isEmpty()) {
-                        for (int i = 0; i < switchesWithOnStatus.size(); i++) {
-                            String strPosition = switchesWithOnStatus.get(i).substring(2, 4);
-                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                    if(allOnSwitchesList != null && !allOnSwitchesList.isEmpty()) {
+                        for (int i = 0; i < allOnSwitchesList.size(); i++) {
+                            String strPosition = allOnSwitchesList.get(i).getName().substring(2, 4);
+                            String CHANGE_STATUS_URL = allOnSwitchesList.get(i).getMip() + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
                             new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                         }
                     }
 
                     // switch on all the previously on dimmers with previously saved value(prior to main power off)
-                    if(dimmersWithOnStatus != null && !dimmersWithOnStatus.isEmpty()) {
-                        for (int i = 0; i < dimmersWithOnStatus.size(); i++) {
-                            XMLValues dimmer = dimmersWithOnStatus.get(i);
-                            String strPosition = dimmer.tagName.substring(2, 4);
-                            String strProgress = dimmer.tagValue.substring(2, 4);
-                            String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                    if(allOnDimmersList != null && !allOnDimmersList.isEmpty()) {
+                        for (int i = 0; i < allOnDimmersList.size(); i++) {
+                            ComponentModel dimmer = allOnDimmersList.get(i);
+                            String strPosition = dimmer.getName().substring(2, 4);
+                            String strProgress = dimmer.getDefaultValue().substring(2, 4);
+                            String CHANGE_STATUS_URL = dimmer.getMip() + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                         }
                     }
@@ -558,7 +574,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
     // fetch current status of all switches before OFF on main power.
     // Store the list of on switches(to maintain previous state for turning on the main power) and turn-off the on switches
-    public class GetSwitchStatus extends AsyncTask<Void, Void, Void> {
+    public class GetSwitchStatus extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -566,24 +582,45 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
             try {
-                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_SWITCH_STATUS);
-                // Log.e("# urlValue", urlValue.toString());
+                allOnSwitchesList = new ArrayList<>();
+                for (int i = 0; i < params.length; i++) {
+                    String machineBaseURL = "";
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
-                //  Log.e("# inputStream", inputStream.toString());
-                MainXmlPullParser pullParser = new MainXmlPullParser();
+                    if (params[i].startsWith("http://")) {
+                        machineBaseURL = params[i];
+                    } else {
+                        machineBaseURL = "http://" + params[i];
+                    }
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
+                    // Log.e("# urlValue", urlValue.toString());
 
-                switchStatusList = pullParser.processXML(inputStream);
-                // Log.e("XML PARSERED", dimmerStatusList.toString());
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    //  Log.e("# inputStream", inputStream.toString());
+                    MainXmlPullParser pullParser = new MainXmlPullParser();
 
+                    switchStatusList = new ArrayList<>();
+                    switchStatusList = pullParser.processXML(inputStream);
 
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
+                    for(int k=0; k<switchStatusList.size(); k++) {
+                        if(switchStatusList.get(k).tagValue.equals("01")) {
+                            ComponentModel componentModel = new ComponentModel();
+                            componentModel.setName(switchStatusList.get(k).tagName);
+                            componentModel.setDefaultValue(switchStatusList.get(k).tagValue);
+                            componentModel.setMip(machineBaseURL);
+                            allOnSwitchesList.add(componentModel);
+                        }
+                    }
+
+                    // Log.e("XML PARSERED", dimmerStatusList.toString());
+
+                }
+                }catch(Exception e){
+                    Log.e("# EXP", e.toString());
+                }
             return null;
         }
 
@@ -591,19 +628,18 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         protected void onPostExecute(Void aVoid) {
             // Log.e("TAG_ASYNC", "Inside onPostExecute");
             // store list of all on switches
-            switchesWithOnStatus = new ArrayList<>();
-            for(int i =0; i<switchStatusList.size();i++) {
-                if(switchStatusList.get(i).tagValue.equals("01")) {
-                    switchesWithOnStatus.add(switchStatusList.get(i).tagName);
-
+            /*switchesWithOnStatus = new ArrayList<>();
+            for(int i =0; i<allOnSwitchesList.size();i++) {
+                if(allOnSwitchesList.get(i).getDefaultValue().equals("01")) {
+                    switchesWithOnStatus.add(allOnSwitchesList.get(i).getName());
                 }
             }
-            Log.e("ON SWITCHES", switchesWithOnStatus.toString());
+            Log.e("ON SWITCHES", switchesWithOnStatus.toString());*/
 
             // turn off all the on switches
-            for(int i=0; i< switchesWithOnStatus.size();i++) {
-                String strPosition = switchesWithOnStatus.get(i).substring(2,4);
-                String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+            for(int i=0; i< allOnSwitchesList.size();i++) {
+                String strPosition = allOnSwitchesList.get(i).getName().substring(2,4);
+                String CHANGE_STATUS_URL = allOnSwitchesList.get(i).getMip() + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                 new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
             }
         }
@@ -612,7 +648,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     // fetch current status of all dimmers before OFF on main power.
     // Store the list of on dimmers with their values(to maintain previous state for turning on the main power)
     // and turn-off the on dimmers
-    public class GetDimmerStatus extends AsyncTask<Void, Void, Void> {
+    public class GetDimmerStatus extends AsyncTask<String, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -620,31 +656,53 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
             try {
-                URL urlValue = new URL(DashboardFragment.URL_MACHINE_IP + AppConstants.URL_FETCH_DIMMER_STATUS);
-                // Log.e("# urlValue", urlValue.toString());
+                allOnDimmersList = new ArrayList<>();
+                for (int i = 0; i < params.length; i++) {
+                    String machineBaseURL = "";
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
-                //  Log.e("# inputStream", inputStream.toString());
-                MainXmlPullParser pullParser = new MainXmlPullParser();
+                    if (params[i].startsWith("http://")) {
+                        machineBaseURL = params[i];
+                    } else {
+                        machineBaseURL = "http://" + params[i];
+                    }
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
+                    // Log.e("# urlValue", urlValue.toString());
 
-                dimmerStatusList = pullParser.processXML(inputStream);
-               //  Log.e("XML PARSERED", dimmerStatusList.toString());
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    //  Log.e("# inputStream", inputStream.toString());
+                    MainXmlPullParser pullParser = new MainXmlPullParser();
 
+                    dimmerStatusList = new ArrayList<>();
+                    dimmerStatusList = pullParser.processXML(inputStream);
 
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
+                    for (int k = 0; k < dimmerStatusList.size(); k++) {
+                        if (dimmerStatusList.get(k).tagValue.equals("01")) {
+                            ComponentModel componentModel = new ComponentModel();
+                            componentModel.setName(dimmerStatusList.get(k).tagName);
+                            componentModel.setDefaultValue(dimmerStatusList.get(k).tagValue);
+                            componentModel.setMip(machineBaseURL);
+                            allOnDimmersList.add(componentModel);
+                        }
+                    }
+
+                    //  Log.e("XML PARSERED", dimmerStatusList.toString());
+
+                }
+                }catch(Exception e){
+                    Log.e("# EXP", e.toString());
+                }
+
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             // Log.e("TAG_ASYNC", "Inside onPostExecute");
-            // store dimmer status
+            /*// store dimmer status
             dimmersWithOnStatus = new ArrayList<>();
             for(int i =0; i<dimmerStatusList.size();i++) {
 
@@ -652,14 +710,14 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     dimmersWithOnStatus.add(dimmerStatusList.get(i));
                 }
             }
-            Log.e("ON DIMMERS", dimmersWithOnStatus.toString());
+            Log.e("ON DIMMERS", dimmersWithOnStatus.toString());*/
 
             // switch off on dimmers
-            for(int i=0; i< dimmersWithOnStatus.size();i++) {
-                XMLValues dimmer = dimmersWithOnStatus.get(i);
-                String strPosition =  dimmer.tagName.substring(2, 4);
-                String strProgress = dimmer.tagValue.substring(2, 4);
-                String CHANGE_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+            for(int i=0; i< allOnDimmersList.size();i++) {
+                ComponentModel dimmer = allOnDimmersList.get(i);
+                String strPosition =  dimmer.getName().substring(2, 4);
+                String strProgress = dimmer.getDefaultValue().substring(2, 4);
+                String CHANGE_STATUS_URL = dimmer.getMip() + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                 new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
             }
         }

@@ -227,7 +227,7 @@ public class SensorsListActivity extends AppCompatActivity {
                 for(int i=0; i<params.length; i++) {
                     String machineBaseURL = "";
 
-                    if (params[i].contains("http://")) {
+                    if (params[i].startsWith("http://")) {
                         machineBaseURL = params[i];
                     } else {
                         machineBaseURL = "http://" + params[i];

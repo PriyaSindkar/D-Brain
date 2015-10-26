@@ -128,7 +128,7 @@ public class AddMachineDialog extends BaseDialog {
         protected Void doInBackground(Void... params) {
             try {
                 URL urlValue;
-                if(!machineIP.contains("http://")) {
+                if(!machineIP.startsWith("http://")) {
                     urlValue = new URL("http://" + machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
                 } else {
                     urlValue = new URL( machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);

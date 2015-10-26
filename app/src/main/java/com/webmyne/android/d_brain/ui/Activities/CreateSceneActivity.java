@@ -328,8 +328,8 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
             for(int i=0; i < initSwitches.size(); i++) {
                 linearControls.addView(initSwitches.get(i));
-
                 final int position = i;
+
                 initSwitches.get(i).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -341,6 +341,15 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
                             sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+
+                             /*String machineIP = "";
+                                if(initSwitches.get(position).getMachineIP().startsWith("http://")) {
+                                machineIP = initSwitches.get(position).getMachineIP();
+                            } else {
+                                machineIP = "http://"+ initSwitches.get(position).getMachineIP();
+                            }
+                            String strPosition = initSwitches.get(position).getSwitchId().substring(2,4);
+                            sceneItemsDataObject.setDefaultValue(machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE);*/
 
                            // mAdapter.add(mData.size(), sceneItemsDataObject);
                             mData.add(sceneItemsDataObject);
@@ -402,9 +411,19 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             // set component_id in scene_component table
                             sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
                             sceneItemsDataObject.setSceneComponentPrimaryId(initDimmers.get(position).getComponentPrimaryId());
-                            sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
-                            sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
-                            sceneItemsDataObject.setDefaultValue(AppConstants.DIMMER_DEFAULT_VALUE);
+                            sceneItemsDataObject.setMachineIP(initDimmers.get(position).getMachineIP());
+                            sceneItemsDataObject.setMachineName(initDimmers.get(position).getMachineName());
+                            sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+
+                            /*String machineIP = "";
+                            if(initDimmers.get(position).getMachineIP().startsWith("http://")) {
+                                machineIP = initDimmers.get(position).getMachineIP();
+                            } else {
+                                machineIP = "http://"+ initDimmers.get(position).getMachineIP();
+                            }
+                            String strPosition = initDimmers.get(position).getSwitchId().substring(2,4);
+
+                            sceneItemsDataObject.setDefaultValue(machineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + AppConstants.DIMMER_DEFAULT_VALUE);*/
 
                           //  mAdapter.add(mData.size(), sceneItemsDataObject);
                             mData.add(sceneItemsDataObject);
@@ -538,7 +557,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
             dbHelper.openDataBase();
-            Cursor motorListCursor = dbHelper.getAllMotorComponentsForAMachine("");
+            Cursor motorListCursor = dbHelper.getAllMotorComponents();
             dbHelper.close();
 
             totalNoOfMotors = motorListCursor.getCount();

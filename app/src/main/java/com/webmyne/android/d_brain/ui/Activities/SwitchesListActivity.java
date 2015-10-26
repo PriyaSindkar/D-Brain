@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -26,6 +27,7 @@ import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -133,13 +135,9 @@ public class SwitchesListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(0);
 
-       /*   adapter.setLongClickListener(new onLongClickListener() {
+       // registerForContextMenu(mRecyclerView);
 
-            @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });
+       /*
 
         adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
 
@@ -183,6 +181,28 @@ public class SwitchesListActivity extends AppCompatActivity {
         });
     }
 
+    /*@Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        if (v.getId()==R.id.recycler_view) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_launcher_screen, menu);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterViewCompat.AdapterContextMenuInfo info = (AdapterViewCompat.AdapterContextMenuInfo) item.getMenuInfo();
+        switch(item.getItemId()) {
+            case R.id.action_settings:
+                Toast.makeText(this, "Hello", Toast.LENGTH_LONG).show();
+                return true;
+
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+*/
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -235,7 +255,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                 for(int i=0; i<params.length; i++) {
                     String machineBaseURL = "";
 
-                    if(params[i].contains("http://")) {
+                    if(params[i].startsWith("http://")) {
                         machineBaseURL = params[i];
                     } else {
                         machineBaseURL = "http://" + params[i];
@@ -305,35 +325,7 @@ public class SwitchesListActivity extends AppCompatActivity {
 
                     @Override
                     public void onRenameOptionClick(int pos, String _oldName) {
-                        final int position = pos;
-                        switchListCursor.moveToPosition(position);
-                        final String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-
-                        RenameDialog renameDialog = new RenameDialog(SwitchesListActivity.this, _oldName);
-                        renameDialog.show();
-
-                        renameDialog.setRenameListener(new onRenameClickListener() {
-                            @Override
-                            public void onRenameOptionClick(int pos, String newName) {
-                                try {
-                                    DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
-                                    dbHelper.openDataBase();
-                                    dbHelper.renameComponent(componentId, newName);
-                                    switchListCursor = dbHelper.getAllSwitchComponents();
-                                    dbHelper.close();
-                                    adapter.changeCursor(switchListCursor);
-
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
-
-                            @Override
-                            public void onRenameOptionClick(int pos, String newName, String newDetails) {
-
-                            }
-                        });
+                        renameComponent(pos);
                     }
 
                     @Override
@@ -345,49 +337,45 @@ public class SwitchesListActivity extends AppCompatActivity {
                 adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
                     @Override
                     public void onAddToSceneOptionClick(int pos) {
-                        timer.cancel();
-                        switchListCursor.moveToPosition(pos);
-                        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-                        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
-                        SceneListDialog dialog = new SceneListDialog(SwitchesListActivity.this, componentId, componentType);
-                        dialog.show();
-
-                        //Toast.makeText(SwitchesListActivity.this, "Added to Scene Sccessful!", Toast.LENGTH_SHORT).show();
+                        addComponentToScene(pos);
                     }
                 });
 
                 adapter.setFavoriteClickListener(new onFavoriteClickListener() {
                     @Override
                     public void onFavoriteOptionClick(int pos) {
-                        switchListCursor.moveToPosition(pos);
-                        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-                        String componentPrimaryId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-                        String componentName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
-                        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
-                        String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
-                        String machineName = "";
-                        try {
-                            DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
-                            dbHelper.openDataBase();
-                            machineName = dbHelper.getMachineNameByIP(machineIP);
-                            int switchCount = dbHelper.getComponentTypeCountInFavourite(componentType);
+                        addComponentToFavourite(pos);
+                    }
+                });
 
-                            if(switchCount <10) {
-                                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentPrimaryId, componentId, componentName, componentType, machineIP, machineName);
-                                dbHelper.close();
+                adapter.setLongClickListener(new onLongClickListener() {
 
-                                if (isAlreadyAFavourite) {
-                                    Toast.makeText(SwitchesListActivity.this, "Already added to Favorite.", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(SwitchesListActivity.this, "Added to Favorite Successfully.", Toast.LENGTH_SHORT).show();
-                                }
-                            } else {
-                                Toast.makeText(SwitchesListActivity.this, "Cannot add more than 10 switches to favourites.", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onLongClick(final int pos, View view) {
+                        PopupMenu popup = new PopupMenu(SwitchesListActivity.this, view);
+                        popup.getMenuInflater().inflate(R.menu.menu_components, popup.getMenu());
+
+                        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            public boolean onMenuItemClick(MenuItem item) {
+
+                                switch (item.getItemId()) {
+                                    case R.id.action_rename:
+                                        renameComponent(pos);
+                                        break;
+
+                                    case R.id.action_add_to_scene:
+                                        addComponentToScene(pos);
+                                        break;
+
+                                    case R.id.action_add_to_favorite:
+                                        addComponentToFavourite(pos);
+                                        break;
+                                } //switch end
+                                return true;
                             }
+                        });
 
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                        popup.show();//showing popup menu
                     }
                 });
 
@@ -408,6 +396,80 @@ public class SwitchesListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void addComponentToFavourite(int pos) {
+        switchListCursor.moveToPosition(pos);
+        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+        String componentPrimaryId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+        String machineName = "";
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+            dbHelper.openDataBase();
+            machineName = dbHelper.getMachineNameByIP(machineIP);
+            int switchCount = dbHelper.getComponentTypeCountInFavourite(componentType);
+
+            if (switchCount < 10) {
+                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentPrimaryId, componentId, componentName, componentType, machineIP, machineName);
+                dbHelper.close();
+
+                if (isAlreadyAFavourite) {
+                    Toast.makeText(SwitchesListActivity.this, "Already added to Favorite.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(SwitchesListActivity.this, "Added to Favorite Successfully.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(SwitchesListActivity.this, "Cannot add more than 10 switches to favourites.", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void renameComponent(int pos) {
+        final int position = pos;
+        switchListCursor.moveToPosition(position);
+        final String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        final String componentName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+
+
+        RenameDialog renameDialog = new RenameDialog(SwitchesListActivity.this, componentName);
+        renameDialog.show();
+
+        renameDialog.setRenameListener(new onRenameClickListener() {
+            @Override
+            public void onRenameOptionClick(int pos, String newName) {
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                    dbHelper.openDataBase();
+                    dbHelper.renameComponent(componentId, newName);
+                    switchListCursor = dbHelper.getAllSwitchComponents();
+                    dbHelper.close();
+                    adapter.changeCursor(switchListCursor);
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onRenameOptionClick(int pos, String newName, String newDetails) {
+
+            }
+        });
+    }
+
+    private void addComponentToScene(int pos) {
+        timer.cancel();
+        switchListCursor.moveToPosition(pos);
+        String componentId1 = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        SceneListDialog dialog = new SceneListDialog(SwitchesListActivity.this, componentId1, componentType);
+        dialog.show();
     }
 
 

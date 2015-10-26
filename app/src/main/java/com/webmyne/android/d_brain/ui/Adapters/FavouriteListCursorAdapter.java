@@ -201,7 +201,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
         final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP);
 
         String machineIP = cursor.getString(machineIPIndex);
-        if(!machineIP.contains("http://")) {
+        if(!machineIP.startsWith("http://")) {
             machineIP = "http://" + machineIP;
         }
 

@@ -313,7 +313,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         protected Void doInBackground(Void... params) {
             try {
                 URL urlValue;
-                if(!machineIP.contains("http://")) {
+                if(!machineIP.startsWith("http://")) {
                     urlValue = new URL("http://" + machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
                 } else {
                     urlValue = new URL( machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
@@ -357,7 +357,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                     }
 
                     if (machineSerialNo.equals(userEnteredSerialNo)) {
-                        if (Utils.validateProductCode(productCode)) {
+                      //  if (Utils.validateProductCode(productCode)) {
                             DatabaseHelper dbHelper = new DatabaseHelper(UserGuide.this);
 
                             dbHelper.openDataBase();
@@ -375,9 +375,9 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                             Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
-                        } else {
+                        /*} else {
                             Toast.makeText(UserGuide.this, "Invalid Product Code.", Toast.LENGTH_LONG).show();
-                        }
+                        }*/
                     } else {
                         Toast.makeText(UserGuide.this, "Invalid Serial No.", Toast.LENGTH_LONG).show();
                     }

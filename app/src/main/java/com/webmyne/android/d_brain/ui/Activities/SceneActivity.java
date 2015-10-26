@@ -417,10 +417,10 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 String sceneStatus="";
                 if(sceneMainSwitch.isChecked()) {
                     sceneStatus = "no";
-                   // new CallSceneOff().execute();
+                    new CallSceneOff().execute();
                 } else {
                     sceneStatus = "yes";
-                  //  new CallSceneOn().execute();
+                    new CallSceneOn().execute();
                 }
 
                 DatabaseHelper dbHelper = new DatabaseHelper(this);
@@ -836,7 +836,18 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         sceneItemsDataObject.setSceneComponentPrimaryId(initSwitches.get(position).getComponentPrimaryId());
         sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
         sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
+
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+
+        /*String machineIP = "";
+        if(initSwitches.get(position).getMachineIP().startsWith("http://")) {
+            machineIP = initSwitches.get(position).getMachineIP();
+        } else {
+            machineIP = "http://"+ initSwitches.get(position).getMachineIP();
+        }
+        String strPosition = initSwitches.get(position).getSwitchId().substring(2,4);
+
+        sceneItemsDataObject.setDefaultValue(machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE);*/
         mData.add(sceneItemsDataObject);
 
 
@@ -887,7 +898,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-    /*public class CallSceneOn extends AsyncTask<Void, Void, Void> {
+    public class CallSceneOn extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -898,13 +909,20 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     strPosition = String.format("%02d",  Integer.parseInt(mData.get(i).getSceneItemId().substring(2,4)));
 
                     String SET_STATUS_URL = "";
+                    String baseMachineUrl = "";
+
+                    if(mData.get(i).getMachineIP().startsWith("http://")) {
+                        baseMachineUrl = mData.get(i).getMachineIP();
+                    } else {
+                        baseMachineUrl = "http://"+mData.get(i).getMachineIP();
+                    }
 
                     // set defaults for switch
                     if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
                         if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                            SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                         } else {
-                            SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
                         }
                     }
 
@@ -915,9 +933,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
                         }
                         if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                            SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE +dimmerValue;
+                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE +dimmerValue;
                         } else {
-                            SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
+                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
                         }
                     }
 
@@ -963,9 +981,17 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     strPosition = String.format("%02d",  Integer.parseInt(mData.get(i).getSceneItemId().substring(2,4)));
                     String SET_STATUS_URL = "";
 
+                    String baseMachineUrl = "";
+
+                    if(mData.get(i).getMachineIP().startsWith("http://")) {
+                        baseMachineUrl = mData.get(i).getMachineIP();
+                    } else {
+                        baseMachineUrl = "http://"+mData.get(i).getMachineIP();
+                    }
+
                     // for switch
                     if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
-                        SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                        SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
                     }
 
                     if(mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE) ) {
@@ -973,8 +999,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         if( !mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0")) {
                             dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
                         }
-                        SET_STATUS_URL = DashboardFragment.URL_MACHINE_IP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
+                        SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
                     }
+
 
                     URL urlValue = new URL(SET_STATUS_URL);
                     Log.e("# urlValue", urlValue.toString());
@@ -1006,5 +1033,5 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             }catch(Exception e){
             }
         }
-    }*/
+    }
 }

@@ -36,5 +36,5 @@ public class AppConstants {
     //component values
     public  static String OFF_VALUE = "00";
     public  static String ON_VALUE = "01";
-    public  static String DIMMER_DEFAULT_VALUE = "0";
+    public  static String DIMMER_DEFAULT_VALUE = "00";
 }

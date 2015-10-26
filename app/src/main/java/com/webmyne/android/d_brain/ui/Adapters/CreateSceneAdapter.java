@@ -217,12 +217,9 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
                         } else {
                             mDataset.get(position).setDefaultValue(AppConstants.ON_VALUE);
                         }
-                      //  _switchClick.onCheckedChangeClick(position);
+                        //  _switchClick.onCheckedChangeClick(position);
                     }
                 });
-
-
-
 
                /* switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
                     @Override

@@ -287,7 +287,7 @@ public class MotorListAdapter extends RecyclerView.Adapter<MotorListAdapter.View
                 groupViewHolder.linearParent.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        _longClick.onLongClick(position);
+                        _longClick.onLongClick(position, view);
                         return false;
                     }
                 });

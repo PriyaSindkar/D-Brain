@@ -120,7 +120,7 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
         final String sensorName = cursor.getString(nameIndex);
         int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
         int detailsNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_DETAILS);
-        final String sensorDetails = cursor.getColumnName(detailsNameIndex);
+        final String sensorDetails = cursor.getString(detailsNameIndex);
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
@@ -144,13 +144,13 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
 
     }
 
-    public void setSingleClickListener(onSingleClickListener obj){
+   /* public void setSingleClickListener(onSingleClickListener obj){
         this._singleClick = obj;
     }
     public void setLongClickListener(onLongClickListener obj){
         this._longClick = obj;
     }
-
+*/
 
     public void setRenameClickListener(onRenameClickListener obj){
         this._renameClick = obj;
