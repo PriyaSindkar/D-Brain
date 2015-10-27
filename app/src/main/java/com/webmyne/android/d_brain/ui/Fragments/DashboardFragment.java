@@ -28,8 +28,10 @@ import com.webmyne.android.d_brain.ui.Activities.FavouriteListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MachineListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MotorListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
+import com.webmyne.android.d_brain.ui.Activities.SchedulersListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SensorsListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
+import com.webmyne.android.d_brain.ui.Adapters.SchedulersListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -95,8 +97,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
         activity = getActivity();
         init(view);
-
-
 
         return view;
     }
@@ -201,6 +201,20 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             }
         });
 
+
+
+        ((HomeDrawerActivity) getActivity()).initPowerButton();
+        // call();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
+        homeScreen.setTitle("Dashboard");
+        homeScreen.hideAppBarButton();
+
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();
@@ -215,16 +229,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 }
                 MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
             }
-            /*dbHelper.close();
-            Log.e("Machine IP", URL_MACHINE_IP);
-        } catch (Exception e) {
-            Log.e("EXP_MACHINE", e.toString());
-        }
 
-        //check total components in adapter ofr machine-1
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-        try {
-            dbHelper.openDataBase();*/
             switchListCursor =  dbHelper.getAllSwitchComponents();
             dimmerListCursor =  dbHelper.getAllDimmerComponents();
             motorListCursor =  dbHelper.getAllMotorComponents();
@@ -342,34 +347,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 linearBottomComponentRow.setVisibility(View.GONE);
             }
         }
-
-        ((HomeDrawerActivity) getActivity()).initPowerButton();
-        // call();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
-        homeScreen.setTitle("Dashboard");
-        homeScreen.hideAppBarButton();
-
-        /*DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-        try {
-            dbHelper.openDataBase();
-            machineCursor = dbHelper.getAllMachines();
-
-            if(machineCursor != null) {
-                machineCursor.moveToFirst();
-                URL_MACHINE_IP = "http://" + machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
-                MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
-            }
-            dbHelper.close();
-            Log.e("Machine IP", URL_MACHINE_IP);
-        } catch (Exception e) {
-            Log.e("EXP_MACHINE", e.toString());
-        }*/
 
         updateSceneList();
 
@@ -506,6 +483,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 intent = new Intent(getActivity(), FavouriteListActivity.class);
                 startActivity(intent);
                 break;
+
+            case R.id.imgSchedulers:
+                intent = new Intent(getActivity(), SchedulersListActivity.class);
+                startActivity(intent);
+                break;
         }
     }
 
@@ -631,7 +613,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             /*switchesWithOnStatus = new ArrayList<>();
             for(int i =0; i<allOnSwitchesList.size();i++) {
                 if(allOnSwitchesList.get(i).getDefaultValue().equals("01")) {
-                    switchesWithOnStatus.add(allOnSwitchesList.get(i).getName());
+                    switchesWithOnStatus.add(allOnSwitchesList.get(i).getComponentName());
                 }
             }
             Log.e("ON SWITCHES", switchesWithOnStatus.toString());*/

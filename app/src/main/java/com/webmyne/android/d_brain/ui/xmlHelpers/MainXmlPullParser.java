@@ -29,7 +29,7 @@ public class MainXmlPullParser {
                     // not use in coding
                     xmlTagItem = new XMLValues();
                     xmlTagItem.tagName = parser.getName();
-                    // System.out.println("Start tag " + parser.getName());
+                    // System.out.println("Start tag " + parser.getComponentName());
 
                 } else if (eventType == XmlPullParser.TEXT && !parser.getText().toString().trim().equalsIgnoreCase("")) {
                     xmlTagItem.tagValue = parser.getText();

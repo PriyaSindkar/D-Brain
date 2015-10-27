@@ -227,10 +227,12 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                             strProgress = String.format("%02d", (seekBar.getProgress() - 1));
                             CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                            listHolder.imgSwitch.setChecked(true);
                         } else if (seekBar.getProgress() == 0) {
                             CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
+
                         DimmerListActivity.isDelay = true;
                         new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                     }
@@ -281,6 +283,13 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                     }
                 });
 
+                listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        _addSchedulerClick.onAddSchedulerOptionClick(position);
+                    }
+                });
+
                 /*listHolder.linearParent.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -296,12 +305,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                     }
                 });
 
-                listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addSchedulerClick.onAddSchedulerOptionClick(position);
-                    }
-                });*/
+                */
 
 
 
@@ -345,10 +349,12 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                             strProgress = String.format("%02d", (seekBar.getProgress() - 1));
                             CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                            groupViewHolder.imgSwitch.setChecked(true);
                         } else if (seekBar.getProgress() == 0) {
                             CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                             dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
+
                         DimmerListActivity.isDelay = true;
                         new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
 

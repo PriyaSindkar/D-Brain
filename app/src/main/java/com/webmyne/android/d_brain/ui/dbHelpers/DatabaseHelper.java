@@ -7,9 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
+import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.Model.TouchPanelModel;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
@@ -916,4 +916,65 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete(DBConstants.TABLE_FAVOURITE, DBConstants.KEY_SC_COMPONENT_ID + "='" + componentId + "'", null);
         db.close();
     }
+
+    public void insertIntoScheduler(SchedulerModel schedulerModel) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(DBConstants.KEY_SCH_NAME, schedulerModel.getSchedulerName());
+        values.put(DBConstants.KEY_SCH_DATETIME, schedulerModel.getDateTime());
+        values.put(DBConstants.KEY_SCH_DEFAULT, schedulerModel.getDefaultValue());
+        values.put(DBConstants.KEY_SCH_IS_SCENE, schedulerModel.isScene());
+        values.put(DBConstants.KEY_SCH_SCENE_ID, schedulerModel.getComponentId());
+        values.put(DBConstants.KEY_SCH_SCENE_NAME, schedulerModel.getComponentName());
+        values.put(DBConstants.KEY_SCH_TYPE, schedulerModel.getComponentType());
+        values.put(DBConstants.KEY_SCH_MNAME, schedulerModel.getMachineName());
+        values.put(DBConstants.KEY_SCH_MIP, schedulerModel.getMip());
+
+        db.insert(DBConstants.TABLE_SCHEDULERS, null, values);
+
+        db.close();
+    }
+
+    public Cursor getAllSchedulers() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, null,null, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+               /* if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }*/
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+    // to delete  scheduler
+    public void deleteScheduler(String schedulerId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(DBConstants.TABLE_SCHEDULERS, DBConstants.KEY_SCH_ID + "='" + schedulerId + "'", null);
+        db.close();
+    }
+
+    public void updateScheduler(SchedulerModel schedulerModel) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(DBConstants.KEY_SCH_NAME, schedulerModel.getSchedulerName());
+        values.put(DBConstants.KEY_SCH_DATETIME, schedulerModel.getDateTime());
+        values.put(DBConstants.KEY_SCH_DEFAULT, schedulerModel.getDefaultValue());
+
+        db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_ID + " = " + schedulerModel.getId(), null);
+
+        db.close();
+    }
+
+
 }

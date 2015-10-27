@@ -19,15 +19,18 @@ import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -326,6 +329,13 @@ public class DimmerListActivity extends AppCompatActivity {
                     }
                 });
 
+                adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
+                    @Override
+                    public void onAddSchedulerOptionClick(int pos) {
+                        addComponentToScheduler(pos);
+                    }
+                });
+
                 adapter.setLongClickListener(new onLongClickListener() {
 
                     @Override
@@ -434,6 +444,20 @@ public class DimmerListActivity extends AppCompatActivity {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void addComponentToScheduler(int pos) {
+        dimmerListCursor.moveToPosition(pos);
+        String componentId1 = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+        String componentMachineName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
+        String componentMachineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+
+        SchedulerModel schedulerModel = new SchedulerModel("", componentId1, componentName, componentType, componentMachineIP, componentMachineName, false, "00");
+
+        AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(DimmerListActivity.this, schedulerModel);
+        addToSchedulerDialog.show();
     }
 
 }

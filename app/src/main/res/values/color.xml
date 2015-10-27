@@ -39,7 +39,7 @@
     <color name="yellowBorder">#e5b94c</color>
     <color name="offSwitchColor">#0c2836</color>
     <color name="lightGrey">#d4d4d4</color>
-
+    <color name="blackTint">#E6000000</color>
 
     <!-- Ballon line colors -->
     <color name="balloonperformer_common_purple">#d22bd0</color>

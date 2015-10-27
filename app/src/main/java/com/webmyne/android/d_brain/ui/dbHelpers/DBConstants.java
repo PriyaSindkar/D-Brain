@@ -30,6 +30,9 @@ public class DBConstants {
     // Favorite table name
     public static final String TABLE_FAVOURITE = "FavouriteComponent";
 
+    // Schedulers table name
+    public static final String TABLE_SCHEDULERS = "Schedulers";
+
     // Machine Table Columns names
     public static final String KEY_M_ID = "_id";
     public static final String KEY_M_DA = "DA";
@@ -78,6 +81,18 @@ public class DBConstants {
     public static final String KEY_F_CNAME = "COMPONENT_NAME";
     public static final String KEY_F_MNAME = "MACHINE_NAME";
     public static final String KEY_F_CID = "PRIMARY_COMP_ID";
+
+    //Schedulers table column names
+    public static final String KEY_SCH_ID = "_id";
+    public static final String KEY_SCH_NAME = "NAME";
+    public static final String KEY_SCH_DATETIME = "DATEANDTIME";
+    public static final String KEY_SCH_IS_SCENE = "IS_SCENE";
+    public static final String KEY_SCH_SCENE_NAME = "SCENE_NAME";
+    public static final String KEY_SCH_SCENE_ID = "SCENE_ID";
+    public static final String KEY_SCH_TYPE = "COMPONENT_TYPE";
+    public static final String KEY_SCH_MIP = "MACHINE_IP";
+    public static final String KEY_SCH_DEFAULT = "DEF_VALUE";
+    public static final String KEY_SCH_MNAME = "MACHINE_NAME";
 
 
 

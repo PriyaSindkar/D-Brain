@@ -1,6 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@color/secondaryBgColor">
 
     <RelativeLayout
@@ -20,6 +20,7 @@
             android:src="@drawable/ic_arrow_left_white" />
 
         <TextView
+            android:id="@+id/txtTitle"
             android:layout_centerInParent="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,6 +44,8 @@
 
     </RelativeLayout>
 
+
+
     <android.support.v7.widget.RecyclerView
         android:layout_below="@id/thisToolbar"
         android:id="@+id/recycler_view"
@@ -53,5 +56,13 @@
         android:layout_height="wrap_content"/>
 
 
-
+    <TextView
+        android:id="@+id/emptyView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="safasf"
+        android:textColor="@color/white"
+        android:visibility="visible"
+        android:textSize="@dimen/L_TEXT_SIZE"/>
 </RelativeLayout>

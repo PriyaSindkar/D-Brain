@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/STD_MARGIN"
+    android:background="@drawable/add_machine_bg">
+
+    <RelativeLayout
+        android:id="@+id/parentLogo"
+        android:layout_marginTop="@dimen/L_MARGIN"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/pathRel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/img1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:src="@drawable/dlogo"
+            android:layout_width="@dimen/CIRCLE_SIZE"
+            android:layout_height="@dimen/CIRCLE_SIZE" />
+
+        <ImageView
+            android:tint="@color/yellow"
+            android:tintMode="src_atop"
+            android:id="@+id/imgd2"
+            android:layout_alignRight="@+id/img1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:src="@drawable/d2"
+            android:layout_width="20dp"
+            android:layout_height="15dp" />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imgCancel"
+        android:src="@drawable/ic_navigation_cancel"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_below="@id/parentLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_centerInParent="true"/>
+
+    <RelativeLayout
+        android:id="@+id/relativeContent"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/parentLogo"
+        android:orientation="vertical"
+        android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
+        android:layout_marginRight="@dimen/VS_TEXT_SIZE"
+        android:layout_marginTop="@dimen/L_MARGIN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/txtInputSchedulerName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/TextLabel">
+
+            <EditText
+                android:id="@+id/edtSchedulerName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Scheduler Name"
+                android:inputType="text"
+                android:singleLine="true"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/white"
+                android:textColorHint="@color/lightGrey"
+                android:textSize="@dimen/M1_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/txtInputComponentName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/txtInputSchedulerName"
+            android:theme="@style/TextLabel">
+
+            <EditText
+                android:id="@+id/edtComponentName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Component Name"
+                android:text="Component Name"
+                android:inputType="text"
+                android:focusable="false"
+                android:singleLine="true"
+                android:backgroundTint="@color/white"
+                android:textColor="#ffffff"
+                android:textColorHint="#d1d1d1"
+                android:textSize="@dimen/M1_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/txtInputDate"
+            android:layout_width="match_parent"
+            android:layout_below="@id/txtInputComponentName"
+            android:layout_height="wrap_content"
+            android:theme="@style/TextLabel">
+
+            <EditText
+                android:id="@+id/edtDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Scheduled Date"
+                android:inputType="text"
+                android:singleLine="true"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/white"
+                android:textColorHint="@color/lightGrey"
+                android:textSize="@dimen/M1_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/txtInputTime"
+            android:layout_width="match_parent"
+            android:layout_below="@id/txtInputDate"
+            android:layout_height="wrap_content"
+            android:theme="@style/TextLabel">
+
+            <EditText
+                android:id="@+id/edtTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Scheduled Time"
+                android:inputType="text"
+                android:singleLine="true"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/white"
+                android:textColorHint="@color/lightGrey"
+                android:textSize="@dimen/M1_TEXT_SIZE" />
+        </android.support.design.widget.TextInputLayout>
+
+        <RelativeLayout
+            android:id="@+id/linearOnOffState"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_below="@id/txtInputTime"
+            android:layout_height="wrap_content">
+
+           <TextView
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="On/Off Status"
+               android:textColor="@color/white"
+               android:padding="@dimen/STD_MARGIN"/>
+
+        <com.kyleduo.switchbutton.SwitchButton
+            android:id="@+id/imgSwitch"
+            android:layout_alignParentRight="true"
+            style="@style/MaterialDesignStyle" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/linearDimmerSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="@dimen/STD_MARGIN"
+            android:layout_below="@id/linearOnOffState">
+
+            <TextView
+                android:layout_weight="0.4"
+                android:id="@+id/txtValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="right"
+                android:layout_marginRight="@dimen/S_MARGIN"
+                android:padding="@dimen/S_MARGIN"
+                android:singleLine="true"
+                android:text="00"
+                android:background="@drawable/seekbar_value"
+                android:gravity="center"
+                android:textColor="#ffffff" />
+
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progressDrawable="@drawable/progressbar"
+                android:secondaryProgress="0"
+                android:thumb="@drawable/thumb" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtSaveScheduler"
+            android:background="@drawable/round_corner_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/linearDimmerSeekBar"
+            android:padding="@dimen/STD_MARGIN"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/HEADER_BAR_SIZE"
+            android:textSize="@dimen/M1_TEXT_SIZE"
+            android:textColor="@color/white"
+            android:text="SAVE"/>
+
+
+    </RelativeLayout>
+
+</RelativeLayout>

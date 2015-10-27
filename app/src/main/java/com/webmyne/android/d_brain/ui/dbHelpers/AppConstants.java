@@ -32,6 +32,7 @@ public class AppConstants {
     public static String MOTOR_PREFIX = "MO";
     public static String ALERT_PREFIX = "AS";
     public static String TOUCH_PANEL_TYPE = "touch_panel";
+    public static String SCENE_TYPE="scene";
 
     //component values
     public  static String OFF_VALUE = "00";

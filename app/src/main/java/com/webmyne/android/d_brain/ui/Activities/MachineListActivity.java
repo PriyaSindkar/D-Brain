@@ -19,6 +19,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
@@ -143,16 +144,26 @@ public class MachineListActivity extends AppCompatActivity {
                 AddMachineDialog machineDialog = new AddMachineDialog(MachineListActivity.this);
                 machineDialog.show();
 
-                /*try {
-                    DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
-                    dbHelper.openDataBase();
-                    machineCursor = dbHelper.getAllMachines();
-                    adapter.changeCursor(machineCursor);
-                    dbHelper.close();
+                machineDialog.setClickListener(new onSingleClickListener() {
+                    @Override
+                    public void onSingleClick(int pos) {
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
+                            dbHelper.openDataBase();
+                            dbHelper.close();
+                            machineCursor = dbHelper.getAllMachines();
+                            adapter = new MachineListCursorAdapter(MachineListActivity.this, machineCursor);
+                            adapter.setType(0);
+                            adapter.setHasStableIds(true);
+                            mRecyclerView.setAdapter(adapter);
 
-                } catch (SQLException e) {
-                    Log.e("TAG EXP", e.toString());
-                }*/
+                        } catch (SQLException e) {
+                            Log.e("TAG EXP", e.toString());
+                        }
+                    }
+                });
+
+
 
             }
         });

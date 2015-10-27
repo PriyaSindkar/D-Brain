@@ -32,6 +32,7 @@ import com.webmyne.android.d_brain.ui.Fragments.AboutUsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AddMachineFragment;
 import com.webmyne.android.d_brain.ui.Fragments.ContactUsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SchedulerFragment;
+import com.webmyne.android.d_brain.ui.Fragments.SchedulersFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SensorFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Fragments.MachineConfigFragment;
@@ -42,6 +43,7 @@ import com.webmyne.android.d_brain.ui.Fragments.SettingsFragment;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -96,17 +98,12 @@ public class HomeDrawerActivity extends AppCompatActivity {
                 if (txtClearButton.getText().toString().equals("Add Machine")) {
                     AddMachineDialog machineDialog = new AddMachineDialog(HomeDrawerActivity.this);
                     machineDialog.show();
+                    machineDialog.setClickListener(new onSingleClickListener() {
+                        @Override
+                        public void onSingleClick(int pos) {
 
-                   /* try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(HomeDrawerActivity.this);
-                        dbHelper.openDataBase();
-                        Cursor machineCursor = dbHelper.getAllMachines();
-                        adapter.changeCursor(machineCursor);
-                        dbHelper.close();
-
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
-                    }*/
+                        }
+                    });
                 }
             }
         });
@@ -230,11 +227,11 @@ public class HomeDrawerActivity extends AppCompatActivity {
                 ft.commit();
                 break;
 
-            case R.id.drawer_main_panel:
+            /*case R.id.drawer_main_panel:
                 // Home
                 ft.replace(R.id.content, MainPanelFragment.newInstance(), "MAIN_PANEL");
                 ft.commit();
-                break;
+                break;*/
 
             case R.id.drawer_scenes:
                 ft.replace(R.id.content, SceneFragment.newInstance(), "SCENE");
@@ -242,7 +239,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
                 break;
 
             case R.id.drawer_schedulers:
-                ft.replace(R.id.content, SchedulerFragment.newInstance(), "SCHEDULER");
+                ft.replace(R.id.content, SchedulersFragment.newInstance(), "SCHEDULER");
                 ft.commit();
                 break;
 
@@ -268,11 +265,11 @@ public class HomeDrawerActivity extends AppCompatActivity {
                 ft.commit();
                 break;
 
-            case R.id.drawer_machine_config:
+           /* case R.id.drawer_machine_config:
                 // Home
                 ft.replace(R.id.content, MachineConfigFragment.newInstance(), "Machine Configuration");
                 ft.commit();
-                break;
+                break;*/
 
             case R.id.drawer_settings:
                 // Home

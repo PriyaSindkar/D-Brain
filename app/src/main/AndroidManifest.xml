@@ -74,6 +74,10 @@
             android:screenOrientation="portrait">
         </activity>
 
+        <activity android:name=".ui.Activities.SchedulersListActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
 
 
 

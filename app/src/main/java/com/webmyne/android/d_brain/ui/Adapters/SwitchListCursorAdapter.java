@@ -221,19 +221,21 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     }
                 });
 
-                /*listHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _singleClick.onSingleClick(position);
-                    }
-                });
-
                 listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         _addSchedulerClick.onAddSchedulerOptionClick(position);
                     }
-                }); */
+                });
+
+                /*listHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        _singleClick.onSingleClick(position);
+                    }
+                });*/
+
+
                 break;
             case 1:
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;

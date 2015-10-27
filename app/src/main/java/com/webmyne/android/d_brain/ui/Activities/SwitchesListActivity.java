@@ -20,15 +20,19 @@ import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Model.ComponentModel;
+import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -134,19 +138,6 @@ public class SwitchesListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setRemoveDuration(500);
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(0);
-
-       // registerForContextMenu(mRecyclerView);
-
-       /*
-
-        adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-
-            @Override
-            public void onAddSchedulerOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-        */
 
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -379,6 +370,14 @@ public class SwitchesListActivity extends AppCompatActivity {
                     }
                 });
 
+                adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
+
+                    @Override
+                    public void onAddSchedulerOptionClick(int pos) {
+                        addComponentToScheduler(pos);
+                    }
+                });
+
             } catch (Exception e) {
             }
         }
@@ -470,6 +469,20 @@ public class SwitchesListActivity extends AppCompatActivity {
         String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
         SceneListDialog dialog = new SceneListDialog(SwitchesListActivity.this, componentId1, componentType);
         dialog.show();
+    }
+
+    private void addComponentToScheduler(int pos) {
+        switchListCursor.moveToPosition(pos);
+        String componentId1 = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        String componentName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+        String componentMachineName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
+        String componentMachineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+
+        SchedulerModel schedulerModel = new SchedulerModel("", componentId1, componentName, componentType, componentMachineIP, componentMachineName, false, "00");
+
+        AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(SwitchesListActivity.this, schedulerModel);
+        addToSchedulerDialog.show();
     }
 
 

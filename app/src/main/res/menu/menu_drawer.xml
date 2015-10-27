@@ -10,10 +10,10 @@
             android:checked="true"
             android:title="Home" />
 
-        <item
+        <!--<item
             android:icon="@drawable/drawer_mainpanel"
             android:id="@+id/drawer_main_panel"
-            android:title="Main Panel" />
+            android:title="Main Panel" />-->
 
         <item
             android:icon="@drawable/drawer_scenes"
@@ -45,10 +45,10 @@
             android:id="@+id/drawer_add_machine"
             android:title="Add Machine" />
 
-        <item
+       <!-- <item
             android:icon="@drawable/drawer_machineconfig"
             android:id="@+id/drawer_machine_config"
-            android:title="Machine Configuration" />
+            android:title="Machine Configuration" />-->
 
         <item
             android:icon="@drawable/drawer_settings"

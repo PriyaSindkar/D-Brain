@@ -28,6 +28,7 @@ import com.flyco.dialog.widget.base.BaseDialog;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.ProgressPainter;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
+import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.TouchPanelModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
@@ -53,6 +54,7 @@ public class AddMachineDialog extends BaseDialog {
     private ArrayList<XMLValues> powerStatus;
     private RelativeLayout relativeContent;
     private ProgressBar progressBar;
+    private onSingleClickListener clickListener;
 
     public AddMachineDialog(Context context) {
         super(context);
@@ -180,6 +182,7 @@ public class AddMachineDialog extends BaseDialog {
 
                             initDatabaseComponents(productCode);
                             Toast.makeText(context, "Machine Added", Toast.LENGTH_SHORT).show();
+                            clickListener.onSingleClick(0);
                             dismiss();
                         } else {
                             Toast.makeText(context, "Invalid Product Code.", Toast.LENGTH_LONG).show();
@@ -281,5 +284,9 @@ public class AddMachineDialog extends BaseDialog {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setClickListener(onSingleClickListener obj){
+        this.clickListener = obj;
     }
 }

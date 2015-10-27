@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">D2 Brain</string>
+    <string name="app_name">D&#178; Brain</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -17,6 +17,7 @@
     <string name="empty_schedulers_list">You Have Not Added Any Scheduler</string>
     <string name="empty_sensors_list">You Have No Sensors</string>
     <string name="empty_machines_list">You Have Not Added Any Machine</string>
+    <string name="empty_scehdulers_list">You Have Not Added Any Schdeuler</string>
     <string name="about_us1">Brings the Power of Convenience in Your Hand</string>
     <string name="about_us2">D2Brain is the Futuristic Home &amp; Industry Automation App through which the control to your electrical appliances is just a click away!</string>
     <string name="contact_us_website">Website: www.d2brain.com</string>

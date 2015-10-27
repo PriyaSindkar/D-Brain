@@ -20,14 +20,18 @@ import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Adapters.SceneListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SceneListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
@@ -175,19 +179,35 @@ public class SceneFragment extends Fragment {
             }
         });
 
+        adapter.setAddToScheduler(new onAddSchedulerClickListener() {
+            @Override
+            public void onAddSchedulerOptionClick(int pos) {
+                addComponentToScheduler(pos);
+            }
+        });
     }
 
     private void updateSceneList() {
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();
-
             sceneListCursor = dbHelper.getAllScenes("");
             dbHelper.close();
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
         }
 
+    }
+
+    private void addComponentToScheduler(int pos) {
+        sceneListCursor.moveToPosition(pos);
+        String componentId1 = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+        String componentName = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
+
+        SchedulerModel schedulerModel = new SchedulerModel("", componentId1, componentName, AppConstants.SCENE_TYPE, "", "", true, "00");
+
+        AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(getActivity(), schedulerModel);
+        addToSchedulerDialog.show();
     }
 
 }

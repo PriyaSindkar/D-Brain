@@ -42,6 +42,7 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
 
     public onLongClickListener _longClick;
     public onSingleClickListener _singleClick;
+    public onAddSchedulerClickListener _addSchedulerClick;
 
     public SceneListCursorAdapter(Context context){
         super(context );
@@ -75,11 +76,13 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     public class ListViewHolder extends ViewHolder{
         public  TextView txtSceneName;
         public LinearLayout linearScene;
+        private ImageView imgAddSchedulerOption;
 
         public ListViewHolder(View view) {
             super ( view );
             this.txtSceneName = (TextView) view.findViewById(R.id.txtSceneName);
             this.linearScene = (LinearLayout) view.findViewById(R.id.linearScene);
+            this.imgAddSchedulerOption = (ImageView) view.findViewById(R.id.imgAddSchedulerOption);
         }
     }
 
@@ -146,6 +149,13 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
                         _singleClick.onSingleClick(position);
                     }
                 });
+
+                groupViewHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        _addSchedulerClick.onAddSchedulerOptionClick(position);
+                    }
+                });
                 break;
         }
 
@@ -154,5 +164,9 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
 
     public void setSingleClickListener(onSingleClickListener obj){
         this._singleClick = obj;
+    }
+
+    public void setAddToScheduler(onAddSchedulerClickListener obj){
+        this._addSchedulerClick = obj;
     }
 }

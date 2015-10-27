@@ -8,16 +8,16 @@
     android:layout_height="wrap_content">
 
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/linearSwitch"
         android:layout_width="match_parent"
         android:orientation="horizontal"
+        android:padding="@dimen/M_TEXT_SIZE"
         android:layout_height="wrap_content">
 
         <LinearLayout
             android:padding="@dimen/S_MARGIN"
-            android:layout_weight="1.5"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
@@ -32,18 +32,20 @@
                 android:textColor="@color/white"
                 android:src="@drawable/ic_arrow_left"/>
 
+
+
         </LinearLayout>
 
-        <!--<ImageView
-            android:id="@+id/imgRenameOption"
+        <ImageView
+            android:id="@+id/imgAddSchedulerOption"
             android:background="@drawable/white_border_circle"
-            android:src="@drawable/ic_edit"
+            android:src="@drawable/ic_scheduler"
+            android:layout_alignParentRight="true"
             android:padding="@dimen/STD_MARGIN"
-            android:layout_marginTop="@dimen/STD_MARGIN"
             android:layout_marginRight="@dimen/STD_MARGIN"
             android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
-            android:layout_height="@dimen/POPUP_BAR_ICON_SIZE" />-->
-    </LinearLayout>
+            android:layout_height="@dimen/POPUP_BAR_ICON_SIZE" />
+    </RelativeLayout>
 
 
 </LinearLayout>
