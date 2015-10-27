@@ -41,8 +41,6 @@ import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-
-
 public class CreateSceneActivity extends AppCompatActivity implements View.OnClickListener{
     private Toolbar toolbar;
     private TextView txtSwitch, txtDimmer, txtMotor, txtSceneTitle;
