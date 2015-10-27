@@ -976,5 +976,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public SchedulerModel getSchedulerById(String _schedulerId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        SchedulerModel schedulerModel = new SchedulerModel();
+        try {
+            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_SCH_ID + "=?" ,
+                    new String[]{_schedulerId}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                schedulerModel.setSchedulerName(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_NAME)));
+                schedulerModel.setComponentId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_ID)));
+                schedulerModel.setDefaultValue(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_DEFAULT)));
+                schedulerModel.setComponentType(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_TYPE)));
+                schedulerModel.setMip(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_MIP)));
+                schedulerModel.setComponentName(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_NAME)));
+
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return schedulerModel;
+    }
+
 
 }

@@ -1,8 +1,12 @@
 package com.webmyne.android.d_brain.ui.Customcomponents;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -18,12 +22,14 @@ import com.flyco.dialog.widget.base.BaseDialog;
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.ExternalCirclePainter;
+import com.webmyne.android.d_brain.ui.Helpers.AlarmReceiver;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by priyasindkar on 16-09-2015.
@@ -172,16 +178,16 @@ public class AddToSchedulerDialog extends BaseDialog {
             @Override
             public void onClick(View v) {
 
-                if(edtSchedulerName.getText().toString().trim().length() == 0) {
+                if (edtSchedulerName.getText().toString().trim().length() == 0) {
                     Toast.makeText(mContext, "Please Enter Scheduler Name.", Toast.LENGTH_SHORT).show();
-                } else if(edtDate.getText().toString().trim().length() == 0) {
+                } else if (edtDate.getText().toString().trim().length() == 0) {
                     Toast.makeText(mContext, "Please Select Scheduler Date.", Toast.LENGTH_SHORT).show();
-                } else if(edtTime.getText().toString().trim().length() == 0) {
+                } else if (edtTime.getText().toString().trim().length() == 0) {
                     Toast.makeText(mContext, "Please Select Scheduler Time.", Toast.LENGTH_SHORT).show();
                 } else {
                     String dimmerDefaultProgress = "";
                     if (schedulerModel.getComponentType().equals(AppConstants.DIMMER_TYPE)) {
-                        if(seekBar.getProgress() == 0) {
+                        if (seekBar.getProgress() == 0) {
                             dimmerDefaultProgress = "00";
                         } else {
                             dimmerDefaultProgress = String.valueOf(seekBar.getProgress() - 1);
@@ -208,10 +214,12 @@ public class AddToSchedulerDialog extends BaseDialog {
                         dbHelper.insertIntoScheduler(schedulerModel);
                         dbHelper.close();
 
+                        setAlarm(schedulerModel.getDateTime());
+
                         Toast.makeText(mContext, "Scheduler Saved.", Toast.LENGTH_SHORT).show();
                         dismiss();
 
-                    } catch(Exception e) {
+                    } catch (Exception e) {
 
                     }
                 }
@@ -220,6 +228,45 @@ public class AddToSchedulerDialog extends BaseDialog {
         });
 
         return true;
+    }
+
+    private void setAlarm(String dateTime){
+
+        try {
+
+            Date orgDate = new Date();
+
+            //DateTime dt = new DateTime(orgDate);
+            String[] dateAndTime = dateTime.split(" ");
+            String[] date = dateAndTime[0].split("-");
+            String[] time = dateAndTime[1].split(":");
+
+            //Get the calendar instance.
+            Calendar calendar = Calendar.getInstance();
+
+            //Set the time for the notification to occur.
+            calendar.set(Calendar.YEAR, Integer.parseInt(date[0]));
+            calendar.set(Calendar.MONTH, (Integer.parseInt(date[1]))-1);
+            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(date[2]));
+            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time[0]));
+            calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
+            calendar.set(Calendar.SECOND, 0);
+
+            int RQS_1 = 1;
+
+            //Toast.makeText(mContext, "Treatment is rescheduled and you will be notified at the appropriate time", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(mContext, AlarmReceiver.class);
+            intent.putExtra("scheduler_id",schedulerModel.getId());
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent, 0);
+            AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis()+86400000L, pendingIntent);
+
+        }catch (Exception e){
+            Log.e("## EXC", e.toString());
+        }
+
+
     }
 
 }
