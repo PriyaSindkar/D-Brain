@@ -56,6 +56,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     boolean isDimmerPopupShown = false;
     boolean isMotorPopupShown = false;
 
+
     private  AnimationHelper animationHelper = new AnimationHelper();
 
     private  ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
