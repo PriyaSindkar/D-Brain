@@ -39,4 +39,5 @@ dependencies {
     compile 'com.flyco.animation:FlycoAnimation_Lib:1.0.0@aar'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'konifar:fab-transformation:1.0.0'
+    compile 'com.google.code.gson:gson:2.3.1'
 }

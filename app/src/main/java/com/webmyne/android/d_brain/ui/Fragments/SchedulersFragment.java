@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +43,7 @@ public class SchedulersFragment extends Fragment {
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
     private Cursor schedulersCursor;
+    private ImageView imgEmpty;
 
     public static SchedulersFragment newInstance() {
         SchedulersFragment fragment = new SchedulersFragment();
@@ -96,6 +98,7 @@ public class SchedulersFragment extends Fragment {
         emptyView = (LinearLayout) view.findViewById(R.id.emptyView);
         txtEmptyView1 = (TextView) view.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) view.findViewById(R.id.txtEmptyView);
+        imgEmpty = (ImageView) view.findViewById(R.id.imgEmpty);
 
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -118,7 +121,8 @@ public class SchedulersFragment extends Fragment {
         if(schedulersCursor.getCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
-
+            imgEmpty.setVisibility(View.VISIBLE);
+            imgEmpty.setImageResource(R.drawable.drawer_schedulers);
             txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
         } else {
             emptyView.setVisibility(View.GONE);

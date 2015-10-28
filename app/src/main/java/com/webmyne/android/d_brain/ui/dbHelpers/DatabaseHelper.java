@@ -917,7 +917,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void insertIntoScheduler(SchedulerModel schedulerModel) {
+    public long insertIntoScheduler(SchedulerModel schedulerModel) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -926,15 +926,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_SCH_DATETIME, schedulerModel.getDateTime());
         values.put(DBConstants.KEY_SCH_DEFAULT, schedulerModel.getDefaultValue());
         values.put(DBConstants.KEY_SCH_IS_SCENE, schedulerModel.isScene());
-        values.put(DBConstants.KEY_SCH_SCENE_ID, schedulerModel.getComponentId());
+        values.put(DBConstants.KEY_SCH_SCENE_ID, schedulerModel.getComponentPrimaryId());
+        values.put(DBConstants.KEY_SCH_COMPONENT_ID, schedulerModel.getComponentId());
         values.put(DBConstants.KEY_SCH_SCENE_NAME, schedulerModel.getComponentName());
         values.put(DBConstants.KEY_SCH_TYPE, schedulerModel.getComponentType());
         values.put(DBConstants.KEY_SCH_MNAME, schedulerModel.getMachineName());
         values.put(DBConstants.KEY_SCH_MIP, schedulerModel.getMip());
 
-        db.insert(DBConstants.TABLE_SCHEDULERS, null, values);
+       long id =  db.insert(DBConstants.TABLE_SCHEDULERS, null, values);
 
         db.close();
+        return id;
     }
 
     public Cursor getAllSchedulers() {
@@ -987,7 +989,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (cursor != null) {
                 cursor.moveToFirst();
                 schedulerModel.setSchedulerName(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_NAME)));
-                schedulerModel.setComponentId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_ID)));
+                schedulerModel.setComponentPrimaryId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_ID)));
+                schedulerModel.setComponentId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_COMPONENT_ID)));
                 schedulerModel.setDefaultValue(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_DEFAULT)));
                 schedulerModel.setComponentType(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_TYPE)));
                 schedulerModel.setMip(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_MIP)));

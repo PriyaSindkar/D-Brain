@@ -195,13 +195,13 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
-                AdvancedSpannableString sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");
-                switchHolder.txtSwitchName.setText(sp);
+               /* AdvancedSpannableString sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");*/
+                switchHolder.txtSwitchName.setText(mDataset.get(position).getName());
 
-                sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");
-                switchHolder.txtMachineName.setText(sp);
+                /*sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");*/
+                switchHolder.txtMachineName.setText(mDataset.get(position).getMachineName());
 
                 if( mDataset.get(position).getDefaultValue().equals(AppConstants.OFF_VALUE))
                     switchHolder.imgSwitch.setChecked(false);
@@ -239,13 +239,13 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-                sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");
-                dimmerHolder.txtDimmerName.setText(sp);
+               /* sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");*/
+                dimmerHolder.txtDimmerName.setText(mDataset.get(position).getName());
 
-                sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");
-                dimmerHolder.txtMachineName.setText(sp);
+                /*sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");*/
+                dimmerHolder.txtMachineName.setText(mDataset.get(position).getMachineName());
 
                 dimmerHolder.txtValue.setText(mDataset.get(position).getDefaultValue());
                 dimmerHolder.seekBar.setProgress(Integer.parseInt(mDataset.get(position).getDefaultValue()));

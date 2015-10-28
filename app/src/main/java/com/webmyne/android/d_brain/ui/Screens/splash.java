@@ -38,6 +38,8 @@ import com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.DashedC
 import com.webmyne.android.d_brain.ui.Customcomponents.CustomViewPager;
 import com.webmyne.android.d_brain.ui.Customcomponents.PageIndicator;
 import com.webmyne.android.d_brain.ui.Fragments.UserGuideSliderFragment;
+import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
+import com.webmyne.android.d_brain.ui.Model.UserSettings;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 
 
@@ -50,6 +52,16 @@ public class splash extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(this, "settings-pref", 0);
+        UserSettings settings = complexPreferences.getObject("settings-pref", UserSettings.class);
+
+        if(settings != null) {
+            if (settings.isStartupEnabled()) {
+                startActivity(new Intent(this, HomeDrawerActivity.class));
+                finish();
+            }
+        }
         setContentView(R.layout.activity_splash);
 
         init();

@@ -74,8 +74,8 @@ public class MachineListActivity extends AppCompatActivity {
         } else {
             emptyView.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
-        }*/
-
+        }
+*/
         adapter = new MachineListCursorAdapter(MachineListActivity.this, machineCursor);
         adapter.setType(0);
         adapter.setHasStableIds(true);

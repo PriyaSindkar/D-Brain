@@ -86,6 +86,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/txtInputSchedulerName"
+            android:visibility="gone"
             android:theme="@style/TextLabel">
 
             <EditText
@@ -115,6 +116,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Scheduled Date"
+                android:focusable="false"
                 android:inputType="text"
                 android:singleLine="true"
                 android:backgroundTint="@color/white"
@@ -135,6 +137,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Scheduled Time"
+                android:focusable="false"
                 android:inputType="text"
                 android:singleLine="true"
                 android:backgroundTint="@color/white"

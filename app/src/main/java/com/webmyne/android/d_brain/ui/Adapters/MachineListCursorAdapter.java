@@ -123,16 +123,17 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
         final String strPosition = String.format("%02d", (position + 1));
 
         final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-        AdvancedSpannableString sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name: ");
+        AdvancedSpannableString sp = new AdvancedSpannableString(cursor.getString(machineNameIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.white), cursor.getString(machineNameIndex));
+        sp.setBold(cursor.getString(machineNameIndex));
         listHolder.txtMachineName.setText(sp);
 
-        sp = new AdvancedSpannableString("Machine IP Address: " + cursor.getString(machineIPIndex));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine IP Address: ");
+        sp = new AdvancedSpannableString(cursor.getString(machineIPIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow),cursor.getString(machineIPIndex) );
         listHolder.txtMachineIPAddress.setText(sp);
 
-        sp = new AdvancedSpannableString("Machine Serial No.: "+cursor.getString(machineSerialNoIndex));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Serial No.: ");
+        sp = new AdvancedSpannableString(cursor.getString(machineSerialNoIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), cursor.getString(machineSerialNoIndex));
         listHolder.txtMachineSerialNo.setText(sp);
 
         /*listHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {

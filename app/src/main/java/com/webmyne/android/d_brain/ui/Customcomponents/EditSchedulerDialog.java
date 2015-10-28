@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
@@ -27,6 +28,10 @@ import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -99,9 +104,6 @@ public class EditSchedulerDialog extends BaseDialog {
             linearDimmerSeekBar.setVisibility(View.VISIBLE);
             String defaultDimmerValue = schedulerModel.getDefaultValue();
 
-            Log.e("DEF",defaultDimmerValue.substring(0,2) );
-            Log.e("PROGRESS", defaultDimmerValue.substring(2, 4));
-
             if(defaultDimmerValue.substring(0,2).equals(AppConstants.OFF_VALUE)) {
                 imgSwitch.setChecked(false);
             } else {
@@ -139,10 +141,15 @@ public class EditSchedulerDialog extends BaseDialog {
                 final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
                 Calendar newCalendar = Calendar.getInstance();
                 int year, month, day;
+                int mYear, mMonth, mDay;
 
                 year = newCalendar.get(Calendar.YEAR);
                 month = newCalendar.get(Calendar.MONTH);
                 day = newCalendar.get(Calendar.DAY_OF_MONTH);
+
+                mYear = newCalendar.get(Calendar.YEAR);
+                mMonth  = newCalendar.get(Calendar.MONTH);
+                mDay  = newCalendar.get(Calendar.DAY_OF_MONTH);
 
                 if (edtDate.getText().toString().trim().length() != 0) {
                     String[] date = edtDate.getText().toString().trim().split("-");
@@ -161,6 +168,13 @@ public class EditSchedulerDialog extends BaseDialog {
 
                 }, year, month, day);
                 fromDatePickerDialog.show();
+
+                try {
+                    String today = mYear + "-" + mMonth + "-" + mDay;
+                    fromDatePickerDialog.getDatePicker().setMinDate(dateFormatter.parse(today).getTime());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -182,7 +196,7 @@ public class EditSchedulerDialog extends BaseDialog {
 
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                edtTime.setText(hourOfDay + ":" + minute);
+                                edtTime.setText(String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute));
                             }
                         }, mHour, mMinute, false);
                 tpd.show();
@@ -223,7 +237,7 @@ public class EditSchedulerDialog extends BaseDialog {
                         if (seekBar.getProgress() == 0) {
                             dimmerDefaultProgress = "00";
                         } else {
-                            dimmerDefaultProgress = String.valueOf(seekBar.getProgress() - 1);
+                            dimmerDefaultProgress = String.format("%02d", seekBar.getProgress() - 1);
                         }
                         if (imgSwitch.isChecked()) {
                             schedulerModel.setDefaultValue("01" + dimmerDefaultProgress);
@@ -282,7 +296,7 @@ public class EditSchedulerDialog extends BaseDialog {
             //Get the calendar instance.
             Calendar calendar = Calendar.getInstance();
 
-//Set the time for the notification to occur.
+            //Set the time for the notification to occur.
             calendar.set(Calendar.YEAR, Integer.parseInt(date[0]));
             calendar.set(Calendar.MONTH, (Integer.parseInt(date[1]))-1);
             calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(date[2]));
@@ -292,12 +306,11 @@ public class EditSchedulerDialog extends BaseDialog {
 
             int RQS_1 = 1;
 
-            //Toast.makeText(mContext, "Treatment is rescheduled and you will be notified at the appropriate time", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(mContext, AlarmReceiver.class);
-            intent.putExtra("scheduler_id",schedulerModel.getId());
+            intent.putExtra("scheduler_id", String.valueOf(schedulerModel.getId()));
             PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent, 0);
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis()+86400000L, pendingIntent);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
         }catch (Exception e){
             Log.e("## EXC",e.toString());
@@ -305,5 +318,6 @@ public class EditSchedulerDialog extends BaseDialog {
 
 
     }
+
 
 }

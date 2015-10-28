@@ -24,6 +24,9 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
+import com.webmyne.android.d_brain.ui.BallonComponent.BalloonPerformer;
+import com.webmyne.android.d_brain.ui.BallonComponent.configs.Config;
+import com.webmyne.android.d_brain.ui.BallonComponent.widgets.BalloonGroup;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
@@ -40,10 +43,12 @@ import com.webmyne.android.d_brain.ui.Fragments.MainPanelFragment;
 import com.webmyne.android.d_brain.ui.Fragments.NotificationFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SceneFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SettingsFragment;
+import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Model.UserSettings;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -85,10 +90,27 @@ public class HomeDrawerActivity extends AppCompatActivity {
             toolbar.setTitle("");
             setSupportActionBar(toolbar);
         }
+
+
+        //Starting the ballon
+        Config.Builder builder = new Config.Builder(this);
+        Config config = builder.pullSensitivity(5.0f).lineLength(64).isOnlyDestop(true).flyDuration(3000).balloonCount(6).create();
+        BalloonPerformer.getInstance().init(this, config);
+        BalloonPerformer.getInstance().show(this, new BalloonGroup.OnBalloonFlyedListener() {
+            @Override
+            public void onBalloonFlyed() {
+                startActivity(new Intent(getApplicationContext(),HomeDrawerActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            }
+        });
+        //ends of baloon
+
+
+
         initDrawer();
        /* animObj = new AnimationHelper();
         animObj.initPowerButtonAnimation(btn);*/
-        btn.setVisibility(View.VISIBLE);
+
+      //  btn.setVisibility(View.VISIBLE);
 
       //  call();
 

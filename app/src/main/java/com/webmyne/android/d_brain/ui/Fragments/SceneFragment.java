@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +30,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
@@ -45,6 +47,7 @@ public class SceneFragment extends Fragment {
     private int totalNoOfScenes = 0;
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
+    private ImageView imgEmpty;
     private Cursor sceneListCursor;
 
     public static SceneFragment newInstance() {
@@ -118,13 +121,16 @@ public class SceneFragment extends Fragment {
         emptyView = (LinearLayout) view.findViewById(R.id.emptyView);
         txtEmptyView1 = (TextView) view.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) view.findViewById(R.id.txtEmptyView);
+        imgEmpty = (ImageView) view.findViewById(R.id.imgEmpty);
 
         updateSceneList();
 
         if(sceneListCursor.getCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
+            imgEmpty.setVisibility(View.VISIBLE);
 
+            imgEmpty.setImageResource(R.drawable.drawer_scenes);
             AdvancedSpannableString sp = new AdvancedSpannableString("Click Here");
             sp.setUnderLine("Click Here");
             sp.setColor(getResources().getColor(R.color.yellow), "Click Here");
@@ -204,10 +210,57 @@ public class SceneFragment extends Fragment {
         String componentId1 = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
         String componentName = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
 
-        SchedulerModel schedulerModel = new SchedulerModel("", componentId1, componentName, AppConstants.SCENE_TYPE, "", "", true, "00");
+        SchedulerModel schedulerModel = new SchedulerModel("", componentId1,"", componentName, AppConstants.SCENE_TYPE, "", "", true, "00");
 
         AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(getActivity(), schedulerModel);
         addToSchedulerDialog.show();
     }
+
+
+    /*private void showSceneSavedState() {
+        // show scene saved state
+        String currentSceneId =
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        try {
+            dbHelper.openDataBase();
+            Cursor switchListCursor = dbHelper.getAllComponentsInAScene(currentSceneId);
+            *//*if(dbHelper.getSceneStatus(currentSceneId).equals("yes")) {
+                sceneMainSwitch.setChecked(true);
+            } else {
+                sceneMainSwitch.setChecked(false);
+            }*//*
+            mData.clear();
+            if (switchListCursor != null) {
+                switchListCursor.moveToFirst();
+                if (switchListCursor.getCount() > 0) {
+                    do {
+                        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID));
+                        String componentPrimaryId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMP_PRIMARY_ID));
+                        String defaultValue = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
+                        String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
+                        String machineName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MNAME));
+
+                        SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
+                        sceneItemsDataObject.setMachineIP(machineIP);
+                        sceneItemsDataObject.setMachineName(machineName);
+                        sceneItemsDataObject.setSceneControlType(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE)));
+                        sceneItemsDataObject.setSceneItemId(componentId);
+                        sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
+
+                        String componentName = dbHelper.getComponentNameByPrimaryId(componentId);
+                        //String componentName = componentCursor.getString(componentCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+
+                        sceneItemsDataObject.setName(componentName);
+                        sceneItemsDataObject.setDefaultValue(defaultValue);
+                        mData.add(sceneItemsDataObject);
+
+                    } while (switchListCursor.moveToNext());
+                }
+            }
+            dbHelper.close();
+        } catch (SQLException e) {
+            Log.e("SQLEXP", e.toString());
+        }
+    }*/
 
 }

@@ -79,6 +79,13 @@ public class AddMachineDialog extends BaseDialog {
         progressBar = (ProgressBar) inflate.findViewById(R.id.progress_bar);
         relativeContent = (RelativeLayout) inflate.findViewById(R.id.relativeContent);
 
+        inflate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         return inflate;
     }
 

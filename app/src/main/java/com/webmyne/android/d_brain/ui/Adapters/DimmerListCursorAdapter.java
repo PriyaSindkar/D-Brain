@@ -183,13 +183,14 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             case 0:
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
 
-                AdvancedSpannableString sp = new AdvancedSpannableString("Dimmer Name: "+cursor.getString(dimmerNameIndex));
+                /*AdvancedSpannableString sp = new AdvancedSpannableString("Dimmer Name: "+cursor.getString(dimmerNameIndex));
                 sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Dimmer Name:");
                 listHolder.txtDimmerName.setText(sp);
 
                 sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");
-                listHolder.txtMachineName.setText(sp);
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");*/
+                listHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
+                listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                 if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
                     /*listHolder.txtValue.setText("0");
@@ -312,7 +313,12 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                 break;
             case 1:
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
-                groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
+
+                AdvancedSpannableString sp = new AdvancedSpannableString(cursor.getString(dimmerNameIndex) +" ( "+ cursor.getString(machineNameIndex) +" )");
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), cursor.getString(machineNameIndex));
+                groupViewHolder.txtDimmerName.setText(sp);
+
+                //groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex) +" ( "+ cursor.getString(machineNameIndex) +" )");
                 groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
                 final String finalMachineIP1 = machineIP;
 

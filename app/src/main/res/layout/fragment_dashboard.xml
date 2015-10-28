@@ -108,17 +108,28 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:visibility="gone"
+            android:gravity="center"
             android:background="@color/tertiaryBgColor"
             android:layout_height="match_parent">
 
+            <ImageView
+                android:layout_width="@dimen/CIRCLE_SIZE"
+                android:layout_height="@dimen/CIRCLE_SIZE"
+                android:layout_gravity="center"
+                android:src="@drawable/bulb"
+                android:tint="@color/white"
+                android:tintMode="src_atop" />
+
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
+                android:padding="@dimen/STD_MARGIN"
                 android:textColor="@color/yellow"
                 android:textStyle="bold"
-                android:text="Power is Off.\n Please switch on the main switch"/>
+                android:textSize="@dimen/L_TEXT_SIZE"
+                android:text="@string/power_off_text"/>
 
         </LinearLayout>
 

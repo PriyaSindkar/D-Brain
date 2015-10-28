@@ -17,7 +17,7 @@
     <string name="empty_schedulers_list">You Have Not Added Any Scheduler</string>
     <string name="empty_sensors_list">You Have No Sensors</string>
     <string name="empty_machines_list">You Have Not Added Any Machine</string>
-    <string name="empty_scehdulers_list">You Have Not Added Any Schdeuler</string>
+    <string name="empty_scehdulers_list">You Have Not Added Any Scheduler</string>
     <string name="about_us1">Brings the Power of Convenience in Your Hand</string>
     <string name="about_us2">D2Brain is the Futuristic Home &amp; Industry Automation App through which the control to your electrical appliances is just a click away!</string>
     <string name="contact_us_website">Website: www.d2brain.com</string>
@@ -29,4 +29,6 @@
     <string name="action_add_to_scene">Add To Scene</string>
     <string name="action_add_to_favorite">Add To Favourite</string>
     <string name="action_add_to_scheduler">Add To Scheduler</string>
+    <string name="power_off_text">Power is Off\n Please switch on the main switch</string>
+
 </resources>

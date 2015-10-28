@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -60,6 +61,7 @@ public class SensorFragment extends Fragment {
     private Timer timer;
     private Handler handler;
     public static boolean isDelay = false;
+    private ImageView imgEmpty;
 
     private void PauseTimer(){
         this.timer.cancel();
@@ -142,13 +144,15 @@ public class SensorFragment extends Fragment {
         emptyView = (LinearLayout) view.findViewById(R.id.emptyView);
         txtEmptyView1 = (TextView) view.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) view.findViewById(R.id.txtEmptyView);
+        imgEmpty = (ImageView) view.findViewById(R.id.imgEmpty);
 
         initArrayOfSensors();
 
         if(sensorListCursor.getCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
-
+            imgEmpty.setVisibility(View.VISIBLE);
+            imgEmpty.setImageResource(R.drawable.drawer_sensors);
             txtEmptyView.setText(getResources().getString(R.string.empty_sensors_list));
         } else {
             emptyView.setVisibility(View.GONE);
@@ -203,6 +207,7 @@ public class SensorFragment extends Fragment {
                 }
             }
             dbHelper.close();
+
 
         } catch (SQLException e) {
             e.printStackTrace();

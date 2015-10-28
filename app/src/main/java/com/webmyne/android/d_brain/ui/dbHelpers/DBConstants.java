@@ -90,6 +90,7 @@ public class DBConstants {
     public static final String KEY_SCH_SCENE_NAME = "SCENE_NAME";
     public static final String KEY_SCH_SCENE_ID = "SCENE_ID";
     public static final String KEY_SCH_TYPE = "COMPONENT_TYPE";
+    public static final String KEY_SCH_COMPONENT_ID = "COMPONENT_ID";
     public static final String KEY_SCH_MIP = "MACHINE_IP";
     public static final String KEY_SCH_DEFAULT = "DEF_VALUE";
     public static final String KEY_SCH_MNAME = "MACHINE_NAME";

@@ -29,9 +29,11 @@
                     android:id="@+id/txtDimmerName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="@dimen/S_MARGIN"
+                    android:layout_marginLeft="@dimen/S_MARGIN"
+                    android:padding="@dimen/VS_MARGIN"
                     android:text="Dimmer Name"
-                    android:textColor="#fff" />
+                    android:textStyle="bold"
+                    android:textColor="@color/white" />
 
                 <ImageView
                     android:id="@+id/imgDeleteOption"
@@ -52,9 +54,11 @@
                 android:id="@+id/txtMachineName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/S_MARGIN"
+                android:layout_marginLeft="@dimen/S_MARGIN"
+                android:padding="@dimen/VS_MARGIN"
                 android:text="Machine Name"
-                android:textColor="#fff" />
+                android:textStyle="bold"
+                android:textColor="@color/yellow" />
 
             <TextView
                 android:id="@+id/txtValue"

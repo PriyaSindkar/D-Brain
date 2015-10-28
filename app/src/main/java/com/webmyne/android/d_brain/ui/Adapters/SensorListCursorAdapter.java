@@ -125,15 +125,15 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
         final String strPosition = String.format("%02d", (position + 1));
 
         final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-        AdvancedSpannableString sp = new AdvancedSpannableString("Sensor Name: "+cursor.getString(nameIndex));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Sensor Name:");
-        listHolder.txtSensorName.setText(sp);
+       /* AdvancedSpannableString sp = new AdvancedSpannableString("Sensor Name: "+cursor.getString(nameIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Sensor Name:");*/
+        listHolder.txtSensorName.setText(cursor.getString(nameIndex));
 
         listHolder.txtSensorDetails.setText(sensorDetails);
 
-        sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");
-        listHolder.txtMachineName.setText(sp);
+      /*  sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");*/
+        listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
         listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -44,8 +45,9 @@ public class FavouriteListActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private FavouriteListCursorAdapter adapter;
     private Toolbar toolbar;
-    private ImageView imgBack, imgListGridToggle;
+    private ImageView imgBack, imgListGridToggle, imgEmpty;
     private TextView toolbarTitle, txtEmptyView;
+    private LinearLayout linearEmptyView;
 
     private Cursor favouriteListCursor, machineListCursor;
     ArrayList<XMLValues> switchStatusList, dimmerStatusList;
@@ -97,6 +99,8 @@ public class FavouriteListActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         imgBack = (ImageView) findViewById(R.id.imgBack);
+        linearEmptyView = (LinearLayout) findViewById(R.id.linearEmptyView);
+        imgEmpty = (ImageView) findViewById(R.id.imgEmpty);
 
         if (toolbar != null) {
             setSupportActionBar(toolbar);
@@ -194,7 +198,13 @@ public class FavouriteListActivity extends AppCompatActivity {
                         machineIPs[i] = machineIP;
                         i++;
                     } while(machineListCursor.moveToNext());
+                } else {
+                    mRecyclerView.setVisibility(View.GONE);
+                    linearEmptyView.setVisibility(View.VISIBLE);
                 }
+            } else {
+                mRecyclerView.setVisibility(View.GONE);
+                linearEmptyView.setVisibility(View.VISIBLE);
             }
             dbHelper.close();
 
@@ -368,11 +378,13 @@ public class FavouriteListActivity extends AppCompatActivity {
                         } while (favouriteListCursor.moveToNext());
 
                     } else {
-                        txtEmptyView.setVisibility(View.VISIBLE);
+                        linearEmptyView.setVisibility(View.VISIBLE);
+                        imgEmpty.setImageResource(R.drawable.ic_action_favorite);
                         txtEmptyView.setText("You Have No Favourites");
                     }
                 } else {
-                    txtEmptyView.setVisibility(View.VISIBLE);
+                    linearEmptyView.setVisibility(View.VISIBLE);
+                    imgEmpty.setImageResource(R.drawable.ic_action_favorite);
                     txtEmptyView.setText("You Have No Favourites");
                 }
 

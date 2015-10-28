@@ -101,21 +101,22 @@ public class SchedulersListCursorAdapter extends CursorRecyclerViewAdapter<Sched
         final String strPosition = String.format("%02d", (position + 1));
 
         final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-        AdvancedSpannableString sp = new AdvancedSpannableString("Scheduler Name: "+cursor.getString(schedulerNameIdx));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Scheduler Name: ");
+        AdvancedSpannableString sp = new AdvancedSpannableString(cursor.getString(schedulerNameIdx));
+        sp.setColor(mCtx.getResources().getColor(R.color.white), cursor.getString(schedulerNameIdx));
+        sp.setBold(cursor.getString(schedulerNameIdx));
         listHolder.txtMachineName.setText(sp);
 
         if(schedulerType.equals(AppConstants.SCENE_TYPE)) {
             listHolder.txtMachineIPAddress.setVisibility(View.GONE);
         } else {
-            sp = new AdvancedSpannableString("Machine IP Address: " + cursor.getString(machineIPIndex));
-            sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine IP Address: ");
+            sp = new AdvancedSpannableString(cursor.getString(machineIPIndex));
+            sp.setColor(mCtx.getResources().getColor(R.color.yellow), cursor.getString(machineIPIndex));
             listHolder.txtMachineIPAddress.setText(sp);
         }
 
 
-        sp = new AdvancedSpannableString("Scheduled Date Time.: "+cursor.getString(dateTimeIdx));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Scheduled Date Time.: ");
+        sp = new AdvancedSpannableString("Scheduled at: "+cursor.getString(dateTimeIdx));
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Scheduled at: ");
         listHolder.txtMachineSerialNo.setText(sp);
 
         listHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {

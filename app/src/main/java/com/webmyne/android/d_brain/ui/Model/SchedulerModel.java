@@ -6,6 +6,7 @@ package com.webmyne.android.d_brain.ui.Model;
 public class SchedulerModel {
     private int id;
     private String schedulerName;
+    private String componentPrimaryId;
     private String componentId;
     private String componentName;
     private String componentType;
@@ -18,8 +19,9 @@ public class SchedulerModel {
     public SchedulerModel() {
     }
 
-    public SchedulerModel(String schedulerName, String componentId, String name, String componentType, String mip, String machineName, boolean isScene, String defaultValue) {
+    public SchedulerModel(String schedulerName, String componentPrimaryId, String componentId, String name, String componentType, String mip, String machineName, boolean isScene, String defaultValue) {
         this.schedulerName = schedulerName;
+        this.componentPrimaryId = componentPrimaryId;
         this.componentId = componentId;
         this.componentName = name;
         this.componentType = componentType;
@@ -43,6 +45,14 @@ public class SchedulerModel {
 
     public void setSchedulerName(String schedulerName) {
         this.schedulerName = schedulerName;
+    }
+
+    public String getComponentPrimaryId() {
+        return componentPrimaryId;
+    }
+
+    public void setComponentPrimaryId(String componentPrimaryId) {
+        this.componentPrimaryId = componentPrimaryId;
     }
 
     public String getComponentId() {
@@ -107,5 +117,22 @@ public class SchedulerModel {
 
     public void setDateTime(String dateTime) {
         this.dateTime = dateTime;
+    }
+
+    @Override
+    public String toString() {
+        return "SchedulerModel{" +
+                "id=" + id +
+                ", schedulerName='" + schedulerName + '\'' +
+                ", componentPrimaryId='" + componentPrimaryId + '\'' +
+                ", componentId='" + componentId + '\'' +
+                ", componentName='" + componentName + '\'' +
+                ", componentType='" + componentType + '\'' +
+                ", mip='" + mip + '\'' +
+                ", machineName='" + machineName + '\'' +
+                ", isScene=" + isScene +
+                ", defaultValue='" + defaultValue + '\'' +
+                ", dateTime='" + dateTime + '\'' +
+                '}';
     }
 }

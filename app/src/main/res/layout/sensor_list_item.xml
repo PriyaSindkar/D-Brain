@@ -20,18 +20,19 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:paddingLeft="@dimen/STD_MARGIN"
-                    android:paddingBottom="@dimen/STD_MARGIN"
-                    android:paddingRight="@dimen/STD_MARGIN"
+                    android:layout_marginLeft="@dimen/S_MARGIN"
+                    android:padding="@dimen/VS_MARGIN"
                     android:id="@+id/txtSensorName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Sensor Name"
+                    android:textStyle="bold"
                     android:textColor="@color/white"
                     android:src="@drawable/ic_arrow_left"/>
 
                 <TextView
-                    android:padding="@dimen/STD_MARGIN"
+                    android:layout_marginLeft="@dimen/S_MARGIN"
+                    android:padding="@dimen/VS_MARGIN"
                     android:id="@+id/txtSensorDetails"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -43,12 +44,14 @@
 
 
                 <TextView
-                    android:padding="@dimen/STD_MARGIN"
+                    android:layout_marginLeft="@dimen/S_MARGIN"
+                    android:padding="@dimen/VS_MARGIN"
                     android:id="@+id/txtMachineName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Machine Name"
-                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textColor="@color/yellow"
                     android:src="@drawable/ic_arrow_left"/>
 
 

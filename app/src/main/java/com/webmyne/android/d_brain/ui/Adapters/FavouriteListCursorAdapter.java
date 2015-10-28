@@ -211,13 +211,13 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
             case 0:
 
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
-                AdvancedSpannableString sp = new AdvancedSpannableString("Component: "+componentName);
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Component: ");
-                switchHolder.txtSwitchName.setText(sp);
+               /* AdvancedSpannableString sp = new AdvancedSpannableString("Component: "+componentName);
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Component: ");*/
+                switchHolder.txtSwitchName.setText(componentName);
 
-                sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name: ");
-                switchHolder.txtMachineName.setText(sp);
+              /*  sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name: ");*/
+                switchHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                 final String switchStrPosition = componentStatus.get(position).tagName.substring(2,4);
 
@@ -258,13 +258,13 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-                sp = new AdvancedSpannableString("Component: "+componentName);
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Component: ");
-                dimmerHolder.txtDimmerName.setText(sp);
+                /*sp = new AdvancedSpannableString("Component: "+componentName);
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Component: ");*/
+                dimmerHolder.txtDimmerName.setText(componentName);
 
-                sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name: ");
-                dimmerHolder.txtMachineName.setText(sp);
+                /*sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
+                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name: ");*/
+                dimmerHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                 final String dimmerStrPosition = componentStatus.get(position).tagName.substring(2,4);
 

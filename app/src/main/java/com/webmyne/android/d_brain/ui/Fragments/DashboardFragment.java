@@ -170,24 +170,27 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         imgOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isImageUp) {
-                    isImageUp = false;
-                    // to rotate button(arrow)
-                    animObj.rotateViewClockwise((ImageView) v);
-                    linearOptions.setVisibility(View.VISIBLE);
-                    // to animate popup
-                    animObj.viewPopUpMenu(linearOptions);
-                } else {
-                    animObj.rotateViewAntiClockwise((ImageView) v);
-                    animObj.closePopUpMenu(linearOptions);
-                    animObj.setInterFaceObj(new PopupAnimationEnd() {
-                        @Override
-                        public void animationCompleted() {
-                            linearOptions.setVisibility(View.GONE);
-                            isImageUp = true;
-                        }
-                    });
-                }
+
+                try {
+                    if (isImageUp) {
+                        isImageUp = false;
+                        // to rotate button(arrow)
+                        animObj.rotateViewClockwise((ImageView) v);
+                        linearOptions.setVisibility(View.VISIBLE);
+                        // to animate popup
+                        animObj.viewPopUpMenu(linearOptions);
+                    } else {
+                        animObj.rotateViewAntiClockwise((ImageView) v);
+                        animObj.closePopUpMenu(linearOptions);
+                        animObj.setInterFaceObj(new PopupAnimationEnd() {
+                            @Override
+                            public void animationCompleted() {
+                                linearOptions.setVisibility(View.GONE);
+                                isImageUp = true;
+                            }
+                        });
+                    }
+                } catch(Exception e) {}
             }
         });
 
@@ -212,7 +215,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         super.onResume();
 
         HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
-        homeScreen.setTitle("Dashboard");
+        homeScreen.setTitle("Main Panel");
         homeScreen.hideAppBarButton();
 
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
@@ -384,7 +387,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             case R.id.bulb_image:
                 if(isBulbOn) {
                   //  linearMainBody.setAlpha(0.3f);
-                    Toast.makeText(getActivity(), "Power is off. Please switch on the main switch.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
 
                     showOffScreen() ;
                     ((HomeDrawerActivity) getActivity()).hideDrawer();
@@ -477,6 +480,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                         isImageUp = true;
                     }
                 });
+
+                intent = new Intent(getActivity(), SchedulersListActivity.class);
+                startActivity(intent);
                 break;
 
             case R.id.imgFavorites:

@@ -210,13 +210,13 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
             case 0:
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
 
-                AdvancedSpannableString sp = new AdvancedSpannableString("Component Name: "+ componentName);
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");
-                switchHolder.txtSwitchName.setText(sp);
+               /* AdvancedSpannableString sp = new AdvancedSpannableString("Component Name: "+ componentName);
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");*/
+                switchHolder.txtSwitchName.setText(componentName);
 
-                sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");
-                switchHolder.txtMachineName.setText(sp);
+               /* sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");*/
+                switchHolder.txtMachineName.setText(mDataset.get(position).getMachineName());
 
                 if( mDataset.get(position).getDefaultValue().equals(AppConstants.OFF_VALUE))
                     switchHolder.imgSwitch.setChecked(false);
@@ -268,13 +268,13 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-                sp = new AdvancedSpannableString("Component Name: "+componentName);
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");
-                dimmerHolder.txtDimmerName.setText(sp);
+               /* sp = new AdvancedSpannableString("Component Name: "+componentName);
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");*/
+                dimmerHolder.txtDimmerName.setText(componentName);
 
-                sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");
-                dimmerHolder.txtMachineName.setText(sp);
+                /*sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
+                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");*/
+                dimmerHolder.txtMachineName.setText(mDataset.get(position).getMachineName());
 
                 dimmerHolder.txtValue.setText(mDataset.get(position).getDefaultValue());
                 dimmerHolder.seekBar.setProgress(Integer.parseInt(mDataset.get(position).getDefaultValue()));
@@ -319,34 +319,6 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
                         _onItemClick._onItemClickListener();
                     }
                 });
-
-                /*dimmerHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _favoriteClick.onFavoriteOptionClick(position);
-                    }
-                });
-
-                dimmerHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addToSceneClick.onAddToSceneOptionClick(position);
-                    }
-                });
-
-                dimmerHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addSchedulerClick.onAddSchedulerOptionClick(position);
-                    }
-                });
-
-                dimmerHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position);
-                    }
-                });*/
 
                 break;
 

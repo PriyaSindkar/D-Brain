@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,9 +42,10 @@ public class SchedulersListActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private SchedulersListCursorAdapter adapter;
     private Cursor schedulersCursor;
-    private ImageView imgBack;
+    private ImageView imgBack, imgEmpty;
     private int totalNoOfMachines = 5;
-    private TextView txtAddMachine, txtTitle, emptyView;
+    private TextView txtAddMachine, txtTitle, txtEmptyView;
+    private LinearLayout linearEmptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +55,10 @@ public class SchedulersListActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         imgBack = (ImageView) findViewById(R.id.imgBack);
         txtAddMachine = (TextView) findViewById(R.id.txtAddMachine);
+        linearEmptyView = (LinearLayout) findViewById(R.id.linearEmptyView);
         txtTitle  = (TextView) findViewById(R.id.txtTitle);
-        emptyView = (TextView) findViewById(R.id.emptyView);
+        txtEmptyView = (TextView) findViewById(R.id.txtEmptyView);
+        imgEmpty = (ImageView) findViewById(R.id.imgEmpty);
 
         txtTitle.setText("Schedulers");
 
@@ -80,12 +84,13 @@ public class SchedulersListActivity extends AppCompatActivity {
         }
 
         if(schedulersCursor.getCount() == 0) {
-            emptyView.setVisibility(View.VISIBLE);
+            linearEmptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
+            imgEmpty.setImageResource(R.drawable.drawer_schedulers);
 
-            emptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
+            txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
         } else {
-            emptyView.setVisibility(View.GONE);
+            linearEmptyView.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
         }
 
@@ -159,12 +164,12 @@ public class SchedulersListActivity extends AppCompatActivity {
                             dbHelper.openDataBase();
                             schedulersCursor =  dbHelper.getAllSchedulers();
                             if(schedulersCursor.getCount() == 0) {
-                                emptyView.setVisibility(View.VISIBLE);
+                                linearEmptyView.setVisibility(View.VISIBLE);
                                 mRecyclerView.setVisibility(View.GONE);
-
-                                emptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
+                                imgEmpty.setImageResource(R.drawable.drawer_schedulers);
+                                txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
                             } else {
-                                emptyView.setVisibility(View.GONE);
+                                linearEmptyView.setVisibility(View.GONE);
                                 mRecyclerView.setVisibility(View.VISIBLE);
                             }
 
@@ -211,12 +216,13 @@ public class SchedulersListActivity extends AppCompatActivity {
             schedulersCursor = dbHelper.getAllSchedulers();
 
             if(schedulersCursor.getCount() == 0) {
-                emptyView.setVisibility(View.VISIBLE);
+                linearEmptyView.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
+                imgEmpty.setImageResource(R.drawable.drawer_schedulers);
 
-                emptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
+                txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
             } else {
-                emptyView.setVisibility(View.GONE);
+                linearEmptyView.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
             }
 

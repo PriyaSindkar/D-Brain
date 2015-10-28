@@ -448,13 +448,14 @@ public class DimmerListActivity extends AppCompatActivity {
 
     private void addComponentToScheduler(int pos) {
         dimmerListCursor.moveToPosition(pos);
-        String componentId1 = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentPrimaryId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
         String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
         String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
         String componentMachineName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
         String componentMachineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
 
-        SchedulerModel schedulerModel = new SchedulerModel("", componentId1, componentName, componentType, componentMachineIP, componentMachineName, false, "00");
+        SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId, componentName, componentType, componentMachineIP, componentMachineName, false, "00");
 
         AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(DimmerListActivity.this, schedulerModel);
         addToSchedulerDialog.show();

@@ -34,6 +34,13 @@ public class SaveAlertDialog extends BaseDialog {
         txtNo = (TextView) inflate.findViewById(R.id.txtNo);
         imgCancel = (ImageView) inflate.findViewById(R.id.imgCancel);
 
+        inflate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         return inflate;
     }
 

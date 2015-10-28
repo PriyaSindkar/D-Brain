@@ -162,13 +162,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
             case 0:
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
 
-                AdvancedSpannableString sp = new AdvancedSpannableString("Switch Name: "+ cursor.getString(switchNameIndex));
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Switch Name:");
-                listHolder.txtSwitchName.setText(sp);
-
-                sp = new AdvancedSpannableString("Machine Name: "+ cursor.getString(machineNameIndex));
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");
-                listHolder.txtMachineName.setText(sp);
+                listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
+                listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                 if( switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
                     listHolder.imgSwitch.setChecked(false);

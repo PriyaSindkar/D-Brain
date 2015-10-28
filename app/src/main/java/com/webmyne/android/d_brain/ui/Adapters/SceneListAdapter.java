@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
@@ -57,6 +58,7 @@ public class SceneListAdapter extends RecyclerView.Adapter<SceneListAdapter.View
         public  TextView txtSceneName, txtMachineName;
         public LinearLayout linearScene;
         public ImageView imgRenameOption, imgDeleteOption;
+        private SwitchButton imgSwitch;
 
         public GridViewHolder ( View view ) {
             super ( view );
@@ -65,6 +67,7 @@ public class SceneListAdapter extends RecyclerView.Adapter<SceneListAdapter.View
             this.linearScene = (LinearLayout) view.findViewById(R.id.linearScene);
             this.imgDeleteOption = (ImageView) view.findViewById(R.id.imgDeleteOption);
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
+            this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
         }
     }
 
@@ -132,9 +135,6 @@ public class SceneListAdapter extends RecyclerView.Adapter<SceneListAdapter.View
 
                 final GridViewHolder holder = ( GridViewHolder ) viewHolder;
                 holder.txtSceneName.setText("Scene Name: "+ "Scene " + position);
-                holder.txtMachineName.setText("Machine Name: My Machine");
-
-
 
                 holder.linearScene.setOnClickListener(new View.OnClickListener() {
                     @Override

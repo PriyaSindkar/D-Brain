@@ -23,11 +23,14 @@ import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -77,12 +80,14 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
         public  TextView txtSceneName;
         public LinearLayout linearScene;
         private ImageView imgAddSchedulerOption;
+        private SwitchButton imgSwitch;
 
         public ListViewHolder(View view) {
             super ( view );
             this.txtSceneName = (TextView) view.findViewById(R.id.txtSceneName);
             this.linearScene = (LinearLayout) view.findViewById(R.id.linearScene);
             this.imgAddSchedulerOption = (ImageView) view.findViewById(R.id.imgAddSchedulerOption);
+            this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
         }
     }
 
@@ -156,6 +161,19 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
                         _addSchedulerClick.onAddSchedulerOptionClick(position);
                     }
                 });
+
+                groupViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        groupViewHolder.imgSwitch.toggle();
+
+                        if (groupViewHolder.imgSwitch.isChecked()) {
+
+                        } else {
+
+                        }
+                    }
+                });
                 break;
         }
 
@@ -169,4 +187,5 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     public void setAddToScheduler(onAddSchedulerClickListener obj){
         this._addSchedulerClick = obj;
     }
+
 }

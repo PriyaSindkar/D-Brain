@@ -13,16 +13,16 @@
         android:layout_height="wrap_content">
 
             <LinearLayout
-                android:padding="@dimen/S_MARGIN"
+                android:padding="@dimen/VS_MARGIN"
                 android:layout_weight="1.5"
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:paddingLeft="@dimen/STD_MARGIN"
-                    android:paddingBottom="@dimen/STD_MARGIN"
-                    android:paddingRight="@dimen/STD_MARGIN"
+                    android:layout_marginLeft="@dimen/S_MARGIN"
+                    android:padding="@dimen/VS_MARGIN"
+                    android:singleLine="true"
                     android:id="@+id/txtMachineName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -31,7 +31,8 @@
                     android:src="@drawable/ic_arrow_left"/>
 
                 <TextView
-                    android:padding="@dimen/STD_MARGIN"
+                    android:layout_marginLeft="@dimen/S_MARGIN"
+                    android:padding="@dimen/VS_MARGIN"
                     android:id="@+id/txtMachineIPAddress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -40,7 +41,8 @@
                     android:src="@drawable/ic_arrow_left"/>
 
                 <TextView
-                    android:padding="@dimen/STD_MARGIN"
+                    android:layout_marginLeft="@dimen/S_MARGIN"
+                    android:padding="@dimen/VS_MARGIN"
                     android:id="@+id/txtMachineSerialNo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

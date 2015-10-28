@@ -38,7 +38,7 @@ public class AboutUsFragment extends Fragment {
     }
 
     private void init(View view) {
-        ((HomeDrawerActivity) getActivity()).setTitle("About Us");
+        ((HomeDrawerActivity) getActivity()).setTitle("About " + getString(R.string.app_name));
         ((HomeDrawerActivity) getActivity()).hideAppBarButton();
     }
 
