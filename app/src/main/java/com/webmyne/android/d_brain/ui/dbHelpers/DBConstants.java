@@ -10,7 +10,7 @@ public class DBConstants {
     public static final int DATABASE_VERSION = 1;
 
     // Database Name
-    public static final String DATABASE_NAME = "d_brain.DB";
+    public static final String DATABASE_NAME = "d_b.db";
     public static final String DATABASE_PATH = "/data/data/com.webmyne.android.d_brain/databases/";
 
     // Machine table name
