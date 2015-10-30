@@ -1,8 +1,11 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,17 +13,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -38,6 +46,7 @@ public class AddMachineFragment extends Fragment {
     private TextView txtEmptyView, txtEmptyView1;
     private LinearLayout emptyView;
     private Cursor machineCursor;
+    private ProgressBar progress_bar;
 
     public static AddMachineFragment newInstance() {
         AddMachineFragment fragment = new AddMachineFragment();
@@ -62,14 +71,12 @@ public class AddMachineFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_scene_list, container, false);
         init(view);
 
+        callRenameClick();
+        callOnDeleteClick();
+        return view;
+    }
 
-        adapter.setDeleteClickListener(new onDeleteClickListener() {
-            @Override
-            public void onDeleteOptionClick(int pos) {
-                Toast.makeText(getActivity(), "Deleted Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+    private void callRenameClick() {
         adapter.setRenameClickListener(new onRenameClickListener() {
 
             @Override
@@ -82,7 +89,7 @@ public class AddMachineFragment extends Fragment {
                 machineCursor.moveToPosition(pos);
                 final String machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
 
-                EditMachineDialog renameDialog = new EditMachineDialog(getActivity(), pos,oldName, oldDetails);
+                EditMachineDialog renameDialog = new EditMachineDialog(getActivity(), pos, oldName, oldDetails);
                 renameDialog.show();
 
                 renameDialog.setRenameListener(new onRenameClickListener() {
@@ -93,6 +100,7 @@ public class AddMachineFragment extends Fragment {
 
                     @Override
                     public void onRenameOptionClick(int pos, String newName, String newIP) {
+                        progress_bar.setVisibility(View.VISIBLE);
                         try {
                             DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                             dbHelper.openDataBase();
@@ -102,7 +110,7 @@ public class AddMachineFragment extends Fragment {
                             dbHelper.close();
                             machineCursor = dbHelper.getAllMachines();
                             adapter.changeCursor(machineCursor);
-
+                            progress_bar.setVisibility(View.GONE);
                             Toast.makeText(getActivity(), "Machine Updated", Toast.LENGTH_LONG).show();
 
                         } catch (SQLException e) {
@@ -113,9 +121,67 @@ public class AddMachineFragment extends Fragment {
                 });
             }
         });
+    }
 
-        
-        return view;
+    private void callOnDeleteClick() {
+        adapter.setDeleteClickListener(new onDeleteClickListener() {
+            @Override
+            public void onDeleteOptionClick(final int pos) {
+                SaveAlertDialog saveAlertDialog = new SaveAlertDialog(getActivity(), "Are you sure you want to delete the machine?");
+                saveAlertDialog.show();
+
+                saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                    @Override
+                    public void onSaveClick(boolean isSave) {
+                        if (isSave) {
+                            progress_bar.setVisibility(View.VISIBLE);
+
+                            machineCursor.moveToPosition(pos);
+                            final String machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+
+                            try {
+                                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                                dbHelper.openDataBase();
+                                dbHelper.deleteMachine(machineId);
+                                machineCursor = dbHelper.getAllMachines();
+                                adapter = new MachineListCursorAdapter(getActivity(), machineCursor);
+                                adapter.setHasStableIds(true);
+                                mRecyclerView.setAdapter(adapter);
+                                progress_bar.setVisibility(View.GONE);
+
+                                callRenameClick();
+                                callOnDeleteClick();
+
+                                Toast.makeText(getActivity(), "Machine Deleted", Toast.LENGTH_LONG).show();
+                            } catch (SQLException e) {
+                                Log.e("TAG EXP", e.toString());
+                            }
+                        } else {
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    public void refreshAdapter() {
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+            dbHelper.openDataBase();
+            dbHelper.close();
+            machineCursor = dbHelper.getAllMachines();
+
+            adapter = new MachineListCursorAdapter(getActivity(), machineCursor);
+            adapter.setType(0);
+            adapter.setHasStableIds(true);
+            mRecyclerView.setAdapter(adapter);
+
+            callOnDeleteClick();
+            callRenameClick();
+
+        } catch (SQLException e) {
+            Log.e("TAG EXP", e.toString());
+        }
     }
 
     private void init(View view) {
@@ -128,6 +194,8 @@ public class AddMachineFragment extends Fragment {
         emptyView = (LinearLayout) view.findViewById(R.id.emptyView);
         txtEmptyView1 = (TextView) view.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) view.findViewById(R.id.txtEmptyView);
+
+        progress_bar = (ProgressBar) view.findViewById(R.id.progress_bar);
 
 
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());

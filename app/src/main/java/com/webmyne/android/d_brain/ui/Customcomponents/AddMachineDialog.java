@@ -27,6 +27,7 @@ import com.flyco.dialog.utils.CornerUtils;
 import com.flyco.dialog.widget.base.BaseDialog;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.ProgressPainter;
+import com.webmyne.android.d_brain.ui.Fragments.AddMachineFragment;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
@@ -55,6 +56,7 @@ public class AddMachineDialog extends BaseDialog {
     private RelativeLayout relativeContent;
     private ProgressBar progressBar;
     private onSingleClickListener clickListener;
+    private long machineID;
 
     public AddMachineDialog(Context context) {
         super(context);
@@ -64,7 +66,6 @@ public class AddMachineDialog extends BaseDialog {
     public View onCreateView() {
         widthScale(0.85f);
         showAnim(new SlideTopEnter());
-
 
         // dismissAnim(this, new ZoomOutExit());
         View inflate = View.inflate(context, R.layout.dialog_add_machine, null);
@@ -93,9 +94,13 @@ public class AddMachineDialog extends BaseDialog {
 
     @Override
     public boolean setUiBeforShow() {
+        setCancelable(false);
+        setCanceledOnTouchOutside(false);
         txtAddMachine.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Log.e("TAG", "ADD_MACHINE");
                 if(edtIPAddress.getText().toString().trim().length() == 0) {
                     Toast.makeText(context, "Must Enter Device IP Address.", Toast.LENGTH_LONG).show();
                 } else if(edtMachineName.getText().toString().trim().length() == 0) {
@@ -129,7 +134,9 @@ public class AddMachineDialog extends BaseDialog {
         @Override
         protected void onPreExecute() {
              //setProgressBarIndeterminateVisibility(true);
-            relativeContent.setVisibility(View.GONE);
+            relativeContent.setFocusable(false);
+            txtAddMachine.setClickable(false);
+            imgCancel.setClickable(false);
             progressBar.setVisibility(View.VISIBLE);
         }
 
@@ -142,6 +149,7 @@ public class AddMachineDialog extends BaseDialog {
                     urlValue = new URL(machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
                 } else if(!machineIP.startsWith("http://")) {
                     urlValue = new URL("http://" + machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
+                    machineIP = "http://" + machineIP;
                 } else {
                     urlValue = new URL( machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
                 }
@@ -169,7 +177,9 @@ public class AddMachineDialog extends BaseDialog {
         @Override
         protected void onPostExecute(Void aVoid) {
             // Log.e("TAG_ASYNC", "Inside onPostExecute");
-            relativeContent.setVisibility(View.VISIBLE);
+            relativeContent.setEnabled(true);
+            txtAddMachine.setClickable(true);
+            imgCancel.setClickable(true);
             progressBar.setVisibility(View.GONE);
 
             if(!isError) {
@@ -182,30 +192,48 @@ public class AddMachineDialog extends BaseDialog {
                         }
                     }
 
-                    if (userEnteredSerialNo.equals(machineSerialNo)) {
-                        if (Utils.validateProductCode(productCode)) {
-                            DatabaseHelper dbHelper = new DatabaseHelper(context);
-
-                            dbHelper.openDataBase();
-                            dbHelper.insertIntoMachine(powerStatus, machineName, machineIP);
-                            dbHelper.close();
-
-                            initDatabaseComponents(productCode);
-                            Toast.makeText(context, "Machine Added", Toast.LENGTH_SHORT).show();
-                            clickListener.onSingleClick(0);
-                            dismiss();
-                        } else {
-                            Toast.makeText(context, "Invalid Product Code.", Toast.LENGTH_LONG).show();
-                        }
+                    /*if (machineIP.startsWith("https://")) {
+                        machineIP = machineIP.replace("https://", "http://");
+                    } else if (!machineIP.startsWith("http://")) {
+                        machineIP = "http://" + machineIP;
                     } else {
-                        Toast.makeText(context, "Invalid Serial No.", Toast.LENGTH_LONG).show();
-                    }
+
+                    }*/
+
+                    DatabaseHelper dbHelper = new DatabaseHelper(context);
+                    dbHelper.openDataBase();
+                    Log.e("machineIP", machineIP);
+                    if(dbHelper.isMachineIPAlreadyExists(machineIP)) {
+                        Toast.makeText(context, "Machine IP Address Already Exists.", Toast.LENGTH_LONG).show();
+                    } else {
+
+                        if (dbHelper.isMachineSerialNoExists(userEnteredSerialNo)) {
+                            Toast.makeText(context, "Machine Serial No. Already Exists.", Toast.LENGTH_LONG).show();
+                        } else {
+                            if (userEnteredSerialNo.equals(machineSerialNo)) {
+                                if (Utils.validateProductCode(productCode)) {
+                                    machineID = dbHelper.insertIntoMachine(powerStatus, machineName, machineIP);
+                                    dbHelper.close();
+
+                                    initDatabaseComponents(productCode);
+
+                                    Toast.makeText(context, "Machine Added", Toast.LENGTH_SHORT).show();
+                                    clickListener.onSingleClick(0);
+                                    dismiss();
+                                } else {
+                                    Toast.makeText(context, "Invalid Product Code.", Toast.LENGTH_LONG).show();
+                                }
+                            } else {
+                                Toast.makeText(context, "Invalid Serial No.", Toast.LENGTH_LONG).show();
+                            }
+                        } // end of check serialno. duplicate
+                    } // end of check IP duplicate
                 } catch (Exception e) {
-                    Log.e("EXP", e.toString());
-                    Toast.makeText(context, "Error Occurred While Adding Machine. Please Check IP Address", Toast.LENGTH_LONG).show();
+                    Log.e("EXP123", e.toString());
+                    Toast.makeText(context, "Error Occurred While Adding Machine. Please Check IP Address and Serial No.", Toast.LENGTH_LONG).show();
                 }
             } else {
-                Toast.makeText(context, "Error Occurred While Adding Machine. Please Check IP Address", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Error Occurred While Adding Machine. Please Check IP Address and Serial No.", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -232,7 +260,7 @@ public class AddMachineDialog extends BaseDialog {
             } else {
                 for (int i = 0; i < totalNoOfSwitches; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX + idSuffix, AppConstants.SWITCH_TYPE + String.valueOf(i + 1), AppConstants.SWITCH_TYPE, "", machineIP);
+                    ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX + idSuffix, AppConstants.SWITCH_TYPE + String.valueOf(i + 1), AppConstants.SWITCH_TYPE, String.valueOf(machineID), machineIP);
                     switchItem.setMachineName(machineName);
                     listOfComponents.add(switchItem);
                 }
@@ -244,7 +272,7 @@ public class AddMachineDialog extends BaseDialog {
             } else {
                 for (int i = 0; i < totalNoOfDimmers; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX + idSuffix, AppConstants.DIMMER_TYPE + String.valueOf(i + 1), AppConstants.DIMMER_TYPE, "", machineIP);
+                    ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX + idSuffix, AppConstants.DIMMER_TYPE + String.valueOf(i + 1), AppConstants.DIMMER_TYPE, String.valueOf(machineID), machineIP);
                     dimmerItem.setMachineName(machineName);
                     listOfComponents.add(dimmerItem);
                 }
@@ -256,7 +284,7 @@ public class AddMachineDialog extends BaseDialog {
             } else {
                 for (int i = 0; i < totalNoOfMotors; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel motorItem = new ComponentModel(AppConstants.MOTOR_PREFIX + idSuffix, AppConstants.MOTOR_TYPE + String.valueOf(i + 1), AppConstants.MOTOR_TYPE, "", machineIP);
+                    ComponentModel motorItem = new ComponentModel(AppConstants.MOTOR_PREFIX + idSuffix, AppConstants.MOTOR_TYPE + String.valueOf(i + 1), AppConstants.MOTOR_TYPE, String.valueOf(machineID), machineIP);
                     motorItem.setMachineName(machineName);
                     listOfComponents.add(motorItem);
                 }
@@ -269,7 +297,7 @@ public class AddMachineDialog extends BaseDialog {
             } else {
                 for (int i = 0; i < totalNoOfAlerts; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX + idSuffix, AppConstants.ALERT_TYPE + String.valueOf(i + 1), AppConstants.ALERT_TYPE, "", machineIP);
+                    ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX + idSuffix, AppConstants.ALERT_TYPE + String.valueOf(i + 1), AppConstants.ALERT_TYPE, String.valueOf(machineID), machineIP);
                     sensorItem.setMachineName(machineName);
                     sensorItem.setDetails("Alert fired on breach");
                     listOfComponents.add(sensorItem);

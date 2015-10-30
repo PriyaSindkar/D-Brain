@@ -78,10 +78,14 @@
             android:screenOrientation="portrait">
         </activity>
 
-        <receiver android:name=".ui.Helpers.AlarmReceiver">
+        <receiver
+            android:process=":remote"
+            android:name=".ui.Helpers.AlarmReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+
+
             </intent-filter>
         </receiver>
 
@@ -107,6 +111,9 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
+
+
+
 
     </application>
 

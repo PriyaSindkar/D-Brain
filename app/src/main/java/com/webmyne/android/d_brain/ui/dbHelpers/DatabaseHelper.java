@@ -205,12 +205,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         //update Schedulers
         values = new ContentValues();
-        values.put(DBConstants.KEY_M_NAME, newMachineName);
+        values.put(DBConstants.KEY_SCH_MNAME, newMachineName);
         values.put(DBConstants.KEY_SCH_MIP, newMachineIP);
         db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
 
 
         db.close();
+    }
+
+
+    // delete machine. Also delete all entries of this machine in tables: machine,
+    // SceneComponent, Component, FavouriteComponent, Schedulers
+    public void deleteMachine(String machineId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        //update machine
+        db.delete(DBConstants.TABLE_MACHINE, DBConstants.KEY_M_ID + "='" + machineId + "'", null);
+
+        //update component
+        db.delete(DBConstants.TABLE_COMPONENT, DBConstants.KEY_C_MID + "='" + machineId + "'", null);
+
+        //update scene-component
+        db.delete(DBConstants.TABLE_SCENE_COMPONENT, DBConstants.KEY_SC_MID + "='" + machineId + "'", null);
+
+        //update FavouriteComponent
+        db.delete(DBConstants.TABLE_FAVOURITE, DBConstants.KEY_F_MID + "='" + machineId + "'", null);
+
+        //update Schedulers
+        db.delete(DBConstants.TABLE_SCHEDULERS, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
     }
 
     public String getMachineNameByIP(String machineIP) {
@@ -252,7 +274,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return machineIP;
     }
 
-
+    // check IP other than the current machine
     public boolean isMachineIPExists(String machineIP, String oldMachineIP) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
@@ -260,6 +282,52 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=? AND " + DBConstants.KEY_M_IP + "!=?",
                     new String[]{machineIP, oldMachineIP}, null, null, null, null);
+            if (cursor != null) {
+                if(cursor.getCount() == 0) {
+                    result =  false;
+                } else {
+                    result =  true;
+                }
+            } else {
+                result =  false;
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return result;
+    }
+
+    // check IP throughout machine table
+    public boolean isMachineIPAlreadyExists(String machineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        boolean result = true;
+        try {
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?",
+                    new String[]{machineIP}, null, null, null, null);
+            if (cursor != null) {
+                if(cursor.getCount() == 0) {
+                    result =  false;
+                } else {
+                    result =  true;
+                }
+            } else {
+                result =  false;
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return result;
+    }
+
+
+    public boolean isMachineSerialNoExists(String machineSerialNo) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        boolean result = true;
+        try {
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_SERIALNO + "=?",
+                    new String[]{machineSerialNo}, null, null, null, null);
             if (cursor != null) {
                 if(cursor.getCount() == 0) {
                     result =  false;
@@ -915,7 +983,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_C_MIP, machineIP);
         values.put(DBConstants.KEY_F_MNAME, machineName);
 
-        if(!isAlreadyAFavourite(componentId, machineIP)) {
+        if(!isAlreadyAFavourite(componentId, machineID)) {
             db.insert(DBConstants.TABLE_FAVOURITE, null, values);
         } else {
             flag = true;
@@ -948,12 +1016,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         boolean result = true;
         try {
-            // TO:DO search machine-wise
-
-           /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
-                    new String[]{URL_MACHINE_IP}, null, null, null, null);*/
-
-            cursor = db.query(DBConstants.TABLE_FAVOURITE, null, DBConstants.KEY_C_COMPONENT_ID + "=? AND " + DBConstants.KEY_C_MIP + "=?",
+            cursor = db.query(DBConstants.TABLE_FAVOURITE, null, DBConstants.KEY_C_COMPONENT_ID + "=? AND " + DBConstants.KEY_C_MID + "=?",
                     new String[]{componentId, machineIP}, null, null, null, null);
             if (cursor != null) {
                 if(cursor.getCount() == 0) {
@@ -1012,10 +1075,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_SCH_MID, schedulerModel.getMid());
         values.put(DBConstants.KEY_SCH_MIP, schedulerModel.getMip());
 
-       long id =  db.insert(DBConstants.TABLE_SCHEDULERS, null, values);
+        long id =  db.insert(DBConstants.TABLE_SCHEDULERS, null, values);
 
         db.close();
         return id;
+    }
+
+    public boolean isAlreadyScheduled(String componentId, String machineId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        boolean result = true;
+        try {
+            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_C_COMPONENT_ID + "=? AND " + DBConstants.KEY_SCH_MID + "=?",
+                    new String[]{componentId, machineId}, null, null, null, null);
+            if (cursor != null) {
+                if(cursor.getCount() == 0) {
+                    result =  false;
+                } else {
+                    result =  true;
+                }
+            } else {
+                result =  false;
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return result;
     }
 
     public Cursor getAllSchedulers() {

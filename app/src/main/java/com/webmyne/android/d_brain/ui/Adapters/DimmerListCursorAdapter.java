@@ -314,11 +314,12 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             case 1:
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
 
-                AdvancedSpannableString sp = new AdvancedSpannableString(cursor.getString(dimmerNameIndex) +" ( "+ cursor.getString(machineNameIndex) +" )");
+               /* AdvancedSpannableString sp = new AdvancedSpannableString(cursor.getString(dimmerNameIndex) +" ( "+ cursor.getString(machineNameIndex) +" )");
                 sp.setColor(mCtx.getResources().getColor(R.color.yellow), cursor.getString(machineNameIndex));
-                groupViewHolder.txtDimmerName.setText(sp);
+                groupViewHolder.txtDimmerName.setText(sp);*/
 
                 //groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex) +" ( "+ cursor.getString(machineNameIndex) +" )");
+                groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
                 groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
                 final String finalMachineIP1 = machineIP;
 

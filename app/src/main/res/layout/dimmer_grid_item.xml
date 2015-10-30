@@ -65,7 +65,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/VS_MARGIN"
-                    android:layout_margin="@dimen/S_MARGIN"
                     android:text="Dimmer Name"
                     android:singleLine="true"
                     android:textColor="#fff" />
@@ -77,7 +76,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/VS_MARGIN"
-                android:visibility="gone"
                 android:text="Machine Name"
                 android:textColor="@color/yellow" />
             </LinearLayout>

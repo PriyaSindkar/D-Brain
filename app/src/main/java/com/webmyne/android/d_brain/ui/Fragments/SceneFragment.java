@@ -85,6 +85,12 @@ public class SceneFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateSceneList();
+    }
+
     private void init(View view) {
         ((HomeDrawerActivity) getActivity()).setTitle("Scenes");
         ((HomeDrawerActivity) getActivity()).hideAppBarButton();
@@ -93,23 +99,6 @@ public class SceneFragment extends Fragment {
         txtEmptyView1 = (TextView) view.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) view.findViewById(R.id.txtEmptyView);
         imgEmpty = (ImageView) view.findViewById(R.id.imgEmpty);
-
-        updateSceneList();
-
-        if(sceneListCursor.getCount() == 0) {
-            emptyView.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.GONE);
-            imgEmpty.setVisibility(View.VISIBLE);
-
-            imgEmpty.setImageResource(R.drawable.drawer_scenes);
-            AdvancedSpannableString sp = new AdvancedSpannableString("Click Here");
-            sp.setUnderLine("Click Here");
-            sp.setColor(getResources().getColor(R.color.yellow), "Click Here");
-            txtEmptyView1.setText(sp);
-        } else {
-            emptyView.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
-        }
 
         txtEmptyView1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,10 +117,10 @@ public class SceneFragment extends Fragment {
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        adapter = new SceneListCursorAdapter(getActivity(), sceneListCursor);
+        /*adapter = new SceneListCursorAdapter(getActivity(), sceneListCursor);
         adapter.setType(1);
         adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(adapter);*/
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
@@ -140,7 +129,38 @@ public class SceneFragment extends Fragment {
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(500);
 
-        adapter.setSingleClickListener(new onSingleClickListener() {
+    }
+
+    private void updateSceneList() {
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        try {
+            dbHelper.openDataBase();
+            sceneListCursor = dbHelper.getAllScenes("");
+            dbHelper.close();
+        } catch (SQLException e) {
+            Log.e("SQLEXP", e.toString());
+        }
+
+        if(sceneListCursor.getCount() == 0) {
+            emptyView.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
+            imgEmpty.setVisibility(View.VISIBLE);
+
+            imgEmpty.setImageResource(R.drawable.drawer_scenes);
+            AdvancedSpannableString sp = new AdvancedSpannableString("Click Here");
+            sp.setUnderLine("Click Here");
+            sp.setColor(getResources().getColor(R.color.yellow), "Click Here");
+            txtEmptyView1.setText(sp);
+        } else {
+            emptyView.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.VISIBLE);
+
+            adapter = new SceneListCursorAdapter(getActivity(), sceneListCursor);
+            adapter.setType(1);
+            adapter.setHasStableIds(true);
+            mRecyclerView.setAdapter(adapter);
+
+            adapter.setSingleClickListener(new onSingleClickListener() {
             @Override
             public void onSingleClick(int pos) {
                 sceneListCursor.moveToPosition(pos);
@@ -156,46 +176,36 @@ public class SceneFragment extends Fragment {
             }
         });
 
-        adapter.setAddToScheduler(new onAddSchedulerClickListener() {
-            @Override
-            public void onAddSchedulerOptionClick(int pos) {
-                addComponentToScheduler(pos);
-            }
-        });
 
-        adapter.setSceneOnOffListener(new onSceneOnOffClickListener() {
-            @Override
-            public void onSingleClick(int pos, boolean isOn, String sceneId) {
-                String sceneStatus="";
-                if (isOn) {
-                    sceneStatus = "yes";
-                } else {
-                    sceneStatus = "no";
+            adapter.setAddToScheduler(new onAddSchedulerClickListener() {
+                @Override
+                public void onAddSchedulerOptionClick(int pos) {
+                    addComponentToScheduler(pos);
                 }
+            });
 
-                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                try {
-                    dbHelper.openDataBase();
-                    dbHelper.updateSceneStatus(sceneId, sceneStatus);
-                    dbHelper.close();
-                }catch (Exception e) {
+            adapter.setSceneOnOffListener(new onSceneOnOffClickListener() {
+                @Override
+                public void onSingleClick(int pos, boolean isOn, String sceneId) {
+                    String sceneStatus = "";
+                    if (isOn) {
+                        sceneStatus = "yes";
+                    } else {
+                        sceneStatus = "no";
+                    }
 
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.updateSceneStatus(sceneId, sceneStatus);
+                        dbHelper.close();
+                    } catch (Exception e) {
+
+                    }
+                    setSceneOnOff(sceneId, isOn);
                 }
-                setSceneOnOff(sceneId, isOn);
-            }
-        });
-    }
-
-    private void updateSceneList() {
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-        try {
-            dbHelper.openDataBase();
-            sceneListCursor = dbHelper.getAllScenes("");
-            dbHelper.close();
-        } catch (SQLException e) {
-            Log.e("SQLEXP", e.toString());
+            });
         }
-
     }
 
     private void addComponentToScheduler(int pos) {

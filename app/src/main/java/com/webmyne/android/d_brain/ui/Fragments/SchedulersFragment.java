@@ -21,10 +21,12 @@ import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SchedulersListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
@@ -144,23 +146,19 @@ public class SchedulersFragment extends Fragment {
         adapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
             public void onDeleteOptionClick(final int pos) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-                alertDialogBuilder.setTitle("Delete Scheduler");
-                alertDialogBuilder
-                        .setMessage("Are you sure you want to delete the scheduler?")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                deleteScheduler(pos);
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+
+                SaveAlertDialog saveAlertDialog = new SaveAlertDialog(getActivity(), "Are you sure you want to delete the scheduler?");
+                saveAlertDialog.show();
+
+                saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                    @Override
+                    public void onSaveClick(boolean isSave) {
+                        if (isSave) {
+                            deleteScheduler(pos);
+                        } else {
+                        }
+                    }
+                });
 
             }
         });
@@ -203,7 +201,8 @@ public class SchedulersFragment extends Fragment {
                             if(schedulersCursor.getCount() == 0) {
                                 emptyView.setVisibility(View.VISIBLE);
                                 mRecyclerView.setVisibility(View.GONE);
-
+                                imgEmpty.setVisibility(View.VISIBLE);
+                                imgEmpty.setImageResource(R.drawable.drawer_schedulers);
                                 txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
                             } else {
                                 emptyView.setVisibility(View.GONE);
@@ -248,7 +247,8 @@ public class SchedulersFragment extends Fragment {
             if(schedulersCursor.getCount() == 0) {
                 emptyView.setVisibility(View.VISIBLE);
                 mRecyclerView.setVisibility(View.GONE);
-
+                imgEmpty.setVisibility(View.VISIBLE);
+                imgEmpty.setImageResource(R.drawable.drawer_schedulers);
                 txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
             } else {
                 emptyView.setVisibility(View.GONE);

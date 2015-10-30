@@ -35,6 +35,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 /**
  * Created by priyasindkar on 16-09-2015.
@@ -262,7 +263,7 @@ public class EditSchedulerDialog extends BaseDialog {
                         dbHelper.close();
 
                         _onSingleClick.onSingleClick(0);
-                        setAlarm(schedulerModel.getDateTime());
+                        setAlarm(String.valueOf(schedulerModel.getId()), schedulerModel.getDateTime());
                         Toast.makeText(mContext, "Scheduler Updated.", Toast.LENGTH_SHORT).show();
                         dismiss();
 
@@ -282,7 +283,7 @@ public class EditSchedulerDialog extends BaseDialog {
         this._onSingleClick = obj;
     }
 
-    private void setAlarm(String dateTime){
+    private void setAlarm(String schedulerId, String dateTime){
 
         try {
 
@@ -304,14 +305,19 @@ public class EditSchedulerDialog extends BaseDialog {
             calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
             calendar.set(Calendar.SECOND, 0);
 
-            int RQS_1 = 1;
+            Random random = new Random();
+            int RQS_1 = random.nextInt(9999 - 1000) + 1000;
 
+
+            Log.e("EDit", "Edit start");
             Intent intent = new Intent(mContext, AlarmReceiver.class);
-            intent.putExtra("scheduler_id", String.valueOf(schedulerModel.getId()));
-            intent.putExtra("scheduler_name", String.valueOf(schedulerModel.getSchedulerName()));
+            intent.putExtra("scheduler_id", schedulerId);
+//            intent.putExtra("scheduler_name", String.valueOf(schedulerModel.getSchedulerName()));
             PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent, 0);
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
             alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+
+            Log.e("EDit", "Edit end");
 
         }catch (Exception e){
             Log.e("## EXC",e.toString());

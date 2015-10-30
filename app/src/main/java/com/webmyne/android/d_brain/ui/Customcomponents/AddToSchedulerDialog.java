@@ -31,6 +31,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 /**
  * Created by priyasindkar on 16-09-2015.
@@ -44,7 +45,6 @@ public class AddToSchedulerDialog extends BaseDialog {
     private SeekBar seekBar;
     private LinearLayout linearDimmerSeekBar;
     private SchedulerModel schedulerModel;
-    private long _id;
 
     public AddToSchedulerDialog(Context context) {
         super(context);
@@ -233,11 +233,11 @@ public class AddToSchedulerDialog extends BaseDialog {
                     try {
                         DatabaseHelper dbHelper = new DatabaseHelper(mContext);
                         dbHelper.openDataBase();
-                        _id = dbHelper.insertIntoScheduler(schedulerModel);
+                       long _id = dbHelper.insertIntoScheduler(schedulerModel);
 
                         dbHelper.close();
 
-                        setAlarm(schedulerModel.getDateTime());
+                        setAlarm(String.valueOf(_id), schedulerModel.getDateTime());
 
                         Toast.makeText(mContext, "Scheduler Saved.", Toast.LENGTH_SHORT).show();
                         dismiss();
@@ -253,7 +253,7 @@ public class AddToSchedulerDialog extends BaseDialog {
         return true;
     }
 
-    private void setAlarm(String dateTime){
+    private void setAlarm(String schedulerId, String dateTime){
 
         try {
 
@@ -275,11 +275,13 @@ public class AddToSchedulerDialog extends BaseDialog {
             calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
             calendar.set(Calendar.SECOND, 0);
 
-            int RQS_1 = 1;
+            Random random = new Random();
+            int RQS_1 = random.nextInt(9999 - 1000) + 1000;
 
             Intent intent = new Intent(mContext, AlarmReceiver.class);
-            intent.putExtra("scheduler_id", String.valueOf(_id));
-            intent.putExtra("scheduler_name", String.valueOf(schedulerModel.getSchedulerName()));
+            intent.putExtra("scheduler_id", schedulerId);
+//            intent.putExtra("scheduler_id", String.valueOf(_id));
+//            intent.putExtra("scheduler_name", String.valueOf(schedulerModel.getSchedulerName()));
             PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent, 0);
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
             alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);

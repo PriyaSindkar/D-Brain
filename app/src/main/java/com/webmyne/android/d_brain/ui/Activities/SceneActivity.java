@@ -350,31 +350,27 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
         if (id == R.id.action_delete) {
 
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SceneActivity.this);
-            alertDialogBuilder.setTitle("Delete Scene");
-            alertDialogBuilder
-                    .setMessage("Are you sure you want to delete the scene?")
-                    .setCancelable(false)
-                    .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,int id) {
-                            DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
-                            try {
-                                dbHelper.openDataBase();
-                                dbHelper.deleteScene(currentSceneId);
-                                dbHelper.close();
-                                Toast.makeText(SceneActivity.this, "Scene deleted", Toast.LENGTH_LONG).show();
-                                finish();
-                            }catch (Exception e) {}
-                        }
-                    })
-                    .setNegativeButton("No",new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,int id) {
-                            dialog.cancel();
-                        }
-                    });
-            AlertDialog alertDialog = alertDialogBuilder.create();
-            alertDialog.show();
+            SaveAlertDialog saveAlertDialog = new SaveAlertDialog(SceneActivity.this, "Are you sure you want to delete the scene?");
+            saveAlertDialog.show();
 
+            saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                @Override
+                public void onSaveClick(boolean isSave) {
+                    if (isSave) {
+                        DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.deleteScene(currentSceneId);
+                            dbHelper.close();
+                            Toast.makeText(SceneActivity.this, "Scene deleted", Toast.LENGTH_LONG).show();
+                            finish();
+                        } catch (Exception e) {
+                        }
+                    } else {
+                       /* finish();*/
+                    }
+                }
+            });
         }
 
         return super.onOptionsItemSelected(item);

@@ -118,11 +118,19 @@ public class HomeDrawerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (txtClearButton.getText().toString().equals("Add Machine")) {
+
                     AddMachineDialog machineDialog = new AddMachineDialog(HomeDrawerActivity.this);
                     machineDialog.show();
+
                     machineDialog.setClickListener(new onSingleClickListener() {
                         @Override
                         public void onSingleClick(int pos) {
+
+
+
+                            AddMachineFragment fragment = (AddMachineFragment) getSupportFragmentManager().findFragmentByTag("Add Machine");
+                            fragment.refreshAdapter();
+
 
                         }
                     });
@@ -131,6 +139,8 @@ public class HomeDrawerActivity extends AppCompatActivity {
         });
 
     }
+
+
 
     public void setTitle(String title) {
         toolbarTitle.setText(title);

@@ -9,11 +9,12 @@
     <LinearLayout
         android:orientation="vertical"
         android:padding="@dimen/STD_MARGIN"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
         <TextView
-            android:padding="@dimen/STD_MARGIN"
+            android:padding="@dimen/VS_MARGIN"
             android:id="@+id/txtSwitchName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -24,7 +25,7 @@
             android:textColor="@color/white"/>
 
         <TextView
-            android:padding="@dimen/STD_MARGIN"
+            android:padding="@dimen/VS_MARGIN"
             android:id="@+id/txtMachineName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

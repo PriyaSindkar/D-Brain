@@ -16,12 +16,18 @@ import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
  * Created by priyasindkar on 16-09-2015.
  */
 public class SaveAlertDialog extends BaseDialog {
-    private TextView txtYes, txtNo;
+    private TextView txtYes, txtNo, txttitle;
     private ImageView imgCancel;
     private onSaveClickListener _onSaveClick;
+    private String message = "";
 
     public SaveAlertDialog(Context context) {
         super(context);
+    }
+
+    public SaveAlertDialog(Context context, String message) {
+        super(context);
+        this.message = message;
     }
 
     @Override
@@ -33,6 +39,11 @@ public class SaveAlertDialog extends BaseDialog {
         txtYes = (TextView) inflate.findViewById(R.id.txtYes);
         txtNo = (TextView) inflate.findViewById(R.id.txtNo);
         imgCancel = (ImageView) inflate.findViewById(R.id.imgCancel);
+        txttitle = (TextView) inflate.findViewById(R.id.txttitle);
+
+        if(!this.message.equals("")) {
+            txttitle.setText(this.message);
+        }
 
         inflate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,7 +63,7 @@ public class SaveAlertDialog extends BaseDialog {
             @Override
             public void onClick(View v) {
                 _onSaveClick.onSaveClick(true);
-               dismiss();
+                dismiss();
             }
         });
 

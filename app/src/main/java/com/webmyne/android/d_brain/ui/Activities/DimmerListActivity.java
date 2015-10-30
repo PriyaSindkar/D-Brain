@@ -495,10 +495,24 @@ public class DimmerListActivity extends AppCompatActivity {
         String componentMachineID = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
         String componentMachineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
 
-        SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId, componentName, componentType, componentMachineID,componentMachineIP, componentMachineName, false, "00");
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+            dbHelper.openDataBase();
+            boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentId, componentMachineID);
+            dbHelper.close();
 
-        AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(DimmerListActivity.this, schedulerModel);
-        addToSchedulerDialog.show();
+            if(! isAlreadyScheduled) {
+                SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId,componentName, componentType, componentMachineID,componentMachineIP, componentMachineName, false, "00");
+
+                AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(DimmerListActivity.this, schedulerModel);
+                addToSchedulerDialog.show();
+            } else {
+                Toast.makeText(DimmerListActivity.this, "This component is already scheduled.", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

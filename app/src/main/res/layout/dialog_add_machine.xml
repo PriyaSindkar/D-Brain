@@ -42,17 +42,10 @@
         android:id="@+id/imgCancel"
         android:src="@drawable/ic_navigation_cancel"/>
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_below="@id/parentLogo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_centerInParent="true"/>
+
 
     <RelativeLayout
         android:id="@+id/relativeContent"
-        android:layout_centerInParent="true"
         android:layout_below="@id/parentLogo"
         android:orientation="vertical"
         android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
@@ -114,7 +107,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Machine Serial No."
-                android:inputType="text"
+                android:inputType="number"
+                android:maxLength="30"
                 android:singleLine="true"
                 android:backgroundTint="@color/white"
                 android:textColor="@color/white"
@@ -137,5 +131,12 @@
 
 
     </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_centerInParent="true"/>
 
 </RelativeLayout>

@@ -404,7 +404,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
                     // if dimmers exist, fetch their status
                     if(dimmerListCursor != null && dimmerListCursor.getCount() > 0) {
-                        new GetDimmerStatus().execute();
+                        new GetDimmerStatus().execute(machineIPs);
                     } else {
                         Log.e("TAG_DASHBOARD", "No dimmers");
                     }
@@ -582,7 +582,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                         machineBaseURL = "http://" + params[i];
                     }
                     URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
-                    // Log.e("# urlValue", urlValue.toString());
+                     Log.e("# url", urlValue.toString());
 
                     HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                     httpUrlConnection.setRequestMethod("GET");
@@ -656,19 +656,19 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                         machineBaseURL = "http://" + params[i];
                     }
                     URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
-                    // Log.e("# urlValue", urlValue.toString());
+                    Log.e("# url", urlValue.toString());
 
                     HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                     httpUrlConnection.setRequestMethod("GET");
                     InputStream inputStream = httpUrlConnection.getInputStream();
-                    //  Log.e("# inputStream", inputStream.toString());
+                    //Log.e("# inputStream dimmer" , inputStream.toString());
                     MainXmlPullParser pullParser = new MainXmlPullParser();
 
                     dimmerStatusList = new ArrayList<>();
                     dimmerStatusList = pullParser.processXML(inputStream);
 
                     for (int k = 0; k < dimmerStatusList.size(); k++) {
-                        if (dimmerStatusList.get(k).tagValue.equals("01")) {
+                        if (dimmerStatusList.get(k).tagValue.substring(0,2).equals("01")) {
                             ComponentModel componentModel = new ComponentModel();
                             componentModel.setName(dimmerStatusList.get(k).tagName);
                             componentModel.setDefaultValue(dimmerStatusList.get(k).tagValue);
@@ -676,9 +676,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                             allOnDimmersList.add(componentModel);
                         }
                     }
-
-                    //  Log.e("XML PARSERED", dimmerStatusList.toString());
-
                 }
                 }catch(Exception e){
                     Log.e("# EXP", e.toString());
@@ -702,6 +699,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
             // switch off on dimmers
             for(int i=0; i< allOnDimmersList.size();i++) {
+                Log.e("dimmer", "dimmers");
                 ComponentModel dimmer = allOnDimmersList.get(i);
                 String strPosition =  dimmer.getName().substring(2, 4);
                 String strProgress = dimmer.getDefaultValue().substring(2, 4);
@@ -718,7 +716,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
             try {
                 URL urlValue = new URL(params[0]);
-                Log.e("# urlValue", urlValue.toString());
+                Log.e("# url change switch", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                 httpUrlConnection.setRequestMethod("GET");

@@ -263,7 +263,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                     MainXmlPullParser pullParser = new MainXmlPullParser();
 
                     switchStatusList = pullParser.processXML(inputStream);
-                    //Log.e("XML PARSERED", switchStatusList.toString());
+                    Log.e("XML PARSERED", switchStatusList.toString());
                     DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
                     try {
                         dbHelper.openDataBase();
@@ -272,6 +272,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                         if(cursor != null) {
                             totalSwitchesofMachine = cursor.getCount();
                         }
+                        Log.e("totalSwitchesofMachine", totalSwitchesofMachine+"");
                         for(int j=0 ;j <totalSwitchesofMachine ; j++) {
                             allSwitchesStatusList.add(switchStatusList.get(j));
                         }
@@ -520,10 +521,26 @@ public class SwitchesListActivity extends AppCompatActivity {
         String componentMachineID = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
         String componentMachineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
 
-        SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId,componentName, componentType, componentMachineID,componentMachineIP, componentMachineName, false, "00");
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+            dbHelper.openDataBase();
+            boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentId, componentMachineID);
+            dbHelper.close();
 
-        AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(SwitchesListActivity.this, schedulerModel);
-        addToSchedulerDialog.show();
+            if(! isAlreadyScheduled) {
+                SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId,componentName, componentType, componentMachineID,componentMachineIP, componentMachineName, false, "00");
+
+                AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(SwitchesListActivity.this, schedulerModel);
+                addToSchedulerDialog.show();
+            } else {
+                Toast.makeText(SwitchesListActivity.this, "This component is already scheduled.", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 

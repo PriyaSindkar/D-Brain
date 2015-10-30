@@ -6,8 +6,19 @@
     android:background="@drawable/add_machine_bg">
 
 
+    <ImageView
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imgCancel"
+        android:layout_marginRight="@dimen/STD_MARGIN"
+        android:layout_marginTop="@dimen/STD_MARGIN"
+        android:src="@drawable/ic_navigation_cancel"/>
+
+
     <LinearLayout
         android:id="@+id/header"
+        android:layout_below="@id/imgCancel"
         android:layout_width="match_parent"
         android:orientation="horizontal"
         android:layout_marginBottom="@dimen/STD_MARGIN"
@@ -22,19 +33,11 @@
             android:layout_height="wrap_content"
             android:padding="@dimen/STD_MARGIN"
             android:gravity="center"
-            android:layout_margin="@dimen/STD_MARGIN"
             android:textSize="@dimen/M1_TEXT_SIZE"
             android:textColor="@color/white"
             android:text="Do you want to save the scene?"/>
 
-        <ImageView
-            android:layout_alignParentRight="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/imgCancel"
-            android:layout_margin="@dimen/STD_MARGIN"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_navigation_cancel"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -74,16 +77,4 @@
 
 
     </LinearLayout>
-
-
-
-
-
-
-
-
-
-
-
-
 </RelativeLayout>

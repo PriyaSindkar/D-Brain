@@ -27,11 +27,13 @@ import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -115,6 +117,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
+        mCursor = cursor;
         final int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME);
         final String machineName = cursor.getString(machineNameIndex);
         final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP);
@@ -137,12 +140,34 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
         sp.setColor(mCtx.getResources().getColor(R.color.yellow), cursor.getString(machineSerialNoIndex));
         listHolder.txtMachineSerialNo.setText(sp);
 
-        /*listHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+        DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
+        int machineCount = 0;
+        //get no. of machines count
+        try {
+            dbHelper.openDataBase();
+            Cursor machineCursor =  dbHelper.getAllMachines();
+
+            if(machineCursor != null) {
+                machineCount = machineCursor.getCount();
+            }
+            dbHelper.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if(machineCount > 1) {
+            listHolder.imgDeleteOption.setVisibility(View.VISIBLE);
+        } else {
+            listHolder.imgDeleteOption.setVisibility(View.GONE);
+        }
+
+        listHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 _deleteClick.onDeleteOptionClick(position);
             }
-        });*/
+        });
 
         listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
             @Override

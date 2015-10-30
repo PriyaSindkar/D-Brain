@@ -361,7 +361,15 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                     }
 
                     if (machineSerialNo.equals(userEnteredSerialNo)) {
-                       // if (Utils.validateProductCode(productCode)) {
+                        if (Utils.validateProductCode(productCode)) {
+
+                        if(machineIP.startsWith("https://")) {
+                            machineIP = machineIP.replace("https://", "http://");
+                        } else if(!machineIP.startsWith("http://")) {
+                            machineIP = "http://" + machineIP;
+                        } else {
+
+                        }
                             DatabaseHelper dbHelper = new DatabaseHelper(UserGuide.this);
 
                             dbHelper.openDataBase();
@@ -379,17 +387,17 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                             Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
-                       /* } else {
+                        } else {
                             Toast.makeText(UserGuide.this, "Invalid Product Code.", Toast.LENGTH_LONG).show();
-                        }*/
+                        }
                     } else {
                         Toast.makeText(UserGuide.this, "Invalid Serial No.", Toast.LENGTH_LONG).show();
                     }
                 } catch (Exception e) {
-                    Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address", Toast.LENGTH_LONG).show();
+                    Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address and Serial No.", Toast.LENGTH_LONG).show();
                 }
             } else {
-                Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address", Toast.LENGTH_LONG).show();
+                Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address and Serial No.", Toast.LENGTH_LONG).show();
             }
         }
     }

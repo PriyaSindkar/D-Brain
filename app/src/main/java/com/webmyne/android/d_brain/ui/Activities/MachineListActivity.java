@@ -1,10 +1,12 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,9 +24,12 @@ import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
@@ -46,10 +52,8 @@ public class MachineListActivity extends AppCompatActivity {
     private MachineListCursorAdapter adapter;
     private Cursor machineCursor;
     private ImageView imgBack;
-    private int totalNoOfMachines = 5;
     private TextView txtAddMachine;
-    ArrayList<XMLValues> powerStatus = new ArrayList<>();
-    private String machineSerialNo, serialNoFromDB;
+    private ProgressBar progress_bar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +63,9 @@ public class MachineListActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         imgBack = (ImageView) findViewById(R.id.imgBack);
         txtAddMachine = (TextView) findViewById(R.id.txtAddMachine);
+        progress_bar = (ProgressBar) findViewById(R.id.progress_bar);
+
+        progress_bar.setVisibility(View.VISIBLE);
 
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -96,6 +103,8 @@ public class MachineListActivity extends AppCompatActivity {
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
 
+        progress_bar.setVisibility(View.GONE);
+
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
         mRecyclerView.getItemAnimator().setAddDuration(500);
@@ -104,48 +113,8 @@ public class MachineListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setChangeDuration(500);
 
 
-        adapter.setRenameClickListener(new onRenameClickListener() {
-
-            @Override
-            public void onRenameOptionClick(int pos, String _oldName) {
-
-            }
-
-            @Override
-            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
-                machineCursor.moveToPosition(pos);
-                final String machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
-                final String machineSerialNo = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_SERIALNO));
-
-                EditMachineDialog renameDialog = new EditMachineDialog(MachineListActivity.this, pos, oldName, oldDetails);
-                renameDialog.show();
-
-                renameDialog.setRenameListener(new onRenameClickListener() {
-                    @Override
-                    public void onRenameOptionClick(int pos, String newName) {
-                    }
-
-                    @Override
-                    public void onRenameOptionClick(int pos, String newName, String newIP) {
-                        try {
-                            DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
-                            dbHelper.openDataBase();
-
-                            dbHelper.renameMachine(machineId, newName, newIP);
-                            adapter.notifyDataSetChanged();
-                            dbHelper.close();
-                            machineCursor = dbHelper.getAllMachines();
-                            adapter.changeCursor(machineCursor);
-
-                            Toast.makeText(MachineListActivity.this, "Machine Updated", Toast.LENGTH_LONG).show();
-
-                        } catch (SQLException e) {
-                            Log.e("TAG EXP", e.toString());
-                        }
-                    }
-                });
-            }
-        });
+        callOnRenameClick();
+        callOnDeleteClick();
 
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,10 +137,14 @@ public class MachineListActivity extends AppCompatActivity {
                             dbHelper.openDataBase();
                             dbHelper.close();
                             machineCursor = dbHelper.getAllMachines();
+
                             adapter = new MachineListCursorAdapter(MachineListActivity.this, machineCursor);
                             adapter.setType(0);
                             adapter.setHasStableIds(true);
                             mRecyclerView.setAdapter(adapter);
+
+                            callOnRenameClick();
+                            callOnDeleteClick();
 
                         } catch (SQLException e) {
                             Log.e("TAG EXP", e.toString());
@@ -181,6 +154,97 @@ public class MachineListActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void callOnDeleteClick() {
+        adapter.setDeleteClickListener(new onDeleteClickListener() {
+            @Override
+            public void onDeleteOptionClick(final int pos) {
+
+                SaveAlertDialog saveAlertDialog = new SaveAlertDialog(MachineListActivity.this, "Are you sure you want to delete the machine?");
+                saveAlertDialog.show();
+
+                saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                    @Override
+                    public void onSaveClick(boolean isSave) {
+                        if (isSave) {
+                            progress_bar.setVisibility(View.VISIBLE);
+
+                            machineCursor.moveToPosition(pos);
+                            final String machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+
+                            try {
+                                DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
+                                dbHelper.openDataBase();
+                                dbHelper.deleteMachine(machineId);
+                                machineCursor = dbHelper.getAllMachines();
+                                adapter = new MachineListCursorAdapter(MachineListActivity.this, machineCursor);
+                                adapter.setHasStableIds(true);
+                                mRecyclerView.setAdapter(adapter);
+                                progress_bar.setVisibility(View.GONE);
+
+                                callOnRenameClick();
+                                callOnDeleteClick();
+
+                                Toast.makeText(MachineListActivity.this, "Machine Deleted", Toast.LENGTH_LONG).show();
+                            } catch (SQLException e) {
+                                Log.e("TAG EXP", e.toString());
+                            }
+                        } else {
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void callOnRenameClick() {
+        adapter.setRenameClickListener(new onRenameClickListener() {
+
+            @Override
+            public void onRenameOptionClick(int pos, String _oldName) {
+
+            }
+
+            @Override
+            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+                machineCursor.moveToPosition(pos);
+                final String machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                final String machineSerialNo = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_SERIALNO));
+
+                EditMachineDialog renameDialog = new EditMachineDialog(MachineListActivity.this, pos, oldName, oldDetails);
+                renameDialog.show();
+
+                renameDialog.setRenameListener(new onRenameClickListener() {
+                    @Override
+                    public void onRenameOptionClick(int pos, String newName) {
+                    }
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String newName, String newIP) {
+                        progress_bar.setVisibility(View.VISIBLE);
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
+                            dbHelper.openDataBase();
+
+                            dbHelper.renameMachine(machineId, newName, newIP);
+                            machineCursor = dbHelper.getAllMachines();
+                           // dbHelper.close();
+                            adapter.changeCursor(machineCursor);
+                            adapter.notifyDataSetChanged();
+                            progress_bar.setVisibility(View.GONE);
+
+                            Toast.makeText(MachineListActivity.this, "Machine Updated", Toast.LENGTH_LONG).show();
+
+                        } catch (SQLException e) {
+                            Log.e("TAG EXP", e.toString());
+                        }
+                    }
+                });
+            }
+        });
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

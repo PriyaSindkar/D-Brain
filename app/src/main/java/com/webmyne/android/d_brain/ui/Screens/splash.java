@@ -56,14 +56,104 @@ public class splash extends ActionBarActivity {
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(this, "settings-pref", 0);
         UserSettings settings = complexPreferences.getObject("settings-pref", UserSettings.class);
 
-        if(settings != null) {
-            if (settings.isStartupEnabled()) {
-                startActivity(new Intent(this, HomeDrawerActivity.class));
+        if(settings == null) {
+            settings = new UserSettings();
+            settings.setIsStartupEnabled(true);
+
+            complexPreferences = ComplexPreferences.getComplexPreferences(this, "settings-pref", 0);
+            complexPreferences.putObject("settings-pref", settings);
+            complexPreferences.commit();
+
+            initScreen();
+
+
+        } else {
+            if ( !settings.isStartupEnabled()) {
+                Intent i = new Intent(this, HomeDrawerActivity.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
                 finish();
+            } else {
+                setContentView(R.layout.activity_splash);
+                Log.e("splash", "splash");
+                init();
+
+                startProgressBar();
+
+                pathView.setFillAfter(true);
+                pathView.useNaturalColors();
+
+
+                int currentapiVersion = Build.VERSION.SDK_INT;
+                if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP){
+                    imgBulb.setVisibility(View.VISIBLE);
+                    int col = Color.parseColor("#ffffff");
+                    imgBulb.setColorFilter(col, PorterDuff.Mode.SRC_ATOP);
+                } else{
+                    start();
+                }
+
+                dashedCircularProgress.setOnValueChangeListener(new DashedCircularProgress.OnValueChangeListener() {
+                    @Override
+                    public void onValueChange(float value) {
+
+
+                        if (value >= 998 || value == 999) {
+
+                            Animation fadeIn = new AlphaAnimation(0, 1);
+                            fadeIn.setDuration(1800);
+
+                            imgBulb.setVisibility(View.VISIBLE);
+                            int col = Color.parseColor("#edbe4c");
+                            imgBulb.setColorFilter(col, PorterDuff.Mode.SRC_ATOP);
+
+                            imgBulb.setAnimation(fadeIn);
+
+                            new CountDownTimer(1000, 100) {
+
+                                @Override
+                                public void onTick(long millisUntilFinished) {
+
+                                }
+
+                                @Override
+                                public void onFinish() {
+                                    SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
+                                    if (preferences.contains("hasLoggedIn")) {
+                                        Intent i = new Intent(splash.this, HomeDrawerActivity.class);
+                                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(i);
+                                        finish();
+                                        preferences.edit().clear();
+                                    } else {
+                                        Intent i = new Intent(splash.this, UserGuide.class);
+                                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(i);
+                                        finish();
+                                    }
+                                }
+                            }.start();
+
+
+                        }
+
+                    }
+                });
             }
         }
-        setContentView(R.layout.activity_splash);
 
+
+
+
+
+
+
+
+    }
+
+    private void initScreen() {
+        setContentView(R.layout.activity_splash);
+        Log.e("splash", "splash");
         init();
 
         startProgressBar();
@@ -80,8 +170,6 @@ public class splash extends ActionBarActivity {
         } else{
             start();
         }
-
-
 
         dashedCircularProgress.setOnValueChangeListener(new DashedCircularProgress.OnValueChangeListener() {
             @Override
@@ -129,10 +217,6 @@ public class splash extends ActionBarActivity {
 
             }
         });
-
-
-
-
     }
 
     private void animaton360() {

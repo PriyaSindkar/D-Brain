@@ -24,10 +24,12 @@ import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -105,29 +107,7 @@ public class SchedulersListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(500);
 
-        adapter.setDeleteClickListener(new onDeleteClickListener() {
-            @Override
-            public void onDeleteOptionClick(final int pos) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SchedulersListActivity.this);
-                alertDialogBuilder.setTitle("Delete Scheduler");
-                alertDialogBuilder
-                        .setMessage("Are you sure you want to delete the scheduler?")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                deleteScheduler(pos);
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-
-            }
-        });
+        callDeleteClick();
 
 
         adapter.setRenameClickListener(new onRenameClickListener() {
@@ -204,6 +184,27 @@ public class SchedulersListActivity extends AppCompatActivity {
 
     }
 
+    private void callDeleteClick() {
+        adapter.setDeleteClickListener(new onDeleteClickListener() {
+            @Override
+            public void onDeleteOptionClick(final int pos) {
+                SaveAlertDialog saveAlertDialog = new SaveAlertDialog(SchedulersListActivity.this, "Are you sure you want to delete the scheduler?");
+                saveAlertDialog.show();
+
+                saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                    @Override
+                    public void onSaveClick(boolean isSave) {
+                        if (isSave) {
+                            deleteScheduler(pos);
+                        } else {
+                        }
+                    }
+                });
+
+            }
+        });
+    }
+
     private void deleteScheduler(int pos) {
         schedulersCursor.moveToPosition(pos);
 
@@ -230,6 +231,8 @@ public class SchedulersListActivity extends AppCompatActivity {
             adapter.setHasStableIds(true);
             mRecyclerView.setAdapter(adapter);
             dbHelper.close();
+
+            callDeleteClick();
 
             Toast.makeText(SchedulersListActivity.this, "Scheduler Deleted.", Toast.LENGTH_SHORT).show();
 

@@ -18,14 +18,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.FavouriteListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -380,24 +383,18 @@ public class FavouriteListActivity extends AppCompatActivity {
             @Override
             public void onDeleteOptionClick(final int pos) {
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(FavouriteListActivity.this);
-                alertDialogBuilder.setTitle("Delete Favourite");
-                alertDialogBuilder
-                        .setMessage("Are you sure you want to remove this component from favorites?")
-                        .setCancelable(false)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                deleteFromFavourite(pos);
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+            SaveAlertDialog saveAlertDialog = new SaveAlertDialog(FavouriteListActivity.this, "Are you sure you want to remove this component from favorites?");
+            saveAlertDialog.show();
 
+            saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                @Override
+                public void onSaveClick(boolean isSave) {
+                    if (isSave) {
+                        deleteFromFavourite(pos);
+                    } else {
+                    }
+                }
+            });
             }
         });
     }
