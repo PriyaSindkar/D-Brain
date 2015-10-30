@@ -37,6 +37,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
+            android:singleLine="true"
+            android:ellipsize="end"
             android:layout_gravity="center"
             android:textSize="@dimen/L_TEXT_SIZE"
             android:text="New Scene"/>
@@ -91,6 +93,7 @@
             android:hint="Scene Name"
             android:inputType="text"
             android:singleLine="true"
+            android:maxLength="30"
             android:backgroundTint="@color/white"
             android:textColor="#ffffff"
             android:textColorHint="#d1d1d1"

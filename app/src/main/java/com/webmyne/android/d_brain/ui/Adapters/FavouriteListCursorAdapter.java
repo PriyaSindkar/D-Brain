@@ -65,6 +65,12 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
         this.mCursor = cursor;
     }
 
+    public FavouriteListCursorAdapter(Context context, Cursor cursor){
+        super(context,cursor);
+        mCtx = context;
+        this.mCursor = cursor;
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         public ViewHolder(View v) {
             super(v);
@@ -137,7 +143,10 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
     @Override
     public int getItemViewType(int position) {
-        mCursor.moveToPosition(position);
+
+        if(mCursor != null)
+            mCursor.moveToPosition(position);
+
         String type = mCursor.getString(mCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
 
         if(type.equals(AppConstants.SWITCH_TYPE))
@@ -184,6 +193,8 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
+
+        mCursor = cursor;
         int componentIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_F_CID);
         String componentId = cursor.getString(componentIdIndex);
         String componentName = "";
@@ -211,12 +222,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
             case 0:
 
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
-               /* AdvancedSpannableString sp = new AdvancedSpannableString("Component: "+componentName);
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Component: ");*/
                 switchHolder.txtSwitchName.setText(componentName);
-
-              /*  sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name: ");*/
                 switchHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                 final String switchStrPosition = componentStatus.get(position).tagName.substring(2,4);
@@ -249,7 +255,9 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                 switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        Log.e("pos", position+"");
                         _onDeleteClick.onDeleteOptionClick(position);
+                        //componentStatus.remove(position);
                     }
                 });
 
@@ -258,12 +266,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-                /*sp = new AdvancedSpannableString("Component: "+componentName);
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Component: ");*/
                 dimmerHolder.txtDimmerName.setText(componentName);
-
-                /*sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name: ");*/
                 dimmerHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                 final String dimmerStrPosition = componentStatus.get(position).tagName.substring(2,4);
@@ -351,8 +354,9 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                 dimmerHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        Log.e("position", position+"");
                         _onDeleteClick.onDeleteOptionClick(position);
-                        componentStatus.remove(position);
+                       // componentStatus.remove(position);
                     }
                 });
 

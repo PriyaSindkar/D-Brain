@@ -100,7 +100,7 @@ public class AddMachineDialog extends BaseDialog {
                     Toast.makeText(context, "Must Enter Device IP Address.", Toast.LENGTH_LONG).show();
                 } else if(edtMachineName.getText().toString().trim().length() == 0) {
                     Toast.makeText(context, "Must Enter Machine Name.", Toast.LENGTH_LONG).show();
-                }  else if(edtMachineSerialNo.getText().toString().trim().length() == 0) {
+                } else if(edtMachineSerialNo.getText().toString().trim().length() == 0) {
                     Toast.makeText(context, "Must Enter Machine Serial No.", Toast.LENGTH_LONG).show();
                 }
                 else {
@@ -137,7 +137,10 @@ public class AddMachineDialog extends BaseDialog {
         protected Void doInBackground(Void... params) {
             try {
                 URL urlValue;
-                if(!machineIP.startsWith("http://")) {
+                if(machineIP.startsWith("https://")) {
+                    machineIP = machineIP.replace("https://", "http://");
+                    urlValue = new URL(machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
+                } else if(!machineIP.startsWith("http://")) {
                     urlValue = new URL("http://" + machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
                 } else {
                     urlValue = new URL( machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);

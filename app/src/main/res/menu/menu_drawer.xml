@@ -31,7 +31,7 @@
             android:title="Sensors" />
 
         <item
-            android:icon="@drawable/drawer_sensors"
+            android:icon="@drawable/drawer_touchpanel"
             android:id="@+id/drawer_touchpanel"
             android:title="Touch Panel" />
 

@@ -52,6 +52,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
     private Pattern pattern;
     private Matcher matcher;
     private ProgressBar progressBar;
+    private long machineId ;
 
     private static final String IPADDRESS_PATTERN =
             "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
@@ -185,7 +186,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             } else {
                 for (int i = 0; i < totalNoOfSwitches; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX + idSuffix, AppConstants.SWITCH_TYPE + String.valueOf(i + 1), AppConstants.SWITCH_TYPE, "", machineIP);
+                    ComponentModel switchItem = new ComponentModel(AppConstants.SWITCH_PREFIX + idSuffix, AppConstants.SWITCH_TYPE + String.valueOf(i + 1), AppConstants.SWITCH_TYPE, String.valueOf(machineId), machineIP);
                     switchItem.setMachineName(machineName);
                     listOfComponents.add(switchItem);
                 }
@@ -197,7 +198,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             } else {
                 for (int i = 0; i < totalNoOfDimmers; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX + idSuffix, AppConstants.DIMMER_TYPE + String.valueOf(i + 1), AppConstants.DIMMER_TYPE, "", machineIP);
+                    ComponentModel dimmerItem = new ComponentModel(AppConstants.DIMMER_PREFIX + idSuffix, AppConstants.DIMMER_TYPE + String.valueOf(i + 1), AppConstants.DIMMER_TYPE, String.valueOf(machineId), machineIP);
                     dimmerItem.setMachineName(machineName);
                     listOfComponents.add(dimmerItem);
                 }
@@ -209,7 +210,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             } else {
                 for (int i = 0; i < totalNoOfMotors; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel motorItem = new ComponentModel(AppConstants.MOTOR_PREFIX + idSuffix, AppConstants.MOTOR_TYPE + String.valueOf(i + 1), AppConstants.MOTOR_TYPE, "", machineIP);
+                    ComponentModel motorItem = new ComponentModel(AppConstants.MOTOR_PREFIX + idSuffix, AppConstants.MOTOR_TYPE + String.valueOf(i + 1), AppConstants.MOTOR_TYPE, String.valueOf(machineId), machineIP);
                     motorItem.setMachineName(machineName);
                     listOfComponents.add(motorItem);
                 }
@@ -222,7 +223,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
             } else {
                 for (int i = 0; i < totalNoOfAlerts; i++) {
                     String idSuffix = String.format("%02d", (i + 1));
-                    ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX + idSuffix, AppConstants.ALERT_TYPE + String.valueOf(i + 1), AppConstants.ALERT_TYPE, "", machineIP);
+                    ComponentModel sensorItem = new ComponentModel(AppConstants.ALERT_PREFIX + idSuffix, AppConstants.ALERT_TYPE + String.valueOf(i + 1), AppConstants.ALERT_TYPE, String.valueOf(machineId), machineIP);
                     sensorItem.setMachineName(machineName);
                     sensorItem.setDetails("Alert fired on breach");
                     listOfComponents.add(sensorItem);
@@ -313,7 +314,10 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
         protected Void doInBackground(Void... params) {
             try {
                 URL urlValue;
-                if(!machineIP.startsWith("http://")) {
+                if(machineIP.startsWith("https://")) {
+                    machineIP = machineIP.replace("https://", "http://");
+                    urlValue = new URL(machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
+                } else if(!machineIP.startsWith("http://")) {
                     urlValue = new URL("http://" + machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
                 } else {
                     urlValue = new URL( machineIP + AppConstants.URL_FETCH_MACHINE_STATUS);
@@ -357,11 +361,11 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                     }
 
                     if (machineSerialNo.equals(userEnteredSerialNo)) {
-                      //  if (Utils.validateProductCode(productCode)) {
+                       // if (Utils.validateProductCode(productCode)) {
                             DatabaseHelper dbHelper = new DatabaseHelper(UserGuide.this);
 
                             dbHelper.openDataBase();
-                            dbHelper.insertIntoMachine(powerStatus, machineName, machineIP);
+                            machineId = dbHelper.insertIntoMachine(powerStatus, machineName, machineIP);
                             dbHelper.close();
 
 
@@ -375,7 +379,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                             Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
-                        /*} else {
+                       /* } else {
                             Toast.makeText(UserGuide.this, "Invalid Product Code.", Toast.LENGTH_LONG).show();
                         }*/
                     } else {

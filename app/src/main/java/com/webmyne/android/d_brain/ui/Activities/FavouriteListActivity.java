@@ -1,9 +1,11 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -117,11 +119,8 @@ public class FavouriteListActivity extends AppCompatActivity {
         txtEmptyView = (TextView) findViewById(R.id.txtEmptyView);
 
         initArrayOfFavourties();
+        // get initial status of all components from all machines
         new GetSwitchStatus().execute(machineIPs);
-
-       /* adapter = new FavouriteListCursorAdapter(FavouriteListActivity.this, favouriteListCursor, switchStatusList);
-        adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);*/
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -130,11 +129,8 @@ public class FavouriteListActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        // fetch switch status periodically
-        ResumeTimer();
-
-
-
+        // fetch component status periodically
+       // ResumeTimer();
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
@@ -144,27 +140,10 @@ public class FavouriteListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(0);
 
-       /*   adapter.setLongClickListener(new onLongClickListener() {
-
-            @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-
-            @Override
-            public void onAddSchedulerOptionClick(int pos) {
-                Toast.makeText(SwitchesListActivity.this, "Added To Scheduler Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-        */
-
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                timer.cancel();
+              //  timer.cancel();
                 finish();
             }
         });
@@ -174,18 +153,19 @@ public class FavouriteListActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        timer.cancel();
+       // timer.cancel();
     }
 
     private void initArrayOfFavourties() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
 
-        //insert all favourite in adapter ofr machine-1
+        //get all favourite in adapter from all machines
         try {
             dbHelper.openDataBase();
             favouriteListCursor =  dbHelper.getAllFavouriteComponents();
             Log.e("favouriteListCursor", favouriteListCursor.getCount()+"");
 
+            // get all machine IPs in an array
             machineListCursor = dbHelper.getAllMachines();
 
             if(machineListCursor != null) {
@@ -198,13 +178,7 @@ public class FavouriteListActivity extends AppCompatActivity {
                         machineIPs[i] = machineIP;
                         i++;
                     } while(machineListCursor.moveToNext());
-                } else {
-                    mRecyclerView.setVisibility(View.GONE);
-                    linearEmptyView.setVisibility(View.VISIBLE);
                 }
-            } else {
-                mRecyclerView.setVisibility(View.GONE);
-                linearEmptyView.setVisibility(View.VISIBLE);
             }
             dbHelper.close();
 
@@ -394,31 +368,78 @@ public class FavouriteListActivity extends AppCompatActivity {
                 mRecyclerView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
 
-                /*adapter.setDeleteClickListener(new onDeleteClickListener() {
-                    @Override
-                    public void onDeleteOptionClick(int pos) {
-                        favouriteListCursor.moveToPosition(pos);
-
-                        try {
-                            DatabaseHelper dbHelper = new DatabaseHelper(FavouriteListActivity.this);
-                            dbHelper.openDataBase();
-                            String componentId = favouriteListCursor.getString(favouriteListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-
-                            dbHelper.deleteComponentFromFavourite(componentId);
-                            favouriteListCursor = dbHelper.getAllFavouriteComponents();
-                            favouriteComponentStatusList.remove(pos);
-                            adapter.setComponentStatus(favouriteComponentStatusList);
-                            adapter.changeCursor(favouriteListCursor);
-
-                            dbHelper.close();
-                        } catch(Exception e) {
-                            Log.e("DB EXP", e.toString());
-                        }
-                    }
-                });*/
+                deleteComponent();
 
             } catch (Exception e) {
             }
+        }
+    }
+
+    private void deleteComponent() {
+        adapter.setDeleteClickListener(new onDeleteClickListener() {
+            @Override
+            public void onDeleteOptionClick(final int pos) {
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(FavouriteListActivity.this);
+                alertDialogBuilder.setTitle("Delete Favourite");
+                alertDialogBuilder
+                        .setMessage("Are you sure you want to remove this component from favorites?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                deleteFromFavourite(pos);
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+
+            }
+        });
+    }
+
+    private void deleteFromFavourite(int pos) {
+        favouriteListCursor.moveToPosition(pos);
+
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(FavouriteListActivity.this);
+            dbHelper.openDataBase();
+            String componentId = favouriteListCursor.getString(favouriteListCursor.getColumnIndexOrThrow(DBConstants.KEY_F_CID));
+
+            dbHelper.deleteComponentFromFavourite(componentId);
+
+            favouriteListCursor = dbHelper.getAllFavouriteComponents();
+
+            dbHelper.close();
+            try {
+                mRecyclerView.setAdapter(null);
+            } catch (Exception e) {}
+
+            /*favouriteComponentStatusList.remove(pos);
+            adapter.setComponentStatus(favouriteComponentStatusList);
+            adapter.changeCursor(favouriteListCursor);
+            adapter.notifyDataSetChanged();*/
+
+            adapter = new FavouriteListCursorAdapter(FavouriteListActivity.this, favouriteListCursor);
+            adapter.setHasStableIds(true);
+            mRecyclerView.setAdapter(adapter);
+            favouriteComponentStatusList.remove(pos);
+            adapter.setComponentStatus(favouriteComponentStatusList);
+            adapter.notifyDataSetChanged();
+
+            deleteComponent();
+
+            if(favouriteListCursor == null || favouriteListCursor.getCount() == 0) {
+                linearEmptyView.setVisibility(View.VISIBLE);
+                imgEmpty.setImageResource(R.drawable.ic_action_favorite);
+                txtEmptyView.setText("You Have No Favourites");
+            }
+        } catch (Exception e) {
+            Log.e("DB EXP", e.toString());
         }
     }
 

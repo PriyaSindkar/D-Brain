@@ -1,6 +1,9 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,19 +14,29 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.EditMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
+import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -35,6 +48,8 @@ public class MachineListActivity extends AppCompatActivity {
     private ImageView imgBack;
     private int totalNoOfMachines = 5;
     private TextView txtAddMachine;
+    ArrayList<XMLValues> powerStatus = new ArrayList<>();
+    private String machineSerialNo, serialNoFromDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,41 +108,42 @@ public class MachineListActivity extends AppCompatActivity {
 
             @Override
             public void onRenameOptionClick(int pos, String _oldName) {
+
+            }
+
+            @Override
+            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
                 machineCursor.moveToPosition(pos);
                 final String machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                final String machineSerialNo = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_SERIALNO));
 
-                RenameDialog renameDialog = new RenameDialog(MachineListActivity.this, _oldName);
+                EditMachineDialog renameDialog = new EditMachineDialog(MachineListActivity.this, pos, oldName, oldDetails);
                 renameDialog.show();
 
                 renameDialog.setRenameListener(new onRenameClickListener() {
                     @Override
                     public void onRenameOptionClick(int pos, String newName) {
+                    }
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String newName, String newIP) {
                         try {
                             DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
                             dbHelper.openDataBase();
-                            dbHelper.renameMachine(machineId, newName);
+
+                            dbHelper.renameMachine(machineId, newName, newIP);
                             adapter.notifyDataSetChanged();
                             dbHelper.close();
                             machineCursor = dbHelper.getAllMachines();
                             adapter.changeCursor(machineCursor);
 
+                            Toast.makeText(MachineListActivity.this, "Machine Updated", Toast.LENGTH_LONG).show();
 
                         } catch (SQLException e) {
                             Log.e("TAG EXP", e.toString());
                         }
-
-                    }
-
-                    @Override
-                    public void onRenameOptionClick(int pos, String newName, String newDetails) {
-
                     }
                 });
-            }
-
-            @Override
-            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
-
             }
         });
 
@@ -162,13 +178,9 @@ public class MachineListActivity extends AppCompatActivity {
                         }
                     }
                 });
-
-
-
             }
         });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

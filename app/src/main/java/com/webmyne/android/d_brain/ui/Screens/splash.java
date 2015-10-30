@@ -72,8 +72,8 @@ public class splash extends ActionBarActivity {
         pathView.useNaturalColors();
 
 
-        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+        int currentapiVersion = Build.VERSION.SDK_INT;
+        if (currentapiVersion >= Build.VERSION_CODES.LOLLIPOP){
             imgBulb.setVisibility(View.VISIBLE);
             int col = Color.parseColor("#ffffff");
             imgBulb.setColorFilter(col, PorterDuff.Mode.SRC_ATOP);

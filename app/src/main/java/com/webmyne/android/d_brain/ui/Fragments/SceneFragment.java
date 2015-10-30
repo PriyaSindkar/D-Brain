@@ -3,6 +3,7 @@ package com.webmyne.android.d_brain.ui.Fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,6 +30,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSceneOnOffClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
@@ -37,7 +39,13 @@ import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -49,6 +57,7 @@ public class SceneFragment extends Fragment {
     private LinearLayout emptyView;
     private ImageView imgEmpty;
     private Cursor sceneListCursor;
+    private ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
 
     public static SceneFragment newInstance() {
         SceneFragment fragment = new SceneFragment();
@@ -73,44 +82,6 @@ public class SceneFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_scene_list, container, false);
         init(view);
 
-
-        /*adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                Intent intent = new Intent(getActivity(), SceneActivity.class);
-                startActivity(intent);
-                //Toast.makeText(getActivity(), "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setLongClickListener(new onLongClickListener() {
-
-            @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(getActivity(), "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setDeleteClickListener(new onDeleteClickListener() {
-            @Override
-            public void onDeleteOptionClick(int pos) {
-                Toast.makeText(getActivity(), "Deleted Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setRenameClickListener(new onRenameClickListener() {
-
-            @Override
-            public void onRenameOptionClick(int pos, String _oldName) {
-                Toast.makeText(getActivity(), "Rename Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
-
-            }
-        });*/
-        
         return view;
     }
 
@@ -191,6 +162,28 @@ public class SceneFragment extends Fragment {
                 addComponentToScheduler(pos);
             }
         });
+
+        adapter.setSceneOnOffListener(new onSceneOnOffClickListener() {
+            @Override
+            public void onSingleClick(int pos, boolean isOn, String sceneId) {
+                String sceneStatus="";
+                if (isOn) {
+                    sceneStatus = "yes";
+                } else {
+                    sceneStatus = "no";
+                }
+
+                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                try {
+                    dbHelper.openDataBase();
+                    dbHelper.updateSceneStatus(sceneId, sceneStatus);
+                    dbHelper.close();
+                }catch (Exception e) {
+
+                }
+                setSceneOnOff(sceneId, isOn);
+            }
+        });
     }
 
     private void updateSceneList() {
@@ -210,25 +203,19 @@ public class SceneFragment extends Fragment {
         String componentId1 = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
         String componentName = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
 
-        SchedulerModel schedulerModel = new SchedulerModel("", componentId1,"", componentName, AppConstants.SCENE_TYPE, "", "", true, "00");
+        SchedulerModel schedulerModel = new SchedulerModel("", componentId1,"", componentName, AppConstants.SCENE_TYPE, "","", "", true, "00");
 
         AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(getActivity(), schedulerModel);
         addToSchedulerDialog.show();
     }
 
 
-    /*private void showSceneSavedState() {
+    private void setSceneOnOff(String currentSceneId, boolean isOn) {
         // show scene saved state
-        String currentSceneId =
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();
             Cursor switchListCursor = dbHelper.getAllComponentsInAScene(currentSceneId);
-            *//*if(dbHelper.getSceneStatus(currentSceneId).equals("yes")) {
-                sceneMainSwitch.setChecked(true);
-            } else {
-                sceneMainSwitch.setChecked(false);
-            }*//*
             mData.clear();
             if (switchListCursor != null) {
                 switchListCursor.moveToFirst();
@@ -238,9 +225,11 @@ public class SceneFragment extends Fragment {
                         String componentPrimaryId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMP_PRIMARY_ID));
                         String defaultValue = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
                         String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
+                        String machineID = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MID));
                         String machineName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MNAME));
 
                         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
+                        sceneItemsDataObject.setMachineId(machineID);
                         sceneItemsDataObject.setMachineIP(machineIP);
                         sceneItemsDataObject.setMachineName(machineName);
                         sceneItemsDataObject.setSceneControlType(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE)));
@@ -258,9 +247,159 @@ public class SceneFragment extends Fragment {
                 }
             }
             dbHelper.close();
+
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
         }
-    }*/
+
+
+        if(mData != null) {
+            if(mData.size() > 0 && isOn) {
+                new CallSceneOn().execute();
+            }
+
+            if(mData.size() > 0 && !isOn) {
+                new CallSceneOff().execute();
+            }
+        }
+    }
+
+
+    public class CallSceneOn extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                //setting default wal
+                for(int i=0;i<mData.size();i++) {
+                    String strPosition;
+                    strPosition = String.format("%02d",  Integer.parseInt(mData.get(i).getSceneItemId().substring(2,4)));
+
+                    String SET_STATUS_URL = "";
+                    String baseMachineUrl = "";
+
+                    if(mData.get(i).getMachineIP().startsWith("http://")) {
+                        baseMachineUrl = mData.get(i).getMachineIP();
+                    } else {
+                        baseMachineUrl = "http://"+mData.get(i).getMachineIP();
+                    }
+
+                    // set defaults for switch
+                    if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
+                        if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
+                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                        } else {
+                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                        }
+                    }
+
+                    // set defaults for dimmer
+                    if(mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE) ) {
+                        String dimmerValue = "00";
+                        if( !mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0") ) {
+                            dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
+                        }
+                        if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
+                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE +dimmerValue;
+                        } else {
+                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
+                        }
+                    }
+
+                    URL urlValue = new URL(SET_STATUS_URL);
+                    Log.e("# urlValue2222", urlValue.toString());
+
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+
+                    BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder total = new StringBuilder();
+                    String line;
+                    while ((line = r.readLine()) != null) {
+                        total.append(line);
+                    }
+                    Log.e("result", total.toString());
+                }
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            try{
+            }catch(Exception e){
+            }
+        }
+    }
+
+    public class CallSceneOff extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                //setting default wal
+                for(int i=0;i<mData.size();i++) {
+                    String strPosition;
+                    strPosition = String.format("%02d",  Integer.parseInt(mData.get(i).getSceneItemId().substring(2,4)));
+                    String SET_STATUS_URL = "";
+
+                    String baseMachineUrl = "";
+
+                    if(mData.get(i).getMachineIP().startsWith("http://")) {
+                        baseMachineUrl = mData.get(i).getMachineIP();
+                    } else {
+                        baseMachineUrl = "http://"+mData.get(i).getMachineIP();
+                    }
+
+                    // for switch
+                    if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
+                        SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                    }
+
+                    if(mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE) ) {
+                        String dimmerValue = "00";
+                        if( !mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0")) {
+                            dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
+                        }
+                        SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
+                    }
+
+
+                    URL urlValue = new URL(SET_STATUS_URL);
+                    Log.e("# urlValue", urlValue.toString());
+
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+
+
+                    BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+                    StringBuilder total = new StringBuilder();
+                    String line;
+                    while ((line = r.readLine()) != null) {
+                        total.append(line);
+                    }
+                    Log.e("result", total.toString());
+                }
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            try{
+            }catch(Exception e){
+            }
+        }
+    }
 
 }

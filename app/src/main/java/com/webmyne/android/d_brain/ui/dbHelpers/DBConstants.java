@@ -65,6 +65,7 @@ public class DBConstants {
     public static final String KEY_SC_SCENE_ID = "SCENE_ID";
     public static final String KEY_SC_TYPE = "COMPONENT_TYPE";
     public static final String KEY_SC_MIP = "MACHINE_IP";
+    public static final String KEY_SC_MID = "MACHINE_ID";
     public static final String KEY_SC_DEFAULT = "DEF_VALUE";
     public static final String KEY_SC_MNAME = "MACHINE_NAME";
 
@@ -80,6 +81,7 @@ public class DBConstants {
     //Favourite table column names
     public static final String KEY_F_CNAME = "COMPONENT_NAME";
     public static final String KEY_F_MNAME = "MACHINE_NAME";
+    public static final String KEY_F_MID = "MACHINE_ID";
     public static final String KEY_F_CID = "PRIMARY_COMP_ID";
 
     //Schedulers table column names
@@ -92,6 +94,7 @@ public class DBConstants {
     public static final String KEY_SCH_TYPE = "COMPONENT_TYPE";
     public static final String KEY_SCH_COMPONENT_ID = "COMPONENT_ID";
     public static final String KEY_SCH_MIP = "MACHINE_IP";
+    public static final String KEY_SCH_MID = "MACHINE_ID";
     public static final String KEY_SCH_DEFAULT = "DEF_VALUE";
     public static final String KEY_SCH_MNAME = "MACHINE_NAME";
 

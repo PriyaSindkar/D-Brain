@@ -36,7 +36,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     NotificationCompat.Builder alamNotificationBuilder;
     Context _ctx;
     boolean isVibrate;
-    String schedulerId;
+    String schedulerId, schedulerName;
     SchedulerModel schedulerModel;
 
     @Override
@@ -44,10 +44,10 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         _ctx = ctx;
 
-        String msg = "Scheduler Fired";
+
         schedulerId = arg1.getStringExtra("scheduler_id");
-        Log.e("ID", schedulerId);
-       // Toast.makeText(ctx, "krishna - "+schedulerId, Toast.LENGTH_LONG).show();
+        schedulerName = arg1.getStringExtra("scheduler_name");
+        String msg = schedulerName + " Set";
         sendNotification(msg);
         fireScheduler();
     }

@@ -116,7 +116,7 @@
                 android:layout_width="@dimen/CIRCLE_SIZE"
                 android:layout_height="@dimen/CIRCLE_SIZE"
                 android:layout_gravity="center"
-                android:src="@drawable/bulb"
+                android:src="@drawable/poweroff_bulb"
                 android:tint="@color/white"
                 android:tintMode="src_atop" />
 
@@ -126,7 +126,7 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:padding="@dimen/STD_MARGIN"
-                android:textColor="@color/yellow"
+                android:textColor="@color/white"
                 android:textStyle="bold"
                 android:textSize="@dimen/L_TEXT_SIZE"
                 android:text="@string/power_off_text"/>

@@ -18,6 +18,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Switch Name"
+            android:maxLength="15"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:textColor="@color/white"/>
 
         <TextView
@@ -26,6 +29,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Machine Name"
+            android:maxLength="15"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:textColor="@color/yellow"/>
 
     </LinearLayout>

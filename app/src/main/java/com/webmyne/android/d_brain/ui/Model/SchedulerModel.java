@@ -11,6 +11,7 @@ public class SchedulerModel {
     private String componentName;
     private String componentType;
     private String mip;
+    private String mid;
     private String machineName;
     private boolean isScene;
     private String defaultValue;
@@ -19,12 +20,13 @@ public class SchedulerModel {
     public SchedulerModel() {
     }
 
-    public SchedulerModel(String schedulerName, String componentPrimaryId, String componentId, String name, String componentType, String mip, String machineName, boolean isScene, String defaultValue) {
+    public SchedulerModel(String schedulerName, String componentPrimaryId, String componentId, String name, String componentType, String mid, String mip, String machineName, boolean isScene, String defaultValue) {
         this.schedulerName = schedulerName;
         this.componentPrimaryId = componentPrimaryId;
         this.componentId = componentId;
         this.componentName = name;
         this.componentType = componentType;
+        this.mid = mid;
         this.mip = mip;
         this.machineName = machineName;
         this.isScene = isScene;
@@ -77,6 +79,14 @@ public class SchedulerModel {
 
     public void setComponentType(String componentType) {
         this.componentType = componentType;
+    }
+
+    public String getMid() {
+        return mid;
+    }
+
+    public void setMid(String mid) {
+        this.mid = mid;
     }
 
     public String getMip() {

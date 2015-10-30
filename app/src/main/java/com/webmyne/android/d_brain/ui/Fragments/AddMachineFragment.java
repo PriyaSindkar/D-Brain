@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.EditMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
@@ -61,20 +62,6 @@ public class AddMachineFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_scene_list, container, false);
         init(view);
 
-        /*adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                //Toast.makeText(DimmerListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setLongClickListener(new onLongClickListener() {
-
-            @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(getActivity(), "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });*/
 
         adapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
@@ -87,41 +74,43 @@ public class AddMachineFragment extends Fragment {
 
             @Override
             public void onRenameOptionClick(int pos, String _oldName) {
+
+            }
+
+            @Override
+            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
                 machineCursor.moveToPosition(pos);
                 final String machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
 
-                RenameDialog renameDialog = new RenameDialog(getActivity(), _oldName);
+                EditMachineDialog renameDialog = new EditMachineDialog(getActivity(), pos,oldName, oldDetails);
                 renameDialog.show();
 
                 renameDialog.setRenameListener(new onRenameClickListener() {
                     @Override
                     public void onRenameOptionClick(int pos, String newName) {
+
+                    }
+
+                    @Override
+                    public void onRenameOptionClick(int pos, String newName, String newIP) {
                         try {
                             DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                             dbHelper.openDataBase();
-                            dbHelper.renameMachine(machineId, newName);
+
+                            dbHelper.renameMachine(machineId, newName, newIP);
                             adapter.notifyDataSetChanged();
                             dbHelper.close();
                             machineCursor = dbHelper.getAllMachines();
                             adapter.changeCursor(machineCursor);
 
+                            Toast.makeText(getActivity(), "Machine Updated", Toast.LENGTH_LONG).show();
 
                         } catch (SQLException e) {
                             Log.e("TAG EXP", e.toString());
                         }
 
                     }
-
-                    @Override
-                    public void onRenameOptionClick(int pos, String newName, String newDetails) {
-
-                    }
                 });
-            }
-
-            @Override
-            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
-
             }
         });
 

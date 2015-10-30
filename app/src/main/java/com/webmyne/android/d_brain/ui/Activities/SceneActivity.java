@@ -433,7 +433,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 }catch (Exception e) {
 
                 }
-                Log.e("isSceneSaved", String.valueOf(isSceneSaved));
                 break;
         }
 
@@ -610,6 +609,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         sceneSwitchItem.setText(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
                         sceneSwitchItem.setSwitchId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
                         sceneSwitchItem.setComponentPrimaryId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
+                        sceneSwitchItem.setMachineId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID)));
                         sceneSwitchItem.setMachineIP(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
@@ -689,6 +689,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         sceneSwitchItem.setText(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
                         sceneSwitchItem.setSwitchId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
                         sceneSwitchItem.setComponentPrimaryId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
+                        sceneSwitchItem.setMachineId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID)));
                         sceneSwitchItem.setMachineIP(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
@@ -726,11 +727,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         try {
             dbHelper.openDataBase();
             Cursor switchListCursor = dbHelper.getAllComponentsInAScene(currentSceneId);
-            /*if(dbHelper.getSceneStatus(currentSceneId).equals("yes")) {
+            if(dbHelper.getSceneStatus(currentSceneId).equals("yes")) {
                 sceneMainSwitch.setChecked(true);
             } else {
                 sceneMainSwitch.setChecked(false);
-            }*/
+            }
             mData.clear();
             if (switchListCursor != null) {
                 switchListCursor.moveToFirst();
@@ -740,10 +741,12 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         String componentPrimaryId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMP_PRIMARY_ID));
                         String defaultValue = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
                         String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
+                        String machineID = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MID));
                         String machineName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MNAME));
 
                         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
                         sceneItemsDataObject.setMachineIP(machineIP);
+                        sceneItemsDataObject.setMachineId(machineID);
                         sceneItemsDataObject.setMachineName(machineName);
                         sceneItemsDataObject.setSceneControlType(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE)));
                         sceneItemsDataObject.setSceneItemId(componentId);
@@ -836,6 +839,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
         sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
         sceneItemsDataObject.setSceneComponentPrimaryId(initSwitches.get(position).getComponentPrimaryId());
+        sceneItemsDataObject.setMachineId(initSwitches.get(position).getMachineId());
         sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
         sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
 
@@ -875,6 +879,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
         sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
         sceneItemsDataObject.setSceneComponentPrimaryId(initDimmers.get(position).getComponentPrimaryId());
+        sceneItemsDataObject.setMachineId(initSwitches.get(position).getMachineId());
         sceneItemsDataObject.setMachineIP(initDimmers.get(position).getMachineIP());
         sceneItemsDataObject.setMachineName(initDimmers.get(position).getMachineName());
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);

@@ -22,10 +22,12 @@ import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSceneOnOffClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
 import java.io.BufferedReader;
@@ -46,6 +48,7 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     public onLongClickListener _longClick;
     public onSingleClickListener _singleClick;
     public onAddSchedulerClickListener _addSchedulerClick;
+    public onSceneOnOffClickListener _onSceneOnOffClick;
 
     public SceneListCursorAdapter(Context context){
         super(context );
@@ -128,6 +131,8 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         int sceneNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        int sceneIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID);
+        final String sceneId = cursor.getString(sceneIdIndex);
         final int position = cursor.getPosition();
 
 
@@ -147,6 +152,20 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
             case 1:
                 final ListViewHolder groupViewHolder = (ListViewHolder) viewHolder;
                 groupViewHolder.txtSceneName.setText(cursor.getString(sceneNameIndex));
+                final String currentSceneId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID)) ;
+
+                DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
+                try {
+                    dbHelper.openDataBase();
+
+                    if (dbHelper.getSceneStatus(currentSceneId).equals("yes")) {
+                        groupViewHolder.imgSwitch.setChecked(true);
+                    } else {
+                        groupViewHolder.imgSwitch.setChecked(false);
+                    }
+                } catch(Exception e) {
+
+                }
 
                 groupViewHolder.linearScene.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -167,11 +186,13 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
                     public void onClick(View v) {
                         groupViewHolder.imgSwitch.toggle();
 
-                        if (groupViewHolder.imgSwitch.isChecked()) {
+                    }
+                });
 
-                        } else {
-
-                        }
+                groupViewHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        _onSceneOnOffClick.onSingleClick(position, isChecked, sceneId);
                     }
                 });
                 break;
@@ -186,6 +207,10 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
 
     public void setAddToScheduler(onAddSchedulerClickListener obj){
         this._addSchedulerClick = obj;
+    }
+
+    public void setSceneOnOffListener(onSceneOnOffClickListener obj){
+        this._onSceneOnOffClick = obj;
     }
 
 }

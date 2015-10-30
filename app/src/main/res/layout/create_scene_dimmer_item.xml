@@ -32,7 +32,6 @@
                     android:layout_marginLeft="@dimen/S_MARGIN"
                     android:padding="@dimen/VS_MARGIN"
                     android:text="Dimmer Name"
-                    android:textStyle="bold"
                     android:textColor="@color/white" />
 
                 <ImageView
@@ -56,8 +55,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/S_MARGIN"
                 android:padding="@dimen/VS_MARGIN"
+                android:singleLine="true"
                 android:text="Machine Name"
-                android:textStyle="bold"
                 android:textColor="@color/yellow" />
 
             <TextView

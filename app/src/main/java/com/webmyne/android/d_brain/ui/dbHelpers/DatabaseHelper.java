@@ -123,7 +123,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);*/
     }
 
-   public void insertIntoMachine(ArrayList<XMLValues> machineValuesList, String machineName, String machineIP) {
+   public long insertIntoMachine(ArrayList<XMLValues> machineValuesList, String machineName, String machineIP) {
 
        Log.e("TAG_DB", "Insert machine");
         SQLiteDatabase db = this.getWritableDatabase();
@@ -147,8 +147,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
        Log.e("Machine_CV", values.toString());
 
-       db.insert(DBConstants.TABLE_MACHINE, null, values);
+       long id = db.insert(DBConstants.TABLE_MACHINE, null, values);
        db.close();
+
+       return id;
     }
 
     public Cursor getAllMachines() {
@@ -170,13 +172,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
-    public void renameMachine(String machineId, String machineName) {
+    // save new machine name in tables: machine, SceneComponent, Component, FavouriteComponent, Schedulers
+    public void renameMachine(String machineId, String newMachineName, String newMachineIP) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // save new machine name
+        // save old IP before updating
+        String oldMachineIP = getMachineIPByID(machineId);
+
+        //update machine
         ContentValues values = new ContentValues();
-        values.put(DBConstants.KEY_M_NAME, machineName);
-        db.update(DBConstants.TABLE_MACHINE, values, DBConstants.KEY_M_ID + "='" + machineId+"'", null);
+        values.put(DBConstants.KEY_M_NAME, newMachineName);
+        values.put(DBConstants.KEY_M_IP, newMachineIP);
+        db.update(DBConstants.TABLE_MACHINE, values, DBConstants.KEY_M_ID + "='" + machineId + "'", null);
+
+        //update component
+        values = new ContentValues();
+        values.put(DBConstants.KEY_C_MNAME, newMachineName);
+        values.put(DBConstants.KEY_C_MIP, newMachineIP);
+        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_MID + "='" + machineId + "'", null);
+
+        //update scene-component
+        values = new ContentValues();
+        values.put(DBConstants.KEY_SC_MNAME, newMachineName);
+        values.put(DBConstants.KEY_SC_MIP, newMachineIP);
+        db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_MID + "='" + machineId + "'", null);
+
+        //update FavouriteComponent
+        values = new ContentValues();
+        values.put(DBConstants.KEY_F_MNAME, newMachineName);
+        values.put(DBConstants.KEY_C_MIP, newMachineIP);
+        db.update(DBConstants.TABLE_FAVOURITE, values, DBConstants.KEY_F_MID + "='" + machineId + "'", null);
+
+        //update Schedulers
+        values = new ContentValues();
+        values.put(DBConstants.KEY_M_NAME, newMachineName);
+        values.put(DBConstants.KEY_SCH_MIP, newMachineIP);
+        db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
+
+
         db.close();
     }
 
@@ -197,6 +230,49 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.e("EXP ", e.toString());
         }
         return machineName;
+    }
+
+
+    public String getMachineIPByID(String machineID) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        String machineIP = "";
+        try {
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_ID + "=?" ,
+                    new String[]{machineID}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                machineIP =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return machineIP;
+    }
+
+
+    public boolean isMachineIPExists(String machineIP, String oldMachineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        boolean result = true;
+        try {
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=? AND " + DBConstants.KEY_M_IP + "!=?",
+                    new String[]{machineIP, oldMachineIP}, null, null, null, null);
+            if (cursor != null) {
+                if(cursor.getCount() == 0) {
+                    result =  false;
+                } else {
+                    result =  true;
+                }
+            } else {
+                result =  false;
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return result;
     }
 
 
@@ -418,6 +494,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_SC_COMP_PRIMARY_ID, componentModels.get(i).getSceneComponentPrimaryId());
             values.put(DBConstants.KEY_SC_TYPE, componentModels.get(i).getSceneControlType());
             values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
+            values.put(DBConstants.KEY_SC_MID, componentModels.get(i).getMachineId());
             values.put(DBConstants.KEY_SC_MNAME, componentModels.get(i).getMachineName());
             values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
 
@@ -515,6 +592,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
             values.put(DBConstants.KEY_SC_COMP_PRIMARY_ID, componentModels.get(i).getSceneComponentPrimaryId());
             values.put(DBConstants.KEY_SC_TYPE, componentModels.get(i).getSceneControlType());
+            values.put(DBConstants.KEY_SC_MID, componentModels.get(i).getMachineId());
             values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
             values.put(DBConstants.KEY_SC_MNAME, componentModels.get(i).getMachineName());
             values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
@@ -824,7 +902,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public boolean insertIntoFavorite(String componentPrimaryId, String componentId, String componentName, String componentType, String machineIP, String machineName) {
+    public boolean insertIntoFavorite(String componentPrimaryId, String componentId, String componentName, String componentType, String machineID,String machineIP, String machineName) {
         SQLiteDatabase db = this.getWritableDatabase();
         boolean flag = false;
 
@@ -833,6 +911,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_C_COMPONENT_ID, componentId);
         values.put(DBConstants.KEY_F_CNAME, componentName);
         values.put(DBConstants.KEY_C_TYPE, componentType);
+        values.put(DBConstants.KEY_C_MID, machineID);
         values.put(DBConstants.KEY_C_MIP, machineIP);
         values.put(DBConstants.KEY_F_MNAME, machineName);
 
@@ -896,25 +975,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         try {
             cursor = db.query(DBConstants.TABLE_FAVOURITE, null, null,null, null, null, null, null);
-            /*if (cursor != null) {
+            if (cursor != null) {
                 cursor.moveToFirst();
-                if (cursor.getCount() > 0) {
-                    do {
-                        Log.e("MACHINEIP", cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP)));
-                    } while (cursor.moveToNext());
-                }
-            }*/
+            }
         }catch (Exception e) {
             Log.e("EXP ", e.toString());
-        }
+        } /*finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }*/
         return cursor;
     }
 
     // to delete fav component
     public void deleteComponentFromFavourite(String componentId) {
+
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(DBConstants.TABLE_FAVOURITE, DBConstants.KEY_SC_COMPONENT_ID + "='" + componentId + "'", null);
-        db.close();
+        db.delete(DBConstants.TABLE_FAVOURITE, DBConstants.KEY_F_CID + "='" + componentId + "'", null);
     }
 
     public long insertIntoScheduler(SchedulerModel schedulerModel) {
@@ -931,6 +1009,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_SCH_SCENE_NAME, schedulerModel.getComponentName());
         values.put(DBConstants.KEY_SCH_TYPE, schedulerModel.getComponentType());
         values.put(DBConstants.KEY_SCH_MNAME, schedulerModel.getMachineName());
+        values.put(DBConstants.KEY_SCH_MID, schedulerModel.getMid());
         values.put(DBConstants.KEY_SCH_MIP, schedulerModel.getMip());
 
        long id =  db.insert(DBConstants.TABLE_SCHEDULERS, null, values);

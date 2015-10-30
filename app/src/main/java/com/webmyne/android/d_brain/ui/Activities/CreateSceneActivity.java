@@ -338,6 +338,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             // set component_id in scene_component table
                             sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
                             sceneItemsDataObject.setSceneComponentPrimaryId(initSwitches.get(position).getComponentPrimaryId());
+                            sceneItemsDataObject.setMachineId(initSwitches.get(position).getMachineId());
                             sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
                             sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
@@ -411,6 +412,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             // set component_id in scene_component table
                             sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
                             sceneItemsDataObject.setSceneComponentPrimaryId(initDimmers.get(position).getComponentPrimaryId());
+                            sceneItemsDataObject.setMachineId(initDimmers.get(position).getMachineId());
                             sceneItemsDataObject.setMachineIP(initDimmers.get(position).getMachineIP());
                             sceneItemsDataObject.setMachineName(initDimmers.get(position).getMachineName());
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
@@ -529,6 +531,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                         //switch id from main component table
                         sceneSwitchItem.setSwitchId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID)));
                         sceneSwitchItem.setComponentPrimaryId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
+                        sceneSwitchItem.setMachineId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID)));
                         sceneSwitchItem.setMachineIP(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
@@ -603,6 +606,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                         //dimmer id from main component table
                         sceneSwitchItem.setSwitchId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID)));
                         sceneSwitchItem.setComponentPrimaryId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
+                        sceneSwitchItem.setMachineId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID)));
                         sceneSwitchItem.setMachineIP(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
                         initDimmers.add(sceneSwitchItem);

@@ -117,7 +117,8 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         final int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME);
         final String machineName = cursor.getString(machineNameIndex);
-        int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP);
+        final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP);
+        final String machineIP = cursor.getString(machineIPIndex);
         int machineSerialNoIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_SERIALNO);
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
@@ -146,7 +147,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
         listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                _renameClick.onRenameOptionClick(position, machineName);
+                _renameClick.onRenameOptionClick(position, machineName, machineIP);
             }
         });
     }

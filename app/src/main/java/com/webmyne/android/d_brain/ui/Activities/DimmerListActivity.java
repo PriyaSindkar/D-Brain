@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.LongPressOptionsDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -340,7 +341,44 @@ public class DimmerListActivity extends AppCompatActivity {
 
                     @Override
                     public void onLongClick(final int pos, View view) {
-                        PopupMenu popup = new PopupMenu(DimmerListActivity.this, view);
+
+                        LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(DimmerListActivity.this, pos);
+                        longPressOptionsDialog.show();
+
+                        longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {
+                            @Override
+                            public void onRenameOptionClick(int pos, String oldName) {
+                                renameComponent(pos);
+                            }
+
+                            @Override
+                            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+                            }
+                        });
+
+                        longPressOptionsDialog.setFavoriteClickListener(new onFavoriteClickListener() {
+                            @Override
+                            public void onFavoriteOptionClick(int pos) {
+                                addComponentToFavourite(pos);
+                            }
+                        });
+
+                        longPressOptionsDialog.setAddToSceneClickListener(new onAddToSceneClickListener() {
+                            @Override
+                            public void onAddToSceneOptionClick(int pos) {
+                                addComponentToScene(pos);
+                            }
+                        });
+
+                        longPressOptionsDialog.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
+                            @Override
+                            public void onAddSchedulerOptionClick(int pos) {
+                                addComponentToScheduler(pos);
+                            }
+                        });
+
+                        /*PopupMenu popup = new PopupMenu(DimmerListActivity.this, view);
                         popup.getMenuInflater().inflate(R.menu.menu_components, popup.getMenu());
 
                         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -363,7 +401,7 @@ public class DimmerListActivity extends AppCompatActivity {
                             }
                         });
 
-                        popup.show();//showing popup menu
+                        popup.show();//showing popup menu*/
                     }
                 });
 
@@ -420,6 +458,7 @@ public class DimmerListActivity extends AppCompatActivity {
         String componentPrimaryId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
         String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
         String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        String componentMachineID = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
         String machineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
         String machineName = "";
         try {
@@ -429,7 +468,7 @@ public class DimmerListActivity extends AppCompatActivity {
             int dimmerCount = dbHelper.getComponentTypeCountInFavourite(componentType);
 
             if(dimmerCount <10) {
-                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentPrimaryId, componentId, componentName, componentType, machineIP, machineName);
+                boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentPrimaryId, componentId, componentName, componentType, componentMachineID,machineIP, machineName);
                 dbHelper.close();
 
                 if (isAlreadyAFavourite) {
@@ -453,9 +492,10 @@ public class DimmerListActivity extends AppCompatActivity {
         String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
         String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
         String componentMachineName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
+        String componentMachineID = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
         String componentMachineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
 
-        SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId, componentName, componentType, componentMachineIP, componentMachineName, false, "00");
+        SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId, componentName, componentType, componentMachineID,componentMachineIP, componentMachineName, false, "00");
 
         AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(DimmerListActivity.this, schedulerModel);
         addToSchedulerDialog.show();

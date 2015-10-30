@@ -279,7 +279,7 @@ public class AddToSchedulerDialog extends BaseDialog {
 
             Intent intent = new Intent(mContext, AlarmReceiver.class);
             intent.putExtra("scheduler_id", String.valueOf(_id));
-
+            intent.putExtra("scheduler_name", String.valueOf(schedulerModel.getSchedulerName()));
             PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent, 0);
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
             alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
