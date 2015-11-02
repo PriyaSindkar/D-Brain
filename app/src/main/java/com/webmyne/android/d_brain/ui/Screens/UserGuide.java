@@ -376,17 +376,20 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                             machineId = dbHelper.insertIntoMachine(powerStatus, machineName, machineIP);
                             dbHelper.close();
 
+                            if(machineId != -1) {
+                                initDatabaseComponents(productCode);
 
-                            initDatabaseComponents(productCode);
+                                SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
+                                SharedPreferences.Editor editor = preferences.edit();
+                                editor.putBoolean("hasLoggedIn", true);
+                                editor.commit();
 
-                            SharedPreferences preferences = getSharedPreferences("login", MODE_PRIVATE);
-                            SharedPreferences.Editor editor = preferences.edit();
-                            editor.putBoolean("hasLoggedIn", true);
-                            editor.commit();
-
-                            Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                                Intent intent = new Intent(getBaseContext(), HomeDrawerActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address and Serial No.", Toast.LENGTH_LONG).show();
+                            }
                         } else {
                             Toast.makeText(UserGuide.this, "Invalid Product Code.", Toast.LENGTH_LONG).show();
                         }

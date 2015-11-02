@@ -42,6 +42,7 @@ public class DBConstants {
     public static final String KEY_M_DATETIME = "DCT";
     public static final String KEY_M_IP = "MACHINE_IP";
     public static final String KEY_M_NAME = "NAME";
+    public static final String KEY_M_ISACTIVE = "IS_ACTIVE";
 
     // Component Table Column names
     public static final String KEY_C_ID = "_id";

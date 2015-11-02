@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
@@ -56,6 +57,7 @@ public class SchedulersListCursorAdapter extends CursorRecyclerViewAdapter<Sched
         public  TextView txtMachineName, txtMachineIPAddress, txtMachineSerialNo;
         public ImageView imgDeleteOption, imgRenameOption;
         public LinearLayout linearSwitch;
+        private SwitchButton imgSwitch;
 
         public ListViewHolder ( View view ) {
             super ( view );
@@ -66,6 +68,9 @@ public class SchedulersListCursorAdapter extends CursorRecyclerViewAdapter<Sched
 
             this.imgDeleteOption = (ImageView) view.findViewById(R.id.imgDeleteOption);
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
+            this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
+
+            this.imgSwitch.setVisibility(View.GONE);
         }
     }
 

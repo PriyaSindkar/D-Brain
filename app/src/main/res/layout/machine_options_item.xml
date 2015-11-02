@@ -8,7 +8,9 @@
     android:padding="@dimen/S_MARGIN"
     android:layout_height="wrap_content">
 
-
+    <com.kyleduo.switchbutton.SwitchButton
+        android:id="@+id/imgSwitch"
+        style="@style/MaterialDesignStyle" />
 
         <ImageView
             android:id="@+id/imgRenameOption"

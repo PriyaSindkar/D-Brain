@@ -28,6 +28,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onMachineStateChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
@@ -115,6 +116,7 @@ public class MachineListActivity extends AppCompatActivity {
 
         callOnRenameClick();
         callOnDeleteClick();
+        callOnMachineEnabledDisabled();
 
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,6 +147,7 @@ public class MachineListActivity extends AppCompatActivity {
 
                             callOnRenameClick();
                             callOnDeleteClick();
+                            callOnMachineEnabledDisabled();
 
                         } catch (SQLException e) {
                             Log.e("TAG EXP", e.toString());
@@ -184,6 +187,7 @@ public class MachineListActivity extends AppCompatActivity {
 
                                 callOnRenameClick();
                                 callOnDeleteClick();
+                                callOnMachineEnabledDisabled();
 
                                 Toast.makeText(MachineListActivity.this, "Machine Deleted", Toast.LENGTH_LONG).show();
                             } catch (SQLException e) {
@@ -229,7 +233,7 @@ public class MachineListActivity extends AppCompatActivity {
 
                             dbHelper.renameMachine(machineId, newName, newIP);
                             machineCursor = dbHelper.getAllMachines();
-                           // dbHelper.close();
+                            // dbHelper.close();
                             adapter.changeCursor(machineCursor);
                             adapter.notifyDataSetChanged();
                             progress_bar.setVisibility(View.GONE);
@@ -241,6 +245,38 @@ public class MachineListActivity extends AppCompatActivity {
                         }
                     }
                 });
+            }
+        });
+    }
+
+    private void callOnMachineEnabledDisabled() {
+        adapter.setMachineStateChanged(new onMachineStateChangeListener() {
+            @Override
+            public void onMachineEnabledDisabled(int pos, boolean isEnabled) {
+                machineCursor.moveToPosition(pos);
+                int machineIdIndex = machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID);
+                final String machineId = machineCursor.getString(machineIdIndex);
+                int machineIpIndex = machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP);
+                final String machineIp = machineCursor.getString(machineIdIndex);
+
+                DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
+                // enable/disable machine throughout db
+                try {
+                    dbHelper.openDataBase();
+                    dbHelper.enableDisableMachine(machineId, isEnabled);
+                    dbHelper.close();
+
+                    if (isEnabled) {
+                        //call debt
+                        new GetMachineStatus().execute(machineIp);
+
+                    }
+                    else
+                        Toast.makeText(MachineListActivity.this, "Machine is Deactivated.", Toast.LENGTH_SHORT).show();
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -258,6 +294,54 @@ public class MachineListActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public class GetMachineStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                URL urlValue = new URL(params[0] + AppConstants.URL_FETCH_MACHINE_STATUS);
+                Log.e("# urlValue", urlValue.toString());
+
+                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(1000 * 60);
+
+                httpUrlConnection.setRequestMethod("GET");
+                InputStream inputStream = httpUrlConnection.getInputStream();
+                //  Log.e("# inputStream", inputStream.toString());
+                MainXmlPullParser pullParser = new MainXmlPullParser();
+                ArrayList<XMLValues> powerStatus = pullParser.processXML(inputStream);
+
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+                isError = true;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            try {
+                if (isError) {
+                    // show alert dialog for ok and retry
+                } else {
+                    Toast.makeText(MachineListActivity.this, "Machine is Activated.", Toast.LENGTH_SHORT).show();
+                }
+
+            } catch (Exception e) {
+
+            }
+
+
+        }
+    }
+
 
 
 }

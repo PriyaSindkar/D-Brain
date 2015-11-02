@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SceneAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
@@ -38,6 +39,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
+import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.Model.onItemClickListener;
 import com.webmyne.android.d_brain.ui.Widgets.SceneMotorItem;
 import com.webmyne.android.d_brain.ui.Widgets.SceneSwitchItem;
@@ -327,52 +329,56 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_rename) {
-            RenameDialog renameDialog = new RenameDialog(SceneActivity.this, currentSceneName);
-            renameDialog.show();
+        switch (id) {
+            case R.id.action_rename:
+                RenameDialog renameDialog = new RenameDialog(SceneActivity.this, currentSceneName);
+                renameDialog.show();
 
-            renameDialog.setRenameListener(new onRenameClickListener() {
-                @Override
-                public void onRenameOptionClick(int pos, String newName) {
-                    isSceneNamedChanged = true;
-                    isSceneSaved = false;
-                    currentSceneName = newName;
-                    edtSceneName.setText(newName);
-                }
-
-                @Override
-                public void onRenameOptionClick(int pos, String newName, String newDetails) {
-
-                }
-            });
-            return true;
-        }
-
-        if (id == R.id.action_delete) {
-
-            SaveAlertDialog saveAlertDialog = new SaveAlertDialog(SceneActivity.this, "Are you sure you want to delete the scene?");
-            saveAlertDialog.show();
-
-            saveAlertDialog.setSaveListener(new onSaveClickListener() {
-                @Override
-                public void onSaveClick(boolean isSave) {
-                    if (isSave) {
-                        DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
-                        try {
-                            dbHelper.openDataBase();
-                            dbHelper.deleteScene(currentSceneId);
-                            dbHelper.close();
-                            Toast.makeText(SceneActivity.this, "Scene deleted", Toast.LENGTH_LONG).show();
-                            finish();
-                        } catch (Exception e) {
-                        }
-                    } else {
-                       /* finish();*/
+                renameDialog.setRenameListener(new onRenameClickListener() {
+                    @Override
+                    public void onRenameOptionClick(int pos, String newName) {
+                        isSceneNamedChanged = true;
+                        isSceneSaved = false;
+                        currentSceneName = newName;
+                        edtSceneName.setText(newName);
                     }
-                }
-            });
-        }
 
+                    @Override
+                    public void onRenameOptionClick(int pos, String newName, String newDetails) {
+
+                    }
+                });
+                break;
+
+            case R.id.action_delete:
+                SaveAlertDialog saveAlertDialog = new SaveAlertDialog(SceneActivity.this, "Are you sure you want to delete the scene?");
+                saveAlertDialog.show();
+
+                saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                    @Override
+                    public void onSaveClick(boolean isSave) {
+                        if (isSave) {
+                            DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                            try {
+                                dbHelper.openDataBase();
+                                dbHelper.deleteScene(currentSceneId);
+                                dbHelper.close();
+                                Toast.makeText(SceneActivity.this, "Scene deleted", Toast.LENGTH_LONG).show();
+                                finish();
+                            } catch (Exception e) {
+                            }
+                        } else {
+                       /* finish();*/
+                        }
+                    }
+                });
+                break;
+
+            case R.id.action_add_to_scheduler:
+                addComponentToScheduler();
+                break;
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -899,6 +905,26 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         initDimmers.get(position).setFocusable(false);
         isSceneSaved = false;
 
+    }
+
+    private void addComponentToScheduler() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        Cursor sceneCursor = null;
+        try {
+            dbHelper.openDataBase();
+            sceneCursor = dbHelper.getScenebyId(currentSceneId);
+
+        }catch (Exception e) {}
+        if(sceneCursor != null) {
+            sceneCursor.moveToFirst();
+            String componentId1 = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+            String componentName = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
+
+            SchedulerModel schedulerModel = new SchedulerModel("", componentId1, "", componentName, AppConstants.SCENE_TYPE, "", "", "", true, "00");
+
+            AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(SceneActivity.this, schedulerModel);
+            addToSchedulerDialog.show();
+        }
     }
 
     public class CallSceneOn extends AsyncTask<Void, Void, Void> {

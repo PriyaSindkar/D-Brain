@@ -8,13 +8,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
+import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
@@ -23,6 +26,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onMachineStateChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
@@ -49,6 +53,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
 
     public onRenameClickListener _renameClick;
     public onDeleteClickListener _deleteClick;
+    public onMachineStateChangeListener _singleClick;
 
     public MachineListCursorAdapter(Context context){
         super(context );
@@ -73,6 +78,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
         public  TextView txtMachineName, txtMachineIPAddress, txtMachineSerialNo;
         public ImageView imgDeleteOption, imgRenameOption;
         public LinearLayout linearSwitch;
+        private SwitchButton imgSwitch;
 
         public ListViewHolder ( View view ) {
             super ( view );
@@ -83,6 +89,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
 
             this.imgDeleteOption = (ImageView) view.findViewById(R.id.imgDeleteOption);
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
+            this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
         }
     }
 
@@ -123,6 +130,11 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
         final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP);
         final String machineIP = cursor.getString(machineIPIndex);
         int machineSerialNoIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_SERIALNO);
+        int machineIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID);
+        final String machineId = cursor.getString(machineIdIndex);
+        int isActiveIdx = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE);
+        final String isActive = cursor.getString(isActiveIdx);
+
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
@@ -133,12 +145,19 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
         listHolder.txtMachineName.setText(sp);
 
         sp = new AdvancedSpannableString(cursor.getString(machineIPIndex));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow),cursor.getString(machineIPIndex) );
+        sp.setColor(mCtx.getResources().getColor(R.color.yellow), cursor.getString(machineIPIndex));
         listHolder.txtMachineIPAddress.setText(sp);
 
         sp = new AdvancedSpannableString(cursor.getString(machineSerialNoIndex));
         sp.setColor(mCtx.getResources().getColor(R.color.yellow), cursor.getString(machineSerialNoIndex));
         listHolder.txtMachineSerialNo.setText(sp);
+
+
+        if(isActive.equals("true")) {
+            listHolder.imgSwitch.setChecked(true);
+        } else {
+            listHolder.imgSwitch.setChecked(false);
+        }
 
         DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
         int machineCount = 0;
@@ -175,6 +194,29 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
                 _renameClick.onRenameOptionClick(position, machineName, machineIP);
             }
         });
+
+        listHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                _singleClick.onMachineEnabledDisabled(position, isChecked);
+                /*DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
+                // enable/disable machine throughout db
+                try {
+                    dbHelper.openDataBase();
+                    dbHelper.enableDisableMachine(machineId, isChecked);
+                    dbHelper.close();
+
+                    if(isChecked)
+                        Toast.makeText(mCtx, "Machine is Activated.", Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(mCtx, "Machine is Deactivated.", Toast.LENGTH_SHORT).show();
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }*/
+            }
+        });
     }
 
     public void setRenameClickListener(onRenameClickListener obj){
@@ -183,6 +225,10 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
 
     public void setDeleteClickListener(onDeleteClickListener obj){
         this._deleteClick = obj;
+    }
+
+    public void setMachineStateChanged(onMachineStateChangeListener obj){
+        this._singleClick = obj;
     }
 
 

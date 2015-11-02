@@ -143,6 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
            }
            values.put(DBConstants.KEY_M_NAME, machineName);
            values.put(DBConstants.KEY_M_IP, machineIP);
+           values.put(DBConstants.KEY_M_ISACTIVE, "true");
        }
 
        Log.e("Machine_CV", values.toString());
@@ -233,6 +234,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         //update Schedulers
         db.delete(DBConstants.TABLE_SCHEDULERS, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
+    }
+
+
+    // change is_active status of machine in tables: machine, SceneComponent, Component, FavouriteComponent, Schedulers
+    public void enableDisableMachine(String machineId, boolean isEnabled) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        //update machine
+        ContentValues values = new ContentValues();
+        if(isEnabled) {
+            values.put(DBConstants.KEY_M_ISACTIVE, "true");
+        }
+        else {
+            values.put(DBConstants.KEY_M_ISACTIVE, "false");
+        }
+
+        // machine
+        db.update(DBConstants.TABLE_MACHINE, values, DBConstants.KEY_M_ID + "='" + machineId + "'", null);
+
+        //update component
+        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_MID + "='" + machineId + "'", null);
+
+        //update scene-component
+        db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_MID + "='" + machineId + "'", null);
+
+        //update FavouriteComponent
+        db.update(DBConstants.TABLE_FAVOURITE, values, DBConstants.KEY_F_MID + "='" + machineId + "'", null);
+
+        //update Schedulers
+        db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
+
+
+        db.close();
     }
 
     public String getMachineNameByIP(String machineIP) {
@@ -357,6 +391,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_C_MID, componentModels.get(i).getMid());
             values.put(DBConstants.KEY_C_MIP, componentModels.get(i).getMip());
             values.put(DBConstants.KEY_C_MNAME, componentModels.get(i).getMachineName());
+            values.put(DBConstants.KEY_M_ISACTIVE, "true");
 
             db.insert(DBConstants.TABLE_COMPONENT, null, values);
         }
@@ -565,6 +600,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_SC_MID, componentModels.get(i).getMachineId());
             values.put(DBConstants.KEY_SC_MNAME, componentModels.get(i).getMachineName());
             values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
+            values.put(DBConstants.KEY_M_ISACTIVE, "true");
 
             db.insert(DBConstants.TABLE_SCENE_COMPONENT, null, values);
         }
@@ -591,6 +627,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete(DBConstants.TABLE_SCENE, DBConstants.KEY_S_ID + "='" + sceneId + "'", null);
         deleteSceneComponentsBySceneId(sceneId);
         db.close();
+    }
+
+
+    // to get scene
+    public Cursor getScenebyId(String sceneId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_S_ID + "=?",
+                    new String[]{sceneId}, null, null, null, null);
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
     }
 
     public String getSceneStatus(String sceneId) {
@@ -982,6 +1033,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_C_MID, machineID);
         values.put(DBConstants.KEY_C_MIP, machineIP);
         values.put(DBConstants.KEY_F_MNAME, machineName);
+        values.put(DBConstants.KEY_M_ISACTIVE, "true");
 
         if(!isAlreadyAFavourite(componentId, machineID)) {
             db.insert(DBConstants.TABLE_FAVOURITE, null, values);
@@ -1074,6 +1126,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_SCH_MNAME, schedulerModel.getMachineName());
         values.put(DBConstants.KEY_SCH_MID, schedulerModel.getMid());
         values.put(DBConstants.KEY_SCH_MIP, schedulerModel.getMip());
+        values.put(DBConstants.KEY_M_ISACTIVE, "true");
 
         long id =  db.insert(DBConstants.TABLE_SCHEDULERS, null, values);
 

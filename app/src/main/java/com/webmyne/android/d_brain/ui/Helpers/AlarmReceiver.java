@@ -111,8 +111,8 @@ public class AlarmReceiver extends BroadcastReceiver {
                 String URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
 
                 // call url
-                new ChangeSwitchStatus().execute(URL);
                 notificationSchedulerName = schedulerModel.getSchedulerName();
+                new ChangeSwitchStatus().execute(URL);
 
             } else if (schedulerModel.getComponentType().equals(AppConstants.DIMMER_TYPE)) {
                 String name = schedulerModel.getComponentId();
@@ -127,12 +127,12 @@ public class AlarmReceiver extends BroadcastReceiver {
                 String URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
 
                 // call url
-                new ChangeDimmerStatus().execute(URL);
                 notificationSchedulerName = schedulerModel.getSchedulerName();
+                new ChangeDimmerStatus().execute(URL);
 
             } else if (schedulerModel.getComponentType().equals(AppConstants.SCENE_TYPE)) {
-
                 try {
+                    notificationSchedulerName = schedulerModel.getSchedulerName();
                     DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
                     dbHelper.openDataBase();
                     Cursor sceneCursor = dbHelper.getAllComponentsInAScene(schedulerModel.getComponentPrimaryId());
@@ -156,7 +156,6 @@ public class AlarmReceiver extends BroadcastReceiver {
                                 if (cComponentType.equals(AppConstants.SWITCH_TYPE)) {
                                     URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue();
                                     new ChangeSwitchStatus().execute(URL);
-                                    notificationSchedulerName = schedulerModel.getSchedulerName();
 
                                 } else if (cComponentType.equals(AppConstants.DIMMER_TYPE)) {
                                     String strProgress = "";
@@ -169,13 +168,15 @@ public class AlarmReceiver extends BroadcastReceiver {
                                         URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue() + strProgress;
                                     }
                                     new ChangeDimmerStatus().execute(URL);
-                                    notificationSchedulerName = schedulerModel.getSchedulerName();
                                 }
 
                             } while (sceneCursor.moveToNext());
                         }
                     }
                     dbHelper.close();
+
+                    String msg = notificationSchedulerName + " Set";
+                    sendNotification(msg);
 
                 } catch (Exception e) {
 
@@ -342,7 +343,8 @@ public class AlarmReceiver extends BroadcastReceiver {
             super.onPostExecute(aVoid);
             try{
                 String msg = notificationSchedulerName + " Set";
-                sendNotification(msg);
+                if(schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE))
+                    sendNotification(msg);
 
             }catch(Exception e){
             }
@@ -375,7 +377,8 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             try {
                 String msg = notificationSchedulerName + " Set";
-                sendNotification(msg);
+                if(schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE))
+                    sendNotification(msg);
             }catch (Exception e) {}
         }
     }

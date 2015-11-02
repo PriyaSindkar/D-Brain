@@ -215,11 +215,15 @@ public class AddMachineDialog extends BaseDialog {
                                     machineID = dbHelper.insertIntoMachine(powerStatus, machineName, machineIP);
                                     dbHelper.close();
 
-                                    initDatabaseComponents(productCode);
+                                    if(machineID != -1) {
+                                        initDatabaseComponents(productCode);
 
-                                    Toast.makeText(context, "Machine Added", Toast.LENGTH_SHORT).show();
-                                    clickListener.onSingleClick(0);
-                                    dismiss();
+                                        Toast.makeText(context, "Machine Added", Toast.LENGTH_SHORT).show();
+                                        clickListener.onSingleClick(0);
+                                        dismiss();
+                                    } else {
+                                        Toast.makeText(context, "Error Occurred While Adding Machine. Please Check IP Address and Serial No.", Toast.LENGTH_LONG).show();
+                                    }
                                 } else {
                                     Toast.makeText(context, "Invalid Product Code.", Toast.LENGTH_LONG).show();
                                 }

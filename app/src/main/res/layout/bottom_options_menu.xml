@@ -82,7 +82,7 @@ android:layout_height="wrap_content">
         android:background="@drawable/dotted_line" />
 
     <LinearLayout
-        android:id="@+id/linearAddScheduler"
+        android:id="@+id/linearShowTouchPanel"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -95,7 +95,9 @@ android:layout_height="wrap_content">
             android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
             android:background="@drawable/white_border_circle"
             android:padding="@dimen/STD_MARGIN"
-            android:src="@drawable/ic_scheduler" />
+            android:tint="@color/white"
+            android:tintMode="src_atop"
+            android:src="@drawable/drawer_touchpanel" />
 
         <TextView
             android:padding="@dimen/VS_MARGIN"
@@ -104,7 +106,7 @@ android:layout_height="wrap_content">
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Schedulers"
+            android:text="Touch Panel"
             android:textSize="@dimen/VS_TEXT_SIZE"
             android:textColor="@color/white" />
     </LinearLayout>

@@ -68,8 +68,8 @@
         <ImageView
             android:id="@+id/imgEmpty"
             android:layout_gravity="center"
-            android:layout_width="@dimen/CIRCLE_SIZE"
-            android:layout_height="@dimen/CIRCLE_SIZE"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:padding="@dimen/STD_MARGIN"
             android:src="@drawable/drawer_schedulers"/>
 

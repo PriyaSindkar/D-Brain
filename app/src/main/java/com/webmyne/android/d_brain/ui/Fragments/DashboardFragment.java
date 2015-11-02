@@ -3,6 +3,7 @@ package com.webmyne.android.d_brain.ui.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,11 +32,13 @@ import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SchedulersListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SensorsListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
-import com.webmyne.android.d_brain.ui.Adapters.SchedulersListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
+import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
+import com.webmyne.android.d_brain.ui.Model.UserSettings;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -46,6 +49,7 @@ import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.KeyStore;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -53,7 +57,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
     private AnimationHelper animObj;
     private ImageView imgOptions, imgFavorites, imgSchedulers, bulb_image;
-    private boolean isImageUp = true, isBulbOn = true;
+    private boolean isImageUp = true, isBulbOn;
     private LinearLayout layoutBottom, linearOptions, linearSceneList, linearDisabled;
     private HorizontalScrollView hScrollView;
     private FrameLayout parentMotor, parentSlider, parentSwitches, parentSensors, linearLeft ;
@@ -137,7 +141,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         linearAddMachine = (LinearLayout) row.findViewById(R.id.linearAddMachine);
         linearAddMachine.setOnClickListener(this);
-        linearAddScheduler = (LinearLayout) row.findViewById(R.id.linearAddScheduler);
+        linearAddScheduler = (LinearLayout) row.findViewById(R.id.linearShowTouchPanel);
         linearAddScheduler.setOnClickListener(this);
 
         imgFavorites.setOnClickListener(this);
@@ -190,7 +194,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                             }
                         });
                     }
-                } catch(Exception e) {}
+                } catch (Exception e) {
+                }
             }
         });
 
@@ -204,8 +209,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             }
         });
 
-
-
         ((HomeDrawerActivity) getActivity()).initPowerButton();
         // call();
     }
@@ -218,24 +221,41 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         homeScreen.setTitle("Main Panel");
         homeScreen.hideAppBarButton();
 
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
+        UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
+
+        if(userSettings != null) {
+            if( !userSettings.isMainPowerOn()) {
+                Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
+
+                showOffScreen();
+                ((HomeDrawerActivity) getActivity()).hideDrawer();
+
+                bulb_image.setColorFilter(getResources().getColor(R.color.white));
+                bulb_image.setBackgroundResource(R.drawable.white_border_circle);
+            } else {
+                bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
+                bulb_image.setBackgroundResource(R.drawable.circle);
+
+                showOnScreen();
+                ((HomeDrawerActivity) getActivity()).showDrawer();
+            }
+        } else {
+            bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
+            bulb_image.setBackgroundResource(R.drawable.circle);
+
+            showOnScreen();
+            ((HomeDrawerActivity) getActivity()).showDrawer();
+        }
+
+
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();
-            machineCursor = dbHelper.getAllMachines();
-
-            if(machineCursor != null) {
-                machineCursor.moveToFirst();
-                if(!machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP)).contains("http://")) {
-                    URL_MACHINE_IP = "http://" + machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
-                } else {
-                    URL_MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
-                }
-                MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
-            }
 
             switchListCursor =  dbHelper.getAllSwitchComponents();
             dimmerListCursor =  dbHelper.getAllDimmerComponents();
-            motorListCursor =  dbHelper.getAllMotorComponents();
+            motorListCursor =   dbHelper.getAllMotorComponents();
             sensorListCursor =  dbHelper.getAllSensorsComponents();
             machineListCursor = dbHelper.getAllMachines();
 
@@ -385,11 +405,12 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 break;
 
             case R.id.bulb_image:
+                Log.e("TAG", "BULB CLICK " + isBulbOn);
                 if(isBulbOn) {
                   //  linearMainBody.setAlpha(0.3f);
                     Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
 
-                    showOffScreen() ;
+                    showOffScreen();
                     ((HomeDrawerActivity) getActivity()).hideDrawer();
 
                     bulb_image.setColorFilter(getResources().getColor(R.color.white));
@@ -408,6 +429,16 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     } else {
                         Log.e("TAG_DASHBOARD", "No dimmers");
                     }
+
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
+                    UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
+
+                    if(userSettings == null) {
+                        userSettings = new UserSettings();
+                    }
+                    userSettings.setIsMainPowerOn(false);
+                    complexPreferences.putObject("settings-pref", userSettings);
+                    complexPreferences.commit();
 
                 } else {
                     bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
@@ -435,7 +466,19 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                             new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                         }
                     }
+
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
+                    UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
+
+                    if(userSettings == null) {
+                        userSettings = new UserSettings();
+                    }
+                    userSettings.setIsMainPowerOn(true);
+                    complexPreferences.putObject("settings-pref", userSettings);
+                    complexPreferences.commit();
                 }
+
+
                 isBulbOn = !isBulbOn;
                 break;
 
@@ -469,7 +512,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 intent = new Intent(getActivity(), MachineListActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.linearAddScheduler:
+            case R.id.linearShowTouchPanel:
                 // close pop up
                 animObj.rotateViewAntiClockwise(imgOptions);
                 animObj.closePopUpMenu(linearOptions);
@@ -481,7 +524,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     }
                 });
 
-                intent = new Intent(getActivity(), SchedulersListActivity.class);
+                intent = new Intent(getActivity(), TouchPanelActivity.class);
                 startActivity(intent);
                 break;
 
