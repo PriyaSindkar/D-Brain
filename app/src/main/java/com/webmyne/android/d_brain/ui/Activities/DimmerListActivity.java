@@ -209,7 +209,6 @@ public class DimmerListActivity extends AppCompatActivity {
                         String machineIP = machineListCursor.getString(machineListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
                         machineIPs[i] = machineIP;
                         i++;
-
                     } while(machineListCursor.moveToNext());
                 }
             }
@@ -223,6 +222,9 @@ public class DimmerListActivity extends AppCompatActivity {
     }
 
     public class GetDimmerStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+        String machineId="", machineName = "", machineIp, isMachineActive = "false";
+        Cursor cursor, machineCursor;
 
         @Override
         protected void onPreExecute() {
@@ -231,50 +233,106 @@ public class DimmerListActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... params) {
-            try {
+
                 allDimmerStatusList = new ArrayList<>();
 
-                for(int i=0; i<params.length; i++) {
+                for(int i=0; i<machineIPs.length; i++) {
                     String machineBaseURL = "";
+                    machineIp = machineIPs[i];
 
                     if(params[i].startsWith("http://")) {
-                        machineBaseURL = params[i];
+                        machineBaseURL = machineIPs[i];
                     } else {
-                        machineBaseURL = "http://" + params[i];
+                        machineBaseURL = "http://" + machineIPs[i];
                     }
-                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
-                    Log.e("# urlValue", urlValue.toString());
-
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = httpUrlConnection.getInputStream();
-                    //  Log.e("# inputStream", inputStream.toString());
-                    MainXmlPullParser pullParser = new MainXmlPullParser();
-
-                    dimmerStatusList = pullParser.processXML(inputStream);
-                    Log.e("XML PARSERED", dimmerStatusList.toString());
 
                     DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
                     try {
                         dbHelper.openDataBase();
-                        Cursor cursor =  dbHelper.getAllDimmerComponentsForAMachine(params[i]);
-                        int totalDimmersofMachine = 0;
-                        if(cursor != null) {
-                            totalDimmersofMachine = cursor.getCount();
-                        }
-
-                        for(int j=0 ;j <totalDimmersofMachine ; j++) {
-                            allDimmerStatusList.add(dimmerStatusList.get(j));
-                        }
+                        machineCursor = dbHelper.getMachineByIP(machineIp);
+                        machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                        machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                        isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
                         dbHelper.close();
 
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
+
+                    // fetch dimmer status from machine only if the machine is active else init all the dimmer status to off
+                    if (isMachineActive.equals("true")) {
+                        try {
+                            URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
+                            Log.e("# urlValue", urlValue.toString());
+
+                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                            httpUrlConnection.setRequestMethod("GET");
+                            InputStream inputStream = httpUrlConnection.getInputStream();
+                            httpUrlConnection.setConnectTimeout(500*60);
+                            //  Log.e("# inputStream", inputStream.toString());
+                            MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                            dimmerStatusList = pullParser.processXML(inputStream);
+                            Log.e("XML PARSERED", dimmerStatusList.toString());
+
+                            try {
+                                dbHelper.openDataBase();
+                                cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
+                                int totalDimmersofMachine = 0;
+                                if (cursor != null) {
+                                    totalDimmersofMachine = cursor.getCount();
+                                }
+
+                                for (int j = 0; j < totalDimmersofMachine; j++) {
+                                    allDimmerStatusList.add(dimmerStatusList.get(j));
+                                }
+                                dbHelper.close();
+
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                        } catch (Exception e) {
+                            Log.e("# EXP", e.toString());
+                            isError = true;
+                            try {
+                                dbHelper.openDataBase();
+                                dbHelper.enableDisableMachine(machineId, false);
+                                dbHelper.close();
+
+                                if (cursor != null) {
+                                    cursor.moveToFirst();
+                                    if(cursor.getCount() > 0) {
+                                        do {
+                                            String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                            XMLValues values = new XMLValues();
+                                            values.tagName = componnetId;
+                                            values.tagValue = AppConstants.OFF_VALUE + AppConstants.OFF_VALUE;
+                                            allDimmerStatusList.add(values);
+
+                                        } while (cursor.moveToNext());
+                                    }
+                                }
+                            } catch (SQLException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    } else {
+                        if (cursor != null) {
+                            cursor.moveToFirst();
+                            if (cursor.getCount() > 0) {
+                                do {
+                                    String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                    XMLValues values = new XMLValues();
+                                    values.tagName = componnetId;
+                                    values.tagValue = AppConstants.OFF_VALUE + AppConstants.OFF_VALUE;
+                                    allDimmerStatusList.add(values);
+
+                                } while (cursor.moveToNext());
+                            }
+                        }
+                    }
                 }
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
+
             return null;
         }
 
@@ -282,6 +340,19 @@ public class DimmerListActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             try {
                 progressBar.setVisibility(View.GONE);
+                if(isError) {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                        Toast.makeText(DimmerListActivity.this, "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                }
+
+
                 if(isFirstTime) {
                     //init adapter
                     adapter = new DimmerListCursorAdapter(DimmerListActivity.this, dimmerListCursor, allDimmerStatusList);

@@ -33,6 +33,7 @@ import com.webmyne.android.d_brain.ui.Activities.SchedulersListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SensorsListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
+import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
@@ -753,6 +754,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     }
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
 
         @Override
         protected Void doInBackground(String... params) {
@@ -762,20 +764,25 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 Log.e("# url change switch", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(1000*60);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
 
 
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
+                isError = true;
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+            // machine became inactive.
+            if(isError) {
+
             }
+        }
     }
 
     public class ChangeDimmerStatus extends AsyncTask<String, Void, Void> {
@@ -788,6 +795,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 Log.e("# url change dimmer", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(1000*60);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
 

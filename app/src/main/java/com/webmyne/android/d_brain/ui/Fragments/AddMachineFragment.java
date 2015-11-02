@@ -1,8 +1,10 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -21,19 +23,28 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditMachineDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineNotActiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onMachineStateChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
+import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
+import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -47,6 +58,9 @@ public class AddMachineFragment extends Fragment {
     private LinearLayout emptyView;
     private Cursor machineCursor;
     private ProgressBar progress_bar;
+    private ProgressDialog progress_dialog;
+    private String machineId, machineIp;
+    private boolean isEnabled;
 
     public static AddMachineFragment newInstance() {
         AddMachineFragment fragment = new AddMachineFragment();
@@ -73,6 +87,7 @@ public class AddMachineFragment extends Fragment {
 
         callRenameClick();
         callOnDeleteClick();
+        callOnMachineEnabledDisabled();
         return view;
     }
 
@@ -151,6 +166,7 @@ public class AddMachineFragment extends Fragment {
 
                                 callRenameClick();
                                 callOnDeleteClick();
+                                callOnMachineEnabledDisabled();
 
                                 Toast.makeText(getActivity(), "Machine Deleted", Toast.LENGTH_LONG).show();
                             } catch (SQLException e) {
@@ -160,6 +176,46 @@ public class AddMachineFragment extends Fragment {
                         }
                     }
                 });
+            }
+        });
+    }
+
+    private void callOnMachineEnabledDisabled() {
+        adapter.setMachineStateChanged(new onMachineStateChangeListener() {
+            @Override
+            public void onMachineEnabledDisabled(int pos, boolean _isEnabled) {
+                machineCursor.moveToPosition(pos);
+                int machineIdIndex = machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID);
+                machineId = machineCursor.getString(machineIdIndex);
+                isEnabled = _isEnabled;
+
+                int machineIpIndex = machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP);
+                machineIp = machineCursor.getString(machineIpIndex);
+
+                if (_isEnabled) {
+                    //call debt
+                    new GetMachineStatus().execute(machineIp);
+                } else {
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    // enable/disable machine throughout db
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, _isEnabled);
+                        machineCursor = dbHelper.getAllMachines();
+                        adapter = new MachineListCursorAdapter(getActivity(), machineCursor);
+                        adapter.setHasStableIds(true);
+                        mRecyclerView.setAdapter(adapter);
+                        progress_bar.setVisibility(View.GONE);
+
+                        callRenameClick();
+                        callOnDeleteClick();
+                        callOnMachineEnabledDisabled();
+                        //dbHelper.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    Toast.makeText(getActivity(), "Machine is Deactivated.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -178,6 +234,7 @@ public class AddMachineFragment extends Fragment {
 
             callOnDeleteClick();
             callRenameClick();
+            callOnMachineEnabledDisabled();
 
         } catch (SQLException e) {
             Log.e("TAG EXP", e.toString());
@@ -196,6 +253,10 @@ public class AddMachineFragment extends Fragment {
         txtEmptyView = (TextView) view.findViewById(R.id.txtEmptyView);
 
         progress_bar = (ProgressBar) view.findViewById(R.id.progress_bar);
+
+        progress_dialog = new ProgressDialog(getActivity());
+        progress_dialog.setMessage("Please wait...");
+        progress_dialog.setCancelable(false);
 
 
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
@@ -240,6 +301,105 @@ public class AddMachineFragment extends Fragment {
         mRecyclerView.getItemAnimator().setRemoveDuration(500);
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(500);
+    }
+
+    public class GetMachineStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+
+        @Override
+        protected void onPreExecute() {
+           progress_dialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                URL urlValue = new URL(params[0] + AppConstants.URL_FETCH_MACHINE_STATUS);
+                Log.e("# urlValue", urlValue.toString());
+
+                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(500 * 60);
+
+                httpUrlConnection.setRequestMethod("GET");
+                InputStream inputStream = httpUrlConnection.getInputStream();
+                //  Log.e("# inputStream", inputStream.toString());
+                MainXmlPullParser pullParser = new MainXmlPullParser();
+                ArrayList<XMLValues> powerStatus = pullParser.processXML(inputStream);
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+                isError = true;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            progress_dialog.hide();
+            try {
+                if (isError) {
+
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    // enable/disable machine throughout db
+                    try {
+                        dbHelper.openDataBase();
+                        machineCursor = dbHelper.getAllMachines();
+                        adapter = new MachineListCursorAdapter(getActivity(), machineCursor);
+                        adapter.setHasStableIds(true);
+                        mRecyclerView.setAdapter(adapter);
+                        progress_bar.setVisibility(View.GONE);
+
+                        callRenameClick();
+                        callOnDeleteClick();
+                        callOnMachineEnabledDisabled();
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+
+                    // show alert dialog for ok and retry
+                    MachineNotActiveDialog machineNotActiveDialog = new MachineNotActiveDialog(getActivity(), "Machine cannot be activated.");
+                    machineNotActiveDialog.show();
+
+                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            if( !isSave) {
+                                //call debt
+                                new GetMachineStatus().execute(machineIp);
+                            }
+                        }
+                    });
+
+                } else {
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    // enable/disable machine throughout db
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, isEnabled);
+
+                        machineCursor = dbHelper.getAllMachines();
+                        adapter = new MachineListCursorAdapter(getActivity(), machineCursor);
+                        adapter.setHasStableIds(true);
+                        mRecyclerView.setAdapter(adapter);
+                        progress_bar.setVisibility(View.GONE);
+
+                        callRenameClick();
+                        callOnDeleteClick();
+                        callOnMachineEnabledDisabled();
+                        //dbHelper.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    Toast.makeText(getActivity(), "Machine is Activated.", Toast.LENGTH_SHORT).show();
+                }
+
+            } catch (Exception e) {
+
+            }
+
+
+        }
     }
 
 }

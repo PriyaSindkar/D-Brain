@@ -74,7 +74,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
         public TextView txtDimmerName, txtValue, txtMachineName;
         private SeekBar seekBar;
         private ImageView  imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
-        private LinearLayout linearParent;
+        private LinearLayout linearMotor;
         private SwitchButton imgSwitch;
 
         public ListViewHolder(View view) {
@@ -83,7 +83,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             this.txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.seekBar = (SeekBar) view.findViewById(R.id.seekBar);
             this.txtValue = (TextView) view.findViewById(R.id.txtValue);
-            this.linearParent = (LinearLayout) view.findViewById(R.id.linearParent);
+            this.linearMotor = (LinearLayout) view.findViewById(R.id.linearMotor);
             txtValue.setText("0");
 
             this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
@@ -161,6 +161,9 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
         int componentIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID);
         String componentName = cursor.getString(componentIdIndex);
 
+        final int isActiveIdx = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE);
+        final String isActive = cursor.getString(isActiveIdx);
+
         String machineIP = cursor.getString(machineIPIndex);
         if(!machineIP.startsWith("http://")) {
             machineIP = "http://" + machineIP;
@@ -183,22 +186,12 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             case 0:
                 final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
 
-                /*AdvancedSpannableString sp = new AdvancedSpannableString("Dimmer Name: "+cursor.getString(dimmerNameIndex));
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Dimmer Name:");
-                listHolder.txtDimmerName.setText(sp);
-
-                sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");*/
                 listHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
                 listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                 if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
-                    /*listHolder.txtValue.setText("0");
-                    listHolder.seekBar.setProgress(0);*/
                     listHolder.imgSwitch.setChecked(false);
                 } else {
-                   /* listHolder.txtValue.setText(String.valueOf(seekProgress));
-                    listHolder.seekBar.setProgress(seekProgress);*/
                     listHolder.imgSwitch.setChecked(true);
                 }
 
@@ -206,107 +199,107 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                 listHolder.txtValue.setText(String.valueOf(seekProgress));
                 listHolder.seekBar.setProgress(seekProgress);
 
-                final String finalMachineIP = machineIP;
-                listHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        listHolder.txtValue.setText("" + progress);
+                if(isActive.equals("false")) {
+                    listHolder.linearMotor.setAlpha(0.5f);
+                    listHolder.imgRenameOption.setClickable(false);
+                    listHolder.imgAddToSceneOption.setClickable(false);
+                    listHolder.imgFavoriteOption.setClickable(false);
+                    listHolder.imgAddSchedulerOption.setClickable(false);
+                    listHolder.imgSwitch.setEnabled(false);
+                    listHolder.imgSwitch.setClickable(false);
+                    listHolder.seekBar.setEnabled(false);
 
-                    }
+                } else {
+                    listHolder.linearMotor.setAlpha(1.0f);
+                    listHolder.seekBar.setEnabled(true);
+                    listHolder.imgSwitch.setEnabled(true);
+                    listHolder.imgSwitch.setClickable(true);
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    final String finalMachineIP = machineIP;
+                    listHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            listHolder.txtValue.setText("" + progress);
 
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        String strProgress = "00";
-                        String CHANGE_STATUS_URL = "";
-
-                        if (seekBar.getProgress() > 0) {
-                            strProgress = String.format("%02d", (seekBar.getProgress() - 1));
-                            CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
-                            dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
-                            listHolder.imgSwitch.setChecked(true);
-                        } else if (seekBar.getProgress() == 0) {
-                            CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
-                            dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                         }
 
-                        DimmerListActivity.isDelay = true;
-                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
-                    }
-                });
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
 
-                listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        listHolder.imgSwitch.toggle();
-                        String strProgress = "00";
-                        String CHANGE_STATUS_URL = "";
-
-                        if (listHolder.seekBar.getProgress() > 0) {
-                            strProgress = String.format("%02d", (listHolder.seekBar.getProgress() - 1));
                         }
 
-                        if (listHolder.imgSwitch.isChecked()) {
-                            CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
-                             //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
-                        } else {
-                            CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
-                            //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                            String strProgress = "00";
+                            String CHANGE_STATUS_URL = "";
+
+                            if (seekBar.getProgress() > 0) {
+                                strProgress = String.format("%02d", (seekBar.getProgress() - 1));
+                                CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                                dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                                listHolder.imgSwitch.setChecked(true);
+                            } else if (seekBar.getProgress() == 0) {
+                                CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                                dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                            }
+
+                            DimmerListActivity.isDelay = true;
+                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                         }
+                    });
 
-                        DimmerListActivity.isDelay = true;
-                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
-                    }
-                });
+                    listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            listHolder.imgSwitch.toggle();
+                            String strProgress = "00";
+                            String CHANGE_STATUS_URL = "";
 
-                listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position, dimmerName);
-                    }
-                });
+                            if (listHolder.seekBar.getProgress() > 0) {
+                                strProgress = String.format("%02d", (listHolder.seekBar.getProgress() - 1));
+                            }
 
-                listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addToSceneClick.onAddToSceneOptionClick(position);
-                    }
-                });
+                            if (listHolder.imgSwitch.isChecked()) {
+                                CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                                //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                            } else {
+                                CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                                //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                            }
 
-                listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _favoriteClick.onFavoriteOptionClick(position);
-                    }
-                });
+                            DimmerListActivity.isDelay = true;
+                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                        }
+                    });
 
-                listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addSchedulerClick.onAddSchedulerOptionClick(position);
-                    }
-                });
+                    listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _renameClick.onRenameOptionClick(position, dimmerName);
+                        }
+                    });
 
-                /*listHolder.linearParent.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _singleClick.onSingleClick(position);
-                    }
-                });
+                    listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _addToSceneClick.onAddToSceneOptionClick(position);
+                        }
+                    });
 
+                    listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _favoriteClick.onFavoriteOptionClick(position);
+                        }
+                    });
 
-                listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addToSceneClick.onAddToSceneOptionClick(position);
-                    }
-                });
-
-                */
+                    listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _addSchedulerClick.onAddSchedulerOptionClick(position);
+                        }
+                    });
+                }
 
 
 
@@ -314,91 +307,96 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             case 1:
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
 
-               /* AdvancedSpannableString sp = new AdvancedSpannableString(cursor.getString(dimmerNameIndex) +" ( "+ cursor.getString(machineNameIndex) +" )");
-                sp.setColor(mCtx.getResources().getColor(R.color.yellow), cursor.getString(machineNameIndex));
-                groupViewHolder.txtDimmerName.setText(sp);*/
-
-                //groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex) +" ( "+ cursor.getString(machineNameIndex) +" )");
                 groupViewHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
                 groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
+
                 final String finalMachineIP1 = machineIP;
 
                 if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
-                    /*groupViewHolder.txtValue.setText("0");
-                    groupViewHolder.seekBar.setProgress(0);*/
                     groupViewHolder.imgSwitch.setChecked(false);
                 } else {
-                    /*groupViewHolder.txtValue.setText(String.valueOf(seekProgress));
-                    groupViewHolder.seekBar.setProgress(seekProgress);*/
                     groupViewHolder.imgSwitch.setChecked(true);
                 }
                 //added on 19-10
                 groupViewHolder.txtValue.setText(String.valueOf(seekProgress));
                 groupViewHolder.seekBar.setProgress(seekProgress);
 
-                groupViewHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        groupViewHolder.txtValue.setText("" + progress);
-                    }
+                if(isActive.equals("false")) {
+                    groupViewHolder.linearParent.setAlpha(0.5f);
+                    groupViewHolder.linearParent.setLongClickable(false);
+                    groupViewHolder.imgSwitch.setEnabled(false);
+                    groupViewHolder.imgSwitch.setClickable(false);
+                    groupViewHolder.seekBar.setEnabled(false);
+                } else {
+                    groupViewHolder.linearParent.setAlpha(1.0f);
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        String strProgress = "00";
-                        String CHANGE_STATUS_URL = "";
-
-                        if (seekBar.getProgress() > 0) {
-                            strProgress = String.format("%02d", (seekBar.getProgress() - 1));
-                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
-                            dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
-                            groupViewHolder.imgSwitch.setChecked(true);
-                        } else if (seekBar.getProgress() == 0) {
-                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
-                            dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                    groupViewHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            groupViewHolder.txtValue.setText("" + progress);
                         }
 
-                        DimmerListActivity.isDelay = true;
-                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
 
-                    }
-                });
-
-                groupViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        groupViewHolder.imgSwitch.toggle();
-                        String strProgress = "00";
-                        String CHANGE_STATUS_URL = "";
-
-                        if (groupViewHolder.seekBar.getProgress() > 0) {
-                            strProgress = String.format("%02d", (groupViewHolder.seekBar.getProgress() - 1));
                         }
 
-                        if (groupViewHolder.imgSwitch.isChecked()) {
-                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
-                            //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
-                        } else {
-                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
-                            //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                            String strProgress = "00";
+                            String CHANGE_STATUS_URL = "";
+
+                            if (seekBar.getProgress() > 0) {
+                                strProgress = String.format("%02d", (seekBar.getProgress() - 1));
+                                CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                                dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                                groupViewHolder.imgSwitch.setChecked(true);
+                            } else if (seekBar.getProgress() == 0) {
+                                CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                                dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                            }
+
+                            DimmerListActivity.isDelay = true;
+                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+
                         }
+                    });
 
-                        DimmerListActivity.isDelay = true;
-                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
-                    }
-                });
+                    groupViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            groupViewHolder.imgSwitch.toggle();
+                            String strProgress = "00";
+                            String CHANGE_STATUS_URL = "";
 
-                groupViewHolder.linearParent.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View view) {
-                        _longClick.onLongClick(position, view);
-                        return false;
-                    }
-                });
+                            if (groupViewHolder.seekBar.getProgress() > 0) {
+                                strProgress = String.format("%02d", (groupViewHolder.seekBar.getProgress() - 1));
+                            }
+
+                            if (groupViewHolder.imgSwitch.isChecked()) {
+                                CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                                //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                            } else {
+                                CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                                //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                            }
+
+                            DimmerListActivity.isDelay = true;
+                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                        }
+                    });
+
+                    groupViewHolder.linearParent.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View view) {
+                            _longClick.onLongClick(position, view);
+                            return false;
+                        }
+                    });
+                }
+
+
+
                 break;
         }
 

@@ -198,23 +198,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
         listHolder.imgSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
                 _singleClick.onMachineEnabledDisabled(position, isChecked);
-                /*DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
-                // enable/disable machine throughout db
-                try {
-                    dbHelper.openDataBase();
-                    dbHelper.enableDisableMachine(machineId, isChecked);
-                    dbHelper.close();
-
-                    if(isChecked)
-                        Toast.makeText(mCtx, "Machine is Activated.", Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(mCtx, "Machine is Deactivated.", Toast.LENGTH_SHORT).show();
-
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }*/
             }
         });
     }

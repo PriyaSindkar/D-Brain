@@ -234,6 +234,9 @@ public class SwitchesListActivity extends AppCompatActivity {
     }
 
     public class GetSwitchStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false, isMachineActive = false;
+        String machineId="", machineName = "", machineIp;
+        Cursor cursor, machineCursor;
 
         @Override
         protected void onPreExecute() {
@@ -242,49 +245,108 @@ public class SwitchesListActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... params) {
-            try {
                 allSwitchesStatusList = new ArrayList<>();
-                for(int i=0; i<params.length; i++) {
-                    String machineBaseURL = "";
 
-                    if(params[i].startsWith("http://")) {
-                        machineBaseURL = params[i];
+                for(int i=0; i<machineIPs.length; i++) {
+
+                    String machineBaseURL = "";
+                    machineIp = machineIPs[i];
+
+                    if(machineIPs[i].startsWith("http://")) {
+                        machineBaseURL = machineIPs[i];
                     } else {
-                        machineBaseURL = "http://" + params[i];
+                        machineBaseURL = "http://" + machineIPs[i];
                     }
 
-                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
-                    Log.e("# urlValue", urlValue.toString());
-
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    inputStream = httpUrlConnection.getInputStream();
-                  //  Log.e("# inputStream", inputStream.toString());
-                    MainXmlPullParser pullParser = new MainXmlPullParser();
-
-                    switchStatusList = pullParser.processXML(inputStream);
-                    Log.e("XML PARSERED", switchStatusList.toString());
-                    DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
                     try {
-                        dbHelper.openDataBase();
-                        Cursor cursor =  dbHelper.getAllSwitchComponentsForAMachine(params[i]);
-                        int totalSwitchesofMachine = 0;
-                        if(cursor != null) {
-                            totalSwitchesofMachine = cursor.getCount();
-                        }
-                        Log.e("totalSwitchesofMachine", totalSwitchesofMachine+"");
-                        for(int j=0 ;j <totalSwitchesofMachine ; j++) {
-                            allSwitchesStatusList.add(switchStatusList.get(j));
-                        }
-                        dbHelper.close();
+                        DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                        try {
+                            dbHelper.openDataBase();
+                            isMachineActive =  dbHelper.isMachineActive(machineIp);
+                            machineCursor = dbHelper.getMachineByIP(machineIp);
+                            machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                            machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
 
-                    } catch (SQLException e) {
-                        e.printStackTrace();
+                            cursor = dbHelper.getAllSwitchComponentsForAMachine(machineIp);
+                            dbHelper.close();
+
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        // fetch switch status from machine only if the machine is active else init all the switch status to off
+                        if (isMachineActive) {
+                            URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
+                            Log.e("# urlValue", urlValue.toString());
+
+                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                            httpUrlConnection.setConnectTimeout(500*60);
+                            httpUrlConnection.setRequestMethod("GET");
+                            inputStream = httpUrlConnection.getInputStream();
+                            //  Log.e("# inputStream", inputStream.toString());
+                            MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                            switchStatusList = pullParser.processXML(inputStream);
+                            Log.e("XML PARSERED", switchStatusList.toString());
+
+                            //DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                            try {
+                                dbHelper.openDataBase();
+                                int totalSwitchesofMachine = 0;
+                                if (cursor != null) {
+                                    totalSwitchesofMachine = cursor.getCount();
+                                }
+
+                                Log.e("totalSwitchesofMachine", totalSwitchesofMachine + "");
+                                for (int j = 0; j < totalSwitchesofMachine; j++) {
+                                    allSwitchesStatusList.add(switchStatusList.get(j));
+                                }
+                                dbHelper.close();
+
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            if (cursor != null) {
+                                cursor.moveToFirst();
+                                if (cursor.getCount() > 0) {
+                                    do {
+                                        String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                        XMLValues values = new XMLValues();
+                                        values.tagName = componnetId;
+                                        values.tagValue = AppConstants.OFF_VALUE;
+                                        allSwitchesStatusList.add(values);
+
+                                    } while (cursor.moveToNext());
+                                }
+                            }
+                        }
+                    } catch (Exception ex1) {
+                        Log.e("#EXP", ex1.toString());
+                        isError = true;
+                        DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+
+                            if (cursor != null) {
+                                cursor.moveToFirst();
+                                if(cursor.getCount() > 0) {
+                                    do {
+                                        String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                        XMLValues values = new XMLValues();
+                                        values.tagName = componnetId;
+                                        values.tagValue = AppConstants.OFF_VALUE;
+                                        allSwitchesStatusList.add(values);
+
+                                    } while (cursor.moveToNext());
+                                }
+                            }
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
-            } catch (Exception e) {
-                Log.e("# EXP123", e.toString());
-            }
             return null;
         }
 
@@ -293,6 +355,19 @@ public class SwitchesListActivity extends AppCompatActivity {
            // Log.e("TAG_ASYNC", "Inside onPostExecute");
             try {
                 progressBar.setVisibility(View.GONE);
+
+                if(isError) {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                        Toast.makeText(SwitchesListActivity.this, "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                }
+
                 if(isFirstTime) {
                     //init adapter
                     adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, allSwitchesStatusList);
@@ -381,31 +456,6 @@ public class SwitchesListActivity extends AppCompatActivity {
                                 addComponentToScheduler(pos);
                             }
                         });
-
-                        /*PopupMenu popup = new PopupMenu(SwitchesListActivity.this, view);
-                        popup.getMenuInflater().inflate(R.menu.menu_components, popup.getMenu());
-
-                        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                            public boolean onMenuItemClick(MenuItem item) {
-
-                                switch (item.getItemId()) {
-                                    case R.id.action_rename:
-                                        renameComponent(pos);
-                                        break;
-
-                                    case R.id.action_add_to_scene:
-                                        addComponentToScene(pos);
-                                        break;
-
-                                    case R.id.action_add_to_favorite:
-                                        addComponentToFavourite(pos);
-                                        break;
-                                } //switch end
-                                return true;
-                            }
-                        });
-
-                        popup.show();//showing popup menu*/
                     }
                 });
 

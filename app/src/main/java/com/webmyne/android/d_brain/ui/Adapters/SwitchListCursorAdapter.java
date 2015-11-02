@@ -9,9 +9,11 @@ import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
@@ -27,11 +29,13 @@ import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -74,7 +78,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     public class ListViewHolder extends ViewHolder {
         public  TextView txtSwitchName, txtMachineName;
         public ImageView imgFavoriteOption, imgAddToSceneOption, imgAddSchedulerOption, imgRenameOption;
-        public LinearLayout linearSwitch;
+        public LinearLayout linearSwitch, linearParent, linearOptionsMenu;
         public SwitchButton imgSwitch;
 
         public ListViewHolder ( View view ) {
@@ -89,6 +93,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
 
             this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
+            this.linearParent = (LinearLayout) view.findViewById(R.id.linearParent);
+            this.linearOptionsMenu = (LinearLayout)view.findViewById(R.id.linearOptionsMenu);
         }
     }
 
@@ -148,7 +154,13 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         final int switchNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
         final String switchName = cursor.getString(switchNameIndex);
         int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
+        final String machineName = cursor.getString(machineNameIndex);
         final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP);
+        final int machineIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID);
+        final String machineId = cursor.getString(machineIdIndex);
+
+        final int isActiveIdx = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE);
+        final String isActive = cursor.getString(isActiveIdx);
 
         int componentIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID);
         String componentName = cursor.getString(componentIdIndex);
@@ -170,66 +182,73 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                 } else {
                     listHolder.imgSwitch.setChecked(true);
-                   // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                    // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                 }
+                if(isActive.equals("false")) {
+                    listHolder.linearParent.setAlpha(0.5f);
+                    listHolder.linearOptionsMenu.setAlpha(0.5f);
+                    listHolder.imgRenameOption.setClickable(false);
+                    listHolder.imgAddToSceneOption.setClickable(false);
+                    listHolder.imgFavoriteOption.setClickable(false);
+                    listHolder.imgAddSchedulerOption.setClickable(false);
+                    listHolder.imgSwitch.setEnabled(false);
+                    listHolder.imgSwitch.setClickable(false);
 
-                listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        listHolder.imgSwitch.toggle();
-                        String machineIP = cursor.getString(machineIPIndex);
-                        if(!machineIP.startsWith("http://")) {
-                            machineIP = "http://" + machineIP;
+                } else {
+                    listHolder.linearParent.setAlpha(1.0f);
+                    listHolder.linearOptionsMenu.setAlpha(1.0f);
+                    listHolder.imgSwitch.setEnabled(true);
+
+                    listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            listHolder.imgSwitch.toggle();
+                            String machineIP = cursor.getString(machineIPIndex);
+                            if(!machineIP.startsWith("http://")) {
+                                machineIP = "http://" + machineIP;
+                            }
+
+                            if(listHolder.imgSwitch.isChecked()){// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                                String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                                SwitchesListActivity.isDelay  = true;
+                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                            }else{
+                                //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                                String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                                SwitchesListActivity.isDelay  = true;
+                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                            }
                         }
+                    });
 
-                        if(listHolder.imgSwitch.isChecked()){// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                            String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                            SwitchesListActivity.isDelay  = true;
-                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                        }else{
-                            //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                            String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                            SwitchesListActivity.isDelay  = true;
-                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                    listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _renameClick.onRenameOptionClick(position, switchName);
                         }
-                    }
-                });
+                    });
 
-                listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _renameClick.onRenameOptionClick(position, switchName);
-                    }
-                });
+                    listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _addToSceneClick.onAddToSceneOptionClick(position);
+                        }
+                    });
 
-                listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addToSceneClick.onAddToSceneOptionClick(position);
-                    }
-                });
+                    listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _favoriteClick.onFavoriteOptionClick(position);
+                        }
+                    });
 
-                listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _favoriteClick.onFavoriteOptionClick(position);
-                    }
-                });
-
-                listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _addSchedulerClick.onAddSchedulerOptionClick(position);
-                    }
-                });
-
-                /*listHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _singleClick.onSingleClick(position);
-                    }
-                });*/
-
+                    listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _addSchedulerClick.onAddSchedulerOptionClick(position);
+                        }
+                    });
+                }
 
                 break;
             case 1:
@@ -245,36 +264,50 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                 }
 
-                groupViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        groupViewHolder.imgSwitch.toggle();
+                if(isActive.equals("false")) {
+                    groupViewHolder.linearSwitch.setAlpha(0.5f);
+                    groupViewHolder.linearSwitch.setLongClickable(false);
+                    groupViewHolder.imgSwitch.setEnabled(false);
+                    groupViewHolder.imgSwitch.setClickable(false);
 
-                        String machineIP = cursor.getString(machineIPIndex);
-                        if(!machineIP.startsWith("http://")) {
-                            machineIP = "http://" + machineIP;
+                } else {
+                    groupViewHolder.linearSwitch.setAlpha(1.0f);
+                    groupViewHolder.imgSwitch.setEnabled(true);
+                    groupViewHolder.imgSwitch.setClickable(false);
+
+                    groupViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            groupViewHolder.imgSwitch.toggle();
+
+                            String machineIP = cursor.getString(machineIPIndex);
+                            if(!machineIP.startsWith("http://")) {
+                                machineIP = "http://" + machineIP;
+                            }
+
+                            if (groupViewHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                                String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                                SwitchesListActivity.isDelay = true;
+                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                            } else {
+                                //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                                String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                                SwitchesListActivity.isDelay = true;
+                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                            }
                         }
+                    });
 
-                        if (groupViewHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                            String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                            SwitchesListActivity.isDelay = true;
-                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                        } else {
-                            //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                            String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                            SwitchesListActivity.isDelay = true;
-                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                    groupViewHolder.linearSwitch.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View view) {
+                            _longClick.onLongClick(position,  view);
+                            return false;
                         }
-                    }
-                });
+                    });
+                }
 
-                groupViewHolder.linearSwitch.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View view) {
-                        _longClick.onLongClick(position,  view);
-                        return false;
-                    }
-                });
+
                 break;
         }
 
@@ -309,6 +342,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     }
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
 
         @Override
         protected Void doInBackground(String... params) {
@@ -324,6 +358,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
+                isError = true;
             }
             return null;
         }
@@ -332,7 +367,19 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             try{
-                _switchClick.onCheckedChangeClick(0);
+                /*if(isError) {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+
+                        Toast.makeText(mCtx, "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                } else {*/
+                    _switchClick.onCheckedChangeClick(0);
+               // }
 
             }catch(Exception e){
             }

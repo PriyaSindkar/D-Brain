@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearParent"
     android:orientation="horizontal"
     android:background="@color/primaryColor"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-
 
     <LinearLayout
         android:id="@+id/linearSwitch"

@@ -288,6 +288,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return machineName;
     }
 
+    public Cursor getMachineByIP(String IP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?" ,
+                    new String[]{IP}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+               // machineIP =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
 
     public String getMachineIPByID(String machineID) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -375,6 +393,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.e("EXP ", e.toString());
         }
         return result;
+    }
+
+    public boolean isMachineActive(String machineIP) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        String isActive = "";
+        boolean isMachineActive = false;
+        try {
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?" ,
+                    new String[]{machineIP}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                isActive =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+            }
+
+            if(isActive.equals("true")) {
+                isMachineActive = true;
+            } else {
+                isMachineActive = false;
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return isMachineActive;
     }
 
 
