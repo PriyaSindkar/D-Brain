@@ -4,7 +4,7 @@ package com.webmyne.android.d_brain.ui.Model;
  * Created by priyasindkar on 08-09-2015.
  */
 public class SceneItemsDataObject {
-    private String sceneItemId, sceneControlType, name, machineIP, machineName, defaultValue, sceneComponentPrimaryId, machineId;
+    private String sceneItemId, sceneControlType, name, machineIP, machineName, defaultValue, sceneComponentPrimaryId, machineId, isActive;
 
     public SceneItemsDataObject() {
     }
@@ -78,6 +78,13 @@ public class SceneItemsDataObject {
         this.defaultValue = defaultValue;
     }
 
+    public String getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(String isActive) {
+        this.isActive = isActive;
+    }
 
     @Override
     public boolean equals(Object o) {

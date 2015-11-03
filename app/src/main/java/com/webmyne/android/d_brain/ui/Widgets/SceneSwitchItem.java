@@ -20,7 +20,8 @@ public class SceneSwitchItem extends LinearLayout{
     View viewLine;
     private ImageView imgSwitch;
     private TextView txtSwitchName, txtMachineName;
-    private String switchId, machineIP, componentPrimaryId, machineId;
+    private LinearLayout linearParent;
+    private String switchId, machineIP, componentPrimaryId, machineId, isActive;
 
     public SceneSwitchItem(Context _context) {
         super(_context);
@@ -51,6 +52,7 @@ public class SceneSwitchItem extends LinearLayout{
 
         txtSwitchName = (TextView) findViewById(R.id.txtSwitchName);
         txtMachineName = (TextView) findViewById(R.id.txtMachineName);
+        linearParent = (LinearLayout) findViewById(R.id.linearParent);
         viewLine = findViewById(R.id.viewLine);
 
         setFocusable(true);
@@ -101,6 +103,25 @@ public class SceneSwitchItem extends LinearLayout{
 
     public void setMachineName(String machineName) {
         txtMachineName.setText(machineName);
+    }
+
+    public String getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(String isActive) {
+        this.isActive = isActive;
+    }
+
+    public void enableDisableComponent(String isActive) {
+        if(isActive.equals("false")) {
+            setFocusable(false);
+            linearParent.setAlpha(0.5f);
+        }
+        else {
+            setFocusable(true);
+            linearParent.setAlpha(1.0f);
+        }
     }
 
     @Override

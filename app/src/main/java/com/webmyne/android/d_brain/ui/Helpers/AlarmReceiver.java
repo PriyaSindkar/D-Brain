@@ -37,7 +37,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     NotificationCompat.Builder alamNotificationBuilder;
     Context _ctx;
     boolean isVibrate;
-    String schedulerId, notificationSchedulerName;
+    String schedulerId, notificationSchedulerName = "";
     SchedulerModel schedulerModel;
     Cursor schedulerCursor;
 
@@ -92,231 +92,94 @@ public class AlarmReceiver extends BroadcastReceiver {
                // schedulerCursor = dbHelper.getAllSchedulers();
                 dbHelper.close();
 
+                if(schedulerModel != null) {
+                    if (schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE)) {
+                        String name = schedulerModel.getComponentId();
+                        String mip = schedulerModel.getMip();
+                        String baseMachineUrl = "";
+                        if (mip.startsWith("http://")) {
+                            baseMachineUrl = mip;
+                        } else {
+                            baseMachineUrl = "http://" + mip;
+                        }
+                        String URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
+
+                        // call url
+                        notificationSchedulerName = schedulerModel.getSchedulerName();
+                        new ChangeSwitchStatus().execute(URL);
+
+                    } else if (schedulerModel.getComponentType().equals(AppConstants.DIMMER_TYPE)) {
+                        String name = schedulerModel.getComponentId();
+                        String mip = schedulerModel.getMip();
+                        String baseMachineUrl = "";
+                        if (mip.startsWith("http://")) {
+                            baseMachineUrl = mip;
+                        } else {
+                            baseMachineUrl = "http://" + mip;
+                        }
+
+                        String URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
+
+                        // call url
+                        notificationSchedulerName = schedulerModel.getSchedulerName();
+                        new ChangeDimmerStatus().execute(URL);
+
+                    } else if (schedulerModel.getComponentType().equals(AppConstants.SCENE_TYPE)) {
+                        try {
+                            notificationSchedulerName = schedulerModel.getSchedulerName();
+                            dbHelper.openDataBase();
+                            Cursor sceneCursor = dbHelper.getAllComponentsInAScene(schedulerModel.getComponentPrimaryId());
+
+                            if (sceneCursor != null) {
+                                if (sceneCursor.getCount() > 0) {
+                                    sceneCursor.moveToFirst();
+                                    do {
+                                        String URL = "", baseMachineUrl = "";
+                                        String mip = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
+                                        String sceneComponentId = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID));
+                                        String defaultValue = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
+                                        String cComponentType = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE));
+
+                                        if (mip.startsWith("http://")) {
+                                            baseMachineUrl = mip;
+                                        } else {
+                                            baseMachineUrl = "http://" + mip;
+                                        }
+
+                                        if (cComponentType.equals(AppConstants.SWITCH_TYPE)) {
+                                            URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue();
+                                            new ChangeSwitchStatus().execute(URL);
+
+                                        } else if (cComponentType.equals(AppConstants.DIMMER_TYPE)) {
+                                            String strProgress = "";
+                                            Log.e("def", defaultValue);
+                                            if (defaultValue.equals("00")) {
+                                                strProgress = String.format("%02d", Integer.parseInt(defaultValue));
+                                                URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue() + strProgress;
+                                            } else {
+                                                strProgress = String.format("%02d", Integer.parseInt(defaultValue) - 1);
+                                                URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue() + strProgress;
+                                            }
+                                            new ChangeDimmerStatus().execute(URL);
+                                        }
+
+                                    } while (sceneCursor.moveToNext());
+                                }
+                            }
+                            dbHelper.close();
+
+                            String msg = notificationSchedulerName + " Set";
+                            sendNotification(msg);
+
+                        } catch (Exception e) {
+
+                        }
+                    }
+                }
             } catch (Exception e) {
 
             }
-
-
-
-        if(schedulerModel != null) {
-            if (schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE)) {
-                String name = schedulerModel.getComponentId();
-                String mip = schedulerModel.getMip();
-                String baseMachineUrl = "";
-                if (mip.startsWith("http://")) {
-                    baseMachineUrl = mip;
-                } else {
-                    baseMachineUrl = "http://" + mip;
-                }
-                String URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
-
-                // call url
-                notificationSchedulerName = schedulerModel.getSchedulerName();
-                new ChangeSwitchStatus().execute(URL);
-
-            } else if (schedulerModel.getComponentType().equals(AppConstants.DIMMER_TYPE)) {
-                String name = schedulerModel.getComponentId();
-                String mip = schedulerModel.getMip();
-                String baseMachineUrl = "";
-                if (mip.startsWith("http://")) {
-                    baseMachineUrl = mip;
-                } else {
-                    baseMachineUrl = "http://" + mip;
-                }
-
-                String URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
-
-                // call url
-                notificationSchedulerName = schedulerModel.getSchedulerName();
-                new ChangeDimmerStatus().execute(URL);
-
-            } else if (schedulerModel.getComponentType().equals(AppConstants.SCENE_TYPE)) {
-                try {
-                    notificationSchedulerName = schedulerModel.getSchedulerName();
-                    DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
-                    dbHelper.openDataBase();
-                    Cursor sceneCursor = dbHelper.getAllComponentsInAScene(schedulerModel.getComponentPrimaryId());
-
-                    if (sceneCursor != null) {
-                        if (sceneCursor.getCount() > 0) {
-                            sceneCursor.moveToFirst();
-                            do {
-                                String URL = "", baseMachineUrl = "";
-                                String mip = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
-                                String sceneComponentId = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID));
-                                String defaultValue = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
-                                String cComponentType = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE));
-
-                                if (mip.startsWith("http://")) {
-                                    baseMachineUrl = mip;
-                                } else {
-                                    baseMachineUrl = "http://" + mip;
-                                }
-
-                                if (cComponentType.equals(AppConstants.SWITCH_TYPE)) {
-                                    URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue();
-                                    new ChangeSwitchStatus().execute(URL);
-
-                                } else if (cComponentType.equals(AppConstants.DIMMER_TYPE)) {
-                                    String strProgress = "";
-                                    Log.e("def", defaultValue);
-                                    if (defaultValue.equals("00")) {
-                                        strProgress = String.format("%02d", Integer.parseInt(defaultValue));
-                                        URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue() + strProgress;
-                                    } else {
-                                        strProgress = String.format("%02d", Integer.parseInt(defaultValue) - 1);
-                                        URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue() + strProgress;
-                                    }
-                                    new ChangeDimmerStatus().execute(URL);
-                                }
-
-                            } while (sceneCursor.moveToNext());
-                        }
-                    }
-                    dbHelper.close();
-
-                    String msg = notificationSchedulerName + " Set";
-                    sendNotification(msg);
-
-                } catch (Exception e) {
-
-                }
-            }
         }
-
-
-
-
-
-
-
-            /*if(schedulerCursor != null) {
-                if(schedulerCursor.getCount() > 0) {
-                    do {
-                        final String schedulerId = schedulerCursor.getString(schedulerCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_ID));
-                        final String schedulerName = schedulerCursor.getString(schedulerCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_NAME));
-                        final String componentPrimaryId = schedulerCursor.getString(schedulerCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_ID));
-                        final String componentId = schedulerCursor.getString(schedulerCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-                        final String componentName = schedulerCursor.getString(schedulerCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_NAME));
-                        final String componentType = schedulerCursor.getString(schedulerCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_TYPE));
-                        final String cdefaultValue = schedulerCursor.getString(schedulerCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_DEFAULT));
-                        final String dateTime = schedulerCursor.getString(schedulerCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_DATETIME));
-                        final String machineIP = schedulerCursor.getString(schedulerCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_MIP));
-
-                        *//*SchedulerModel schedulerModel = new SchedulerModel();
-                        schedulerModel.setId(Integer.parseInt(schedulerId));
-                        schedulerModel.setDefaultValue(cdefaultValue);
-                        schedulerModel.setComponentType(componentType);
-                        schedulerModel.setSchedulerName(schedulerName);
-                        schedulerModel.setComponentName(componentName);
-                        schedulerModel.setMip(machineIP);
-                        schedulerModel.setDateTime(dateTime);*//*
-
-                        if(schedulerId != null) {
-                            if (componentType.equals(AppConstants.SWITCH_TYPE)) {
-                                String name = componentId;
-                                String mip = machineIP;
-                                String baseMachineUrl = "";
-                                if (mip.startsWith("http://")) {
-                                    baseMachineUrl = mip;
-                                } else {
-                                    baseMachineUrl = "http://" + mip;
-                                }
-                                String URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + name.substring(2, 4) + cdefaultValue;
-
-                                // call url
-                                new ChangeSwitchStatus().execute(URL);
-                                notificationSchedulerName = schedulerName;
-
-                            } else if (componentType.equals(AppConstants.DIMMER_TYPE)) {
-                                String name = componentId;
-                                String mip = machineIP;
-                                String baseMachineUrl = "";
-                                if (mip.startsWith("http://")) {
-                                    baseMachineUrl = mip;
-                                } else {
-                                    baseMachineUrl = "http://" + mip;
-                                }
-
-                                String URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + name.substring(2, 4) + cdefaultValue;
-
-                                // call url
-                                new ChangeDimmerStatus().execute(URL);
-                                notificationSchedulerName = schedulerName;
-
-                            } else if (componentType.equals(AppConstants.SCENE_TYPE)) {
-
-                                try {
-                                    DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
-                                    dbHelper.openDataBase();
-                                    Cursor sceneCursor = dbHelper.getAllComponentsInAScene(componentPrimaryId);
-
-                                    if (sceneCursor != null) {
-                                        if (sceneCursor.getCount() > 0) {
-                                            sceneCursor.moveToFirst();
-                                            do {
-                                                String URL = "", baseMachineUrl = "";
-                                                String mip = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
-                                                String sceneComponentId = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID));
-                                                String defaultValue = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
-                                                String cComponentType = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE));
-
-                                                if (mip.startsWith("http://")) {
-                                                    baseMachineUrl = mip;
-                                                } else {
-                                                    baseMachineUrl = "http://" + mip;
-                                                }
-
-                                                if (cComponentType.equals(AppConstants.SWITCH_TYPE)) {
-                                                    URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + sceneComponentId.substring(2, 4) + cdefaultValue;
-                                                    new ChangeSwitchStatus().execute(URL);
-                                                    notificationSchedulerName = schedulerName;
-
-                                                } else if (cComponentType.equals(AppConstants.DIMMER_TYPE)) {
-                                                    String strProgress = "";
-                                                    Log.e("def", defaultValue);
-                                                    if (defaultValue.equals("00")) {
-                                                        strProgress = String.format("%02d", Integer.parseInt(defaultValue));
-                                                        URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + cdefaultValue + strProgress;
-                                                    } else {
-                                                        strProgress = String.format("%02d", Integer.parseInt(defaultValue) - 1);
-                                                        URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + cdefaultValue + strProgress;
-                                                    }
-                                                    new ChangeDimmerStatus().execute(URL);
-                                                    notificationSchedulerName = schedulerName;
-                                                }
-
-                                            } while (sceneCursor.moveToNext());
-                                        }
-                                    }
-                                    dbHelper.close();
-
-                                } catch (Exception e) {
-
-                                }
-                            }
-                        }
-
-                    } while(schedulerCursor.moveToNext());
-                }
-            }*/
-
-
-
-
-
-
-
-
-
-
-
-       /* } else {
-            Log.e("TAG_SCHEDULER", "Scheduler null");
-        }*/
-
-    }
-
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
 

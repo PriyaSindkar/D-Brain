@@ -266,8 +266,8 @@ public class SwitchesListActivity extends AppCompatActivity {
                             machineCursor = dbHelper.getMachineByIP(machineIp);
                             machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
                             machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
-
                             cursor = dbHelper.getAllSwitchComponentsForAMachine(machineIp);
+
                             dbHelper.close();
 
                         } catch (SQLException e) {
@@ -275,6 +275,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                         }
                         // fetch switch status from machine only if the machine is active else init all the switch status to off
                         if (isMachineActive) {
+                            Log.e("TAG_MACHINE", machineIp +  "machine is active");
                             URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
                             Log.e("# urlValue", urlValue.toString());
 
@@ -306,6 +307,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         } else {
+                            Log.e("TAG_MACHINE", machineIp + "machine is inactive");
                             if (cursor != null) {
                                 cursor.moveToFirst();
                                 if (cursor.getCount() > 0) {

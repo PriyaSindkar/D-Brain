@@ -73,7 +73,7 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
     public class ListViewHolder extends ViewHolder {
         public  TextView txtSensorName, txtMachineName, txtSensorDetails;
         public ImageView imgRenameOption;
-        public LinearLayout linearSensor;
+        public LinearLayout linearSensor, linearParent;
 
         public ListViewHolder ( View view ) {
             super ( view );
@@ -81,6 +81,7 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
             this.txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.txtSensorDetails = (TextView) view.findViewById(R.id.txtSensorDetails);
             this.linearSensor = (LinearLayout) view.findViewById(R.id.linearSensor);
+            this.linearParent = (LinearLayout) view.findViewById(R.id.linearParent);
 
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
         }
@@ -121,36 +122,37 @@ public class SensorListCursorAdapter extends CursorRecyclerViewAdapter<SensorLis
         int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
         int detailsNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_DETAILS);
         final String sensorDetails = cursor.getString(detailsNameIndex);
+
+        final int isActiveIdx = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE);
+        final String isActive = cursor.getString(isActiveIdx);
+
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
 
         final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
-       /* AdvancedSpannableString sp = new AdvancedSpannableString("Sensor Name: "+cursor.getString(nameIndex));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Sensor Name:");*/
         listHolder.txtSensorName.setText(cursor.getString(nameIndex));
 
         listHolder.txtSensorDetails.setText(sensorDetails);
 
-      /*  sp = new AdvancedSpannableString("Machine Name: "+cursor.getString(machineNameIndex));
-        sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Machine Name:");*/
         listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
-        listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                _renameClick.onRenameOptionClick(position, sensorName, sensorDetails);
-            }
-        });
+        if(isActive.equals("false")) {
+            listHolder.linearParent.setAlpha(0.5f);
+            listHolder.imgRenameOption.setClickable(false);
+
+        } else {
+            listHolder.linearParent.setAlpha(1.0f);
+            listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    _renameClick.onRenameOptionClick(position, sensorName, sensorDetails);
+                }
+            });
+        }
+
+
 
     }
-
-   /* public void setSingleClickListener(onSingleClickListener obj){
-        this._singleClick = obj;
-    }
-    public void setLongClickListener(onLongClickListener obj){
-        this._longClick = obj;
-    }
-*/
 
     public void setRenameClickListener(onRenameClickListener obj){
         this._renameClick = obj;

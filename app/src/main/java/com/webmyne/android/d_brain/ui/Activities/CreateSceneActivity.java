@@ -342,6 +342,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
                             sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+                            sceneItemsDataObject.setIsActive(initSwitches.get(position).getIsActive());
 
                              /*String machineIP = "";
                                 if(initSwitches.get(position).getMachineIP().startsWith("http://")) {
@@ -358,7 +359,9 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             initSwitches.get(position).setFocusable(false);
                             isSceneSaved = false;
                         } else {
-                            Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            if(initSwitches.get(position).getIsActive().equals("true")) {
+                                Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            }
                         }
 
                     }
@@ -416,6 +419,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             sceneItemsDataObject.setMachineIP(initDimmers.get(position).getMachineIP());
                             sceneItemsDataObject.setMachineName(initDimmers.get(position).getMachineName());
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+                            sceneItemsDataObject.setIsActive(initDimmers.get(position).getIsActive());
 
                             /*String machineIP = "";
                             if(initDimmers.get(position).getMachineIP().startsWith("http://")) {
@@ -433,7 +437,9 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             initDimmers.get(position).setFocusable(false);
                             isSceneSaved = false;
                         } else {
-                            Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            if(initDimmers.get(position).getIsActive().equals("true")) {
+                                Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            }
                         }
 
                     }
@@ -535,6 +541,11 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                         sceneSwitchItem.setMachineIP(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
+                        String isActive = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                        sceneSwitchItem.setIsActive(isActive);
+                        sceneSwitchItem.enableDisableComponent(isActive);
+
+
                         initSwitches.add(sceneSwitchItem);
                     } while (switchListCursor.moveToNext());
                 } else {
@@ -609,6 +620,11 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                         sceneSwitchItem.setMachineId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID)));
                         sceneSwitchItem.setMachineIP(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
+
+                        String isActive = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                        sceneSwitchItem.setIsActive(isActive);
+                        sceneSwitchItem.enableDisableComponent(isActive);
+
                         initDimmers.add(sceneSwitchItem);
                     } while (dimmerListCursor.moveToNext());
                 } else {

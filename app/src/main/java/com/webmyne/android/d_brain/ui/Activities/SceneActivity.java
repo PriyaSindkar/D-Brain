@@ -465,7 +465,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         if (initSwitches.get(position).isFocusable()) {
                             addSwitchToScene(position);
                         } else {
-                            Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            if(initSwitches.get(position).getIsActive().equals("true")) {
+                                Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
                 });
@@ -517,7 +519,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         if (initDimmers.get(position).isFocusable()) {
                             addDimmerToScene(position);
                         } else {
-                            Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            if(initDimmers.get(position).getIsActive().equals("true")) {
+                                Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+                            }
                         }
 
                     }
@@ -614,6 +618,13 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         sceneSwitchItem.setMachineId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID)));
                         sceneSwitchItem.setMachineIP(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
+                        String isActive = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                        sceneSwitchItem.setIsActive(isActive);
+                        sceneSwitchItem.enableDisableComponent(isActive);
+                        /*//check if this componeny is inactive or not
+                        if(isActive.equals("false")) {
+                            sceneSwitchItem.setFocusable(false);
+                        }*/
 
                         // check if this component is already added to the scene or not
                         for(int i=0; i<mData.size(); i++) {
@@ -694,7 +705,15 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         sceneSwitchItem.setMachineId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID)));
                         sceneSwitchItem.setMachineIP(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
                         sceneSwitchItem.setMachineName(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
+                        String isActive = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                        sceneSwitchItem.setIsActive(isActive);
+                        sceneSwitchItem.enableDisableComponent(isActive);
 
+                       /* //check if this componeny is inactive or not
+                        if(isActive.equals("false")) {
+                            sceneSwitchItem.setFocusable(false);
+                        }
+*/
                         // check if this component is already added or not
                         for(int i=0; i<mData.size(); i++) {
                             if(mData.get(i).getSceneComponentPrimaryId().equals(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)))) {
@@ -745,6 +764,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
                         String machineID = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MID));
                         String machineName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MNAME));
+                        String isActive = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
 
                         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
                         sceneItemsDataObject.setMachineIP(machineIP);
@@ -753,6 +773,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         sceneItemsDataObject.setSceneControlType(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE)));
                         sceneItemsDataObject.setSceneItemId(componentId);
                         sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
+                        sceneItemsDataObject.setIsActive(isActive);
 
                         String componentName = dbHelper.getComponentNameByPrimaryId(componentId);
                         //String componentName = componentCursor.getString(componentCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));

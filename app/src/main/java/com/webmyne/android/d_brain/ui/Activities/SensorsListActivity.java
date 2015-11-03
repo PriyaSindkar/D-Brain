@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SensorListCursorAdapter;
@@ -214,6 +215,9 @@ public class SensorsListActivity extends AppCompatActivity {
     }
 
     public class GetSensorStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false, isMachineActive = false;
+        String machineId="", machineName = "", machineIp;
+        Cursor cursor, machineCursor;
 
         @Override
         protected void onPreExecute() {
@@ -222,33 +226,92 @@ public class SensorsListActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... params) {
-            try {
+
                 allSensorsStatusList = new ArrayList<>();
                 for(int i=0; i<params.length; i++) {
                     String machineBaseURL = "";
+                    machineIp = machineIPs[i];
 
-                    if (params[i].startsWith("http://")) {
-                        machineBaseURL = params[i];
+                    if(machineIp.startsWith("http://")) {
+                        machineBaseURL = machineIp;
                     } else {
-                        machineBaseURL = "http://" + params[i];
+                        machineBaseURL = "http://" + machineIp;
                     }
-                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SENSOR_STATUS);
-                    // Log.e("# urlValue", urlValue.toString());
 
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = httpUrlConnection.getInputStream();
-                    //  Log.e("# inputStream", inputStream.toString());
-                    MainXmlPullParser pullParser = new MainXmlPullParser();
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(SensorsListActivity.this);
+                        try {
+                            dbHelper.openDataBase();
+                            isMachineActive =  dbHelper.isMachineActive(machineIp);
+                            machineCursor = dbHelper.getMachineByIP(machineIp);
+                            machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                            machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                            cursor = dbHelper.getAllSensorComponentsForAMachine(machineIp);
 
-                    sensorStatusList = pullParser.processXML(inputStream);
-                    allSensorsStatusList.addAll(sensorStatusList);
-                    // Log.e("XML PARSERED", dimmerStatusList.toString());
+                            dbHelper.close();
+
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+
+                        // fetch sensor status from machine only if the machine is active else init all the sensor status to off
+                        if (isMachineActive) {
+                            URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SENSOR_STATUS);
+                            // Log.e("# urlValue", urlValue.toString());
+
+                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                            httpUrlConnection.setRequestMethod("GET");
+                            InputStream inputStream = httpUrlConnection.getInputStream();
+                            //  Log.e("# inputStream", inputStream.toString());
+                            MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                            sensorStatusList = pullParser.processXML(inputStream);
+                            allSensorsStatusList.addAll(sensorStatusList);
+                            // Log.e("XML PARSERED", dimmerStatusList.toString());
+                        } else {
+                            if (cursor != null) {
+                                cursor.moveToFirst();
+                                if (cursor.getCount() > 0) {
+                                    do {
+                                        String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                        XMLValues values = new XMLValues();
+                                        values.tagName = componnetId;
+                                        values.tagValue = AppConstants.OFF_VALUE;
+                                        allSensorsStatusList.add(values);
+
+                                    } while (cursor.moveToNext());
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e("#EXP", e.toString());
+                        isError = true;
+                        DatabaseHelper dbHelper = new DatabaseHelper(SensorsListActivity.this);
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+
+                            if (cursor != null) {
+                                cursor.moveToFirst();
+                                if(cursor.getCount() > 0) {
+                                    do {
+                                        String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                        XMLValues values = new XMLValues();
+                                        values.tagName = componnetId;
+                                        values.tagValue = AppConstants.OFF_VALUE;
+                                        allSensorsStatusList.add(values);
+
+                                    } while (cursor.moveToNext());
+                                }
+                            }
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                 }
 
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
+
             return null;
         }
 
@@ -257,6 +320,18 @@ public class SensorsListActivity extends AppCompatActivity {
             // Log.e("TAG_ASYNC", "Inside onPostExecute");
             try {
                 progressBar.setVisibility(View.GONE);
+                if(isError) {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(SensorsListActivity.this);
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                        Toast.makeText(SensorsListActivity.this, "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                }
+
                 if(isFirstTime) {
                     //init adapter
                     adapter = new SensorListCursorAdapter(SensorsListActivity.this, sensorListCursor, sensorStatusList);

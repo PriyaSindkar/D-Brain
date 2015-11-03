@@ -215,41 +215,103 @@ public class SensorFragment extends Fragment {
     }
 
     public class GetSensorStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false, isMachineActive = false;
+        String machineId="", machineName = "", machineIp;
+        Cursor cursor, machineCursor;
 
         @Override
         protected void onPreExecute() {
-           // getActivity().setProgressBarIndeterminateVisibility(true);
+            progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected Void doInBackground(String... params) {
-            try {
-                allSensorsStatusList = new ArrayList<>();
-                for(int i=0; i<params.length; i++) {
-                    String machineBaseURL = "";
 
-                    if (params[i].contains("http://")) {
-                        machineBaseURL = params[i];
-                    } else {
-                        machineBaseURL = "http://" + params[i];
-                    }
-                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SENSOR_STATUS);
-                    // Log.e("# urlValue", urlValue.toString());
+            allSensorsStatusList = new ArrayList<>();
+            for(int i=0; i<params.length; i++) {
+                String machineBaseURL = "";
+                machineIp = machineIPs[i];
 
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = httpUrlConnection.getInputStream();
-                    //  Log.e("# inputStream", inputStream.toString());
-                    MainXmlPullParser pullParser = new MainXmlPullParser();
-
-                    sensorStatusList = pullParser.processXML(inputStream);
-                    allSensorsStatusList.addAll(sensorStatusList);
-                    Log.e("XML PARSERED", sensorStatusList.toString());
-
+                if(machineIp.startsWith("http://")) {
+                    machineBaseURL = machineIp;
+                } else {
+                    machineBaseURL = "http://" + machineIp;
                 }
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    try {
+                        dbHelper.openDataBase();
+                        isMachineActive =  dbHelper.isMachineActive(machineIp);
+                        machineCursor = dbHelper.getMachineByIP(machineIp);
+                        machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                        machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                        cursor = dbHelper.getAllSensorComponentsForAMachine(machineIp);
+
+                        dbHelper.close();
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+
+                    // fetch sensor status from machine only if the machine is active else init all the sensor status to off
+                    if (isMachineActive) {
+                        URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SENSOR_STATUS);
+                        // Log.e("# urlValue", urlValue.toString());
+
+                        HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                        httpUrlConnection.setRequestMethod("GET");
+                        InputStream inputStream = httpUrlConnection.getInputStream();
+                        //  Log.e("# inputStream", inputStream.toString());
+                        MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                        sensorStatusList = pullParser.processXML(inputStream);
+                        allSensorsStatusList.addAll(sensorStatusList);
+                        // Log.e("XML PARSERED", dimmerStatusList.toString());
+                    } else {
+                        if (cursor != null) {
+                            cursor.moveToFirst();
+                            if (cursor.getCount() > 0) {
+                                do {
+                                    String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                    XMLValues values = new XMLValues();
+                                    values.tagName = componnetId;
+                                    values.tagValue = AppConstants.OFF_VALUE;
+                                    allSensorsStatusList.add(values);
+
+                                } while (cursor.moveToNext());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e("#EXP", e.toString());
+                    isError = true;
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+
+                        if (cursor != null) {
+                            cursor.moveToFirst();
+                            if(cursor.getCount() > 0) {
+                                do {
+                                    String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                    XMLValues values = new XMLValues();
+                                    values.tagName = componnetId;
+                                    values.tagValue = AppConstants.OFF_VALUE;
+                                    allSensorsStatusList.add(values);
+
+                                } while (cursor.moveToNext());
+                            }
+                        }
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
+
+
             return null;
         }
 
@@ -258,6 +320,18 @@ public class SensorFragment extends Fragment {
             // Log.e("TAG_ASYNC", "Inside onPostExecute");
             try {
                 progressBar.setVisibility(View.GONE);
+                if(isError) {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                        Toast.makeText(getActivity(), "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                }
+
                 if(isFirstTime) {
                     //init adapter
                     adapter = new SensorListCursorAdapter(getActivity(), sensorListCursor, sensorStatusList);
@@ -270,18 +344,18 @@ public class SensorFragment extends Fragment {
                     adapter.setSensorStatus(sensorStatusList);
                     adapter.notifyDataSetChanged();
                 }
-
                 adapter.setRenameClickListener(new onRenameClickListener() {
 
                     @Override
-                    public void onRenameOptionClick(int pos, String oldName) {
+                    public void onRenameOptionClick(int pos, String _oldName) {
+
                     }
 
                     @Override
                     public void onRenameOptionClick(int pos, String _oldName, String _oldDetails) {
                         final int position = pos;
                         sensorListCursor.moveToPosition(position);
-                        final String componentId = sensorListCursor.getString(sensorListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                        final String componentId = sensorListCursor.getString(sensorListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
 
                         RenameDialog renameDialog = new RenameDialog(getActivity(), _oldName, _oldDetails);
                         renameDialog.show();
@@ -308,13 +382,7 @@ public class SensorFragment extends Fragment {
                             }
                         });
                     }
-
-            /*@Override
-            public void onRenameOptionClick(int pos) {
-
-            }*/
                 });
-
 
             } catch (Exception e) {
             }
