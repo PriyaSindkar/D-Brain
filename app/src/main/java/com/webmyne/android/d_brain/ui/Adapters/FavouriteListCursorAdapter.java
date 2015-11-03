@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -80,7 +81,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
     public class SwitchViewHolder extends ViewHolder {
         public TextView txtSwitchName, txtMachineName;
-        public LinearLayout linearSwitch;
+        public LinearLayout linearSwitch, linearItem;
         private ImageView imgDeleteOption;
         public SwitchButton imgSwitch;
 
@@ -92,6 +93,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
             this.linearSwitch = (LinearLayout) itemView.findViewById(R.id.linearSwitch);
             this.imgDeleteOption = (ImageView) itemView.findViewById(R.id.imgDeleteOption);
             this.imgSwitch = (SwitchButton) itemView.findViewById(R.id.imgSwitch);
+            this.linearItem = (LinearLayout) itemView.findViewById(R.id.linearItem);
         }
     }
 
@@ -99,7 +101,7 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
         public TextView txtDimmerName, txtValue, txtMachineName;
         private SeekBar seekBar;
         public  ImageView  imgDeleteOption;
-        private LinearLayout linearItem;
+        private LinearLayout linearItem, linearMotor;
         private SwitchButton imgSwitch;
 
         public DimmerViewHolder ( View itemView ) {
@@ -109,12 +111,11 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
             this.seekBar = (SeekBar) itemView.findViewById(R.id.seekBar);
             this.txtValue = (TextView) itemView.findViewById(R.id.txtValue);
             this.linearItem = (LinearLayout) itemView.findViewById(R.id.linearItem);
+            this.linearMotor = (LinearLayout) itemView.findViewById(R.id.linearMotor);
             this.imgDeleteOption = (ImageView) itemView.findViewById(R.id.imgDeleteOption);
             this.imgSwitch = (SwitchButton) itemView.findViewById(R.id.imgSwitch);
             this.imgSwitch.setVisibility(View.VISIBLE);
             txtValue.setText("0");
-
-
         }
     }
 
@@ -199,6 +200,9 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
         String componentId = cursor.getString(componentIdIndex);
         String componentName = "";
 
+        int isActiveIdx = cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE);
+        String isActive = cursor.getString(isActiveIdx);
+
         try {
             DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
             dbHelper.openDataBase();
@@ -235,29 +239,50 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
                 final String finalMachineIP = machineIP;
 
-                switchHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        switchHolder.imgSwitch.toggle();
+                if(isActive.equals("false")) {
+                    switchHolder.linearItem.setAlpha(0.5f);
+                    switchHolder.linearSwitch.setAlpha(0.5f);
+                    switchHolder.imgDeleteOption.setClickable(false);
+                    switchHolder.imgSwitch.setEnabled(false);
+                    switchHolder.imgSwitch.setClickable(false);
+                } else {
+                    switchHolder.linearItem.setAlpha(1.0f);
+                    switchHolder.linearSwitch.setAlpha(1.0f);
+                    switchHolder.imgDeleteOption.setClickable(true);
+                    switchHolder.imgSwitch.setEnabled(true);
+                    switchHolder.imgSwitch.setClickable(true);
 
-                        if(switchHolder.imgSwitch.isChecked()){
-                            String CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.OFF_VALUE;
-                          //  SwitchesListActivity.isDelay  = true;
-                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                        }else{
-                            String CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.ON_VALUE;
-                           // SwitchesListActivity.isDelay  = true;
-                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                    switchHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            switchHolder.imgSwitch.toggle();
+
+                            if(switchHolder.imgSwitch.isChecked()){
+                                String CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.OFF_VALUE;
+                                //  SwitchesListActivity.isDelay  = true;
+                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                            }else{
+                                String CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.ON_VALUE;
+                                // SwitchesListActivity.isDelay  = true;
+                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                            }
                         }
-                    }
-                });
+                    });
 
-                switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+                    switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            _onDeleteClick.onDeleteOptionClick(position);
+                        }
+                    });
+                }
+
+
+
+                switchHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
                     @Override
-                    public void onClick(View v) {
-                        Log.e("pos", position+"");
-                        _onDeleteClick.onDeleteOptionClick(position);
-                        //componentStatus.remove(position);
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return event.getActionMasked() == MotionEvent.ACTION_MOVE;
                     }
                 });
 
@@ -280,12 +305,8 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                 }
 
                 if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
-                    /*dimmerHolder.txtValue.setText("0");
-                    dimmerHolder.seekBar.setProgress(0);*/
                     dimmerHolder.imgSwitch.setChecked(false);
                 } else {
-                   /* dimmerHolder.txtValue.setText(String.valueOf(seekProgress));
-                    dimmerHolder.seekBar.setProgress(seekProgress);*/
                     dimmerHolder.imgSwitch.setChecked(true);
                 }
 
@@ -295,68 +316,93 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                 dimmerHolder.txtValue.setText(String.valueOf(seekProgress));
                 dimmerHolder.seekBar.setProgress(seekProgress);
 
-                dimmerHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        dimmerHolder.txtValue.setText("" + progress);
 
-                    }
+                if(isActive.equals("false")) {
+                    dimmerHolder.linearItem.setAlpha(0.5f);
+                    dimmerHolder.linearMotor.setAlpha(0.5f);
+                    dimmerHolder.imgDeleteOption.setClickable(false);
+                    dimmerHolder.imgSwitch.setEnabled(false);
+                    dimmerHolder.imgSwitch.setClickable(false);
+                    dimmerHolder.seekBar.setEnabled(false);
+                } else {
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    dimmerHolder.linearItem.setAlpha(1.0f);
+                    dimmerHolder.linearMotor.setAlpha(1.0f);
+                    dimmerHolder.imgDeleteOption.setClickable(true);
+                    dimmerHolder.imgSwitch.setEnabled(true);
+                    dimmerHolder.imgSwitch.setClickable(true);
+                    dimmerHolder.seekBar.setEnabled(true);
 
-                    }
 
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        String strProgress = "00";
-                        String CHANGE_STATUS_URL = "";
+                    dimmerHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            dimmerHolder.txtValue.setText("" + progress);
 
-                        if (seekBar.getProgress() > 0) {
-                            strProgress = String.format("%02d", (seekBar.getProgress() - 1));
-                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.ON_VALUE + strProgress;
-                            componentStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
-                            dimmerHolder.imgSwitch.setChecked(true);
-                        } else if (seekBar.getProgress() == 0) {
-                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.OFF_VALUE + strProgress;
-                            componentStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
-                            dimmerHolder.imgSwitch.setChecked(false);
-                        }
-                        // DimmerListActivity.isDelay = true;
-                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
-                    }
-                });
-
-                dimmerHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dimmerHolder.imgSwitch.toggle();
-                        String strProgress = "00";
-                        String CHANGE_STATUS_URL = "";
-
-                        if (dimmerHolder.seekBar.getProgress() > 0) {
-                            strProgress = String.format("%02d", (dimmerHolder.seekBar.getProgress() - 1));
                         }
 
-                        if (dimmerHolder.imgSwitch.isChecked()) {
-                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.OFF_VALUE + strProgress;
-                            //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
-                        } else {
-                            CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.ON_VALUE + strProgress;
-                            //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+
                         }
 
-                        // DimmerListActivity.isDelay = true;
-                        new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
-                    }
-                });
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                            String strProgress = "00";
+                            String CHANGE_STATUS_URL = "";
 
-                dimmerHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+                            if (seekBar.getProgress() > 0) {
+                                strProgress = String.format("%02d", (seekBar.getProgress() - 1));
+                                CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.ON_VALUE + strProgress;
+                                componentStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                                dimmerHolder.imgSwitch.setChecked(true);
+                            } else if (seekBar.getProgress() == 0) {
+                                CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.OFF_VALUE + strProgress;
+                                componentStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                                dimmerHolder.imgSwitch.setChecked(false);
+                            }
+                            // DimmerListActivity.isDelay = true;
+                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                        }
+                    });
+
+                    dimmerHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dimmerHolder.imgSwitch.toggle();
+                            String strProgress = "00";
+                            String CHANGE_STATUS_URL = "";
+
+                            if (dimmerHolder.seekBar.getProgress() > 0) {
+                                strProgress = String.format("%02d", (dimmerHolder.seekBar.getProgress() - 1));
+                            }
+
+                            if (dimmerHolder.imgSwitch.isChecked()) {
+                                CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.OFF_VALUE + strProgress;
+                                //dimmerStatus.get(position).tagValue = AppConstants.ON_VALUE + strProgress;
+                            } else {
+                                CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + dimmerStrPosition + AppConstants.ON_VALUE + strProgress;
+                                //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
+                            }
+
+                            // DimmerListActivity.isDelay = true;
+                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                        }
+                    });
+
+                    dimmerHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Log.e("position", position + "");
+                            _onDeleteClick.onDeleteOptionClick(position);
+                        }
+                    });
+                }
+
+                dimmerHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
                     @Override
-                    public void onClick(View v) {
-                        Log.e("position", position+"");
-                        _onDeleteClick.onDeleteOptionClick(position);
-                       // componentStatus.remove(position);
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return event.getActionMasked() == MotionEvent.ACTION_MOVE;
                     }
                 });
 

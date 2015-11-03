@@ -1,6 +1,7 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -34,6 +35,7 @@ import com.webmyne.android.d_brain.ui.Activities.SensorsListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.ExternalCirclePainter;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
@@ -53,6 +55,8 @@ import java.net.URL;
 import java.security.KeyStore;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class DashboardFragment extends Fragment implements PopupAnimationEnd, View.OnClickListener {
 
@@ -62,7 +66,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private LinearLayout layoutBottom, linearOptions, linearSceneList, linearDisabled;
     private HorizontalScrollView hScrollView;
     private FrameLayout parentMotor, parentSlider, parentSwitches, parentSensors, linearLeft ;
-    private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits;
+    private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits, txtPowerOffMessage, txtPowerOffMessageLink;
     private LinearLayout linearCreateScene, linearAddMachine, linearAddScheduler, firstBottomItem, linearTopComponentRow, linearBottomComponentRow, linearFavorites;
     private ArrayList<XMLValues> switchStatusList, dimmerStatusList;
     private Cursor switchListCursor, dimmerListCursor, motorListCursor, sensorListCursor, machineCursor, machineListCursor;
@@ -71,14 +75,46 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private FragmentActivity activity;
     private int powerSignalCount = 0;
     private String previousLed = "", led = "";
-    private static String URL_MACHINE_IP ="";
-    private static String MACHINE_IP = "";
     private String[] machineIPs;
+    private int totalMachineCount = 0;
+    private ProgressDialog progressDilaog;
 
     private ArrayList<ComponentModel> allOnSwitchesList, allOnDimmersList;
 
-    private int topRowComponentCount = 0; // fix-> switches and motors
-    private int bottomRowComponentCount = 0; // fix -> Dimmers and sensors
+    private int topRowComponentCount = 0; // fix layout-> switches and motors
+    private int bottomRowComponentCount = 0; // fix layout-> Dimmers and sensors
+    private Timer timer;
+    private Handler handler;
+    public static boolean isDelay = false;
+
+    private void PauseTimer(){
+        this.timer.cancel();
+    }
+
+    public void ResumeTimer() {
+        handler = new Handler();
+        timer = new Timer();
+
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isDelay) {
+                            new GetMachineStatus().execute();
+                        } else {
+                            PauseTimer();
+                            ResumeTimer();
+                        }
+                    }
+                });
+
+            }
+        }, 0, 4000 * 1);
+
+    }
 
 
     public static DashboardFragment newInstance() {
@@ -110,6 +146,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private void init(View row) {
         animObj = new AnimationHelper();
         linearDisabled = (LinearLayout) row.findViewById(R.id.linearDisabled);
+        txtPowerOffMessage = (TextView) row.findViewById(R.id.txtPowerOffMessage);
+        txtPowerOffMessageLink = (TextView) row.findViewById(R.id.txtPowerOffMessageLink);
 
         linearDisabled.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,6 +155,10 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
             }
         });
+
+        progressDilaog = new ProgressDialog(getActivity());
+        progressDilaog.setMessage("Checking Machine Status...");
+        progressDilaog.setCancelable(false);
 
 
         linearLeft = (FrameLayout)row.findViewById(R.id.linearLeft);
@@ -204,14 +246,18 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-            int width = firstBottomItem.getWidth();
-            linearLeft.getLayoutParams().width = width;
-            linearLeft.requestLayout();
+                int width = firstBottomItem.getWidth();
+                linearLeft.getLayoutParams().width = width;
+                linearLeft.requestLayout();
             }
         });
 
         ((HomeDrawerActivity) getActivity()).initPowerButton();
         // call();
+
+        initComponents();
+        // to check periodically if all the machines are working or not
+        ResumeTimer();
     }
 
     @Override
@@ -234,12 +280,14 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
                 bulb_image.setColorFilter(getResources().getColor(R.color.white));
                 bulb_image.setBackgroundResource(R.drawable.white_border_circle);
+                isBulbOn = false;
             } else {
                 bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
                 bulb_image.setBackgroundResource(R.drawable.circle);
 
                 showOnScreen();
                 ((HomeDrawerActivity) getActivity()).showDrawer();
+                isBulbOn = true;
             }
         } else {
             bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
@@ -249,7 +297,238 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             ((HomeDrawerActivity) getActivity()).showDrawer();
         }
 
+        updateSceneList();
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.parentMotor:
+                Intent intent = new Intent(getActivity(), MotorListActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.parentSlider:
+                intent = new Intent(getActivity(), DimmerListActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.parentSwitches:
+                intent = new Intent(getActivity(), SwitchesListActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.parentSensors:
+                intent = new Intent(getActivity(), SensorsListActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.bulb_image:
+                if(isBulbOn) {
+                  //  linearMainBody.setAlpha(0.3f);
+                    Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
+
+                    showOffScreen();
+                    ((HomeDrawerActivity) getActivity()).hideDrawer();
+
+                    bulb_image.setColorFilter(getResources().getColor(R.color.white));
+                    bulb_image.setBackgroundResource(R.drawable.white_border_circle);
+
+                    // if switches exist, fetch their status
+                    if(switchListCursor != null && switchListCursor.getCount() > 0) {
+                        new GetSwitchStatus().execute(machineIPs);
+                    } else {
+                        Log.e("TAG_DASHBOARD", "No switches");
+                    }
+
+                    // if dimmers exist, fetch their status
+                    if(dimmerListCursor != null && dimmerListCursor.getCount() > 0) {
+                        new GetDimmerStatus().execute(machineIPs);
+                    } else {
+                        Log.e("TAG_DASHBOARD", "No dimmers");
+                    }
+
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
+                    UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
+
+                    if(userSettings == null) {
+                        userSettings = new UserSettings();
+                    }
+                    userSettings.setIsMainPowerOn(false);
+                    complexPreferences.putObject("settings-pref", userSettings);
+                    complexPreferences.commit();
+
+                } else {
+                    bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
+                    bulb_image.setBackgroundResource(R.drawable.circle);
+
+                    showOnScreen();
+                    ((HomeDrawerActivity) getActivity()).showDrawer();
+
+                    // switch on all the previously saved on switches(set prior to main power off)
+                    if(allOnSwitchesList != null && !allOnSwitchesList.isEmpty()) {
+                        for (int i = 0; i < allOnSwitchesList.size(); i++) {
+                            String strPosition = allOnSwitchesList.get(i).getName().substring(2, 4);
+                            String CHANGE_STATUS_URL = allOnSwitchesList.get(i).getMip() + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            String[] params = new String[3];
+                            params[0] = CHANGE_STATUS_URL;
+                            params[1] = allOnSwitchesList.get(i).getMid();
+                            params[2] = allOnSwitchesList.get(i).getMachineName();
+                            new ChangeSwitchStatus().execute(params);
+                        }
+                    }
+
+                    // switch on all the previously saved on dimmers with previously saved value(set prior to main power off)
+                    if(allOnDimmersList != null && !allOnDimmersList.isEmpty()) {
+                        for (int i = 0; i < allOnDimmersList.size(); i++) {
+                            ComponentModel dimmer = allOnDimmersList.get(i);
+                            String strPosition = dimmer.getName().substring(2, 4);
+                            String strProgress = dimmer.getDefaultValue().substring(2, 4);
+                            String CHANGE_STATUS_URL = dimmer.getMip() + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
+                            String[] params = new String[3];
+                            params[0] = CHANGE_STATUS_URL;
+                            params[1] = dimmer.getMid();
+                            params[2] = dimmer.getMachineName();
+                            new ChangeDimmerStatus().execute(params);
+                        }
+                    }
+
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
+                    UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
+
+                    if(userSettings == null) {
+                        userSettings = new UserSettings();
+                    }
+                    userSettings.setIsMainPowerOn(true);
+                    complexPreferences.putObject("settings-pref", userSettings);
+                    complexPreferences.commit();
+                }
+                isBulbOn = !isBulbOn;
+                break;
+
+            case R.id.linearCreateScene:
+                //close the popup
+                animObj.rotateViewAntiClockwise(imgOptions);
+                animObj.closePopUpMenu(linearOptions);
+                animObj.setInterFaceObj(new PopupAnimationEnd() {
+                    @Override
+                    public void animationCompleted() {
+                        linearOptions.setVisibility(View.GONE);
+                        isImageUp = true;
+                    }
+                });
+
+                intent = new Intent(getActivity(), CreateSceneActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.linearAddMachine:
+                //close the popup
+                animObj.rotateViewAntiClockwise(imgOptions);
+                animObj.closePopUpMenu(linearOptions);
+                animObj.setInterFaceObj(new PopupAnimationEnd() {
+                    @Override
+                    public void animationCompleted() {
+                        linearOptions.setVisibility(View.GONE);
+                        isImageUp = true;
+                    }
+                });
+
+                intent = new Intent(getActivity(), MachineListActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.linearShowTouchPanel:
+                // close pop up
+                animObj.rotateViewAntiClockwise(imgOptions);
+                animObj.closePopUpMenu(linearOptions);
+                animObj.setInterFaceObj(new PopupAnimationEnd() {
+                    @Override
+                    public void animationCompleted() {
+                        linearOptions.setVisibility(View.GONE);
+                        isImageUp = true;
+                    }
+                });
+
+                intent = new Intent(getActivity(), TouchPanelActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.imgFavorites:
+                intent = new Intent(getActivity(), FavouriteListActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.imgSchedulers:
+                intent = new Intent(getActivity(), SchedulersListActivity.class);
+                startActivity(intent);
+                break;
+        }
+    }
+
+    @Override
+    public void animationCompleted() {
+
+    }
+
+
+    private void updateSceneList() {
+        linearSceneList.removeAllViews();
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        try {
+            dbHelper.openDataBase();
+
+            final Cursor sceneCursor = dbHelper.getAllScenes("");
+            dbHelper.close();
+
+            if (sceneCursor != null) {
+
+                sceneCursor.moveToFirst();
+                if (sceneCursor.getCount() > 0) {
+                    do {
+                        final LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        View view = inflater.inflate(R.layout.dashboard_scene_slider_item, null);
+                        TextView txtSceneName = (TextView) view.findViewById(R.id.txtSceneName);
+                        final String sceneId = ""+sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+                        final String sceneName = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
+
+                        txtSceneName.setText(sceneName);
+
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                        int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), getActivity());
+                        layoutParams.setMargins(margin, margin, margin, margin);
+                        view.setLayoutParams(layoutParams);
+
+                        view.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(getActivity(), SceneActivity.class);
+                                intent.putExtra("scene_id", sceneId);
+                                intent.putExtra("scene_name", sceneName);
+                                startActivity(intent);
+                            }
+                        });
+
+                        linearSceneList.addView(view);
+                    } while (sceneCursor.moveToNext());
+                } else {
+
+                    TextView emptyMessage = new TextView(getActivity());
+                    emptyMessage.setText("No Scenes Created");
+                    emptyMessage.setTextColor(getResources().getColor(R.color.white));
+                    linearSceneList.addView(emptyMessage);
+
+                }
+            }
+
+        } catch (SQLException e) {
+            Log.e("SQLEXP", e.toString());
+        }
+
+    }
+
+
+    private void initComponents() {
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         try {
             dbHelper.openDataBase();
@@ -371,242 +650,14 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 linearBottomComponentRow.setVisibility(View.GONE);
             }
         }
-
-        updateSceneList();
-
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            /*case R.id.imgHScrollLeft:
-                hScrollView.scrollTo((int) hScrollView.getScrollX() - 20, (int) hScrollView.getScrollY());
-                break;
-
-            case R.id.imgHScrollRight:
-                hScrollView.scrollTo((int) hScrollView.getScrollX() + 20, (int) hScrollView.getScrollY());
-                break;*/
-            case R.id.parentMotor:
-                Intent intent = new Intent(getActivity(), MotorListActivity.class);
-                startActivity(intent);
-                break;
-
-            case R.id.parentSlider:
-                intent = new Intent(getActivity(), DimmerListActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.parentSwitches:
-                intent = new Intent(getActivity(), SwitchesListActivity.class);
-                startActivity(intent);
-                break;
-
-            case R.id.parentSensors:
-                intent = new Intent(getActivity(), SensorsListActivity.class);
-                startActivity(intent);
-                break;
-
-            case R.id.bulb_image:
-                Log.e("TAG", "BULB CLICK " + isBulbOn);
-                if(isBulbOn) {
-                  //  linearMainBody.setAlpha(0.3f);
-                    Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
-
-                    showOffScreen();
-                    ((HomeDrawerActivity) getActivity()).hideDrawer();
-
-                    bulb_image.setColorFilter(getResources().getColor(R.color.white));
-                    bulb_image.setBackgroundResource(R.drawable.white_border_circle);
-
-                    // if switches exist, fetch their status
-                    if(switchListCursor != null && switchListCursor.getCount() > 0) {
-                        new GetSwitchStatus().execute(machineIPs);
-                    } else {
-                        Log.e("TAG_DASHBOARD", "No switches");
-                    }
-
-                    // if dimmers exist, fetch their status
-                    if(dimmerListCursor != null && dimmerListCursor.getCount() > 0) {
-                        new GetDimmerStatus().execute(machineIPs);
-                    } else {
-                        Log.e("TAG_DASHBOARD", "No dimmers");
-                    }
-
-                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
-                    UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
-
-                    if(userSettings == null) {
-                        userSettings = new UserSettings();
-                    }
-                    userSettings.setIsMainPowerOn(false);
-                    complexPreferences.putObject("settings-pref", userSettings);
-                    complexPreferences.commit();
-
-                } else {
-                    bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
-                    bulb_image.setBackgroundResource(R.drawable.circle);
-
-                    showOnScreen();
-                    ((HomeDrawerActivity) getActivity()).showDrawer();
-
-                    // switch on all the previously on switches(prior to main power off)
-                    if(allOnSwitchesList != null && !allOnSwitchesList.isEmpty()) {
-                        for (int i = 0; i < allOnSwitchesList.size(); i++) {
-                            String strPosition = allOnSwitchesList.get(i).getName().substring(2, 4);
-                            String CHANGE_STATUS_URL = allOnSwitchesList.get(i).getMip() + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                            new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                        }
-                    }
-
-                    // switch on all the previously on dimmers with previously saved value(prior to main power off)
-                    if(allOnDimmersList != null && !allOnDimmersList.isEmpty()) {
-                        for (int i = 0; i < allOnDimmersList.size(); i++) {
-                            ComponentModel dimmer = allOnDimmersList.get(i);
-                            String strPosition = dimmer.getName().substring(2, 4);
-                            String strProgress = dimmer.getDefaultValue().substring(2, 4);
-                            String CHANGE_STATUS_URL = dimmer.getMip() + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
-                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
-                        }
-                    }
-
-                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
-                    UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
-
-                    if(userSettings == null) {
-                        userSettings = new UserSettings();
-                    }
-                    userSettings.setIsMainPowerOn(true);
-                    complexPreferences.putObject("settings-pref", userSettings);
-                    complexPreferences.commit();
-                }
-
-
-                isBulbOn = !isBulbOn;
-                break;
-
-            case R.id.linearCreateScene:
-                //close the popup
-                animObj.rotateViewAntiClockwise(imgOptions);
-                animObj.closePopUpMenu(linearOptions);
-                animObj.setInterFaceObj(new PopupAnimationEnd() {
-                    @Override
-                    public void animationCompleted() {
-                        linearOptions.setVisibility(View.GONE);
-                        isImageUp = true;
-                    }
-                });
-
-                intent = new Intent(getActivity(), CreateSceneActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.linearAddMachine:
-                //close the popup
-                animObj.rotateViewAntiClockwise(imgOptions);
-                animObj.closePopUpMenu(linearOptions);
-                animObj.setInterFaceObj(new PopupAnimationEnd() {
-                    @Override
-                    public void animationCompleted() {
-                        linearOptions.setVisibility(View.GONE);
-                        isImageUp = true;
-                    }
-                });
-
-                intent = new Intent(getActivity(), MachineListActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.linearShowTouchPanel:
-                // close pop up
-                animObj.rotateViewAntiClockwise(imgOptions);
-                animObj.closePopUpMenu(linearOptions);
-                animObj.setInterFaceObj(new PopupAnimationEnd() {
-                    @Override
-                    public void animationCompleted() {
-                        linearOptions.setVisibility(View.GONE);
-                        isImageUp = true;
-                    }
-                });
-
-                intent = new Intent(getActivity(), TouchPanelActivity.class);
-                startActivity(intent);
-                break;
-
-            case R.id.imgFavorites:
-                intent = new Intent(getActivity(), FavouriteListActivity.class);
-                startActivity(intent);
-                break;
-
-            case R.id.imgSchedulers:
-                intent = new Intent(getActivity(), SchedulersListActivity.class);
-                startActivity(intent);
-                break;
-        }
-    }
-
-    @Override
-    public void animationCompleted() {
-
-    }
-
-
-    private void updateSceneList() {
-        linearSceneList.removeAllViews();
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-        try {
-            dbHelper.openDataBase();
-
-            final Cursor sceneCursor = dbHelper.getAllScenes(DashboardFragment.MACHINE_IP);
-            dbHelper.close();
-
-            if (sceneCursor != null) {
-
-                sceneCursor.moveToFirst();
-                if (sceneCursor.getCount() > 0) {
-                    do {
-                        final LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        View view = inflater.inflate(R.layout.dashboard_scene_slider_item, null);
-                        TextView txtSceneName = (TextView) view.findViewById(R.id.txtSceneName);
-                        final String sceneId = ""+sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
-                        final String sceneName = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
-
-                        txtSceneName.setText(sceneName);
-
-                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                        int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), getActivity());
-                        layoutParams.setMargins(margin, margin, margin, margin);
-                        view.setLayoutParams(layoutParams);
-
-                        view.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(getActivity(), SceneActivity.class);
-                                intent.putExtra("scene_id", sceneId);
-                                intent.putExtra("scene_name", sceneName);
-                                startActivity(intent);
-                            }
-                        });
-
-                        linearSceneList.addView(view);
-                    } while (sceneCursor.moveToNext());
-                } else {
-
-                    TextView emptyMessage = new TextView(getActivity());
-                    emptyMessage.setText("No Scenes Created");
-                    emptyMessage.setTextColor(getResources().getColor(R.color.white));
-                    linearSceneList.addView(emptyMessage);
-
-                }
-            }
-
-        } catch (SQLException e) {
-            Log.e("SQLEXP", e.toString());
-        }
-
     }
 
     // fetch current status of all switches before OFF on main power.
     // Store the list of on switches(to maintain previous state for turning on the main power) and turn-off the on switches
     public class GetSwitchStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false, isMachineActive = false;
+        String machineId="", machineName = "", machineIp;
+        Cursor cursor, machineCursor;
 
         @Override
         protected void onPreExecute() {
@@ -615,64 +666,93 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         @Override
         protected Void doInBackground(String... params) {
-            try {
+
                 allOnSwitchesList = new ArrayList<>();
-                for (int i = 0; i < params.length; i++) {
+                for (int i = 0; i < machineIPs.length; i++) {
                     String machineBaseURL = "";
+                    machineIp = machineIPs[i];
 
-                    if (params[i].startsWith("http://")) {
-                        machineBaseURL = params[i];
+                    if(machineIp.startsWith("http://")) {
+                        machineBaseURL = machineIp;
                     } else {
-                        machineBaseURL = "http://" + params[i];
+                        machineBaseURL = "http://" + machineIp;
                     }
-                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
-                     Log.e("# url", urlValue.toString());
 
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = httpUrlConnection.getInputStream();
-                    //  Log.e("# inputStream", inputStream.toString());
-                    MainXmlPullParser pullParser = new MainXmlPullParser();
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                        dbHelper.openDataBase();
+                        isMachineActive =  dbHelper.isMachineActive(machineIp);
+                        machineCursor = dbHelper.getMachineByIP(machineIp);
+                        machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                        machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                        dbHelper.close();
 
-                    switchStatusList = new ArrayList<>();
-                    switchStatusList = pullParser.processXML(inputStream);
+                        // fetch switch status from machine only if the machine is active else init all the switch status to off
+                        if (isMachineActive) {
+                            URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
+                            Log.e("# url", urlValue.toString());
 
-                    for(int k=0; k<switchStatusList.size(); k++) {
-                        if(switchStatusList.get(k).tagValue.equals("01")) {
-                            ComponentModel componentModel = new ComponentModel();
-                            componentModel.setName(switchStatusList.get(k).tagName);
-                            componentModel.setDefaultValue(switchStatusList.get(k).tagValue);
-                            componentModel.setMip(machineBaseURL);
-                            allOnSwitchesList.add(componentModel);
+                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                            httpUrlConnection.setRequestMethod("GET");
+                            InputStream inputStream = httpUrlConnection.getInputStream();
+                            //  Log.e("# inputStream", inputStream.toString());
+                            MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                            switchStatusList = new ArrayList<>();
+                            switchStatusList = pullParser.processXML(inputStream);
+
+                            for (int k = 0; k < switchStatusList.size(); k++) {
+                                if (switchStatusList.get(k).tagValue.equals("01")) {
+                                    ComponentModel componentModel = new ComponentModel();
+                                    componentModel.setName(switchStatusList.get(k).tagName);
+                                    componentModel.setDefaultValue(switchStatusList.get(k).tagValue);
+                                    componentModel.setMip(machineBaseURL);
+                                    componentModel.setMid(machineId);
+                                    componentModel.setMachineName(machineName);
+                                    allOnSwitchesList.add(componentModel);
+                                }
+                            }
                         }
+                    }catch(Exception e){
+                        Log.e("# EXP GetSwitchStatus", e.toString());
+                        isError = true;
+                        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                        } catch (Exception ex) {}
                     }
 
-                    // Log.e("XML PARSERED", dimmerStatusList.toString());
+                }
 
-                }
-                }catch(Exception e){
-                    Log.e("# EXP", e.toString());
-                }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            // Log.e("TAG_ASYNC", "Inside onPostExecute");
-            // store list of all on switches
-            /*switchesWithOnStatus = new ArrayList<>();
-            for(int i =0; i<allOnSwitchesList.size();i++) {
-                if(allOnSwitchesList.get(i).getDefaultValue().equals("01")) {
-                    switchesWithOnStatus.add(allOnSwitchesList.get(i).getComponentName());
+            if(isError) {
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    dbHelper.openDataBase();
+                    dbHelper.enableDisableMachine(machineId, false);
+                    dbHelper.close();
+                    Toast.makeText(getActivity(), "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                } catch (SQLException e) {
+                    Log.e("TAG EXP", e.toString());
                 }
             }
-            Log.e("ON SWITCHES", switchesWithOnStatus.toString());*/
 
             // turn off all the on switches
             for(int i=0; i< allOnSwitchesList.size();i++) {
                 String strPosition = allOnSwitchesList.get(i).getName().substring(2,4);
                 String CHANGE_STATUS_URL = allOnSwitchesList.get(i).getMip() + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                String[] params = new String[3];
+                params[0] = CHANGE_STATUS_URL;
+                params[1] =  allOnSwitchesList.get(i).getMid();
+                params[2] =  allOnSwitchesList.get(i).getMachineName();
+                new ChangeSwitchStatus().execute(params);
             }
         }
     }
@@ -681,6 +761,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     // Store the list of on dimmers with their values(to maintain previous state for turning on the main power)
     // and turn-off the on dimmers
     public class GetDimmerStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+        String machineId="", machineName = "", machineIp, isMachineActive = "false";
+        Cursor cursor, machineCursor;
 
         @Override
         protected void onPreExecute() {
@@ -689,88 +772,115 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         @Override
         protected Void doInBackground(String... params) {
-            try {
+
                 allOnDimmersList = new ArrayList<>();
-                for (int i = 0; i < params.length; i++) {
+                for (int i = 0; i < machineIPs.length; i++) {
                     String machineBaseURL = "";
+                    machineIp = machineIPs[i];
 
-                    if (params[i].startsWith("http://")) {
-                        machineBaseURL = params[i];
+                    if(machineIp.startsWith("http://")) {
+                        machineBaseURL = machineIp;
                     } else {
-                        machineBaseURL = "http://" + params[i];
+                        machineBaseURL = "http://" + machineIp;
                     }
-                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
-                    Log.e("# url", urlValue.toString());
 
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = httpUrlConnection.getInputStream();
-                    //Log.e("# inputStream dimmer" , inputStream.toString());
-                    MainXmlPullParser pullParser = new MainXmlPullParser();
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    try {
 
-                    dimmerStatusList = new ArrayList<>();
-                    dimmerStatusList = pullParser.processXML(inputStream);
+                        dbHelper.openDataBase();
+                        machineCursor = dbHelper.getMachineByIP(machineIp);
+                        machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                        machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                        isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                        dbHelper.close();
 
-                    for (int k = 0; k < dimmerStatusList.size(); k++) {
-                        if (dimmerStatusList.get(k).tagValue.substring(0,2).equals("01")) {
-                            ComponentModel componentModel = new ComponentModel();
-                            componentModel.setName(dimmerStatusList.get(k).tagName);
-                            componentModel.setDefaultValue(dimmerStatusList.get(k).tagValue);
-                            componentModel.setMip(machineBaseURL);
-                            allOnDimmersList.add(componentModel);
+                        // fetch dimmer status from machine only if the machine is active else init all the dimmer status to off
+                        if (isMachineActive.equals("true")) {
+                            URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
+                            Log.e("# url", urlValue.toString());
+
+                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                            httpUrlConnection.setRequestMethod("GET");
+                            InputStream inputStream = httpUrlConnection.getInputStream();
+                            //Log.e("# inputStream dimmer" , inputStream.toString());
+                            MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                            dimmerStatusList = new ArrayList<>();
+                            dimmerStatusList = pullParser.processXML(inputStream);
+
+                            for (int k = 0; k < dimmerStatusList.size(); k++) {
+                                if (dimmerStatusList.get(k).tagValue.substring(0, 2).equals("01")) {
+                                    ComponentModel componentModel = new ComponentModel();
+                                    componentModel.setName(dimmerStatusList.get(k).tagName);
+                                    componentModel.setDefaultValue(dimmerStatusList.get(k).tagValue);
+                                    componentModel.setMip(machineBaseURL);
+                                    componentModel.setMid(machineId);
+                                    componentModel.setMachineName(machineName);
+                                    allOnDimmersList.add(componentModel);
+                                }
+                            }
                         }
+                    }catch(Exception e){
+                        Log.e("# EXP GetDimmerStatus", e.toString());
+                        isError = true;
                     }
                 }
-                }catch(Exception e){
-                    Log.e("# EXP", e.toString());
-                }
+
 
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            // Log.e("TAG_ASYNC", "Inside onPostExecute");
-            /*// store dimmer status
-            dimmersWithOnStatus = new ArrayList<>();
-            for(int i =0; i<dimmerStatusList.size();i++) {
-
-                if(dimmerStatusList.get(i).tagValue.substring(0,2).equals("01")) {
-                    dimmersWithOnStatus.add(dimmerStatusList.get(i));
+            if(isError) {
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    dbHelper.openDataBase();
+                    dbHelper.enableDisableMachine(machineId, false);
+                    dbHelper.close();
+                    Toast.makeText(getActivity(), "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                } catch (SQLException e) {
+                    Log.e("TAG EXP", e.toString());
                 }
             }
-            Log.e("ON DIMMERS", dimmersWithOnStatus.toString());*/
 
             // switch off on dimmers
             for(int i=0; i< allOnDimmersList.size();i++) {
-                Log.e("dimmer", "dimmers");
                 ComponentModel dimmer = allOnDimmersList.get(i);
                 String strPosition =  dimmer.getName().substring(2, 4);
                 String strProgress = dimmer.getDefaultValue().substring(2, 4);
                 String CHANGE_STATUS_URL = dimmer.getMip() + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
-                new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                String[] params = new String[3];
+                params[0] = CHANGE_STATUS_URL;
+                params[1] =  dimmer.getMid();
+                params[2] =  dimmer.getMachineName();
+                new ChangeDimmerStatus().execute(params);
             }
         }
     }
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
         boolean isError = false;
+        String mid = "", mname = "";
 
         @Override
         protected Void doInBackground(String... params) {
 
             try {
                 URL urlValue = new URL(params[0]);
+                mid = params[1];
+                mname = params[2];
                 Log.e("# url change switch", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(1000*60);
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
 
 
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+                Log.e("#EXP ChangeSwitchStatus", e.toString());
                 isError = true;
             }
             return null;
@@ -780,35 +890,60 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         protected void onPostExecute(Void aVoid) {
             // machine became inactive.
             if(isError) {
-
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    dbHelper.openDataBase();
+                    dbHelper.enableDisableMachine(mid, false);
+                    dbHelper.close();
+                    Toast.makeText(getActivity(), "Machine, " + mname + " was deactivated.", Toast.LENGTH_LONG).show();
+                } catch (SQLException e) {
+                    Log.e("TAG EXP", e.toString());
+                }
             }
+
         }
     }
 
     public class ChangeDimmerStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+        String mid = "", mname = "";
 
         @Override
         protected Void doInBackground(String... params) {
 
             try {
                 URL urlValue = new URL(params[0]);
+                mid = params[1];
+                mname = params[2];
                 Log.e("# url change dimmer", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(1000*60);
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
 
 
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+                Log.e("#EXP ChangeDimmerStatus", e.toString());
+                isError = true;
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+            if(isError) {
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    dbHelper.openDataBase();
+                    dbHelper.enableDisableMachine(mid, false);
+                    dbHelper.close();
+                    Toast.makeText(getActivity(), "Machine : " + mname + " was deactivated.", Toast.LENGTH_LONG).show();
+                } catch (SQLException e) {
+                    Log.e("TAG EXP", e.toString());
+                }
+            }
+
         }
     }
 
@@ -818,7 +953,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             @Override
             public void run() {
                 //Do something after 100ms
-                new GetMachineStatus().execute();
+                //new GetMachineStatus().execute();
                 // isPowerOn = !isPowerOn;
                 /*if (isPowerOn) {
                     animObj.cancelPowerButtonAnimation();
@@ -830,7 +965,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         }, 1000);
     }
 
-    public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
+    // to display the green LED on toolbar
+   /* public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -844,7 +980,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                  Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(1000*60);
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
 
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
@@ -915,60 +1051,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 ((HomeDrawerActivity) activity).hideDrawer();
                 bulb_image.setClickable(false);
             }
-
-
-
-
-
-
-
-
-
-
-
-            /*try {
-                for (int i = 0; i < powerStatus.size(); i++) {
-                    if (powerStatus.get(i).tagName.equals("led0")) {
-                         Log.e("Power_status", powerStatus.get(i).tagValue);
-                        if (powerStatus.get(i).tagValue.equals("0")) {
-                            if (isPowerOn) {
-                                Toast.makeText(activity, "Machine is disconnected", Toast.LENGTH_LONG).show();
-                            }
-                            isPowerOn = false;
-                            ((HomeDrawerActivity) activity).setPowerButtonOff();
-                            ((HomeDrawerActivity) activity).cancelPowerAnimation();
-                                showOffScreen() ;
-                            ((HomeDrawerActivity) activity).hideDrawer();
-                            bulb_image.setClickable(false);
-
-                        } else {
-                            Log.e("Power_status", powerStatus.get(i).tagValue);
-                            isPowerOn = true;
-                            //btn.setAlpha(1f);
-                            ((HomeDrawerActivity) activity).startPowerAnimation();
-                            bulb_image.setClickable(true);
-                            parentSwitches.setClickable(true);
-                            parentMotor.setClickable(true);
-                            parentSlider.setClickable(true);
-                            parentSensors.setClickable(true);
-                        }
-                        break;
-                    }
-                }
-
-            }catch (Exception e){
-                Toast.makeText(activity, "Machine is disconnected", Toast.LENGTH_LONG).show();
-                isPowerOn = false;
-                ((HomeDrawerActivity) activity).setPowerButtonOff();
-                ((HomeDrawerActivity) activity).cancelPowerAnimation();
-                showOffScreen();
-                ((HomeDrawerActivity) activity).hideDrawer();
-                bulb_image.setClickable(false);
-            }*/
-
-
         }
-    }
+    }*/
 
     private void showOffScreen() {
         linearDisabled.setAlpha(0.8f);
@@ -984,5 +1068,103 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         imgOptions.setClickable(true);
         imgFavorites.setClickable(true);
         imgSchedulers.setClickable(true);
+    }
+
+    public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
+        String machineId="", machineName = "", machineIp, isMachineActive = "false";
+        boolean isError = false;
+
+        @Override
+        protected void onPreExecute() {
+            //progressDilaog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            totalMachineCount = 0;
+            for (int i = 0; i < machineIPs.length; i++) {
+                String machineBaseURL = "";
+                machineIp = machineIPs[i];
+
+                if (machineIp.startsWith("http://")) {
+                    machineBaseURL = machineIp;
+                } else {
+                    machineBaseURL = "http://" + machineIp;
+                }
+                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                try {
+                    dbHelper.openDataBase();
+                    machineCursor = dbHelper.getMachineByIP(machineIp);
+                    machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                    machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                    isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                    dbHelper.close();
+
+                    if(isMachineActive.equals("true")) {
+
+                        URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_MACHINE_STATUS);
+                        Log.e("# urlValue", urlValue.toString());
+
+                        HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                        httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+
+                        httpUrlConnection.setRequestMethod("GET");
+                        InputStream inputStream = httpUrlConnection.getInputStream();
+                        totalMachineCount++;
+                    }
+                } catch (Exception e) {
+                    Log.e("# EXP", e.toString());
+                    isError = true;
+                    try {
+                        DatabaseHelper dbHelper1 = new DatabaseHelper(getActivity());
+                        dbHelper1.openDataBase();
+                        dbHelper1.enableDisableMachine(machineId, false);
+                        dbHelper1.close();
+                    } catch (Exception ex) {
+                        Log.e("TAG EXP", ex.toString());
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            //progressDilaog.hide();
+
+            if(isError) {
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    dbHelper.openDataBase();
+                    Log.e("TAG_MACHINE", dbHelper+"");
+                    dbHelper.enableDisableMachine(machineId, false);
+                    dbHelper.close();
+                    Toast.makeText(getActivity(), "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                } catch (SQLException e) {
+                    Log.e("TAG EXP", e.toString());
+                }
+            }
+
+            if(totalMachineCount == 0) {
+                //Toast.makeText(getActivity(), getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
+                txtPowerOffMessageLink.setVisibility(View.VISIBLE);
+                txtPowerOffMessage.setText(getString(R.string.all_machines_off_text));
+
+                txtPowerOffMessageLink.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), MachineListActivity.class);
+                        startActivity(intent);
+                    }
+                });
+
+                showOffScreen();
+                ((HomeDrawerActivity) getActivity()).hideDrawer();
+
+                bulb_image.setColorFilter(getResources().getColor(R.color.white));
+                bulb_image.setBackgroundResource(R.drawable.white_border_circle);
+            }
+
+        }
     }
 }

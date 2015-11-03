@@ -27,6 +27,7 @@ import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.Random;
 
 /**
@@ -84,7 +85,6 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     private void fireScheduler() {
        // if(schedulerId != null) {
-            Log.e("TAG_SCHEDULER", "Scheduler");
             try {
                 DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
                 dbHelper.openDataBase();
@@ -96,17 +96,25 @@ public class AlarmReceiver extends BroadcastReceiver {
                     if (schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE)) {
                         String name = schedulerModel.getComponentId();
                         String mip = schedulerModel.getMip();
+                        String mid = schedulerModel.getMid();
                         String baseMachineUrl = "";
                         if (mip.startsWith("http://")) {
                             baseMachineUrl = mip;
                         } else {
                             baseMachineUrl = "http://" + mip;
                         }
-                        String URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
+                        boolean isMachineActive =  dbHelper.isMachineActive(mip);
 
-                        // call url
-                        notificationSchedulerName = schedulerModel.getSchedulerName();
-                        new ChangeSwitchStatus().execute(URL);
+                        if(isMachineActive) {
+                            String URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
+
+                            // call url
+                            notificationSchedulerName = schedulerModel.getSchedulerName();
+                            String[] params = new String[2];
+                            params[0] = URL;
+                            params[1] = mip;
+                            new ChangeSwitchStatus().execute(params);
+                        }
 
                     } else if (schedulerModel.getComponentType().equals(AppConstants.DIMMER_TYPE)) {
                         String name = schedulerModel.getComponentId();
@@ -118,11 +126,18 @@ public class AlarmReceiver extends BroadcastReceiver {
                             baseMachineUrl = "http://" + mip;
                         }
 
-                        String URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
+                        boolean isMachineActive =  dbHelper.isMachineActive(mip);
 
-                        // call url
-                        notificationSchedulerName = schedulerModel.getSchedulerName();
-                        new ChangeDimmerStatus().execute(URL);
+                        if(isMachineActive) {
+                            String URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + name.substring(2, 4) + schedulerModel.getDefaultValue();
+
+                            // call url
+                            notificationSchedulerName = schedulerModel.getSchedulerName();
+                            String[] params = new String[2];
+                            params[0] = URL;
+                            params[1] = mip;
+                            new ChangeDimmerStatus().execute(params);
+                        }
 
                     } else if (schedulerModel.getComponentType().equals(AppConstants.SCENE_TYPE)) {
                         try {
@@ -139,6 +154,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                                         String sceneComponentId = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID));
                                         String defaultValue = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_DEFAULT));
                                         String cComponentType = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_TYPE));
+                                        String sceneIsActive = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
 
                                         if (mip.startsWith("http://")) {
                                             baseMachineUrl = mip;
@@ -146,21 +162,29 @@ public class AlarmReceiver extends BroadcastReceiver {
                                             baseMachineUrl = "http://" + mip;
                                         }
 
-                                        if (cComponentType.equals(AppConstants.SWITCH_TYPE)) {
-                                            URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue();
-                                            new ChangeSwitchStatus().execute(URL);
+                                        if(sceneIsActive.equals("true")) {
+                                            if (cComponentType.equals(AppConstants.SWITCH_TYPE)) {
+                                                URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue();
+                                                String[] params = new String[2];
+                                                params[0] = URL;
+                                                params[1] = mip;
+                                                new ChangeSwitchStatus().execute(params);
 
-                                        } else if (cComponentType.equals(AppConstants.DIMMER_TYPE)) {
-                                            String strProgress = "";
-                                            Log.e("def", defaultValue);
-                                            if (defaultValue.equals("00")) {
-                                                strProgress = String.format("%02d", Integer.parseInt(defaultValue));
-                                                URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue() + strProgress;
-                                            } else {
-                                                strProgress = String.format("%02d", Integer.parseInt(defaultValue) - 1);
-                                                URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue() + strProgress;
+                                            } else if (cComponentType.equals(AppConstants.DIMMER_TYPE)) {
+                                                String strProgress = "";
+                                                Log.e("def", defaultValue);
+                                                if (defaultValue.equals("00")) {
+                                                    strProgress = String.format("%02d", Integer.parseInt(defaultValue));
+                                                    URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue() + strProgress;
+                                                } else {
+                                                    strProgress = String.format("%02d", Integer.parseInt(defaultValue) - 1);
+                                                    URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + sceneComponentId.substring(2, 4) + schedulerModel.getDefaultValue() + strProgress;
+                                                }
+                                                String[] params = new String[2];
+                                                params[0] = URL;
+                                                params[1] = mip;
+                                                new ChangeDimmerStatus().execute(params);
                                             }
-                                            new ChangeDimmerStatus().execute(URL);
                                         }
 
                                     } while (sceneCursor.moveToNext());
@@ -182,32 +206,53 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
-
+        boolean isError = false, isMachineActive = false;
+        String machineId="", machineName = "", machineIp;
+        Cursor  machineCursor;
         @Override
         protected Void doInBackground(String... params) {
-
+            DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
             try {
                 URL urlValue = new URL(params[0]);
+                machineIp = params[1];
                 Log.e("# urlValue", urlValue.toString());
 
+                isMachineActive =  dbHelper.isMachineActive(machineIp);
+                machineCursor = dbHelper.getMachineByIP(machineIp);
+                machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
 
 
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
+                isError = true;
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
             try{
-                String msg = notificationSchedulerName + " Set";
-                if(schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE))
-                    sendNotification(msg);
+                DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
+                if(isError) {
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                        Toast.makeText(_ctx, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                } else {
+                    String msg = notificationSchedulerName + " Set";
+                    if (schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE))
+                        sendNotification(msg);
+                }
 
             }catch(Exception e){
             }
@@ -215,33 +260,55 @@ public class AlarmReceiver extends BroadcastReceiver {
     }
 
     public class ChangeDimmerStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false, isMachineActive = false;
+        String machineId="", machineName = "", machineIp;
+        Cursor  machineCursor;
 
         @Override
         protected Void doInBackground(String... params) {
-
+            DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
             try {
                 URL urlValue = new URL(params[0]);
-                Log.e("# url change dimmer", urlValue.toString());
+                machineIp = params[1];
+                Log.e("# urlValue", urlValue.toString());
+
+                isMachineActive =  dbHelper.isMachineActive(machineIp);
+                machineCursor = dbHelper.getMachineByIP(machineIp);
+                machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
 
 
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
+                isError = false;
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-
             try {
-                String msg = notificationSchedulerName + " Set";
-                if(schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE))
-                    sendNotification(msg);
+                DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
+                if(isError) {
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                        Toast.makeText(_ctx, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                } else {
+                    String msg = notificationSchedulerName + " Set";
+                    if(schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE))
+                        sendNotification(msg);
+                }
+
             }catch (Exception e) {}
         }
     }

@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -132,6 +133,13 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         txtDimmer.setOnClickListener(this);
         linearSaveScene.setOnClickListener(this);
         sceneMainSwitch.setOnClickListener(this);
+
+        sceneMainSwitch.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return event.getActionMasked() == MotionEvent.ACTION_MOVE;
+            }
+        });
 
         imgHScrollLeft.setOnClickListener(this);
         imgHScrollRight.setOnClickListener(this);
@@ -269,25 +277,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 }
             }
         });
-
-        /*edtSceneName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                isSceneNamedChanged = true;
-                isSceneSaved = false;
-                currentSceneName = s.toString().trim();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });*/
     }
 
     @Override
@@ -367,8 +356,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                                 finish();
                             } catch (Exception e) {
                             }
-                        } else {
-                       /* finish();*/
                         }
                     }
                 });
@@ -621,10 +608,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         String isActive = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
                         sceneSwitchItem.setIsActive(isActive);
                         sceneSwitchItem.enableDisableComponent(isActive);
-                        /*//check if this componeny is inactive or not
-                        if(isActive.equals("false")) {
-                            sceneSwitchItem.setFocusable(false);
-                        }*/
 
                         // check if this component is already added to the scene or not
                         for(int i=0; i<mData.size(); i++) {
@@ -709,11 +692,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         sceneSwitchItem.setIsActive(isActive);
                         sceneSwitchItem.enableDisableComponent(isActive);
 
-                       /* //check if this componeny is inactive or not
-                        if(isActive.equals("false")) {
-                            sceneSwitchItem.setFocusable(false);
-                        }
-*/
                         // check if this component is already added or not
                         for(int i=0; i<mData.size(); i++) {
                             if(mData.get(i).getSceneComponentPrimaryId().equals(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)))) {
@@ -732,12 +710,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         } catch (SQLException e) {
             Log.e("SQLException", e.toString());
         }
-
-        /*for(int i=0; i < totalNoOfMotors; i++) {
-            SceneDimmerItem sceneSwitchItem = new SceneDimmerItem(SceneActivity.this);
-            sceneSwitchItem.setText("Dimmer " + i);
-            initDimmers.add(sceneSwitchItem);
-        }*/
     }
 
     private void showSceneSavedState() {
@@ -839,7 +811,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     if (initSwitches.get(i).isFocusable()) {
                         addSwitchToScene(i);
                     } else {
-                        Toast.makeText(SceneActivity.this, "Component Already Added To Scene", Toast.LENGTH_SHORT).show();
+                        if(initSwitches.get(i).getIsActive().equals("true")) {
+                            Toast.makeText(SceneActivity.this, "Component Already Added To Scene", Toast.LENGTH_SHORT).show();
+                        }
                     }
                     break;
                 }
@@ -850,7 +824,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     if (initDimmers.get(i).isFocusable()) {
                         addDimmerToScene(i);
                     } else {
-                        Toast.makeText(SceneActivity.this, "Component Already Added To Scene", Toast.LENGTH_SHORT).show();
+                        if(initDimmers.get(i).getIsActive().equals("true")) {
+                            Toast.makeText(SceneActivity.this, "Component Already Added To Scene", Toast.LENGTH_SHORT).show();
+                        }
                     }
                     break;
                 }
@@ -867,16 +843,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
 
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+        sceneItemsDataObject.setIsActive(initSwitches.get(position).getIsActive());
 
-        /*String machineIP = "";
-        if(initSwitches.get(position).getMachineIP().startsWith("http://")) {
-            machineIP = initSwitches.get(position).getMachineIP();
-        } else {
-            machineIP = "http://"+ initSwitches.get(position).getMachineIP();
-        }
-        String strPosition = initSwitches.get(position).getSwitchId().substring(2,4);
-
-        sceneItemsDataObject.setDefaultValue(machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE);*/
         mData.add(sceneItemsDataObject);
 
 
@@ -902,10 +870,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
         sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
         sceneItemsDataObject.setSceneComponentPrimaryId(initDimmers.get(position).getComponentPrimaryId());
-        sceneItemsDataObject.setMachineId(initSwitches.get(position).getMachineId());
+        sceneItemsDataObject.setMachineId(initDimmers.get(position).getMachineId());
         sceneItemsDataObject.setMachineIP(initDimmers.get(position).getMachineIP());
         sceneItemsDataObject.setMachineName(initDimmers.get(position).getMachineName());
         sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+        sceneItemsDataObject.setIsActive(initDimmers.get(position).getIsActive());
         //mAdapter.add(mData.size(), sceneItemsDataObject);
         mData.add(sceneItemsDataObject);
 
@@ -949,10 +918,13 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public class CallSceneOn extends AsyncTask<Void, Void, Void> {
+        boolean isError = false, isMachineActive = false;
+        String machineId="", machineName = "", machineIp;
+        Cursor  machineCursor;
 
         @Override
         protected Void doInBackground(Void... params) {
-            try {
+
                 //setting default wal
                 for(int i=0;i<mData.size();i++) {
                     String strPosition;
@@ -961,53 +933,69 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     String SET_STATUS_URL = "";
                     String baseMachineUrl = "";
 
-                    if(mData.get(i).getMachineIP().startsWith("http://")) {
-                        baseMachineUrl = mData.get(i).getMachineIP();
+                    machineIp = mData.get(i).getMachineIP();
+
+                    if(machineIp.startsWith("http://")) {
+                        baseMachineUrl = machineIp;
                     } else {
-                        baseMachineUrl = "http://"+mData.get(i).getMachineIP();
+                        baseMachineUrl = "http://"+ machineIp;
                     }
+                    DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
 
-                    // set defaults for switch
-                    if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
-                        if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                    try {
+                        isMachineActive =  dbHelper.isMachineActive(machineIp);
+                        machineCursor = dbHelper.getMachineByIP(machineIp);
+                        machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                        machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+
+
+                        if(isMachineActive) {
+                            // set defaults for switch
+                            if (mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
+                                if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
+                                    SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                                } else {
+                                    SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                                }
+                            }
+
+                            // set defaults for dimmer
+                            if (mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
+                                String dimmerValue = "00";
+                                if (!mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0")) {
+                                    dimmerValue = String.format("%02d", Integer.parseInt(mData.get(i).getDefaultValue()) - 1);
+                                }
+                                if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
+                                    SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
+                                } else {
+                                    SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
+                                }
+                            }
+
+                            URL urlValue = new URL(SET_STATUS_URL);
+                            Log.e("# urlValue", urlValue.toString());
+
+                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                            httpUrlConnection.setRequestMethod("GET");
+                            InputStream inputStream = httpUrlConnection.getInputStream();
                         } else {
-                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                            try {
+                                dbHelper.openDataBase();
+                                dbHelper.enableDisableMachine(machineId, false);
+                                dbHelper.close();
+                                Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                            } catch (SQLException e) {
+                                Log.e("TAG EXP", e.toString());
+                            }
                         }
+                    } catch (Exception e) {
+                        Log.e("# EXP", e.toString());
+                        isError = true;
                     }
-
-                    // set defaults for dimmer
-                    if(mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE) ) {
-                        String dimmerValue = "00";
-                        if( !mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0") ) {
-                            dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
-                        }
-                        if (mData.get(i).getDefaultValue().equals(AppConstants.OFF_VALUE)) {
-                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE +dimmerValue;
-                        } else {
-                            SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + dimmerValue;
-                        }
-                    }
-
-                    URL urlValue = new URL(SET_STATUS_URL);
-                    Log.e("# urlValue2222", urlValue.toString());
-
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = httpUrlConnection.getInputStream();
-
-                    BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder total = new StringBuilder();
-                    String line;
-                    while ((line = r.readLine()) != null) {
-                        total.append(line);
-                    }
-                    Log.e("result", total.toString());
                 }
 
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
+
             return null;
         }
 
@@ -1015,16 +1003,29 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             try{
+                if(isError) {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                       // Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                }
             }catch(Exception e){
             }
         }
     }
 
     public class CallSceneOff extends AsyncTask<Void, Void, Void> {
-
+        boolean isError = false, isMachineActive = false;
+        String machineId="", machineName = "", machineIp;
+        Cursor  machineCursor;
         @Override
         protected Void doInBackground(Void... params) {
-            try {
+
                 //setting default wal
                 for(int i=0;i<mData.size();i++) {
                     String strPosition;
@@ -1032,54 +1033,76 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     String SET_STATUS_URL = "";
 
                     String baseMachineUrl = "";
+                    machineIp = mData.get(i).getMachineIP();
 
-                    if(mData.get(i).getMachineIP().startsWith("http://")) {
-                        baseMachineUrl = mData.get(i).getMachineIP();
+                    if(machineIp.startsWith("http://")) {
+                        baseMachineUrl = machineIp;
                     } else {
-                        baseMachineUrl = "http://"+mData.get(i).getMachineIP();
+                        baseMachineUrl = "http://"+ machineIp;
                     }
+                    DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                    try {
+                        isMachineActive =  dbHelper.isMachineActive(machineIp);
+                        machineCursor = dbHelper.getMachineByIP(machineIp);
+                        machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                        machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
 
-                    // for switch
-                    if(mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE) ) {
-                        SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                    }
+                        if(isMachineActive) {
+                            // for switch
+                            if (mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
+                                SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                            }
 
-                    if(mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE) ) {
-                        String dimmerValue = "00";
-                        if( !mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0")) {
-                            dimmerValue = String.format("%02d",Integer.parseInt(mData.get(i).getDefaultValue())-1);
+                            // for dimmers
+                            if (mData.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
+                                String dimmerValue = "00";
+                                if (!mData.get(i).getDefaultValue().equals("00") && !mData.get(i).getDefaultValue().equals("0")) {
+                                    dimmerValue = String.format("%02d", Integer.parseInt(mData.get(i).getDefaultValue()) - 1);
+                                }
+                                SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
+                            }
+
+                            URL urlValue = new URL(SET_STATUS_URL);
+                            Log.e("# urlValue", urlValue.toString());
+
+                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                            httpUrlConnection.setRequestMethod("GET");
+                            InputStream inputStream = httpUrlConnection.getInputStream();
+                        } else {
+                            try {
+                                dbHelper.openDataBase();
+                                dbHelper.enableDisableMachine(machineId, false);
+                                dbHelper.close();
+                                Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                            } catch (SQLException e) {
+                                Log.e("TAG EXP", e.toString());
+                            }
                         }
-                        SET_STATUS_URL = baseMachineUrl + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + dimmerValue;
+                    } catch (Exception e) {
+                        Log.e("# EXP", e.toString());
+                        isError = true;
                     }
-
-
-                    URL urlValue = new URL(SET_STATUS_URL);
-                    Log.e("# urlValue", urlValue.toString());
-
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = httpUrlConnection.getInputStream();
-
-
-                    BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder total = new StringBuilder();
-                    String line;
-                    while ((line = r.readLine()) != null) {
-                        total.append(line);
-                    }
-                    Log.e("result", total.toString());
                 }
 
-            } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-            }
+
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
             try{
+                if(isError) {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                        //Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                    } catch (SQLException e) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                }
             }catch(Exception e){
             }
         }

@@ -239,7 +239,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // change is_active status of machine in tables: machine, SceneComponent, Component, FavouriteComponent, Schedulers
     public void enableDisableMachine(String machineId, boolean isEnabled) {
-        SQLiteDatabase db = this.getWritableDatabase();
+
+        mDb = getWritableDatabase();
 
         //update machine
         ContentValues values = new ContentValues();
@@ -251,22 +252,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         // machine
-        db.update(DBConstants.TABLE_MACHINE, values, DBConstants.KEY_M_ID + "='" + machineId + "'", null);
+        mDb.update(DBConstants.TABLE_MACHINE, values, DBConstants.KEY_M_ID + "='" + machineId + "'", null);
 
         //update component
-        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_MID + "='" + machineId + "'", null);
+        mDb.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_MID + "='" + machineId + "'", null);
 
         //update scene-component
-        db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_MID + "='" + machineId + "'", null);
+        mDb.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_MID + "='" + machineId + "'", null);
 
         //update FavouriteComponent
-        db.update(DBConstants.TABLE_FAVOURITE, values, DBConstants.KEY_F_MID + "='" + machineId + "'", null);
+        mDb.update(DBConstants.TABLE_FAVOURITE, values, DBConstants.KEY_F_MID + "='" + machineId + "'", null);
 
         //update Schedulers
-        db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
+        mDb.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
 
 
-        db.close();
+        mDb.close();
     }
 
     public String getMachineNameByIP(String machineIP) {
@@ -759,6 +760,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_SC_MIP, componentModels.get(i).getMachineIP());
             values.put(DBConstants.KEY_SC_MNAME, componentModels.get(i).getMachineName());
             values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
+            values.put(DBConstants.KEY_M_ISACTIVE, componentModels.get(i).getIsActive());
 
             if( !isComponentAlreadyExists(componentModels.get(i).getSceneComponentPrimaryId(), sceneId))
                 db.insert(DBConstants.TABLE_SCENE_COMPONENT, null, values);

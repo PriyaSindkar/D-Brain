@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SensorListCursorAdapter;
-import com.webmyne.android.d_brain.ui.Adapters.SensorsListAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
@@ -65,7 +64,6 @@ public class SensorFragment extends Fragment {
 
     private void PauseTimer(){
         this.timer.cancel();
-        Log.e("TIMER", "Timer Paused");
     }
 
     public void ResumeTimer() {
@@ -81,7 +79,6 @@ public class SensorFragment extends Fragment {
                     public void run() {
                         if (!isDelay) {
                             new GetSensorStatus().execute();
-                            Log.e("TIMER", "Timer Start");
                         } else {
                             PauseTimer();
                             ResumeTimer();
@@ -116,23 +113,6 @@ public class SensorFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_scene_list, container, false);
         init(view);
-
-        /*adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                Toast.makeText(getActivity(), "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setLongClickListener(new onLongClickListener() {
-
-            @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(getActivity(), "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });*/
-
-
 
         return view;
     }
@@ -257,9 +237,10 @@ public class SensorFragment extends Fragment {
                     // fetch sensor status from machine only if the machine is active else init all the sensor status to off
                     if (isMachineActive) {
                         URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SENSOR_STATUS);
-                        // Log.e("# urlValue", urlValue.toString());
+                        Log.e("# urlValue", urlValue.toString());
 
                         HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                        httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                         httpUrlConnection.setRequestMethod("GET");
                         InputStream inputStream = httpUrlConnection.getInputStream();
                         //  Log.e("# inputStream", inputStream.toString());
@@ -326,7 +307,7 @@ public class SensorFragment extends Fragment {
                         dbHelper.openDataBase();
                         dbHelper.enableDisableMachine(machineId, false);
                         dbHelper.close();
-                        Toast.makeText(getActivity(), "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
                     } catch (SQLException e) {
                         Log.e("TAG EXP", e.toString());
                     }

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -132,6 +133,13 @@ public class EditSchedulerDialog extends BaseDialog {
             @Override
             public void onClick(View v) {
                 dismiss();
+            }
+        });
+
+        imgSwitch.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return event.getActionMasked() == MotionEvent.ACTION_MOVE;
             }
         });
 
@@ -308,16 +316,12 @@ public class EditSchedulerDialog extends BaseDialog {
             Random random = new Random();
             int RQS_1 = random.nextInt(9999 - 1000) + 1000;
 
-
-            Log.e("EDit", "Edit start");
             Intent intent = new Intent(mContext, AlarmReceiver.class);
             intent.putExtra("scheduler_id", schedulerId);
 //            intent.putExtra("scheduler_name", String.valueOf(schedulerModel.getSchedulerName()));
             PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent, 0);
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
             alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-
-            Log.e("EDit", "Edit end");
 
         }catch (Exception e){
             Log.e("## EXC",e.toString());

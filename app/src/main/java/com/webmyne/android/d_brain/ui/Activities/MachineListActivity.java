@@ -327,7 +327,7 @@ public class MachineListActivity extends AppCompatActivity {
                 Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(500 * 60);
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
 
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();

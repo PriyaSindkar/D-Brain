@@ -2,10 +2,7 @@ package com.webmyne.android.d_brain.ui.base;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -13,52 +10,31 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
-import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.BallonComponent.BalloonPerformer;
 import com.webmyne.android.d_brain.ui.BallonComponent.configs.Config;
 import com.webmyne.android.d_brain.ui.BallonComponent.widgets.BalloonGroup;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddMachineDialog;
-import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
-import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AboutUsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AddMachineFragment;
 import com.webmyne.android.d_brain.ui.Fragments.ContactUsFragment;
-import com.webmyne.android.d_brain.ui.Fragments.SchedulerFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SchedulersFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SensorFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
-import com.webmyne.android.d_brain.ui.Fragments.MachineConfigFragment;
-import com.webmyne.android.d_brain.ui.Fragments.MainPanelFragment;
 import com.webmyne.android.d_brain.ui.Fragments.NotificationFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SceneFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SettingsFragment;
-import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
-import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
-import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
-import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
-import com.webmyne.android.d_brain.ui.Model.UserSettings;
-import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
-import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
-import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
-import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class HomeDrawerActivity extends AppCompatActivity {
@@ -259,12 +235,6 @@ public class HomeDrawerActivity extends AppCompatActivity {
                 ft.commit();
                 break;
 
-            /*case R.id.drawer_main_panel:
-                // Home
-                ft.replace(R.id.content, MainPanelFragment.newInstance(), "MAIN_PANEL");
-                ft.commit();
-                break;*/
-
             case R.id.drawer_scenes:
                 ft.replace(R.id.content, SceneFragment.newInstance(), "SCENE");
                 ft.commit();
@@ -296,12 +266,6 @@ public class HomeDrawerActivity extends AppCompatActivity {
                 ft.replace(R.id.content, AddMachineFragment.newInstance(), "Add Machine");
                 ft.commit();
                 break;
-
-           /* case R.id.drawer_machine_config:
-                // Home
-                ft.replace(R.id.content, MachineConfigFragment.newInstance(), "Machine Configuration");
-                ft.commit();
-                break;*/
 
             case R.id.drawer_settings:
                 // Home

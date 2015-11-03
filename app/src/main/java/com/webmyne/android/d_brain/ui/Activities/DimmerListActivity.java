@@ -67,10 +67,10 @@ public class DimmerListActivity extends AppCompatActivity {
     private Timer timer;
     private Handler handler;
     public static boolean isDelay = false;
+    private int totalMachineCount = 0;
 
     private void PauseTimer(){
         this.timer.cancel();
-        Log.e("TIMER", "Timer Paused");
     }
 
     public void ResumeTimer() {
@@ -86,7 +86,6 @@ public class DimmerListActivity extends AppCompatActivity {
                     public void run() {
                         if (!isDelay) {
                             new GetDimmerStatus().execute(machineIPs);
-                            Log.e("TIMER", "Timer Start");
                         } else {
                             PauseTimer();
                             ResumeTimer();
@@ -240,10 +239,10 @@ public class DimmerListActivity extends AppCompatActivity {
                     String machineBaseURL = "";
                     machineIp = machineIPs[i];
 
-                    if(params[i].startsWith("http://")) {
-                        machineBaseURL = machineIPs[i];
+                    if(machineIp.startsWith("http://")) {
+                        machineBaseURL = machineIp;
                     } else {
-                        machineBaseURL = "http://" + machineIPs[i];
+                        machineBaseURL = "http://" + machineIp;
                     }
 
                     DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
@@ -253,6 +252,7 @@ public class DimmerListActivity extends AppCompatActivity {
                         machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
                         machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
                         isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                        cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
                         dbHelper.close();
 
                     } catch (SQLException e) {
@@ -266,30 +266,22 @@ public class DimmerListActivity extends AppCompatActivity {
                             Log.e("# urlValue", urlValue.toString());
 
                             HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                             httpUrlConnection.setRequestMethod("GET");
                             InputStream inputStream = httpUrlConnection.getInputStream();
-                            httpUrlConnection.setConnectTimeout(500*60);
                             //  Log.e("# inputStream", inputStream.toString());
                             MainXmlPullParser pullParser = new MainXmlPullParser();
 
                             dimmerStatusList = pullParser.processXML(inputStream);
                             Log.e("XML PARSERED", dimmerStatusList.toString());
 
-                            try {
-                                dbHelper.openDataBase();
-                                cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
-                                int totalDimmersofMachine = 0;
-                                if (cursor != null) {
-                                    totalDimmersofMachine = cursor.getCount();
-                                }
+                            int totalDimmersofMachine = 0;
+                            if (cursor != null) {
+                                totalDimmersofMachine = cursor.getCount();
+                            }
 
-                                for (int j = 0; j < totalDimmersofMachine; j++) {
-                                    allDimmerStatusList.add(dimmerStatusList.get(j));
-                                }
-                                dbHelper.close();
-
-                            } catch (SQLException e) {
-                                e.printStackTrace();
+                            for (int j = 0; j < totalDimmersofMachine; j++) {
+                                allDimmerStatusList.add(dimmerStatusList.get(j));
                             }
                         } catch (Exception e) {
                             Log.e("# EXP", e.toString());
@@ -346,7 +338,7 @@ public class DimmerListActivity extends AppCompatActivity {
                         dbHelper.openDataBase();
                         dbHelper.enableDisableMachine(machineId, false);
                         dbHelper.close();
-                        Toast.makeText(DimmerListActivity.this, "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(DimmerListActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
                     } catch (SQLException e) {
                         Log.e("TAG EXP", e.toString());
                     }
@@ -370,7 +362,7 @@ public class DimmerListActivity extends AppCompatActivity {
                 adapter.setCheckedChangeListener(new onCheckedChangeListener() {
                     @Override
                     public void onCheckedChangeClick(int pos) {
-                        isDelay  = false;
+                        isDelay = false;
                     }
                 });
 
@@ -448,38 +440,108 @@ public class DimmerListActivity extends AppCompatActivity {
                                 addComponentToScheduler(pos);
                             }
                         });
-
-                        /*PopupMenu popup = new PopupMenu(DimmerListActivity.this, view);
-                        popup.getMenuInflater().inflate(R.menu.menu_components, popup.getMenu());
-
-                        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                            public boolean onMenuItemClick(MenuItem item) {
-
-                                switch (item.getItemId()) {
-                                    case R.id.action_rename:
-                                        renameComponent(pos);
-                                        break;
-
-                                    case R.id.action_add_to_scene:
-                                        addComponentToScene(pos);
-                                        break;
-
-                                    case R.id.action_add_to_favorite:
-                                        addComponentToFavourite(pos);
-                                        break;
-                                } //switch end
-                                return true;
-                            }
-                        });
-
-                        popup.show();//showing popup menu*/
                     }
                 });
+
+               // new GetMachineStatus().execute();
 
             } catch (Exception e) {
             }
         }
     }
+
+
+    public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
+        String machineId="", machineName = "", machineIp, isMachineActive = "false";
+        boolean isError = false;
+        Cursor machineCursor;
+
+        @Override
+        protected void onPreExecute() {
+            //progressDilaog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            totalMachineCount = 0;
+            for (int i = 0; i < machineIPs.length; i++) {
+                String machineBaseURL = "";
+                machineIp = machineIPs[i];
+
+                if (machineIp.startsWith("http://")) {
+                    machineBaseURL = machineIp;
+                } else {
+                    machineBaseURL = "http://" + machineIp;
+                }
+                DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+                try {
+                    dbHelper.openDataBase();
+                    Log.e("MACHIEN_IP", machineIp);
+                    machineCursor = dbHelper.getMachineByIP(machineIp);
+                    machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                    machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                    isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                    dbHelper.close();
+
+
+                    if(isMachineActive.equals("true")) {
+                        Log.e("isMachineActive", isMachineActive);
+                        URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_MACHINE_STATUS);
+                        Log.e("# urlValue", urlValue.toString());
+
+                        HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                        httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+
+                        httpUrlConnection.setRequestMethod("GET");
+                        InputStream inputStream = httpUrlConnection.getInputStream();
+                        totalMachineCount++;
+                    } else {
+                        Log.e("isMachineActive", isMachineActive);
+                    }
+
+                } catch (Exception e) {
+                    Log.e("# EXP", e.toString());
+                    isError = true;
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("TAG EXP", ex.toString());
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            //progressDilaog.hide();
+
+            /*if(isError) {
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+                    dbHelper.openDataBase();
+                    dbHelper.enableDisableMachine(machineId, false);
+                    dbHelper.close();
+                    Toast.makeText(DimmerListActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                } catch (SQLException e) {
+                    Log.e("TAG EXP", e.toString());
+                }
+            }*/
+
+            if(totalMachineCount == 0) {
+                Toast.makeText(DimmerListActivity.this, getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
+                timer.cancel();
+                finish();
+            } else {
+               // new GetDimmerStatus().execute(machineIPs);
+            }
+
+        }
+    }
+
+
 
     private void renameComponent(int pos) {
         final int position = pos;

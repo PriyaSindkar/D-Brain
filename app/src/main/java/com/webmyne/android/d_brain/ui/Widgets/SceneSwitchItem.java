@@ -116,11 +116,11 @@ public class SceneSwitchItem extends LinearLayout{
     public void enableDisableComponent(String isActive) {
         if(isActive.equals("false")) {
             setFocusable(false);
-            linearParent.setAlpha(0.5f);
+            linearParent.setBackgroundResource(R.drawable.disabled_linear_shadow);
         }
         else {
             setFocusable(true);
-            linearParent.setAlpha(1.0f);
+            linearParent.setBackgroundResource(R.drawable.linear_shadow);
         }
     }
 

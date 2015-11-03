@@ -134,12 +134,6 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         mAdapter = new CreateSceneAdapter(this, mData);
         mRecycler.setAdapter(mAdapter);
 
-       /* gridView = (GridView) findViewById(R.id.grid_view);
-        gridView.setNumColumns(1);
-
-        mAdapter = new CreateSceneAdapter(this, mData);
-        gridView.setAdapter(mAdapter);*/
-
         mAdapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
             public void onDeleteOptionClick(int pos) {
@@ -344,16 +338,6 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
                             sceneItemsDataObject.setIsActive(initSwitches.get(position).getIsActive());
 
-                             /*String machineIP = "";
-                                if(initSwitches.get(position).getMachineIP().startsWith("http://")) {
-                                machineIP = initSwitches.get(position).getMachineIP();
-                            } else {
-                                machineIP = "http://"+ initSwitches.get(position).getMachineIP();
-                            }
-                            String strPosition = initSwitches.get(position).getSwitchId().substring(2,4);
-                            sceneItemsDataObject.setDefaultValue(machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE);*/
-
-                           // mAdapter.add(mData.size(), sceneItemsDataObject);
                             mData.add(sceneItemsDataObject);
                             mAdapter.notifyDataSetChanged();
                             initSwitches.get(position).setFocusable(false);
@@ -421,17 +405,6 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
                             sceneItemsDataObject.setIsActive(initDimmers.get(position).getIsActive());
 
-                            /*String machineIP = "";
-                            if(initDimmers.get(position).getMachineIP().startsWith("http://")) {
-                                machineIP = initDimmers.get(position).getMachineIP();
-                            } else {
-                                machineIP = "http://"+ initDimmers.get(position).getMachineIP();
-                            }
-                            String strPosition = initDimmers.get(position).getSwitchId().substring(2,4);
-
-                            sceneItemsDataObject.setDefaultValue(machineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + AppConstants.DIMMER_DEFAULT_VALUE);*/
-
-                          //  mAdapter.add(mData.size(), sceneItemsDataObject);
                             mData.add(sceneItemsDataObject);
                             mAdapter.notifyDataSetChanged();
                             initDimmers.get(position).setFocusable(false);
@@ -559,12 +532,6 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
         }
-
-       /* for(int i=0; i < totalNoOfSwitches; i++) {
-            SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(CreateSceneActivity.this);
-            sceneSwitchItem.setText("Switch " + i);
-            initSwitches.add(sceneSwitchItem);
-        }*/
     }
 
     private void initMotors() {
@@ -636,12 +603,6 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
         }
-
-        /*for(int i=0; i < totalNoOfMotors; i++) {
-            SceneDimmerItem sceneSwitchItem = new SceneDimmerItem(CreateSceneActivity.this);
-            sceneSwitchItem.setText("Dimmer " + i);
-            initDimmers.add(sceneSwitchItem);
-        }*/
     }
 
 

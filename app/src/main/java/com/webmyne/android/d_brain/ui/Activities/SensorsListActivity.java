@@ -58,7 +58,6 @@ public class SensorsListActivity extends AppCompatActivity {
 
     private void PauseTimer(){
         this.timer.cancel();
-        Log.e("TIMER", "Timer Paused");
     }
 
     public void ResumeTimer() {
@@ -74,7 +73,6 @@ public class SensorsListActivity extends AppCompatActivity {
                     public void run() {
                         if (!isDelay) {
                             new GetSensorStatus().execute(machineIPs);
-                            Log.e("TIMER", "Timer Start");
                         } else {
                             PauseTimer();
                             ResumeTimer();
@@ -127,33 +125,6 @@ public class SensorsListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(500);
 
-
-        /*adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                *//*Intent intent = new Intent(SensorsListActivity.this, SceneActivity.class);
-                startActivity(intent);*//*
-                Toast.makeText(SensorsListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setLongClickListener(new onLongClickListener() {
-
-            @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(SensorsListActivity.this, "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setDeleteClickListener(new onDeleteClickListener() {
-            @Override
-            public void onDeleteOptionClick(int pos) {
-                Toast.makeText(SensorsListActivity.this, "Deleted Sccessful!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-       */
-
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -168,7 +139,7 @@ public class SensorsListActivity extends AppCompatActivity {
     private void initArrayOfSensors() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
 
-        //insert switches in adapter ofr machine-1
+        //insert sensors in adapter from all machines
         try {
             dbHelper.openDataBase();
             sensorListCursor =  dbHelper.getAllSensorsComponents();
@@ -228,7 +199,7 @@ public class SensorsListActivity extends AppCompatActivity {
         protected Void doInBackground(String... params) {
 
                 allSensorsStatusList = new ArrayList<>();
-                for(int i=0; i<params.length; i++) {
+                for(int i=0; i<machineIPs.length; i++) {
                     String machineBaseURL = "";
                     machineIp = machineIPs[i];
 
@@ -257,9 +228,10 @@ public class SensorsListActivity extends AppCompatActivity {
                         // fetch sensor status from machine only if the machine is active else init all the sensor status to off
                         if (isMachineActive) {
                             URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SENSOR_STATUS);
-                            // Log.e("# urlValue", urlValue.toString());
+                             Log.e("# urlValue", urlValue.toString());
 
                             HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                             httpUrlConnection.setRequestMethod("GET");
                             InputStream inputStream = httpUrlConnection.getInputStream();
                             //  Log.e("# inputStream", inputStream.toString());
@@ -326,7 +298,7 @@ public class SensorsListActivity extends AppCompatActivity {
                         dbHelper.openDataBase();
                         dbHelper.enableDisableMachine(machineId, false);
                         dbHelper.close();
-                        Toast.makeText(SensorsListActivity.this, "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(SensorsListActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
                     } catch (SQLException e) {
                         Log.e("TAG EXP", e.toString());
                     }

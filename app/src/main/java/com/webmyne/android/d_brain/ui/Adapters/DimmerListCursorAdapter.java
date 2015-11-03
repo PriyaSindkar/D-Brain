@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -301,7 +302,12 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                     });
                 }
 
-
+                listHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return event.getActionMasked() == MotionEvent.ACTION_MOVE;
+                    }
+                });
 
                 break;
             case 1:
@@ -329,6 +335,9 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                     groupViewHolder.seekBar.setEnabled(false);
                 } else {
                     groupViewHolder.linearParent.setAlpha(1.0f);
+                    groupViewHolder.imgSwitch.setEnabled(true);
+                    groupViewHolder.imgSwitch.setClickable(true);
+                    groupViewHolder.seekBar.setEnabled(true);
 
                     groupViewHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                         @Override
@@ -395,7 +404,12 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                     });
                 }
 
-
+                groupViewHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return event.getActionMasked() == MotionEvent.ACTION_MOVE;
+                    }
+                });
 
                 break;
         }

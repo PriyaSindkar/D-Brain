@@ -195,7 +195,7 @@ public class EditMachineDialog extends BaseDialog {
                 Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(1000 * 30);
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
 
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();

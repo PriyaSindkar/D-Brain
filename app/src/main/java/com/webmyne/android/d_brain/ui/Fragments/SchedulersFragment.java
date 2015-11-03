@@ -70,24 +70,6 @@ public class SchedulersFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_scene_list, container, false);
         init(view);
 
-        /*adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                //Toast.makeText(DimmerListActivity.this, "Single Click Item Pos: " + pos, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        adapter.setLongClickListener(new onLongClickListener() {
-
-            @Override
-            public void onLongClick(int pos) {
-                Toast.makeText(getActivity(), "Options Will Open Here", Toast.LENGTH_SHORT).show();
-            }
-        });*/
-
-
-
-        
         return view;
     }
 

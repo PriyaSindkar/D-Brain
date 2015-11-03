@@ -46,7 +46,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
 
     public class SwitchViewHolder extends ViewHolder {
         public TextView txtSwitchName, txtMachineName;
-        public LinearLayout linearSwitch;
+        public LinearLayout linearSwitch, linearItem;
         private ImageView imgDeleteOption;
         public SwitchButton imgSwitch;
 
@@ -57,6 +57,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
             this.linearSwitch = (LinearLayout) itemView.findViewById(R.id.linearSwitch);
             this.imgDeleteOption = (ImageView) itemView.findViewById(R.id.imgDeleteOption);
             this.imgSwitch = (SwitchButton) itemView.findViewById(R.id.imgSwitch);
+            this.linearItem = (LinearLayout) itemView.findViewById(R.id.linearItem);
         }
     }
 
@@ -190,17 +191,13 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-       /* final SceneItemsDataObject name = (SceneItemsDataObject) mDataset.get(position);*/
+        final String isActive = mDataset.get(position).getIsActive();
 
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
-               /* AdvancedSpannableString sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");*/
                 switchHolder.txtSwitchName.setText(mDataset.get(position).getName());
 
-                /*sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");*/
                 switchHolder.txtMachineName.setText(mDataset.get(position).getMachineName());
 
                 if( mDataset.get(position).getDefaultValue().equals(AppConstants.OFF_VALUE))
@@ -208,91 +205,88 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
                 else
                     switchHolder.imgSwitch.setChecked(true);
 
-                switchHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        switchHolder.imgSwitch.toggle();
-                        if (switchHolder.imgSwitch.isChecked()) {
-                            mDataset.get(position).setDefaultValue(AppConstants.OFF_VALUE);
-                        } else {
-                            mDataset.get(position).setDefaultValue(AppConstants.ON_VALUE);
+                if(isActive.equals("false")) {
+                    switchHolder.linearItem.setAlpha(0.5f);
+                    switchHolder.imgDeleteOption.setClickable(false);
+                    switchHolder.imgSwitch.setEnabled(false);
+                    switchHolder.imgSwitch.setClickable(false);
+                } else {
+                    switchHolder.linearItem.setAlpha(1.0f);
+                    switchHolder.imgSwitch.setEnabled(true);
+                    switchHolder.imgSwitch.setClickable(true);
+
+                    switchHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            switchHolder.imgSwitch.toggle();
+                            if (switchHolder.imgSwitch.isChecked()) {
+                                mDataset.get(position).setDefaultValue(AppConstants.OFF_VALUE);
+                            } else {
+                                mDataset.get(position).setDefaultValue(AppConstants.ON_VALUE);
+                            }
                         }
-                        //  _switchClick.onCheckedChangeClick(position);
-                    }
-                });
+                    });
 
-               /* switchHolder.linearSwitch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        _onItemClick._onItemClickListener();
-                    }
-                });*/
-                switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _onDeleteClick.onDeleteOptionClick(position);
-                    }
-                });
-
-
+                    switchHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _onDeleteClick.onDeleteOptionClick(position);
+                        }
+                    });
+                }
 
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-               /* sp = new AdvancedSpannableString("Component Name: "+mDataset.get(position).getName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Component Name:");*/
                 dimmerHolder.txtDimmerName.setText(mDataset.get(position).getName());
 
-                /*sp = new AdvancedSpannableString("Machine Name: "+mDataset.get(position).getMachineName());
-                sp.setColor(_ctx.getResources().getColor(R.color.yellow), "Machine Name:");*/
                 dimmerHolder.txtMachineName.setText(mDataset.get(position).getMachineName());
 
                 dimmerHolder.txtValue.setText(mDataset.get(position).getDefaultValue());
                 dimmerHolder.seekBar.setProgress(Integer.parseInt(mDataset.get(position).getDefaultValue()));
 
-                dimmerHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        dimmerHolder.txtValue.setText("" + progress);
-                    }
+                if(isActive.equals("false")) {
+                    dimmerHolder.linearItem.setAlpha(0.5f);
+                    dimmerHolder.imgDeleteOption.setClickable(false);
+                    dimmerHolder.seekBar.setClickable(false);
+                } else {
+                    dimmerHolder.linearItem.setAlpha(1.0f);
+                    dimmerHolder.seekBar.setClickable(true);
 
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        String strProgress = "";
-                        if (seekBar.getProgress() > 0 && seekBar.getProgress() < 100) {
-                            strProgress = String.format("%02d", (seekBar.getProgress()));
-                        } else if (seekBar.getProgress() == 0) {
-                            strProgress = "00";
-                        }  else if(seekBar.getProgress() == 100) {
-                            strProgress = "100";
+                    dimmerHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                            dimmerHolder.txtValue.setText("" + progress);
                         }
 
-                        mDataset.get(position).setDefaultValue(strProgress);
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
 
-                    }
-                });
+                        }
 
-                dimmerHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        _onDeleteClick.onDeleteOptionClick(position);
-                    }
-                });
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+                            String strProgress = "";
+                            if (seekBar.getProgress() > 0 && seekBar.getProgress() < 100) {
+                                strProgress = String.format("%02d", (seekBar.getProgress()));
+                            } else if (seekBar.getProgress() == 0) {
+                                strProgress = "00";
+                            } else if (seekBar.getProgress() == 100) {
+                                strProgress = "100";
+                            }
 
-               /* dimmerHolder.linearItem.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        _onItemClick._onItemClickListener();
-                    }
-                });*/
+                            mDataset.get(position).setDefaultValue(strProgress);
 
+                        }
+                    });
 
-
+                    dimmerHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            _onDeleteClick.onDeleteOptionClick(position);
+                        }
+                    });
+                }
                 break;
 
             case 2:

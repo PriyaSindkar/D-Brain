@@ -121,6 +121,7 @@
                 android:tintMode="src_atop" />
 
             <TextView
+                android:id="@+id/txtPowerOffMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -130,6 +131,19 @@
                 android:textStyle="bold"
                 android:textSize="@dimen/L_TEXT_SIZE"
                 android:text="@string/power_off_text"/>
+
+            <TextView
+                android:id="@+id/txtPowerOffMessageLink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:visibility="gone"
+                android:padding="@dimen/STD_MARGIN"
+                android:textColor="@color/yellow"
+                android:textStyle="bold"
+                android:textSize="@dimen/L_TEXT_SIZE"
+                android:text="@string/click_here"/>
 
         </LinearLayout>
 

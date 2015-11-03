@@ -56,7 +56,7 @@ public class SchedulersListCursorAdapter extends CursorRecyclerViewAdapter<Sched
     public class ListViewHolder extends ViewHolder {
         public  TextView txtMachineName, txtMachineIPAddress, txtMachineSerialNo;
         public ImageView imgDeleteOption, imgRenameOption;
-        public LinearLayout linearSwitch;
+        public LinearLayout linearSwitch, linearParent;
         private SwitchButton imgSwitch;
 
         public ListViewHolder ( View view ) {
@@ -69,6 +69,7 @@ public class SchedulersListCursorAdapter extends CursorRecyclerViewAdapter<Sched
             this.imgDeleteOption = (ImageView) view.findViewById(R.id.imgDeleteOption);
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
             this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
+            this.linearParent = (LinearLayout) view.findViewById(R.id.linearParent);
 
             this.imgSwitch.setVisibility(View.GONE);
         }
@@ -86,8 +87,6 @@ public class SchedulersListCursorAdapter extends CursorRecyclerViewAdapter<Sched
             ViewGroup viewgroup1 = ( ViewGroup ) mInflater.inflate ( R.layout.machine_list_item, parent, false );
             ListViewHolder listHolder = new ListViewHolder (viewgroup1);
             return listHolder;
-
-
     }
 
     @Override
@@ -100,7 +99,8 @@ public class SchedulersListCursorAdapter extends CursorRecyclerViewAdapter<Sched
         int schedulerTypeIdx= cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_TYPE);
         String schedulerType = cursor.getString(schedulerTypeIdx);
 
-        Log.e("schedulerType", schedulerType);
+        int isActiveiIdx= cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE);
+        String isActive = cursor.getString(isActiveiIdx);
 
         final int position = cursor.getPosition();
         final String strPosition = String.format("%02d", (position + 1));
@@ -119,24 +119,35 @@ public class SchedulersListCursorAdapter extends CursorRecyclerViewAdapter<Sched
             listHolder.txtMachineIPAddress.setText(sp);
         }
 
-
         sp = new AdvancedSpannableString("Scheduled at: "+cursor.getString(dateTimeIdx));
         sp.setColor(mCtx.getResources().getColor(R.color.yellow), "Scheduled at: ");
         listHolder.txtMachineSerialNo.setText(sp);
 
-        listHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                _deleteClick.onDeleteOptionClick(position);
-            }
-        });
+        if(isActive.equals("false")) {
+            listHolder.linearParent.setAlpha(0.5f);
+            listHolder.imgRenameOption.setClickable(false);
+            listHolder.imgDeleteOption.setClickable(false);
+        } else {
+            listHolder.linearParent.setAlpha(1.0f);
+            listHolder.imgRenameOption.setClickable(true);
+            listHolder.imgDeleteOption.setClickable(true);
 
-        listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                _renameClick.onRenameOptionClick(position, schedulerName);
-            }
-        });
+            listHolder.imgDeleteOption.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    _deleteClick.onDeleteOptionClick(position);
+                }
+            });
+
+            listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    _renameClick.onRenameOptionClick(position, schedulerName);
+                }
+            });
+        }
+
+
     }
 
     public void setRenameClickListener(onRenameClickListener obj){

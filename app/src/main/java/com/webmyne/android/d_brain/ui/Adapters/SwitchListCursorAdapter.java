@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -250,6 +251,13 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     });
                 }
 
+                listHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return event.getActionMasked() == MotionEvent.ACTION_MOVE;
+                    }
+                });
+
                 break;
             case 1:
                 final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
@@ -307,6 +315,12 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     });
                 }
 
+                groupViewHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return event.getActionMasked() == MotionEvent.ACTION_MOVE;
+                    }
+                });
 
                 break;
         }

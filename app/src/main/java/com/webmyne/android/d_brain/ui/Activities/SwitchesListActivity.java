@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -34,6 +35,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
+import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -67,10 +69,10 @@ public class SwitchesListActivity extends AppCompatActivity {
     private Timer timer;
     private Handler handler;
     public static boolean isDelay = false;
+    private int totalMachineCount = 0;
 
     private void PauseTimer(){
         this.timer.cancel();
-        Log.e("TIMER", "Timer Paused");
     }
 
     public void ResumeTimer() {
@@ -86,7 +88,6 @@ public class SwitchesListActivity extends AppCompatActivity {
                     public void run() {
                         if (!isDelay) {
                             new GetSwitchStatus().execute(machineIPs);
-                            Log.e("TIMER switch", "Timer Start");
                         } else {
                             PauseTimer();
                             ResumeTimer();
@@ -143,7 +144,6 @@ public class SwitchesListActivity extends AppCompatActivity {
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("back", "back");
                 timer.cancel();
                 finish();
             }
@@ -173,28 +173,6 @@ public class SwitchesListActivity extends AppCompatActivity {
         });
     }
 
-    /*@Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        if (v.getId()==R.id.recycler_view) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.menu_launcher_screen, menu);
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterViewCompat.AdapterContextMenuInfo info = (AdapterViewCompat.AdapterContextMenuInfo) item.getMenuInfo();
-        switch(item.getItemId()) {
-            case R.id.action_settings:
-                Toast.makeText(this, "Hello", Toast.LENGTH_LONG).show();
-                return true;
-
-            default:
-                return super.onContextItemSelected(item);
-        }
-    }
-*/
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -252,10 +230,10 @@ public class SwitchesListActivity extends AppCompatActivity {
                     String machineBaseURL = "";
                     machineIp = machineIPs[i];
 
-                    if(machineIPs[i].startsWith("http://")) {
-                        machineBaseURL = machineIPs[i];
+                    if(machineIp.startsWith("http://")) {
+                        machineBaseURL = machineIp;
                     } else {
-                        machineBaseURL = "http://" + machineIPs[i];
+                        machineBaseURL = "http://" + machineIp;
                     }
 
                     try {
@@ -275,12 +253,11 @@ public class SwitchesListActivity extends AppCompatActivity {
                         }
                         // fetch switch status from machine only if the machine is active else init all the switch status to off
                         if (isMachineActive) {
-                            Log.e("TAG_MACHINE", machineIp +  "machine is active");
                             URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
                             Log.e("# urlValue", urlValue.toString());
 
                             HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                            httpUrlConnection.setConnectTimeout(500*60);
+                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                             httpUrlConnection.setRequestMethod("GET");
                             inputStream = httpUrlConnection.getInputStream();
                             //  Log.e("# inputStream", inputStream.toString());
@@ -297,7 +274,6 @@ public class SwitchesListActivity extends AppCompatActivity {
                                     totalSwitchesofMachine = cursor.getCount();
                                 }
 
-                                Log.e("totalSwitchesofMachine", totalSwitchesofMachine + "");
                                 for (int j = 0; j < totalSwitchesofMachine; j++) {
                                     allSwitchesStatusList.add(switchStatusList.get(j));
                                 }
@@ -307,7 +283,6 @@ public class SwitchesListActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         } else {
-                            Log.e("TAG_MACHINE", machineIp + "machine is inactive");
                             if (cursor != null) {
                                 cursor.moveToFirst();
                                 if (cursor.getCount() > 0) {
@@ -364,7 +339,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                         dbHelper.openDataBase();
                         dbHelper.enableDisableMachine(machineId, false);
                         dbHelper.close();
-                        Toast.makeText(SwitchesListActivity.this, "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(SwitchesListActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
                     } catch (SQLException e) {
                         Log.e("TAG EXP", e.toString());
                     }
@@ -469,6 +444,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                     }
                 });
 
+               // new GetMachineStatus().execute();
             } catch (Exception e) {
             }
         }
@@ -591,8 +567,89 @@ public class SwitchesListActivity extends AppCompatActivity {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
 
+    public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
+        String machineId="", machineName = "", machineIp, isMachineActive = "false";
+        boolean isError = false;
+        Cursor machineCursor;
 
+        @Override
+        protected void onPreExecute() {
+            //progressDilaog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            totalMachineCount = 0;
+            for (int i = 0; i < machineIPs.length; i++) {
+                String machineBaseURL = "";
+                machineIp = machineIPs[i];
+
+                if (machineIp.startsWith("http://")) {
+                    machineBaseURL = machineIp;
+                } else {
+                    machineBaseURL = "http://" + machineIp;
+                }
+                DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                try {
+                    dbHelper.openDataBase();
+                    machineCursor = dbHelper.getMachineByIP(machineIp);
+                    machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                    machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                    isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                    dbHelper.close();
+
+                    if(isMachineActive.equals("true")) {
+                        URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_MACHINE_STATUS);
+                        Log.e("# urlValue", urlValue.toString());
+
+                        HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                        httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+
+                        httpUrlConnection.setRequestMethod("GET");
+                        InputStream inputStream = httpUrlConnection.getInputStream();
+                        totalMachineCount++;
+                    }
+
+                } catch (Exception e) {
+                    Log.e("# EXP", e.toString());
+                    isError = true;
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("TAG EXP", ex.toString());
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            //progressDilaog.hide();
+
+            if(isError) {
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                    dbHelper.openDataBase();
+                    dbHelper.enableDisableMachine(machineId, false);
+                    dbHelper.close();
+                    Toast.makeText(SwitchesListActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                } catch (SQLException e) {
+                    Log.e("TAG EXP", e.toString());
+                }
+            }
+
+            if(totalMachineCount == 0) {
+                Toast.makeText(SwitchesListActivity.this, getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
+                timer.cancel();
+                finish();
+            }
+
+        }
     }
 
 
