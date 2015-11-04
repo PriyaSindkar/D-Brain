@@ -1,6 +1,7 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,7 +24,10 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.LongPressOptionsDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineNotActiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
@@ -33,6 +37,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
@@ -69,6 +74,7 @@ public class SwitchesListActivity extends AppCompatActivity {
     private Timer timer1;
     private Handler handler,handler1;
     public static boolean isDelay = false;
+    private boolean flag = true;
 
 
 
@@ -256,19 +262,20 @@ public class SwitchesListActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(String... params) {
+        protected Void doInBackground(String... machineIps) {
                 allSwitchesStatusList = new ArrayList<>();
 
-                for(int i=0; i<machineIPs.length; i++) {
+                for(int i=0; i<machineIps.length; i++) {
 
                     String machineBaseURL = "";
-                    machineIp = machineIPs[i];
+                    machineIp = machineIps[i];
 
                     if(machineIp.startsWith("http://")) {
                         machineBaseURL = machineIp;
                     } else {
                         machineBaseURL = "http://" + machineIp;
                     }
+
 
                     try {
                         DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
@@ -287,6 +294,8 @@ public class SwitchesListActivity extends AppCompatActivity {
                         }
                         // fetch switch status from machine only if the machine is active else init all the switch status to off
                         if (isMachineActive) {
+                            Log.e("#### Switch url",""+machineBaseURL+"ACTIVE");
+
                             URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
                           //  Log.e("# urlValue", urlValue.toString());
 
@@ -317,6 +326,8 @@ public class SwitchesListActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         } else {
+                            Log.e("#### Switch url",""+machineBaseURL+"DISABLE");
+
                             if (cursor != null) {
                                 cursor.moveToFirst();
                                 if (cursor.getCount() > 0) {
@@ -367,17 +378,6 @@ public class SwitchesListActivity extends AppCompatActivity {
             try {
                 progressBar.setVisibility(View.GONE);
 
-                if(isError) {
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-                        Toast.makeText(SwitchesListActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
-                    }
-                }
 
                 if(isFirstTime) {
                     //init adapter
@@ -612,7 +612,6 @@ public class SwitchesListActivity extends AppCompatActivity {
 
     public class GetMachineStatus extends AsyncTask<String, Void, Void> {
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
-        boolean isError = false;
         Cursor machineCursor;
         int totalMachineCount = 0;
 
@@ -646,7 +645,7 @@ public class SwitchesListActivity extends AppCompatActivity {
 
                     if(isMachineActive.equals("true")) {
                         URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_MACHINE_STATUS);
-                       // Log.e("# urlValue", urlValue.toString());
+                        Log.e("# machine url", urlValue.toString());
 
                         HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                         httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
@@ -658,7 +657,6 @@ public class SwitchesListActivity extends AppCompatActivity {
 
                 } catch (Exception e) {
                     Log.e("~~~~~~~~TIME OUT~~~", e.toString());
-                    isError = true;
                     try {
                         dbHelper.openDataBase();
                         dbHelper.enableDisableMachine(machineId, false);
@@ -673,13 +671,67 @@ public class SwitchesListActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+
+            SharedPreferences settings = getSharedPreferences("MACHINE_STATUS", 0);
+            int count = settings.getInt("ACTIVE_MACHINE", machineIPs.length);
+
+            Log.e("### Total machine count", "" + totalMachineCount);
+
             if(totalMachineCount == 0) {
                 Toast.makeText(SwitchesListActivity.this, getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
                 stopTherad();
                 finish();
-            } else {
+            } else if (totalMachineCount < machineIPs.length) {
+
+                if (count != totalMachineCount) {
+
+                    settings = getSharedPreferences("MACHINE_STATUS", 0);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putInt("ACTIVE_MACHINE", totalMachineCount);
+                    editor.commit();
+
+                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(SwitchesListActivity.this, "One of your machines deactivated.");
+                    machineNotActiveDialog.show();
+
+                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            stopTherad();
+                            finish();
+                        }
+                    });
+
+
+                    //Toast.makeText(SwitchesListActivity.this, "One of your machines deactivated.", Toast.LENGTH_LONG).show();
+
+                }else{
+
+                    settings = getSharedPreferences("MACHINE_STATUS", 0);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putInt("ACTIVE_MACHINE", totalMachineCount);
+                    editor.commit();
+
+
+                    new GetSwitchStatus().execute(machineIPs);
+
+                }
+
+
+            }
+            else {
+
+                settings = getSharedPreferences("MACHINE_STATUS", 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putInt("ACTIVE_MACHINE", totalMachineCount);
+                editor.commit();
+
+
                 new GetSwitchStatus().execute(machineIPs);
             }
+
+
+
+
         }
     }
 

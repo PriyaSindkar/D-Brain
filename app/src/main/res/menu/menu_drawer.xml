@@ -21,6 +21,11 @@
             android:title="Scenes" />
 
         <item
+            android:icon="@drawable/ic_action_favorite"
+            android:id="@+id/drawer_favourites"
+            android:title="Favourites" />
+
+        <item
             android:icon="@drawable/drawer_schedulers"
             android:id="@+id/drawer_schedulers"
             android:title="Schedulers" />

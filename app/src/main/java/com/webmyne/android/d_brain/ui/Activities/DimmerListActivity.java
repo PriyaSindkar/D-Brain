@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -21,6 +22,7 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.LongPressOptionsDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -31,6 +33,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -364,17 +367,6 @@ public class DimmerListActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             try {
                 progressBar.setVisibility(View.GONE);
-                if(isError) {
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-                        Toast.makeText(DimmerListActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
-                    }
-                }
 
 
                 if(isFirstTime) {
@@ -547,6 +539,7 @@ public class DimmerListActivity extends AppCompatActivity {
                         Log.e("TAG EXP", ex.toString());
                     }
                 }
+
             }
             return null;
         }
@@ -554,11 +547,58 @@ public class DimmerListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
 
+            SharedPreferences settings = getSharedPreferences("MACHINE_STATUS", 0);
+            int count = settings.getInt("ACTIVE_MACHINE", machineIPs.length);
+
+            Log.e("### Total machine count", "" + totalMachineCount);
+
             if(totalMachineCount == 0) {
                 Toast.makeText(DimmerListActivity.this, getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
                 stopTherad();
                 finish();
-            } else {
+            } else if (totalMachineCount < machineIPs.length) {
+
+                if (count != totalMachineCount) {
+
+                    settings = getSharedPreferences("MACHINE_STATUS", 0);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putInt("ACTIVE_MACHINE", totalMachineCount);
+                    editor.commit();
+
+
+                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(DimmerListActivity.this, "One of your machines deactivated.");
+                    machineNotActiveDialog.show();
+
+                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            stopTherad();
+                            finish();
+                        }
+                    });
+
+                }else{
+
+                    settings = getSharedPreferences("MACHINE_STATUS", 0);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putInt("ACTIVE_MACHINE", totalMachineCount);
+                    editor.commit();
+
+
+                    new GetDimmerStatus().execute(machineIPs);
+
+                }
+
+
+            }
+            else {
+
+                settings = getSharedPreferences("MACHINE_STATUS", 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putInt("ACTIVE_MACHINE", totalMachineCount);
+                editor.commit();
+
+
                 new GetDimmerStatus().execute(machineIPs);
             }
 

@@ -556,7 +556,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
 
     private void initComponents() {
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        DatabaseHelper dbHelper = new DatabaseHelper(activity);
         try {
             dbHelper.openDataBase();
 
@@ -586,6 +586,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     parentSwitches.setVisibility(View.GONE);
                 } else {
                     topRowComponentCount ++;
+                    parentSwitches.setVisibility(View.VISIBLE);
                     txtNoOfSwitchUnits.setText(String.valueOf(switchListCursor.getCount()));
                 }
             } else {
@@ -597,6 +598,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 if (dimmerListCursor.getCount() == 0) {
                     parentSlider.setVisibility(View.GONE);
                 } else {
+                    parentSlider.setVisibility(View.VISIBLE);
                     bottomRowComponentCount++;
                     txtNoOfSliderUnits.setText(String.valueOf(dimmerListCursor.getCount()));
                 }
@@ -613,8 +615,14 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     lp.rightMargin = 0;
                     parentSwitches.setLayoutParams(lp);
                 } else {
+                    parentMotor.setVisibility(View.VISIBLE);
                     topRowComponentCount++;
                     txtNoOfMotorUnits.setText(String.valueOf(motorListCursor.getCount()));
+
+                    // set right margin of left side block to original size
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
+                    lp.rightMargin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), activity);
+                    parentSwitches.setLayoutParams(lp);
                 }
             } else {
                 parentMotor.setVisibility(View.GONE);
@@ -630,6 +638,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     parentSlider.setLayoutParams(lp);
                 } else {
                     bottomRowComponentCount++;
+                    parentSensors.setVisibility(View.VISIBLE);
                     txtNoOfSensorUnits.setText(String.valueOf(sensorListCursor.getCount()));
                 }
             } else {
@@ -1094,6 +1103,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
     private void showOnScreen() {
         linearDisabled.setVisibility(View.GONE);
+        bulb_image.setClickable(false);
         imgOptions.setClickable(true);
         imgFavorites.setClickable(true);
         imgSchedulers.setClickable(true);
@@ -1184,6 +1194,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
                 bulb_image.setColorFilter(getResources().getColor(R.color.white));
                 bulb_image.setBackgroundResource(R.drawable.white_border_circle);
+                bulb_image.setClickable(false);
             }
 
 

@@ -455,6 +455,16 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            try{
+                _switchClick.onCheckedPreChangeClick(0);
+
+            }catch(Exception e){
+            }
+        }
+
+        @Override
         protected Void doInBackground(String... params) {
 
             try {

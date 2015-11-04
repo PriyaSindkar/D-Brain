@@ -170,162 +170,162 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         //final String strPosition = String.format("%02d", (position + 1));
         final String strPosition = componentName.substring(2,4);
 
+            switch (viewHolder.getItemViewType()) {
+                case 0:
+                    final ListViewHolder listHolder = (ListViewHolder) viewHolder;
 
-        switch (viewHolder.getItemViewType () ) {
-            case 0:
-                final ListViewHolder listHolder = ( ListViewHolder ) viewHolder;
+                    listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
+                    listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
-                listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
-                listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
-
-                if( switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
-                    listHolder.imgSwitch.setChecked(false);
-                    //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                } else {
-                    listHolder.imgSwitch.setChecked(true);
-                    // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                }
-                if(isActive.equals("false")) {
-                    listHolder.linearParent.setAlpha(0.5f);
-                    listHolder.linearOptionsMenu.setAlpha(0.5f);
-                    listHolder.imgRenameOption.setClickable(false);
-                    listHolder.imgAddToSceneOption.setClickable(false);
-                    listHolder.imgFavoriteOption.setClickable(false);
-                    listHolder.imgAddSchedulerOption.setClickable(false);
-                    listHolder.imgSwitch.setEnabled(false);
-                    listHolder.imgSwitch.setClickable(false);
-
-                } else {
-                    listHolder.linearParent.setAlpha(1.0f);
-                    listHolder.linearOptionsMenu.setAlpha(1.0f);
-                    listHolder.imgSwitch.setEnabled(true);
-
-                    listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-                            listHolder.imgSwitch.toggle();
-                            String machineIP = cursor.getString(machineIPIndex);
-                            if(!machineIP.startsWith("http://")) {
-                                machineIP = "http://" + machineIP;
-                            }
-
-                            if(listHolder.imgSwitch.isChecked()){// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                                String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                                SwitchesListActivity.isDelay  = true;
-                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                            }else{
-                                //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                                String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                                SwitchesListActivity.isDelay  = true;
-                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                            }
-
-                        }
-                    });
-
-                    listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            _renameClick.onRenameOptionClick(position, switchName);
-                        }
-                    });
-
-                    listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            _addToSceneClick.onAddToSceneOptionClick(position);
-                        }
-                    });
-
-                    listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            _favoriteClick.onFavoriteOptionClick(position);
-                        }
-                    });
-
-                    listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            _addSchedulerClick.onAddSchedulerOptionClick(position);
-                        }
-                    });
-                }
-
-                listHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        return event.getActionMasked() == MotionEvent.ACTION_MOVE;
+                    if (switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
+                        listHolder.imgSwitch.setChecked(false);
+                        //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                    } else {
+                        listHolder.imgSwitch.setChecked(true);
+                        // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                     }
-                });
+                    if (isActive.equals("false")) {
+                        listHolder.linearParent.setAlpha(0.5f);
+                        listHolder.linearOptionsMenu.setAlpha(0.5f);
+                        listHolder.imgRenameOption.setClickable(false);
+                        listHolder.imgAddToSceneOption.setClickable(false);
+                        listHolder.imgFavoriteOption.setClickable(false);
+                        listHolder.imgAddSchedulerOption.setClickable(false);
+                        listHolder.imgSwitch.setEnabled(false);
+                        listHolder.imgSwitch.setClickable(false);
 
-                break;
-            case 1:
-                final GridViewHolder groupViewHolder = ( GridViewHolder ) viewHolder;
-                groupViewHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
-                groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
+                    } else {
+                        listHolder.linearParent.setAlpha(1.0f);
+                        listHolder.linearOptionsMenu.setAlpha(1.0f);
+                        listHolder.imgSwitch.setEnabled(true);
 
-                if( switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
-                    groupViewHolder.imgSwitch.setChecked(false);
-                    //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                } else {
-                    groupViewHolder.imgSwitch.setChecked(true);
-                    // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                }
+                        listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
 
-                if(isActive.equals("false")) {
-                    groupViewHolder.linearSwitch.setAlpha(0.5f);
-                    groupViewHolder.linearSwitch.setLongClickable(false);
-                    groupViewHolder.imgSwitch.setEnabled(false);
-                    groupViewHolder.imgSwitch.setClickable(false);
+                                listHolder.imgSwitch.toggle();
+                                String machineIP = cursor.getString(machineIPIndex);
+                                if (!machineIP.startsWith("http://")) {
+                                    machineIP = "http://" + machineIP;
+                                }
 
-                } else {
-                    groupViewHolder.linearSwitch.setAlpha(1.0f);
-                    groupViewHolder.imgSwitch.setEnabled(true);
-                    groupViewHolder.imgSwitch.setClickable(false);
+                                if (listHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                                    String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                                    SwitchesListActivity.isDelay = true;
+                                    new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                } else {
+                                    //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                                    String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                                    SwitchesListActivity.isDelay = true;
+                                    new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                }
 
-                    groupViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            groupViewHolder.imgSwitch.toggle();
-
-                            String machineIP = cursor.getString(machineIPIndex);
-                            if(!machineIP.startsWith("http://")) {
-                                machineIP = "http://" + machineIP;
                             }
+                        });
 
-                            if (groupViewHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
-                                String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                                SwitchesListActivity.isDelay = true;
-                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
-                            } else {
-                                //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
-                                String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                                SwitchesListActivity.isDelay = true;
-                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                        listHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                _renameClick.onRenameOptionClick(position, switchName);
                             }
-                        }
-                    });
+                        });
 
-                    groupViewHolder.linearSwitch.setOnLongClickListener(new View.OnLongClickListener() {
-                        @Override
-                        public boolean onLongClick(View view) {
-                            _longClick.onLongClick(position,  view);
-                            return false;
-                        }
-                    });
-                }
+                        listHolder.imgAddToSceneOption.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                _addToSceneClick.onAddToSceneOptionClick(position);
+                            }
+                        });
 
-                groupViewHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        return event.getActionMasked() == MotionEvent.ACTION_MOVE;
+                        listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                _favoriteClick.onFavoriteOptionClick(position);
+                            }
+                        });
+
+                        listHolder.imgAddSchedulerOption.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                _addSchedulerClick.onAddSchedulerOptionClick(position);
+                            }
+                        });
                     }
-                });
 
-                break;
-        }
+                    listHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            return event.getActionMasked() == MotionEvent.ACTION_MOVE;
+                        }
+                    });
+
+                    break;
+                case 1:
+                    final GridViewHolder groupViewHolder = (GridViewHolder) viewHolder;
+                    groupViewHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
+                    groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
+
+                    if (switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
+                        groupViewHolder.imgSwitch.setChecked(false);
+                        //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                    } else {
+                        groupViewHolder.imgSwitch.setChecked(true);
+                        // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                    }
+
+                    if (isActive.equals("false")) {
+                        groupViewHolder.linearSwitch.setAlpha(0.5f);
+                        groupViewHolder.linearSwitch.setLongClickable(false);
+                        groupViewHolder.imgSwitch.setEnabled(false);
+                        groupViewHolder.imgSwitch.setClickable(false);
+
+                    } else {
+                        groupViewHolder.linearSwitch.setAlpha(1.0f);
+                        groupViewHolder.imgSwitch.setEnabled(true);
+                        groupViewHolder.imgSwitch.setClickable(false);
+
+                        groupViewHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                groupViewHolder.imgSwitch.toggle();
+
+                                String machineIP = cursor.getString(machineIPIndex);
+                                if (!machineIP.startsWith("http://")) {
+                                    machineIP = "http://" + machineIP;
+                                }
+
+                                if (groupViewHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                                    String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                                    SwitchesListActivity.isDelay = true;
+                                    new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                } else {
+                                    //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
+                                    String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
+                                    SwitchesListActivity.isDelay = true;
+                                    new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                }
+                            }
+                        });
+
+                        groupViewHolder.linearSwitch.setOnLongClickListener(new View.OnLongClickListener() {
+                            @Override
+                            public boolean onLongClick(View view) {
+                                _longClick.onLongClick(position, view);
+                                return false;
+                            }
+                        });
+                    }
+
+                    groupViewHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            return event.getActionMasked() == MotionEvent.ACTION_MOVE;
+                        }
+                    });
+
+                    break;
+            }
+
 
 
     }

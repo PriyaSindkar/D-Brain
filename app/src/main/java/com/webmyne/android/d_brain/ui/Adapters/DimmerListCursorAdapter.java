@@ -244,7 +244,6 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                                 dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             }
 
-                            DimmerListActivity.isDelay = true;
                             new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                         }
                     });
@@ -268,7 +267,6 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                                 //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             }
 
-                            DimmerListActivity.isDelay = true;
                             new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                         }
                     });
@@ -365,7 +363,6 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                                 dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             }
 
-                            DimmerListActivity.isDelay = true;
                             new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
 
                         }
@@ -390,7 +387,6 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                                 //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             }
 
-                            DimmerListActivity.isDelay = true;
                             new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
                         }
                     });
@@ -445,6 +441,16 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
     }
 
     public class ChangeDimmerStatus extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            try{
+                _switchClick.onCheckedPreChangeClick(0);
+
+            }catch(Exception e){
+            }
+        }
 
         @Override
         protected Void doInBackground(String... params) {

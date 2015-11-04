@@ -26,6 +26,7 @@ import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AboutUsFragment;
 import com.webmyne.android.d_brain.ui.Fragments.AddMachineFragment;
 import com.webmyne.android.d_brain.ui.Fragments.ContactUsFragment;
+import com.webmyne.android.d_brain.ui.Fragments.FavoritesFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SchedulersFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SensorFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
@@ -242,6 +243,11 @@ public class HomeDrawerActivity extends AppCompatActivity {
 
             case R.id.drawer_schedulers:
                 ft.replace(R.id.content, SchedulersFragment.newInstance(), "SCHEDULER");
+                ft.commit();
+                break;
+
+            case R.id.drawer_favourites:
+                ft.replace(R.id.content, FavoritesFragment.newInstance(), "FAVOURITE");
                 ft.commit();
                 break;
 
