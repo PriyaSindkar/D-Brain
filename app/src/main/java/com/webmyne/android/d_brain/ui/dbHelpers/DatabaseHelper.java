@@ -84,7 +84,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean openDataBase() throws SQLException {
         String mPath = DBConstants.DATABASE_PATH + DBConstants.DATABASE_NAME;
-        Log.e("mPath", mPath);
+        //Log.e("mPath", mPath);
         mDb = SQLiteDatabase.openDatabase(mPath, null, SQLiteDatabase.CREATE_IF_NECESSARY);
         //mDataBase = SQLiteDatabase.openDatabase(mPath, null, SQLiteDatabase.NO_LOCALIZED_COLLATORS);
         mDb.execSQL("PRAGMA foreign_keys=ON");
@@ -240,7 +240,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // change is_active status of machine in tables: machine, SceneComponent, Component, FavouriteComponent, Schedulers
     public void enableDisableMachine(String machineId, boolean isEnabled) {
 
-        mDb = getWritableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
 
         //update machine
         ContentValues values = new ContentValues();
@@ -252,22 +252,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         // machine
-        mDb.update(DBConstants.TABLE_MACHINE, values, DBConstants.KEY_M_ID + "='" + machineId + "'", null);
+        db.update(DBConstants.TABLE_MACHINE, values, DBConstants.KEY_M_ID + "='" + machineId + "'", null);
 
         //update component
-        mDb.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_MID + "='" + machineId + "'", null);
+        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_MID + "='" + machineId + "'", null);
 
         //update scene-component
-        mDb.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_MID + "='" + machineId + "'", null);
+        db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_MID + "='" + machineId + "'", null);
 
         //update FavouriteComponent
-        mDb.update(DBConstants.TABLE_FAVOURITE, values, DBConstants.KEY_F_MID + "='" + machineId + "'", null);
+        db.update(DBConstants.TABLE_FAVOURITE, values, DBConstants.KEY_F_MID + "='" + machineId + "'", null);
 
         //update Schedulers
-        mDb.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
+        db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
 
 
-        mDb.close();
+        db.close();
     }
 
     public String getMachineNameByIP(String machineIP) {

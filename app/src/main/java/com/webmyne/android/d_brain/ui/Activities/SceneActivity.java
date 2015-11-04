@@ -251,6 +251,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     updatedMData.add(mData.get(pos));
                 }
             }
+
+            @Override
+            public void onCheckedPreChangeClick(int pos) {
+
+            }
         });
 
         imgBack.setOnClickListener(new View.OnClickListener() {

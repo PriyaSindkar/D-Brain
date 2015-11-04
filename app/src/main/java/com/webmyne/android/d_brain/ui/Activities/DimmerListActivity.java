@@ -85,7 +85,7 @@ public class DimmerListActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (!isDelay) {
-                            new GetDimmerStatus().execute(machineIPs);
+                            new GetMachineStatus().execute();
                         } else {
                             PauseTimer();
                             ResumeTimer();
@@ -364,6 +364,11 @@ public class DimmerListActivity extends AppCompatActivity {
                     public void onCheckedChangeClick(int pos) {
                         isDelay = false;
                     }
+
+                    @Override
+                    public void onCheckedPreChangeClick(int pos) {
+
+                    }
                 });
 
                 adapter.setRenameClickListener(new onRenameClickListener() {
@@ -535,7 +540,7 @@ public class DimmerListActivity extends AppCompatActivity {
                 timer.cancel();
                 finish();
             } else {
-               // new GetDimmerStatus().execute(machineIPs);
+                new GetDimmerStatus().execute(machineIPs);
             }
 
         }

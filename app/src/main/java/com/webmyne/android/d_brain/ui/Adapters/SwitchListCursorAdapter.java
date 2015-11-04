@@ -203,6 +203,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     listHolder.imgSwitch.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+
                             listHolder.imgSwitch.toggle();
                             String machineIP = cursor.getString(machineIPIndex);
                             if(!machineIP.startsWith("http://")) {
@@ -219,6 +220,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                                 SwitchesListActivity.isDelay  = true;
                                 new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                             }
+
                         }
                     });
 
@@ -359,11 +361,17 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         boolean isError = false;
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            _switchClick.onCheckedPreChangeClick(0);
+        }
+
+        @Override
         protected Void doInBackground(String... params) {
 
             try {
                 URL urlValue = new URL(params[0]);
-                Log.e("# urlValue", urlValue.toString());
+            //    Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                 httpUrlConnection.setRequestMethod("GET");
@@ -371,7 +379,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
 
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+                Log.e("# EXP adapter", e.toString());
                 isError = true;
             }
             return null;
@@ -380,23 +388,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            try{
-                /*if(isError) {
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
+             _switchClick.onCheckedChangeClick(0);
 
-                        Toast.makeText(mCtx, "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
-                    }
-                } else {*/
-                    _switchClick.onCheckedChangeClick(0);
-               // }
-
-            }catch(Exception e){
-            }
         }
     }
 }

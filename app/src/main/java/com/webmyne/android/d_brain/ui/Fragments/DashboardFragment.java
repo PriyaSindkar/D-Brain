@@ -76,46 +76,38 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private int powerSignalCount = 0;
     private String previousLed = "", led = "";
     private String[] machineIPs;
-    private int totalMachineCount = 0;
     private ProgressDialog progressDilaog;
 
     private ArrayList<ComponentModel> allOnSwitchesList, allOnDimmersList;
 
     private int topRowComponentCount = 0; // fix layout-> switches and motors
     private int bottomRowComponentCount = 0; // fix layout-> Dimmers and sensors
-    private Timer timer;
-    private Handler handler;
-    public static boolean isDelay = false;
+    private Timer timer1;
+    private Handler handler1;
+    private Context mContext;
 
-    private void PauseTimer(){
-        this.timer.cancel();
-    }
-
-    public void ResumeTimer() {
-        handler = new Handler();
-        timer = new Timer();
+    public void startTherad(){
+        handler1 = new Handler();
+        timer1 = new Timer();
 
 
-        timer.scheduleAtFixedRate(new TimerTask() {
+        timer1.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                handler.post(new Runnable() {
+                handler1.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (!isDelay) {
-                            new GetMachineStatus().execute();
-                        } else {
-                            PauseTimer();
-                            ResumeTimer();
-                        }
+                        new GetMachineStatus().execute(machineIPs);
                     }
                 });
 
             }
-        }, 0, 4000 * 1);
-
+        }, 0, 2000 * 1);
     }
 
+    public void stopTherad(){
+        timer1.cancel();
+    }
 
     public static DashboardFragment newInstance() {
         DashboardFragment fragment = new DashboardFragment();
@@ -255,14 +247,16 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         ((HomeDrawerActivity) getActivity()).initPowerButton();
         // call();
 
-        initComponents();
-        // to check periodically if all the machines are working or not
-        ResumeTimer();
+
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        initComponents();
+
 
         HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
         homeScreen.setTitle("Main Panel");
@@ -297,8 +291,43 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             ((HomeDrawerActivity) getActivity()).showDrawer();
         }
 
+        // to check periodically if all the machines are working or not
+        startTherad();
+
         updateSceneList();
 
+    }
+
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        try{
+            stopTherad();
+        }catch (Exception e){
+
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        try{
+            stopTherad();
+        }catch (Exception e){
+
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        try{
+            stopTherad();
+        }catch (Exception e){
+
+        }
     }
 
     @Override
@@ -654,6 +683,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
     // fetch current status of all switches before OFF on main power.
     // Store the list of on switches(to maintain previous state for turning on the main power) and turn-off the on switches
+
+
     public class GetSwitchStatus extends AsyncTask<String, Void, Void> {
         boolean isError = false, isMachineActive = false;
         String machineId="", machineName = "", machineIp;
@@ -1070,9 +1101,13 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         imgSchedulers.setClickable(true);
     }
 
-    public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
+
+
+
+    public class GetMachineStatus extends AsyncTask<String, Void, Void> {
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
         boolean isError = false;
+        int totalMachineCount = 0;
 
         @Override
         protected void onPreExecute() {
@@ -1080,18 +1115,18 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            totalMachineCount = 0;
-            for (int i = 0; i < machineIPs.length; i++) {
+        protected Void doInBackground(String... machineIP) {
+
+            for (int i = 0; i < machineIP.length; i++) {
                 String machineBaseURL = "";
-                machineIp = machineIPs[i];
+                machineIp = machineIP[i];
 
                 if (machineIp.startsWith("http://")) {
                     machineBaseURL = machineIp;
                 } else {
                     machineBaseURL = "http://" + machineIp;
                 }
-                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                DatabaseHelper dbHelper = new DatabaseHelper(activity);
                 try {
                     dbHelper.openDataBase();
                     machineCursor = dbHelper.getMachineByIP(machineIp);
@@ -1111,12 +1146,13 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                         httpUrlConnection.setRequestMethod("GET");
                         InputStream inputStream = httpUrlConnection.getInputStream();
                         totalMachineCount++;
+                        Log.e("# total count back", ""+totalMachineCount);
                     }
                 } catch (Exception e) {
-                    Log.e("# EXP", e.toString());
-                    isError = true;
+                    Log.e("# EXP123", e.toString());
+                    Log.e("# total count catch", ""+totalMachineCount);
                     try {
-                        DatabaseHelper dbHelper1 = new DatabaseHelper(getActivity());
+                        DatabaseHelper dbHelper1 = new DatabaseHelper(activity);
                         dbHelper1.openDataBase();
                         dbHelper1.enableDisableMachine(machineId, false);
                         dbHelper1.close();
@@ -1130,20 +1166,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            //progressDilaog.hide();
-
-            if(isError) {
-                try {
-                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                    dbHelper.openDataBase();
-                    Log.e("TAG_MACHINE", dbHelper+"");
-                    dbHelper.enableDisableMachine(machineId, false);
-                    dbHelper.close();
-                    Toast.makeText(getActivity(), "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                } catch (SQLException e) {
-                    Log.e("TAG EXP", e.toString());
-                }
-            }
+            Log.e("# total post", ""+totalMachineCount);
 
             if(totalMachineCount == 0) {
                 //Toast.makeText(getActivity(), getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
@@ -1164,6 +1187,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 bulb_image.setColorFilter(getResources().getColor(R.color.white));
                 bulb_image.setBackgroundResource(R.drawable.white_border_circle);
             }
+
+
+
 
         }
     }
