@@ -106,7 +106,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     }
 
     public void stopTherad(){
-        timer1.cancel();
+        try {
+            timer1.cancel();
+        }catch (Exception e){
+
+        }
     }
 
     public static DashboardFragment newInstance() {
@@ -303,31 +307,25 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     @Override
     public void onPause() {
         super.onPause();
-        try{
-            stopTherad();
-        }catch (Exception e){
 
-        }
+            stopTherad();
+
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        try{
-            stopTherad();
-        }catch (Exception e){
 
-        }
+            stopTherad();
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        try{
-            stopTherad();
-        }catch (Exception e){
 
-        }
+            stopTherad();
+
     }
 
     @Override

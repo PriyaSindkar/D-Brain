@@ -64,38 +64,74 @@ public class DimmerListActivity extends AppCompatActivity {
     private boolean isListView = true, isFirstTime = true;
 
 
-    private Timer timer;
-    private Handler handler;
-    public static boolean isDelay = false;
-    private int totalMachineCount = 0;
+    private Timer timer1;
+    private Handler handler1;
 
-    private void PauseTimer(){
-        this.timer.cancel();
-    }
-
-    public void ResumeTimer() {
-        handler = new Handler();
-        timer = new Timer();
+    public void startTherad(){
+        handler1 = new Handler();
+        timer1 = new Timer();
 
 
-        timer.scheduleAtFixedRate(new TimerTask() {
+        timer1.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                handler.post(new Runnable() {
+                handler1.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (!isDelay) {
-                            new GetMachineStatus().execute();
-                        } else {
-                            PauseTimer();
-                            ResumeTimer();
-                        }
+
+                        new GetMachineStatus().execute(machineIPs);
                     }
                 });
 
             }
-        }, 0, 6000 * 1);
+        }, 0, 2000 * 1);
+    }
 
+    public void stopTherad(){
+        try {
+            timer1.cancel();
+        }catch (Exception e){
+
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initArrayOfDimmers();
+
+        startTherad();
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        try{
+            stopTherad();
+        }catch (Exception e){
+
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        try{
+            stopTherad();
+        }catch (Exception e){
+
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        try{
+            stopTherad();
+        }catch (Exception e){
+
+        }
     }
 
     @Override
@@ -108,7 +144,6 @@ public class DimmerListActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.VISIBLE);
 
-        initArrayOfDimmers();
 
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -119,10 +154,7 @@ public class DimmerListActivity extends AppCompatActivity {
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        // fetch dimmer status periodically
-           ResumeTimer();
-        // call first time
-        //new GetDimmerStatus().execute();
+
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
@@ -156,7 +188,7 @@ public class DimmerListActivity extends AppCompatActivity {
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                timer.cancel();
+                stopTherad();
                 finish();
             }
         });
@@ -165,7 +197,7 @@ public class DimmerListActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        timer.cancel();
+       stopTherad();
     }
 
     private void init() {
@@ -362,12 +394,12 @@ public class DimmerListActivity extends AppCompatActivity {
                 adapter.setCheckedChangeListener(new onCheckedChangeListener() {
                     @Override
                     public void onCheckedChangeClick(int pos) {
-                        isDelay = false;
+                           startTherad();
                     }
 
                     @Override
                     public void onCheckedPreChangeClick(int pos) {
-
+                            stopTherad();
                     }
                 });
 
@@ -456,22 +488,22 @@ public class DimmerListActivity extends AppCompatActivity {
     }
 
 
-    public class GetMachineStatus extends AsyncTask<Void, Void, Void> {
+    public class GetMachineStatus extends AsyncTask<String, Void, Void> {
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
         boolean isError = false;
         Cursor machineCursor;
-
+        int   totalMachineCount = 0;
         @Override
         protected void onPreExecute() {
             //progressDilaog.show();
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            totalMachineCount = 0;
-            for (int i = 0; i < machineIPs.length; i++) {
+        protected Void doInBackground(String... machineIps) {
+
+            for (int i = 0; i < machineIps.length; i++) {
                 String machineBaseURL = "";
-                machineIp = machineIPs[i];
+                machineIp = machineIps[i];
 
                 if (machineIp.startsWith("http://")) {
                     machineBaseURL = machineIp;
@@ -537,7 +569,7 @@ public class DimmerListActivity extends AppCompatActivity {
 
             if(totalMachineCount == 0) {
                 Toast.makeText(DimmerListActivity.this, getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
-                timer.cancel();
+                stopTherad();
                 finish();
             } else {
                 new GetDimmerStatus().execute(machineIPs);
@@ -582,7 +614,7 @@ public class DimmerListActivity extends AppCompatActivity {
     }
 
     private void addComponentToScene(int pos) {
-        timer.cancel();
+        stopTherad();
         dimmerListCursor.moveToPosition(pos);
         String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
         String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));

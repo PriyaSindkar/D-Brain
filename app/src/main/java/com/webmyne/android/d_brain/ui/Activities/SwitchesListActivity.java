@@ -69,7 +69,6 @@ public class SwitchesListActivity extends AppCompatActivity {
     private Timer timer1;
     private Handler handler,handler1;
     public static boolean isDelay = false;
-    private int totalMachineCount = 0;
 
 
 
@@ -95,7 +94,11 @@ public class SwitchesListActivity extends AppCompatActivity {
     }
 
     public void stopTherad(){
-        timer1.cancel();
+        try {
+            timer1.cancel();
+        }catch (Exception e){
+
+        }
     }
 
 
@@ -120,7 +123,6 @@ public class SwitchesListActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.VISIBLE);
 
-        initArrayOfSwitches();
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -128,10 +130,6 @@ public class SwitchesListActivity extends AppCompatActivity {
         int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), SwitchesListActivity.this);
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
-
-        // fetch switch status periodically
-     //   ResumeTimer();
-        startTherad();
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
 
@@ -144,11 +142,9 @@ public class SwitchesListActivity extends AppCompatActivity {
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
+
                     stopTherad();
-                }catch(Exception e){
-                    Log.e("#### Exc for timer",""+e.toString());
-                }
+
                 finish();
             }
         });
@@ -178,43 +174,42 @@ public class SwitchesListActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        initArrayOfSwitches();
+        startTherad();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
-        try{
-            stopTherad();
-        }catch (Exception e){
 
-        }
+            stopTherad();
+
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        try{
-            stopTherad();
-        }catch (Exception e){
 
-        }
+            stopTherad();
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        try{
-            stopTherad();
-        }catch (Exception e){
 
-        }
+            stopTherad();
+
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        try {
+
             stopTherad();
-        }catch(Exception e){
-            Log.e("#### Exc for timer", "" + e.toString());
-        }
+
 
     }
 
@@ -575,11 +570,8 @@ public class SwitchesListActivity extends AppCompatActivity {
 
     private void addComponentToScene(int pos) {
 
-        try{
+
            stopTherad();
-        }catch (Exception e){
-            Log.e("## exc timer",""+e.toString());
-        }
 
         switchListCursor.moveToPosition(pos);
         String componentId1 = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
