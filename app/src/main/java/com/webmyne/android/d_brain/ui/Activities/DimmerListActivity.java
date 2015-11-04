@@ -553,19 +553,6 @@ public class DimmerListActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            //progressDilaog.hide();
-
-            /*if(isError) {
-                try {
-                    DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
-                    dbHelper.openDataBase();
-                    dbHelper.enableDisableMachine(machineId, false);
-                    dbHelper.close();
-                    Toast.makeText(DimmerListActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                } catch (SQLException e) {
-                    Log.e("TAG EXP", e.toString());
-                }
-            }*/
 
             if(totalMachineCount == 0) {
                 Toast.makeText(DimmerListActivity.this, getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
@@ -581,6 +568,7 @@ public class DimmerListActivity extends AppCompatActivity {
 
 
     private void renameComponent(int pos) {
+
         final int position = pos;
         dimmerListCursor.moveToPosition(position);
         final String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
