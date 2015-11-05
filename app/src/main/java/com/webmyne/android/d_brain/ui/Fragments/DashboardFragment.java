@@ -201,6 +201,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         linearFavorites = (LinearLayout) row.findViewById(R.id.linearFavorites);
         linearFavorites.setOnClickListener(this);
 
+        bulb_image.setClickable(true);
+
        /* parentSwitches.setClickable(false);
         parentMotor.setClickable(false);
         parentSlider.setClickable(false);
@@ -271,7 +273,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         if(userSettings != null) {
             if( !userSettings.isMainPowerOn()) {
-                Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
+               // Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
 
                 showOffScreen();
                 ((HomeDrawerActivity) getActivity()).hideDrawer();
@@ -353,7 +355,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             case R.id.bulb_image:
                 if(isBulbOn) {
                   //  linearMainBody.setAlpha(0.3f);
-                    Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
 
                     showOffScreen();
                     ((HomeDrawerActivity) getActivity()).hideDrawer();
@@ -1195,6 +1197,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 bulb_image.setColorFilter(getResources().getColor(R.color.white));
                 bulb_image.setBackgroundResource(R.drawable.white_border_circle);
                 bulb_image.setClickable(false);
+            } else {
+                bulb_image.setClickable(true);
             }
 
 
