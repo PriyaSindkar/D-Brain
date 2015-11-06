@@ -72,6 +72,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Scheduler Name"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:inputType="text"
                 android:singleLine="true"
                 android:maxLength="30"
@@ -87,7 +89,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/txtInputSchedulerName"
-            android:visibility="gone"
             android:theme="@style/TextLabel">
 
             <EditText
@@ -95,7 +96,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Component Name"
-                android:text="Component Name"
                 android:inputType="text"
                 android:focusable="false"
                 android:singleLine="true"

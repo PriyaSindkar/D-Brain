@@ -26,6 +26,7 @@ import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SceneAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
@@ -802,7 +803,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
             dbHelper.close();
             isSceneSaved = true;
-            Toast.makeText(SceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SceneActivity.this, "Scene Updated", Toast.LENGTH_SHORT).show();
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
         }
@@ -909,17 +910,38 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             dbHelper.openDataBase();
             sceneCursor = dbHelper.getScenebyId(currentSceneId);
 
-        }catch (Exception e) {}
         if(sceneCursor != null) {
             sceneCursor.moveToFirst();
             String componentId1 = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
             String componentName = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
 
-            SchedulerModel schedulerModel = new SchedulerModel("", componentId1, "", componentName, AppConstants.SCENE_TYPE, "", "", "", true, "00");
+            boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentId1);
 
-            AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(SceneActivity.this, schedulerModel);
-            addToSchedulerDialog.show();
+            if(isAlreadyScheduled) {
+                SchedulerModel scheduledModel = null;
+                scheduledModel =  dbHelper.getSchedulerByComponentId(componentId1, "", "1");
+                dbHelper.close();
+
+
+                if(scheduledModel != null) {
+                    EditSchedulerDialog addToSchedulerDialog = new EditSchedulerDialog(SceneActivity.this, scheduledModel);
+                    addToSchedulerDialog.show();
+
+                    addToSchedulerDialog.setOnSingleClick(new onSingleClickListener() {
+                        @Override
+                        public void onSingleClick(int pos) {
+
+                        }
+                    });
+                }
+            } else {
+                SchedulerModel schedulerModel = new SchedulerModel("", componentId1, "", componentName, AppConstants.SCENE_TYPE, "", "", "", true, "00");
+                AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(SceneActivity.this, schedulerModel);
+                addToSchedulerDialog.show();
+            }
         }
+
+        }catch (Exception e) {}
     }
 
     public class CallSceneOn extends AsyncTask<Void, Void, Void> {

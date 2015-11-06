@@ -50,6 +50,7 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     public onSingleClickListener _singleClick;
     public onAddSchedulerClickListener _addSchedulerClick;
     public onSceneOnOffClickListener _onSceneOnOffClick;
+    public onRenameClickListener _renameClick;
 
     public SceneListCursorAdapter(Context context){
         super(context );
@@ -83,7 +84,7 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     public class ListViewHolder extends ViewHolder{
         public  TextView txtSceneName;
         public LinearLayout linearScene;
-        private ImageView imgAddSchedulerOption;
+        private ImageView imgAddSchedulerOption, imgRenameOption;
         private SwitchButton imgSwitch;
 
         public ListViewHolder(View view) {
@@ -91,6 +92,7 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
             this.txtSceneName = (TextView) view.findViewById(R.id.txtSceneName);
             this.linearScene = (LinearLayout) view.findViewById(R.id.linearScene);
             this.imgAddSchedulerOption = (ImageView) view.findViewById(R.id.imgAddSchedulerOption);
+            this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
             this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
         }
     }
@@ -132,6 +134,7 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final Cursor cursor) {
         int sceneNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME);
+        final String sceneName = cursor.getString(sceneNameIndex);
         int sceneIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID);
         final String sceneId = cursor.getString(sceneIdIndex);
         final int position = cursor.getPosition();
@@ -140,7 +143,7 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final SimpleDialogViewHolder listHolder = (SimpleDialogViewHolder) viewHolder;
-                listHolder.txtSceneName.setText(cursor.getString(sceneNameIndex));
+                listHolder.txtSceneName.setText(sceneName);
 
                 listHolder.linearScene.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -152,7 +155,7 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
                 break;
             case 1:
                 final ListViewHolder groupViewHolder = (ListViewHolder) viewHolder;
-                groupViewHolder.txtSceneName.setText(cursor.getString(sceneNameIndex));
+                groupViewHolder.txtSceneName.setText(sceneName);
                 final String currentSceneId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID)) ;
 
                 DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
@@ -204,6 +207,13 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
                     }
                 });
 
+                groupViewHolder.imgRenameOption.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        _renameClick.onRenameOptionClick(position, sceneName);
+                    }
+                });
+
                 break;
         }
 
@@ -220,6 +230,10 @@ public class SceneListCursorAdapter extends CursorRecyclerViewAdapter<SceneListC
 
     public void setSceneOnOffListener(onSceneOnOffClickListener obj){
         this._onSceneOnOffClick = obj;
+    }
+
+    public void setRenameClickListener(onRenameClickListener obj){
+        this._renameClick = obj;
     }
 
 }

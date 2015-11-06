@@ -142,7 +142,6 @@ public class SensorFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-
         mRecyclerView.setLayoutManager(layoutManager);
         int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), getActivity());
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
@@ -152,7 +151,6 @@ public class SensorFragment extends Fragment {
         ResumeTimer();
 
         mRecyclerView.setItemAnimator(new LandingAnimator());
-
         mRecyclerView.getItemAnimator().setAddDuration(500);
         mRecyclerView.getItemAnimator().setRemoveDuration(500);
         mRecyclerView.getItemAnimator().setMoveDuration(500);

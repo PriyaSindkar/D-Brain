@@ -358,7 +358,6 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     }
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
-        boolean isError = false;
 
         @Override
         protected void onPreExecute() {
@@ -371,7 +370,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
             try {
                 URL urlValue = new URL(params[0]);
-            //    Log.e("# urlValue", urlValue.toString());
+                Log.e("# SWCR CHANGE", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                 httpUrlConnection.setRequestMethod("GET");
@@ -380,7 +379,6 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
             } catch (Exception e) {
                 Log.e("# EXP adapter", e.toString());
-                isError = true;
             }
             return null;
         }

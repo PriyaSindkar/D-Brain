@@ -1156,11 +1156,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                         httpUrlConnection.setRequestMethod("GET");
                         InputStream inputStream = httpUrlConnection.getInputStream();
                         totalMachineCount++;
-                        Log.e("# total count back", ""+totalMachineCount);
                     }
                 } catch (Exception e) {
                     Log.e("# EXP123", e.toString());
-                    Log.e("# total count catch", ""+totalMachineCount);
                     try {
                         DatabaseHelper dbHelper1 = new DatabaseHelper(activity);
                         dbHelper1.openDataBase();
@@ -1176,8 +1174,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Log.e("# total post", ""+totalMachineCount);
-
             if(totalMachineCount == 0) {
                 //Toast.makeText(getActivity(), getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
                 txtPowerOffMessageLink.setVisibility(View.VISIBLE);

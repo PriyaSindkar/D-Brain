@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.LongPressOptionsDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.MachineNotActiveDialog;
@@ -38,6 +40,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
@@ -76,13 +79,10 @@ public class SwitchesListActivity extends AppCompatActivity {
     public static boolean isDelay = false;
     private boolean flag = true;
 
-
-
-
     public void startTherad(){
+        Log.e("$#$ THREAD", "START");
         handler1 = new Handler();
         timer1 = new Timer();
-
 
         timer1.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -90,7 +90,6 @@ public class SwitchesListActivity extends AppCompatActivity {
                 handler1.post(new Runnable() {
                     @Override
                     public void run() {
-
                         new GetMachineStatus().execute(machineIPs);
                     }
                 });
@@ -100,6 +99,7 @@ public class SwitchesListActivity extends AppCompatActivity {
     }
 
     public void stopTherad(){
+        Log.e("$#$ THREAD", "STOP");
         try {
             timer1.cancel();
         }catch (Exception e){
@@ -148,10 +148,8 @@ public class SwitchesListActivity extends AppCompatActivity {
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                    stopTherad();
-
-                finish();
+            stopTherad();
+            finish();
             }
         });
 
@@ -189,34 +187,26 @@ public class SwitchesListActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-
-            stopTherad();
-
+        stopTherad();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-            stopTherad();
-
+        stopTherad();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
-            stopTherad();
+        stopTherad();
 
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-
-            stopTherad();
-
-
+        stopTherad();
     }
 
     private void initArrayOfSwitches() {
@@ -241,11 +231,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                     } while(machineListCursor.moveToNext());
                 }
             }
-
             dbHelper.close();
-
-
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -275,8 +261,6 @@ public class SwitchesListActivity extends AppCompatActivity {
                     } else {
                         machineBaseURL = "http://" + machineIp;
                     }
-
-
                     try {
                         DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
                         try {
@@ -344,7 +328,6 @@ public class SwitchesListActivity extends AppCompatActivity {
                         }
                     } catch (Exception ex1) {
                         Log.e("#EXP switch", ex1.toString());
-                        isError = true;
                         DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
                         try {
                             dbHelper.openDataBase();
@@ -593,16 +576,36 @@ public class SwitchesListActivity extends AppCompatActivity {
         try {
             DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
             dbHelper.openDataBase();
-            boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentId, componentMachineID);
+            boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentPrimaryId, componentMachineID);
             dbHelper.close();
 
             if(! isAlreadyScheduled) {
                 SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId,componentName, componentType, componentMachineID,componentMachineIP, componentMachineName, false, "00");
-
                 AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(SwitchesListActivity.this, schedulerModel);
+                addToSchedulerDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
                 addToSchedulerDialog.show();
             } else {
-                Toast.makeText(SwitchesListActivity.this, "This component is already scheduled.", Toast.LENGTH_SHORT).show();
+                dbHelper = new DatabaseHelper(this);
+                SchedulerModel schedulerModel = null;
+                try {
+                    dbHelper.openDataBase();
+                    schedulerModel =  dbHelper.getSchedulerByComponentId(componentPrimaryId, componentMachineID, "0");
+                    dbHelper.close();
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                if(schedulerModel != null) {
+                    EditSchedulerDialog addToSchedulerDialog = new EditSchedulerDialog(SwitchesListActivity.this, schedulerModel);
+                    addToSchedulerDialog.show();
+
+                    addToSchedulerDialog.setOnSingleClick(new onSingleClickListener() {
+                        @Override
+                        public void onSingleClick(int pos) {
+
+                        }
+                    });
+                }
             }
 
         } catch (SQLException e) {
@@ -682,9 +685,7 @@ public class SwitchesListActivity extends AppCompatActivity {
                 stopTherad();
                 finish();
             } else if (totalMachineCount < machineIPs.length) {
-
                 if (count != totalMachineCount) {
-
                     settings = getSharedPreferences("MACHINE_STATUS", 0);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putInt("ACTIVE_MACHINE", totalMachineCount);
@@ -692,46 +693,29 @@ public class SwitchesListActivity extends AppCompatActivity {
 
                     MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(SwitchesListActivity.this, "One of your machines deactivated.");
                     machineNotActiveDialog.show();
-
                     machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
                         @Override
                         public void onSaveClick(boolean isSave) {
-                            stopTherad();
-                            finish();
+                        stopTherad();
+                        finish();
                         }
                     });
-
-
                     //Toast.makeText(SwitchesListActivity.this, "One of your machines deactivated.", Toast.LENGTH_LONG).show();
-
                 }else{
-
                     settings = getSharedPreferences("MACHINE_STATUS", 0);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putInt("ACTIVE_MACHINE", totalMachineCount);
                     editor.commit();
-
-
                     new GetSwitchStatus().execute(machineIPs);
-
                 }
-
-
             }
             else {
-
                 settings = getSharedPreferences("MACHINE_STATUS", 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putInt("ACTIVE_MACHINE", totalMachineCount);
                 editor.commit();
-
-
                 new GetSwitchStatus().execute(machineIPs);
             }
-
-
-
-
         }
     }
 

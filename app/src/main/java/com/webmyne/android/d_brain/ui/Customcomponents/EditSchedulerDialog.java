@@ -122,8 +122,6 @@ public class EditSchedulerDialog extends BaseDialog {
 
         edtDate.setText(dateTime[0]);
         edtTime.setText(dateTime[1]);
-
-
     }
 
 
@@ -274,8 +272,6 @@ public class EditSchedulerDialog extends BaseDialog {
                         setAlarm(String.valueOf(schedulerModel.getId()), schedulerModel.getDateTime());
                         Toast.makeText(mContext, "Scheduler Updated.", Toast.LENGTH_SHORT).show();
                         dismiss();
-
-
                     } catch (Exception e) {
 
                     }

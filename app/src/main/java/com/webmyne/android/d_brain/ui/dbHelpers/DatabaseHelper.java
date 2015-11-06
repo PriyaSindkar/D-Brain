@@ -1180,13 +1180,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return id;
     }
 
+    // check if the component (switch/dimmer) is scheduled or not
     public boolean isAlreadyScheduled(String componentId, String machineId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         boolean result = true;
         try {
-            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_C_COMPONENT_ID + "=? AND " + DBConstants.KEY_SCH_MID + "=?",
+            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_SCH_SCENE_ID + "=? AND " + DBConstants.KEY_SCH_MID + "=?",
                     new String[]{componentId, machineId}, null, null, null, null);
+            if (cursor != null) {
+                if(cursor.getCount() == 0) {
+                    result =  false;
+                } else {
+                    result =  true;
+                }
+            } else {
+                result =  false;
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return result;
+    }
+
+    // check if a scene is already scheduled
+    public boolean isAlreadyScheduled(String componentId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        boolean result = true;
+        try {
+            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_SCH_SCENE_ID + "=? AND " + DBConstants.KEY_SCH_IS_SCENE + "=?",
+                    new String[]{componentId, "1"}, null, null, null, null);
             if (cursor != null) {
                 if(cursor.getCount() == 0) {
                     result =  false;
@@ -1267,5 +1291,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return schedulerModel;
     }
 
+    public SchedulerModel getSchedulerByComponentId(String compoentId, String machineId, String isScene) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        SchedulerModel schedulerModel = new SchedulerModel();
+        try {
+
+            // if it's not a scene, query for switches/dimmers for the scheduled machine
+            if (isScene != "1") {
+                cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_SCH_SCENE_ID + "=? AND " + DBConstants.KEY_SCH_MID + "=?",
+                        new String[]{compoentId, machineId}, null, null, null, null);
+            } else {  // else if it's a scene, query for scenes
+                cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_SCH_SCENE_ID + "=? AND " + DBConstants.KEY_SCH_IS_SCENE + "=?",
+                        new String[]{compoentId, "1"}, null, null, null, null);
+            }
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                schedulerModel.setSchedulerName(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_NAME)));
+                schedulerModel.setComponentPrimaryId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_ID)));
+                schedulerModel.setComponentId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_COMPONENT_ID)));
+                schedulerModel.setDefaultValue(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_DEFAULT)));
+                schedulerModel.setComponentType(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_TYPE)));
+                schedulerModel.setMip(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_MIP)));
+                schedulerModel.setComponentName(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_NAME)));
+                schedulerModel.setDateTime(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_DATETIME)));
+
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return schedulerModel;
+    }
 
 }

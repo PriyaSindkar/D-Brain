@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
 import com.webmyne.android.d_brain.ui.BallonComponent.BalloonPerformer;
 import com.webmyne.android.d_brain.ui.BallonComponent.configs.Config;
@@ -98,19 +99,16 @@ public class HomeDrawerActivity extends AppCompatActivity {
 
                     AddMachineDialog machineDialog = new AddMachineDialog(HomeDrawerActivity.this);
                     machineDialog.show();
-
                     machineDialog.setClickListener(new onSingleClickListener() {
                         @Override
                         public void onSingleClick(int pos) {
-
-
-
-                            AddMachineFragment fragment = (AddMachineFragment) getSupportFragmentManager().findFragmentByTag("Add Machine");
-                            fragment.refreshAdapter();
-
-
+                        AddMachineFragment fragment = (AddMachineFragment) getSupportFragmentManager().findFragmentByTag("Add Machine");
+                        fragment.refreshAdapter();
                         }
                     });
+                } else if (txtClearButton.getText().toString().equals("Create New Scene"))  {
+                    Intent intent = new Intent(HomeDrawerActivity.this, CreateSceneActivity.class);
+                    startActivity(intent);
                 }
             }
         });

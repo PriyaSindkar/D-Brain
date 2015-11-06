@@ -33,11 +33,16 @@
                 android:textColor="@color/yellow"
                 android:src="@drawable/ic_arrow_left"/>
 
-
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:orientation="horizontal"
                 android:layout_height="wrap_content">
+
+                <com.kyleduo.switchbutton.SwitchButton
+                    android:id="@+id/imgSwitch"
+                    android:layout_marginRight="@dimen/STD_MARGIN"
+                    android:layout_alignParentRight="true"
+                    style="@style/MaterialDesignStyle" />
 
                 <ImageView
                     android:id="@+id/imgAddSchedulerOption"
@@ -48,18 +53,15 @@
                     android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
                     android:layout_height="@dimen/POPUP_BAR_ICON_SIZE" />
 
-                <com.kyleduo.switchbutton.SwitchButton
-                    android:id="@+id/imgSwitch"
-                    android:layout_marginRight="@dimen/STD_MARGIN"
-                    android:layout_alignParentRight="true"
-                    style="@style/MaterialDesignStyle" />
+                <ImageView
+                    android:id="@+id/imgRenameOption"
+                    android:background="@drawable/white_border_circle"
+                    android:src="@drawable/ic_edit"
+                    android:padding="@dimen/STD_MARGIN"
+                    android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+                    android:layout_height="@dimen/POPUP_BAR_ICON_SIZE" />
 
             </LinearLayout>
-
         </LinearLayout>
-
-
     </RelativeLayout>
-
-
 </LinearLayout>

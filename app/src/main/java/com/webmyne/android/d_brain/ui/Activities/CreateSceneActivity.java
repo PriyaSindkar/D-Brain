@@ -609,8 +609,19 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     private void saveScene() {
         if(edtIPAddress.getText().toString().trim().length() == 0) {
             Toast.makeText(CreateSceneActivity.this, "Please Enter Scene Name", Toast.LENGTH_SHORT).show();
-        } else {
+        } else if (mData == null || mData.isEmpty()) {
+            SaveAlertDialog saveAlertDialog = new SaveAlertDialog(CreateSceneActivity.this, "No Component Added. Do You Want To Exit Without Creating The Scene?");
+            saveAlertDialog.show();
 
+            saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                @Override
+                public void onSaveClick(boolean isSave) {
+                    if(isSave) {
+                        finish();
+                    }
+                }
+            });
+        } else {
             // save scene in DB
             DatabaseHelper dbHelper = new DatabaseHelper(this);
             try {
@@ -620,8 +631,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                 dbHelper.close();
                 txtSceneTitle.setText(edtIPAddress.getText().toString().trim());
                 isSceneSaved = true;
-                Toast.makeText(CreateSceneActivity.this, "Scene Saved", Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(CreateSceneActivity.this, "Scene Created", Toast.LENGTH_SHORT).show();
                 finish();
             } catch (SQLException e) {
                 Log.e("SQLEXP", e.toString());

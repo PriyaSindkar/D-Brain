@@ -20,9 +20,9 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
-import com.webmyne.android.d_brain.ui.Adapters.SceneListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SceneListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
@@ -93,7 +93,9 @@ public class SceneFragment extends Fragment {
 
     private void init(View view) {
         ((HomeDrawerActivity) getActivity()).setTitle("Scenes");
-        ((HomeDrawerActivity) getActivity()).hideAppBarButton();
+        ((HomeDrawerActivity) getActivity()).showAppBarButton();
+        ((HomeDrawerActivity) getActivity()).setClearButtonText("Create New Scene");
+
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         emptyView = (LinearLayout) view.findViewById(R.id.emptyView);
         txtEmptyView1 = (TextView) view.findViewById(R.id.txtEmptyView1);
@@ -110,20 +112,12 @@ public class SceneFragment extends Fragment {
 
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-
-
         mRecyclerView.setLayoutManager(layoutManager);
         int margin = Utils.pxToDp(getResources().getDimension(R.dimen.STD_MARGIN), getActivity());
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
         mRecyclerView.setItemViewCacheSize(0);
 
-        /*adapter = new SceneListCursorAdapter(getActivity(), sceneListCursor);
-        adapter.setType(1);
-        adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);*/
-
         mRecyclerView.setItemAnimator(new LandingAnimator());
-
         mRecyclerView.getItemAnimator().setAddDuration(500);
         mRecyclerView.getItemAnimator().setRemoveDuration(500);
         mRecyclerView.getItemAnimator().setMoveDuration(500);
@@ -161,20 +155,20 @@ public class SceneFragment extends Fragment {
             mRecyclerView.setAdapter(adapter);
 
             adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                sceneListCursor.moveToPosition(pos);
+                @Override
+                public void onSingleClick(int pos) {
+                    sceneListCursor.moveToPosition(pos);
 
-                String sceneId = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
-                String sceneName = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
+                    String sceneId = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+                    String sceneName = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
 
-                // Redirect To the respective saved scene
-                Intent intent = new Intent(getActivity(), SceneActivity.class);
-                intent.putExtra("scene_id", sceneId);
-                intent.putExtra("scene_name", sceneName);
-                getActivity().startActivity(intent);
-            }
-        });
+                    // Redirect To the respective saved scene
+                    Intent intent = new Intent(getActivity(), SceneActivity.class);
+                    intent.putExtra("scene_id", sceneId);
+                    intent.putExtra("scene_name", sceneName);
+                    getActivity().startActivity(intent);
+                }
+            });
 
 
             adapter.setAddToScheduler(new onAddSchedulerClickListener() {
@@ -203,6 +197,41 @@ public class SceneFragment extends Fragment {
 
                     }
                     setSceneOnOff(sceneId, isOn);
+                }
+            });
+
+            adapter.setRenameClickListener(new onRenameClickListener() {
+                @Override
+                public void onRenameOptionClick(int pos, String oldName) {
+                    RenameDialog renameDialog = new RenameDialog(getActivity(), oldName);
+                    renameDialog.show();
+                    sceneListCursor.moveToPosition(pos);
+                    final String sceneId = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+
+                    renameDialog.setRenameListener(new onRenameClickListener() {
+                        @Override
+                        public void onRenameOptionClick(int pos, String newName) {
+                            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                            try {
+                                dbHelper.openDataBase();
+                                dbHelper.renameScene(sceneId, newName);
+                                sceneListCursor = dbHelper.getAllScenes("");
+                                adapter.changeCursor(sceneListCursor);
+                                adapter.notifyDataSetChanged();
+
+                            }catch ( Exception e) {}
+                        }
+
+                        @Override
+                        public void onRenameOptionClick(int pos, String newName, String newDetails) {
+
+                        }
+                    });
+                }
+
+                @Override
+                public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
                 }
             });
         }

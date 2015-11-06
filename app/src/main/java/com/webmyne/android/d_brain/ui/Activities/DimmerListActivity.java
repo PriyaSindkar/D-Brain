@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.LongPressOptionsDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
@@ -34,6 +35,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -557,18 +559,14 @@ public class DimmerListActivity extends AppCompatActivity {
                 stopTherad();
                 finish();
             } else if (totalMachineCount < machineIPs.length) {
-
                 if (count != totalMachineCount) {
-
                     settings = getSharedPreferences("MACHINE_STATUS", 0);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putInt("ACTIVE_MACHINE", totalMachineCount);
                     editor.commit();
 
-
                     MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(DimmerListActivity.this, "One of your machines deactivated.");
                     machineNotActiveDialog.show();
-
                     machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
                         @Override
                         public void onSaveClick(boolean isSave) {
@@ -578,30 +576,20 @@ public class DimmerListActivity extends AppCompatActivity {
                     });
 
                 }else{
-
                     settings = getSharedPreferences("MACHINE_STATUS", 0);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putInt("ACTIVE_MACHINE", totalMachineCount);
                     editor.commit();
-
-
                     new GetDimmerStatus().execute(machineIPs);
-
                 }
-
-
             }
             else {
-
                 settings = getSharedPreferences("MACHINE_STATUS", 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putInt("ACTIVE_MACHINE", totalMachineCount);
                 editor.commit();
-
-
                 new GetDimmerStatus().execute(machineIPs);
             }
-
         }
     }
 
@@ -696,16 +684,28 @@ public class DimmerListActivity extends AppCompatActivity {
         try {
             DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
             dbHelper.openDataBase();
-            boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentId, componentMachineID);
-            dbHelper.close();
+            boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentPrimaryId, componentMachineID);
 
             if(! isAlreadyScheduled) {
                 SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId,componentName, componentType, componentMachineID,componentMachineIP, componentMachineName, false, "00");
-
                 AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(DimmerListActivity.this, schedulerModel);
                 addToSchedulerDialog.show();
             } else {
-                Toast.makeText(DimmerListActivity.this, "This component is already scheduled.", Toast.LENGTH_SHORT).show();
+                SchedulerModel schedulerModel = null;
+                schedulerModel =  dbHelper.getSchedulerByComponentId(componentPrimaryId, componentMachineID, "0");
+                dbHelper.close();
+
+                if(schedulerModel != null) {
+                    EditSchedulerDialog addToSchedulerDialog = new EditSchedulerDialog(DimmerListActivity.this, schedulerModel);
+                    addToSchedulerDialog.show();
+
+                    addToSchedulerDialog.setOnSingleClick(new onSingleClickListener() {
+                        @Override
+                        public void onSingleClick(int pos) {
+
+                        }
+                    });
+                }
             }
 
         } catch (SQLException e) {
