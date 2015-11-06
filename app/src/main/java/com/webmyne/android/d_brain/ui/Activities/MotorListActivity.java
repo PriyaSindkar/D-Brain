@@ -24,6 +24,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -168,6 +169,12 @@ public class MotorListActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AppConstants.getCurrentSsid(MotorListActivity.this);
     }
 
 

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -93,7 +94,6 @@ public class SwitchesListActivity extends AppCompatActivity {
                         new GetMachineStatus().execute(machineIPs);
                     }
                 });
-
             }
         }, 0, 2000 * 1);
     }
@@ -180,6 +180,7 @@ public class SwitchesListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        AppConstants.getCurrentSsid(SwitchesListActivity.this);
         initArrayOfSwitches();
         startTherad();
     }

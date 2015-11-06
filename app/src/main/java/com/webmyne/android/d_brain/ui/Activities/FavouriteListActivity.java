@@ -153,9 +153,7 @@ public class FavouriteListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-
-
+        AppConstants.getCurrentSsid(FavouriteListActivity.this);
         //startTherad();
     }
 

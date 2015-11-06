@@ -166,6 +166,12 @@ public class MachineListActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AppConstants.getCurrentSsid(MachineListActivity.this);
+    }
+
     private void callOnDeleteClick() {
         adapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override

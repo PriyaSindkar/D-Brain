@@ -35,6 +35,7 @@ import com.webmyne.android.d_brain.ui.Fragments.NotificationFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SceneFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SettingsFragment;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
 import java.util.ArrayList;
@@ -115,7 +116,11 @@ public class HomeDrawerActivity extends AppCompatActivity {
 
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AppConstants.getCurrentSsid(HomeDrawerActivity.this);
+    }
 
     public void setTitle(String title) {
         toolbarTitle.setText(title);

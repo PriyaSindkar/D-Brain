@@ -103,8 +103,8 @@ public class DimmerListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        AppConstants.getCurrentSsid(DimmerListActivity.this);
         initArrayOfDimmers();
-
         startTherad();
 
     }

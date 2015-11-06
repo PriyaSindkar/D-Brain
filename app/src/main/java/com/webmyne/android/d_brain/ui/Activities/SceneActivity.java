@@ -288,7 +288,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onResume() {
         super.onResume();
+        AppConstants.getCurrentSsid(SceneActivity.this);
     }
+
 
     @Override
     public void onBackPressed() {

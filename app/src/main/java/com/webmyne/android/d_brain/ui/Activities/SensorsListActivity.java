@@ -135,6 +135,12 @@ public class SensorsListActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AppConstants.getCurrentSsid(SensorsListActivity.this);
+    }
+
 
     private void initArrayOfSensors() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);

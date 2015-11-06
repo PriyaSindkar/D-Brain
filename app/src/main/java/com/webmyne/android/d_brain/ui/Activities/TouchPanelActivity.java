@@ -33,6 +33,7 @@ import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemDeleteListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Widgets.TouchPanelBox;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
@@ -163,6 +164,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onResume() {
         super.onResume();
+        AppConstants.getCurrentSsid(TouchPanelActivity.this);
         //populate the each component list
         initArrayOfSwitches();
         initArrayOfDimmers();

@@ -1,11 +1,16 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1196,10 +1201,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             } else {
                 bulb_image.setClickable(true);
             }
-
-
-
-
         }
     }
 }

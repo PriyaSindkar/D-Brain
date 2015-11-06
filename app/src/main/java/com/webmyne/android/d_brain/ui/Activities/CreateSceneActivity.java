@@ -91,6 +91,12 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AppConstants.getCurrentSsid(CreateSceneActivity.this);
+    }
+
     private void init() {
         txtDimmer = (TextView) findViewById(R.id.txtDimmer);
         txtSwitch = (TextView) findViewById(R.id.txtSwitch);

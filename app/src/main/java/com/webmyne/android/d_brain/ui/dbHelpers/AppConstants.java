@@ -1,5 +1,13 @@
 package com.webmyne.android.d_brain.ui.dbHelpers;
 
+import android.app.Activity;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.widget.Toast;
+
 /**
  * Created by priyasindkar on 21-09-2015.
  */
@@ -40,4 +48,25 @@ public class AppConstants {
     public  static String DIMMER_DEFAULT_VALUE = "00";
 
     public static int TIMEOUT = 20000;
+
+
+    public static void getCurrentSsid(Context context) {
+        String ssid = null;
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (networkInfo.isConnected()) {
+            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
+            if (connectionInfo != null && ! (connectionInfo.getSSID().trim().length() == 0)) {
+                ssid = connectionInfo.getSSID();
+            }
+            Toast.makeText(context, "WiFi network connected to: " + ssid, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(context, "No WiFi network available", Toast.LENGTH_LONG).show();
+
+            Activity act = (Activity) context;
+            act.finish();
+
+        }
+    }
 }
