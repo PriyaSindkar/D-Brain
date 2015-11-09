@@ -1157,6 +1157,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public long insertIntoScheduler(SchedulerModel schedulerModel) {
+
+        Log.e("Scheduler insert", schedulerModel.toString());
+
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -1164,6 +1167,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_SCH_NAME, schedulerModel.getSchedulerName());
         values.put(DBConstants.KEY_SCH_DATETIME, schedulerModel.getDateTime());
         values.put(DBConstants.KEY_SCH_DEFAULT, schedulerModel.getDefaultValue());
+        values.put(DBConstants.KEY_SCH_DEF_ON_OFF, schedulerModel.getDefaultOnOffState());
         values.put(DBConstants.KEY_SCH_IS_SCENE, schedulerModel.isScene());
         values.put(DBConstants.KEY_SCH_SCENE_ID, schedulerModel.getComponentPrimaryId());
         values.put(DBConstants.KEY_SCH_COMPONENT_ID, schedulerModel.getComponentId());
@@ -1173,6 +1177,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_SCH_MID, schedulerModel.getMid());
         values.put(DBConstants.KEY_SCH_MIP, schedulerModel.getMip());
         values.put(DBConstants.KEY_M_ISACTIVE, "true");
+        values.put(DBConstants.KEY_SCH_ALARM_ID, schedulerModel.getAlarmId());
 
         long id =  db.insert(DBConstants.TABLE_SCHEDULERS, null, values);
 
@@ -1259,9 +1264,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_SCH_NAME, schedulerModel.getSchedulerName());
         values.put(DBConstants.KEY_SCH_DATETIME, schedulerModel.getDateTime());
         values.put(DBConstants.KEY_SCH_DEFAULT, schedulerModel.getDefaultValue());
+        values.put(DBConstants.KEY_SCH_ALARM_ID, schedulerModel.getAlarmId());
 
         db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_ID + " = " + schedulerModel.getId(), null);
 
+        db.close();
+    }
+
+    // master on/off state
+    public void updateSchedulerDefaultOnOffValue(boolean isOn, String schedulerId) {
+        Log.e("TAG_DB","update default on/off schedulers");
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        if(isOn) {
+            values.put(DBConstants.KEY_SCH_DEF_ON_OFF, AppConstants.ON_VALUE);
+        } else {
+            values.put(DBConstants.KEY_SCH_DEF_ON_OFF, AppConstants.OFF_VALUE);
+        }
+
+        db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_ID + " = " + schedulerId, null);
         db.close();
     }
 
@@ -1275,6 +1298,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             if (cursor != null) {
                 cursor.moveToFirst();
+                schedulerModel.setId(Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_ID))));
                 schedulerModel.setSchedulerName(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_NAME)));
                 schedulerModel.setComponentPrimaryId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_ID)));
                 schedulerModel.setComponentId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_COMPONENT_ID)));
@@ -1282,7 +1306,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 schedulerModel.setComponentType(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_TYPE)));
                 schedulerModel.setMip(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_MIP)));
                 schedulerModel.setComponentName(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_SCENE_NAME)));
-
+                schedulerModel.setDefaultOnOffState(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_DEF_ON_OFF)));
+                schedulerModel.setAlarmId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_ALARM_ID)));
             }
 
         }catch (Exception e) {

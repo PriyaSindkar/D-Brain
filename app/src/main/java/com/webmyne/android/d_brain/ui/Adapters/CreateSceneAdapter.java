@@ -45,7 +45,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
 
 
     public class SwitchViewHolder extends ViewHolder {
-        public TextView txtSwitchName, txtMachineName;
+        public TextView txtSwitchName, txtMachineName, txtDefaultState;
         public LinearLayout linearSwitch, linearItem;
         private ImageView imgDeleteOption;
         public SwitchButton imgSwitch;
@@ -54,6 +54,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
             super ( itemView );
             this.txtSwitchName = (TextView) itemView.findViewById(R.id.txtSwitchName);
             this.txtMachineName = (TextView) itemView.findViewById(R.id.txtMachineName);
+            this.txtDefaultState = (TextView) itemView.findViewById(R.id.txtDefaultState);
             this.linearSwitch = (LinearLayout) itemView.findViewById(R.id.linearSwitch);
             this.imgDeleteOption = (ImageView) itemView.findViewById(R.id.imgDeleteOption);
             this.imgSwitch = (SwitchButton) itemView.findViewById(R.id.imgSwitch);
@@ -62,7 +63,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
     }
 
     public class DimmerViewHolder extends ViewHolder{
-        public TextView txtDimmerName, txtValue, txtMachineName;
+        public TextView txtDimmerName, txtValue, txtMachineName, txtDefaultState;
         private SeekBar seekBar;
         public  ImageView  imgDeleteOption;
         private LinearLayout linearItem;
@@ -71,6 +72,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
             super ( itemView );
             this.txtDimmerName = (TextView) itemView.findViewById(R.id.txtDimmerName);
             this.txtMachineName = (TextView) itemView.findViewById(R.id.txtMachineName);
+            this.txtDefaultState = (TextView) itemView.findViewById(R.id.txtDefaultState);
             this.seekBar = (SeekBar) itemView.findViewById(R.id.seekBar);
             this.txtValue = (TextView) itemView.findViewById(R.id.txtValue);
             this.linearItem = (LinearLayout) itemView.findViewById(R.id.linearItem);
@@ -196,6 +198,7 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
         switch (viewHolder.getItemViewType () ) {
             case 0:
                 final SwitchViewHolder switchHolder = ( SwitchViewHolder ) viewHolder;
+                switchHolder.txtDefaultState.setVisibility(View.VISIBLE);
                 switchHolder.txtSwitchName.setText(mDataset.get(position).getName());
 
                 switchHolder.txtMachineName.setText(mDataset.get(position).getMachineName());
@@ -238,8 +241,9 @@ public class CreateSceneAdapter extends RecyclerView.Adapter<CreateSceneAdapter.
                 break;
             case 1:
                 final DimmerViewHolder dimmerHolder = ( DimmerViewHolder ) viewHolder;
-                dimmerHolder.txtDimmerName.setText(mDataset.get(position).getName());
+                dimmerHolder.txtDefaultState.setVisibility(View.VISIBLE);
 
+                dimmerHolder.txtDimmerName.setText(mDataset.get(position).getName());
                 dimmerHolder.txtMachineName.setText(mDataset.get(position).getMachineName());
 
                 dimmerHolder.txtValue.setText(mDataset.get(position).getDefaultValue());

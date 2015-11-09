@@ -60,6 +60,8 @@ public class MachineInactiveDialog extends BaseDialog {
 
     @Override
     public boolean setUiBeforShow() {
+        setCancelable(false);
+
         txtYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -1,8 +1,10 @@
 package com.webmyne.android.d_brain.ui.Customcomponents;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -57,6 +59,7 @@ public class AddMachineDialog extends BaseDialog {
     private ProgressBar progressBar;
     private onSingleClickListener clickListener;
     private long machineID;
+    private int totalMachinesCount = 0;
 
     public AddMachineDialog(Context context) {
         super(context);
@@ -99,7 +102,6 @@ public class AddMachineDialog extends BaseDialog {
         txtAddMachine.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Log.e("TAG", "ADD_MACHINE");
                 if(edtIPAddress.getText().toString().trim().length() == 0) {
                     Toast.makeText(context, "Must Enter Device IP Address.", Toast.LENGTH_LONG).show();
@@ -107,15 +109,31 @@ public class AddMachineDialog extends BaseDialog {
                     Toast.makeText(context, "Must Enter Machine Name.", Toast.LENGTH_LONG).show();
                 } else if(edtMachineSerialNo.getText().toString().trim().length() == 0) {
                     Toast.makeText(context, "Must Enter Machine Serial No.", Toast.LENGTH_LONG).show();
-                }
-                else {
-                    machineIP = edtIPAddress.getText().toString().trim();
-                    userEnteredSerialNo = edtMachineSerialNo.getText().toString().trim();
-                    machineName = edtMachineName.getText().toString().trim();
-                    new GetMachineStatus().execute();
-                }
+                } else {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(context);
+                        dbHelper.openDataBase();
+                        Cursor machinesCursor = dbHelper.getAllMachines();
 
+                        if (machinesCursor != null) {
+                            totalMachinesCount = machinesCursor.getCount();
+                        } else {
+                            totalMachinesCount = 0;
+                        }
+                        dbHelper.close();
+                    } catch (SQLException e) {
+                       Log.e("SQL EXP", e.toString());
+                    }
 
+                    if (totalMachinesCount >= 3) {
+                        Toast.makeText(context, "Cannot enter more than 3 machines.", Toast.LENGTH_LONG).show();
+                    } else {
+                        machineIP = edtIPAddress.getText().toString().trim();
+                        userEnteredSerialNo = edtMachineSerialNo.getText().toString().trim();
+                        machineName = edtMachineName.getText().toString().trim();
+                        new GetMachineStatus().execute();
+                    }
+                }
             }
         });
 
@@ -217,7 +235,6 @@ public class AddMachineDialog extends BaseDialog {
 
                                     if(machineID != -1) {
                                         initDatabaseComponents(productCode);
-
                                         Toast.makeText(context, "Machine Added", Toast.LENGTH_SHORT).show();
                                         clickListener.onSingleClick(0);
                                         dismiss();

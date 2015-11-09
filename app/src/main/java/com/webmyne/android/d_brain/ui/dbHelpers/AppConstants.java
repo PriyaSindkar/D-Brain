@@ -47,7 +47,7 @@ public class AppConstants {
     public  static String ON_VALUE = "01";
     public  static String DIMMER_DEFAULT_VALUE = "00";
 
-    public static int TIMEOUT = 20000;
+    public static int TIMEOUT = 3000;
 
 
     public static void getCurrentSsid(Context context) {
@@ -60,7 +60,7 @@ public class AppConstants {
             if (connectionInfo != null && ! (connectionInfo.getSSID().trim().length() == 0)) {
                 ssid = connectionInfo.getSSID();
             }
-            Toast.makeText(context, "WiFi network connected to: " + ssid, Toast.LENGTH_LONG).show();
+           // Toast.makeText(context, "WiFi network connected to: " + ssid, Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(context, "No WiFi network available", Toast.LENGTH_LONG).show();
 

@@ -261,20 +261,7 @@ public class EditSchedulerDialog extends BaseDialog {
 
                     schedulerModel.setSchedulerName(edtSchedulerName.getText().toString().trim());
                     schedulerModel.setDateTime(edtDate.getText().toString().trim() + " " + edtTime.getText().toString().trim());
-
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(mContext);
-                        dbHelper.openDataBase();
-                        dbHelper.updateScheduler(schedulerModel);
-                        dbHelper.close();
-
-                        _onSingleClick.onSingleClick(0);
-                        setAlarm(String.valueOf(schedulerModel.getId()), schedulerModel.getDateTime());
-                        Toast.makeText(mContext, "Scheduler Updated.", Toast.LENGTH_SHORT).show();
-                        dismiss();
-                    } catch (Exception e) {
-
-                    }
+                    setAlarm(String.valueOf(schedulerModel.getId()), schedulerModel.getDateTime());
                 }
 
             }
@@ -309,15 +296,27 @@ public class EditSchedulerDialog extends BaseDialog {
             calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
             calendar.set(Calendar.SECOND, 0);
 
+            //int RQS_1 = Integer.parseInt(schedulerModel.getAlarmId());
             Random random = new Random();
             int RQS_1 = random.nextInt(9999 - 1000) + 1000;
 
+            DatabaseHelper dbHelper = new DatabaseHelper(mContext);
+            dbHelper.openDataBase();
+            schedulerModel.setAlarmId(String.valueOf(RQS_1));
+            dbHelper.updateScheduler(schedulerModel);
+            dbHelper.close();
+
             Intent intent = new Intent(mContext, AlarmReceiver.class);
             intent.putExtra("scheduler_id", schedulerId);
-//            intent.putExtra("scheduler_name", String.valueOf(schedulerModel.getSchedulerName()));
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent, 0);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+
             alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+
+            _onSingleClick.onSingleClick(0);
+
+            Toast.makeText(mContext, "Scheduler Updated.", Toast.LENGTH_SHORT).show();
+            dismiss();
 
         }catch (Exception e){
             Log.e("## EXC",e.toString());

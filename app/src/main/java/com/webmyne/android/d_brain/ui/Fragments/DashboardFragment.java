@@ -41,10 +41,12 @@ import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
 import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.ExternalCirclePainter;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.UserSettings;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
@@ -90,6 +92,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private Timer timer1;
     private Handler handler1;
     private Context mContext;
+    int timeOutErrorCount = 0;
 
     public void startTherad(){
         handler1 = new Handler();
@@ -257,9 +260,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         ((HomeDrawerActivity) getActivity()).initPowerButton();
         // call();
-
-
-
     }
 
     @Override
@@ -348,6 +348,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 startActivity(intent);
                 break;
             case R.id.parentSwitches:
+                stopTherad();
                 intent = new Intent(getActivity(), SwitchesListActivity.class);
                 startActivity(intent);
                 break;
@@ -1121,8 +1122,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
     public class GetMachineStatus extends AsyncTask<String, Void, Void> {
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
-        boolean isError = false;
-        int totalMachineCount = 0;
+        int totalMachineCount = machineIPs.length;
 
         @Override
         protected void onPreExecute() {
@@ -1131,16 +1131,18 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         @Override
         protected Void doInBackground(String... machineIP) {
-
             for (int i = 0; i < machineIP.length; i++) {
                 String machineBaseURL = "";
                 machineIp = machineIP[i];
+                int position = i; // save to continue calling debt of the same machine until errorCount > 10
+                Log.e("loop ", i + " "+ machineIp);
 
                 if (machineIp.startsWith("http://")) {
                     machineBaseURL = machineIp;
                 } else {
                     machineBaseURL = "http://" + machineIp;
                 }
+
                 DatabaseHelper dbHelper = new DatabaseHelper(activity);
                 try {
                     dbHelper.openDataBase();
@@ -1151,7 +1153,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     dbHelper.close();
 
                     if(isMachineActive.equals("true")) {
-
                         URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_MACHINE_STATUS);
                         Log.e("# urlValue", urlValue.toString());
 
@@ -1160,17 +1161,39 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
                         httpUrlConnection.setRequestMethod("GET");
                         InputStream inputStream = httpUrlConnection.getInputStream();
-                        totalMachineCount++;
+                        //totalMachineCount++;
+                    } else {
+                        Log.e("TAG_MACHINE", "Already Inactive "+ machineIp );
+                        //timeOutErrorCount = 0;
+                        totalMachineCount--;
                     }
                 } catch (Exception e) {
                     Log.e("# EXP123", e.toString());
-                    try {
-                        DatabaseHelper dbHelper1 = new DatabaseHelper(activity);
-                        dbHelper1.openDataBase();
-                        dbHelper1.enableDisableMachine(machineId, false);
-                        dbHelper1.close();
-                    } catch (Exception ex) {
-                        Log.e("TAG EXP", ex.toString());
+                    timeOutErrorCount++;
+                    Log.e("# timeOutErrorCount", timeOutErrorCount+"");
+
+                    if(timeOutErrorCount >= 10) {
+                        timeOutErrorCount = 0;
+                        totalMachineCount--;
+                        Log.e("TAG IF", "time out");
+                        try {
+                            DatabaseHelper dbHelper1 = new DatabaseHelper(activity);
+                            dbHelper1.openDataBase();
+                            dbHelper1.enableDisableMachine(machineId, false);
+                            dbHelper1.close();
+
+                            /*activity.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Toast.makeText(activity, "One of your machines has been deactivated", Toast.LENGTH_LONG);
+                                }
+                            });*/
+                        } catch (Exception ex) {
+                            Log.e("TAG EXP", ex.toString());
+                        }
+                    } else {
+                        Log.e("TAG ELSE", "time out");
+                        i = position;
+                        continue;
                     }
                 }
             }
@@ -1179,6 +1202,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            Log.e("TAG onPost", "Inside onPost");
             if(totalMachineCount == 0) {
                 //Toast.makeText(getActivity(), getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
                 txtPowerOffMessageLink.setVisibility(View.VISIBLE);

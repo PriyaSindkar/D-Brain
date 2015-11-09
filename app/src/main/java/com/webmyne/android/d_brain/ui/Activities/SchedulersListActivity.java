@@ -28,6 +28,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onMachineStateChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
@@ -66,7 +67,6 @@ public class SchedulersListActivity extends AppCompatActivity {
         txtTitle.setText("Schedulers");
 
         txtAddMachine.setVisibility(View.GONE);
-
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 
@@ -109,7 +109,7 @@ public class SchedulersListActivity extends AppCompatActivity {
         mRecyclerView.getItemAnimator().setChangeDuration(500);
 
         callDeleteClick();
-
+        callOnDefaultToggle();
 
         adapter.setRenameClickListener(new onRenameClickListener() {
 
@@ -203,11 +203,38 @@ public class SchedulersListActivity extends AppCompatActivity {
                     public void onSaveClick(boolean isSave) {
                         if (isSave) {
                             deleteScheduler(pos);
-                        } else {
                         }
                     }
                 });
+            }
+        });
+    }
 
+    private void callOnDefaultToggle() {
+        adapter.setOnDefaultValueChanged(new onMachineStateChangeListener() {
+            @Override
+            public void onMachineEnabledDisabled(int pos, boolean isEnabled) {
+                schedulersCursor.moveToPosition(pos);
+                String schedulerId = schedulersCursor.getString(schedulersCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_ID));
+
+                DatabaseHelper dbHelper = new DatabaseHelper(SchedulersListActivity.this);
+                try {
+                    dbHelper.openDataBase();
+                    dbHelper.updateSchedulerDefaultOnOffValue(isEnabled, schedulerId);
+                    schedulersCursor = dbHelper.getAllSchedulers();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+              /*  adapter = new SchedulersListCursorAdapter(SchedulersListActivity.this, schedulersCursor);
+                adapter.setHasStableIds(true);
+                mRecyclerView.setAdapter(adapter);*/
+                adapter.changeCursor(schedulersCursor);
+                adapter.notifyDataSetChanged();
+                dbHelper.close();
+
+                /*callDeleteClick();
+                callOnDefaultToggle();*/
             }
         });
     }
@@ -240,6 +267,7 @@ public class SchedulersListActivity extends AppCompatActivity {
             dbHelper.close();
 
             callDeleteClick();
+            callOnDefaultToggle();
 
             Toast.makeText(SchedulersListActivity.this, "Scheduler Deleted.", Toast.LENGTH_SHORT).show();
 

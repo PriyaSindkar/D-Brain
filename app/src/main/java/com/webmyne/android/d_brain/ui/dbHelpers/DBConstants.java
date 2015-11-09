@@ -98,6 +98,8 @@ public class DBConstants {
     public static final String KEY_SCH_MID = "MACHINE_ID";
     public static final String KEY_SCH_DEFAULT = "DEF_VALUE";
     public static final String KEY_SCH_MNAME = "MACHINE_NAME";
+    public static final String KEY_SCH_DEF_ON_OFF = "DEF_ON_OFF_STATE";
+    public static final String KEY_SCH_ALARM_ID = "ALARM_ID";
 
 
 

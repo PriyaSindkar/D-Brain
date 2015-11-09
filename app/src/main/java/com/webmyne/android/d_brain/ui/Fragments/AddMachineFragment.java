@@ -61,6 +61,7 @@ public class AddMachineFragment extends Fragment {
     private ProgressDialog progress_dialog;
     private String machineId, machineIp;
     private boolean isEnabled;
+    int timeOutErrorCount = 3;
 
     public static AddMachineFragment newInstance() {
         AddMachineFragment fragment = new AddMachineFragment();
@@ -308,6 +309,112 @@ public class AddMachineFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
+            progress_dialog.setMessage("Connecting to machine.. " + timeOutErrorCount);
+            progress_dialog.show();
+            mRecyclerView.setFocusable(false);
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                URL urlValue = new URL(params[0] + AppConstants.URL_FETCH_MACHINE_STATUS);
+                Log.e("# urlValue", urlValue.toString());
+
+                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+
+                httpUrlConnection.setRequestMethod("GET");
+                InputStream inputStream = httpUrlConnection.getInputStream();
+                //  Log.e("# inputStream", inputStream.toString());
+                MainXmlPullParser pullParser = new MainXmlPullParser();
+                ArrayList<XMLValues> powerStatus = pullParser.processXML(inputStream);
+                isError = false;
+
+            } catch (Exception e) {
+                Log.e("# EXP", e.toString());
+                isError = true;
+                timeOutErrorCount--;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+            if( !isError) {
+                progress_dialog.dismiss();
+                mRecyclerView.setFocusable(true);
+
+                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                // enable/disable machine throughout db
+                try {
+                    dbHelper.openDataBase();
+                    dbHelper.enableDisableMachine(machineId, isEnabled);
+
+                    machineCursor = dbHelper.getAllMachines();
+                    adapter = new MachineListCursorAdapter(getActivity(), machineCursor);
+                    adapter.setHasStableIds(true);
+                    mRecyclerView.setAdapter(adapter);
+
+                    callRenameClick();
+                    callOnDeleteClick();
+                    callOnMachineEnabledDisabled();
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(getActivity(), "Machine is Activated.", Toast.LENGTH_SHORT).show();
+            } else {
+                if(timeOutErrorCount > 0) {
+                    progress_dialog.setMessage("Connecting to machine.. " + timeOutErrorCount);
+                    new GetMachineStatus().execute(machineIp);
+                } else {
+                    progress_dialog.dismiss();
+                    timeOutErrorCount = 3;
+                    // show alert dialog for ok and retry
+                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    // enable/disable machine throughout db
+                    try {
+                        dbHelper.openDataBase();
+                        machineCursor = dbHelper.getAllMachines();
+                        adapter = new MachineListCursorAdapter(getActivity(), machineCursor);
+                        adapter.setHasStableIds(true);
+                        mRecyclerView.setAdapter(adapter);
+
+                        callRenameClick();
+                        callOnDeleteClick();
+                        callOnMachineEnabledDisabled();
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    timeOutErrorCount = 3;
+                    MachineNotActiveDialog machineNotActiveDialog = new MachineNotActiveDialog(getActivity(), "Machine cannot be activated.");
+                    machineNotActiveDialog.show();
+
+                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            if (!isSave) {
+                                //call debt
+                                timeOutErrorCount = 3;
+                                new GetMachineStatus().execute(machineIp);
+                            } else {
+                                timeOutErrorCount = 3;
+                                progress_dialog.dismiss();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    /*public class GetMachineStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+
+        @Override
+        protected void onPreExecute() {
            progress_dialog.show();
         }
 
@@ -400,6 +507,6 @@ public class AddMachineFragment extends Fragment {
 
 
         }
-    }
+    }*/
 
 }

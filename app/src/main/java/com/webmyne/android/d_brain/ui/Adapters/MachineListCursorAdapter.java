@@ -203,6 +203,7 @@ public class MachineListCursorAdapter extends CursorRecyclerViewAdapter<MachineL
             }
         });
 
+        // to disable sliding feature of the switchs
         listHolder.imgSwitch.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {

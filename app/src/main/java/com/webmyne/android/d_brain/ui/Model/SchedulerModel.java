@@ -14,8 +14,10 @@ public class SchedulerModel {
     private String mid;
     private String machineName;
     private boolean isScene;
+    private String defaultOnOffState;
     private String defaultValue;
     private String dateTime;
+    private String alarmId;
 
     public SchedulerModel() {
     }
@@ -113,6 +115,14 @@ public class SchedulerModel {
         this.isScene = isScene;
     }
 
+    public String getDefaultOnOffState() {
+        return defaultOnOffState;
+    }
+
+    public void setDefaultOnOffState(String defaultOnOffState) {
+        this.defaultOnOffState = defaultOnOffState;
+    }
+
     public String getDefaultValue() {
         return defaultValue;
     }
@@ -129,6 +139,14 @@ public class SchedulerModel {
         this.dateTime = dateTime;
     }
 
+    public String getAlarmId() {
+        return alarmId;
+    }
+
+    public void setAlarmId(String alarmId) {
+        this.alarmId = alarmId;
+    }
+
     @Override
     public String toString() {
         return "SchedulerModel{" +
@@ -139,10 +157,13 @@ public class SchedulerModel {
                 ", componentName='" + componentName + '\'' +
                 ", componentType='" + componentType + '\'' +
                 ", mip='" + mip + '\'' +
+                ", mid='" + mid + '\'' +
                 ", machineName='" + machineName + '\'' +
                 ", isScene=" + isScene +
+                ", defaultOnOffState='" + defaultOnOffState + '\'' +
                 ", defaultValue='" + defaultValue + '\'' +
                 ", dateTime='" + dateTime + '\'' +
+                ", alarmId='" + alarmId + '\'' +
                 '}';
     }
 }

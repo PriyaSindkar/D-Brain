@@ -60,6 +60,7 @@ public class MachineListActivity extends AppCompatActivity {
     private ProgressDialog progress_dialog;
     private String machineId, machineIp;
     private boolean isEnabled;
+    int timeOutErrorCount = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +75,8 @@ public class MachineListActivity extends AppCompatActivity {
         progress_bar = (ProgressBar) findViewById(R.id.progress_bar);
 
         progress_dialog = new ProgressDialog(MachineListActivity.this);
-        progress_dialog.setMessage("Please wait...");
-        progress_dialog.setCancelable(false);
 
+        progress_dialog.setCancelable(false);
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 
@@ -88,6 +88,7 @@ public class MachineListActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
 
         //insert switches in adapter ofr machine-1
+
         try {
             dbHelper.openDataBase();
             machineCursor =  dbHelper.getAllMachines();
@@ -303,7 +304,6 @@ public class MachineListActivity extends AppCompatActivity {
         });
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -322,6 +322,7 @@ public class MachineListActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
+            progress_dialog.setMessage("Connecting to machine.. " + timeOutErrorCount);
             progress_dialog.show();
             mRecyclerView.setFocusable(false);
         }
@@ -340,10 +341,12 @@ public class MachineListActivity extends AppCompatActivity {
                 //  Log.e("# inputStream", inputStream.toString());
                 MainXmlPullParser pullParser = new MainXmlPullParser();
                 ArrayList<XMLValues> powerStatus = pullParser.processXML(inputStream);
+                isError = false;
 
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
                 isError = true;
+                timeOutErrorCount--;
             }
             return null;
         }
@@ -351,42 +354,10 @@ public class MachineListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
 
-            progress_dialog.dismiss();
-            mRecyclerView.setFocusable(true);
-            try {
-                if (isError) {
-                    // show alert dialog for ok and retry
-                    DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
-                    // enable/disable machine throughout db
-                    try {
-                        dbHelper.openDataBase();
-                        machineCursor = dbHelper.getAllMachines();
-                        adapter = new MachineListCursorAdapter(MachineListActivity.this, machineCursor);
-                        adapter.setHasStableIds(true);
-                        mRecyclerView.setAdapter(adapter);
+                if( !isError) {
+                    progress_dialog.dismiss();
+                    mRecyclerView.setFocusable(true);
 
-                        callOnRenameClick();
-                        callOnDeleteClick();
-                        callOnMachineEnabledDisabled();
-
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-
-                    MachineNotActiveDialog machineNotActiveDialog = new MachineNotActiveDialog(MachineListActivity.this, "Machine cannot be activated.");
-                    machineNotActiveDialog.show();
-
-                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
-                        @Override
-                        public void onSaveClick(boolean isSave) {
-                            if( !isSave) {
-                                //call debt
-                                new GetMachineStatus().execute(machineIp);
-                            }
-                        }
-                    });
-
-                } else {
                     DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
                     // enable/disable machine throughout db
                     try {
@@ -406,14 +377,50 @@ public class MachineListActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     Toast.makeText(MachineListActivity.this, "Machine is Activated.", Toast.LENGTH_SHORT).show();
+                } else {
+                    if(timeOutErrorCount > 0) {
+                        progress_dialog.setMessage("Connecting to machine.. " + timeOutErrorCount);
+                        new GetMachineStatus().execute(machineIp);
+                    } else {
+                        progress_dialog.dismiss();
+                        timeOutErrorCount = 3;
+                        // show alert dialog for ok and retry
+                        DatabaseHelper dbHelper = new DatabaseHelper(MachineListActivity.this);
+                        // enable/disable machine throughout db
+                        try {
+                            dbHelper.openDataBase();
+                            machineCursor = dbHelper.getAllMachines();
+                            adapter = new MachineListCursorAdapter(MachineListActivity.this, machineCursor);
+                            adapter.setHasStableIds(true);
+                            mRecyclerView.setAdapter(adapter);
+
+                            callOnRenameClick();
+                            callOnDeleteClick();
+                            callOnMachineEnabledDisabled();
+
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                        timeOutErrorCount = 3;
+                        MachineNotActiveDialog machineNotActiveDialog = new MachineNotActiveDialog(MachineListActivity.this, "Machine cannot be activated.");
+                        machineNotActiveDialog.show();
+
+                        machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                            @Override
+                            public void onSaveClick(boolean isSave) {
+                                if (!isSave) {
+                                    //call debt
+                                    timeOutErrorCount = 3;
+                                    new GetMachineStatus().execute(machineIp);
+                                } else {
+                                    timeOutErrorCount = 3;
+                                    progress_dialog.dismiss();
+                                }
+                            }
+                        });
+                    }
                 }
-
-            } catch (Exception e) {
-
             }
-
-
-        }
     }
 
 

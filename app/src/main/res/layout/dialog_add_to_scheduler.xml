@@ -157,8 +157,8 @@
            <TextView
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:text="On/Off Status"
-               android:textColor="@color/white"
+               android:text="Default On/Off Status"
+               android:textColor="@color/yellow"
                android:padding="@dimen/STD_MARGIN"/>
 
         <com.kyleduo.switchbutton.SwitchButton

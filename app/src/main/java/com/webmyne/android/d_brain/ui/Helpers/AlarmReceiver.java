@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Helpers;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -45,12 +46,32 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context ctx, Intent arg1) {
         _ctx = ctx;
-
         schedulerId = arg1.getStringExtra("scheduler_id");
-        Log.e("onReceive", "onReceive" + schedulerId);
+        Log.e("onReceive", "onReceive " + schedulerId);
        // notificationSchedulerName = arg1.getStringExtra("scheduler_name");
 
-        fireScheduler();
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
+            dbHelper.openDataBase();
+            schedulerModel = dbHelper.getSchedulerById(schedulerId);
+            // schedulerCursor = dbHelper.getAllSchedulers();
+            dbHelper.close();
+        } catch (Exception e) {}
+
+
+        if(schedulerModel != null) {
+            // cancel alarm if scheduler is disabled
+            Log.e("default",schedulerModel.toString() );
+            if (schedulerModel.getDefaultOnOffState().equals(AppConstants.OFF_VALUE)) {
+                PendingIntent alarmIntent;
+                AlarmManager alarmManager = (AlarmManager) _ctx.getSystemService(Context.ALARM_SERVICE);
+                int alarmId = Integer.parseInt(schedulerModel.getAlarmId());
+                alarmIntent = PendingIntent.getBroadcast(_ctx, alarmId, new Intent(_ctx, AlarmReceiver.class), PendingIntent.FLAG_CANCEL_CURRENT);
+                alarmManager.cancel(alarmIntent);
+            } else {
+                fireScheduler();
+            }
+        }
     }
 
 
@@ -62,7 +83,6 @@ public class AlarmReceiver extends BroadcastReceiver {
        // newIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent contentIntent = PendingIntent.getActivity(_ctx, 0, newIntent, 0);
-
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         alamNotificationBuilder = new NotificationCompat.Builder(

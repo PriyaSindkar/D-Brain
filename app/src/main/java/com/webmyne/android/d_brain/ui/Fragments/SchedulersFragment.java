@@ -25,6 +25,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onMachineStateChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
@@ -128,7 +129,6 @@ public class SchedulersFragment extends Fragment {
         adapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
             public void onDeleteOptionClick(final int pos) {
-
                 SaveAlertDialog saveAlertDialog = new SaveAlertDialog(getActivity(), "Are you sure you want to delete the scheduler?");
                 saveAlertDialog.show();
 
@@ -137,14 +137,11 @@ public class SchedulersFragment extends Fragment {
                     public void onSaveClick(boolean isSave) {
                         if (isSave) {
                             deleteScheduler(pos);
-                        } else {
                         }
                     }
                 });
-
             }
         });
-
 
         adapter.setRenameClickListener(new onRenameClickListener() {
 
@@ -180,7 +177,7 @@ public class SchedulersFragment extends Fragment {
                             dbHelper.openDataBase();
                             schedulersCursor = dbHelper.getAllSchedulers();
 
-                            if(schedulersCursor.getCount() == 0) {
+                            if (schedulersCursor.getCount() == 0) {
                                 emptyView.setVisibility(View.VISIBLE);
                                 mRecyclerView.setVisibility(View.GONE);
                                 imgEmpty.setVisibility(View.VISIBLE);
@@ -211,6 +208,33 @@ public class SchedulersFragment extends Fragment {
             @Override
             public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
 
+            }
+        });
+
+        adapter.setOnDefaultValueChanged(new onMachineStateChangeListener() {
+            @Override
+            public void onMachineEnabledDisabled(int pos, boolean isEnabled) {
+                schedulersCursor.moveToPosition(pos);
+                String schedulerId = schedulersCursor.getString(schedulersCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_ID));
+
+                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                try {
+                    dbHelper.openDataBase();
+                    dbHelper.updateSchedulerDefaultOnOffValue(isEnabled, schedulerId);
+                    schedulersCursor = dbHelper.getAllSchedulers();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+              /*  adapter = new SchedulersListCursorAdapter(SchedulersListActivity.this, schedulersCursor);
+                adapter.setHasStableIds(true);
+                mRecyclerView.setAdapter(adapter);*/
+                adapter.changeCursor(schedulersCursor);
+                adapter.notifyDataSetChanged();
+                dbHelper.close();
+
+                /*callDeleteClick();
+                callOnDefaultToggle();*/
             }
         });
     }

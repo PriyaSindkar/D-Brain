@@ -235,24 +235,13 @@ public class AddToSchedulerDialog extends BaseDialog {
                         }
                     }
 
+                    schedulerModel.setDefaultOnOffState(AppConstants.ON_VALUE);
                     schedulerModel.setSchedulerName(edtSchedulerName.getText().toString().trim());
                     schedulerModel.setDateTime(edtDate.getText().toString().trim() + " " + edtTime.getText().toString().trim());
 
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(mContext);
-                        dbHelper.openDataBase();
-                       long _id = dbHelper.insertIntoScheduler(schedulerModel);
+                    setAlarm(schedulerModel.getDateTime());
 
-                        dbHelper.close();
 
-                        setAlarm(String.valueOf(_id), schedulerModel.getDateTime());
-
-                        Toast.makeText(mContext, "Scheduler Saved.", Toast.LENGTH_SHORT).show();
-                        dismiss();
-
-                    } catch (Exception e) {
-
-                    }
                 }
 
             }
@@ -261,10 +250,9 @@ public class AddToSchedulerDialog extends BaseDialog {
         return true;
     }
 
-    private void setAlarm(String schedulerId, String dateTime){
+    private void setAlarm(String dateTime){
 
         try {
-
             Date orgDate = new Date();
 
             //DateTime dt = new DateTime(orgDate);
@@ -285,14 +273,32 @@ public class AddToSchedulerDialog extends BaseDialog {
 
             Random random = new Random();
             int RQS_1 = random.nextInt(9999 - 1000) + 1000;
+            schedulerModel.setAlarmId(String.valueOf(RQS_1));
+            long _id = 0;
 
-            Intent intent = new Intent(mContext, AlarmReceiver.class);
-            intent.putExtra("scheduler_id", schedulerId);
-//            intent.putExtra("scheduler_id", String.valueOf(_id));
-//            intent.putExtra("scheduler_name", String.valueOf(schedulerModel.getSchedulerName()));
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent, 0);
-            AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            DatabaseHelper dbHelper = new DatabaseHelper(mContext);
+            dbHelper.openDataBase();
+            _id = dbHelper.insertIntoScheduler(schedulerModel);
+            dbHelper.close();
+
+            Log.e("Scheduler Id", String.valueOf(_id));
+            if(_id == -1) {
+                Toast.makeText(mContext, "Scheduler cannot be saved.", Toast.LENGTH_SHORT).show();
+            } else {
+                Intent intent = new Intent(mContext, AlarmReceiver.class);
+                Log.e("Scheduler Id", String.valueOf(_id));
+                intent.putExtra("scheduler_id", String.valueOf(_id));
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, RQS_1, intent,PendingIntent.FLAG_CANCEL_CURRENT);
+                AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+
+                Toast.makeText(mContext, "Scheduler Saved.", Toast.LENGTH_SHORT).show();
+                dismiss();
+            }
+
+
+
+
 
         }catch (Exception e){
             Log.e("## EXC", e.toString());

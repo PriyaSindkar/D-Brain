@@ -78,7 +78,7 @@ public class SwitchesListActivity extends AppCompatActivity {
     private Timer timer1;
     private Handler handler,handler1;
     public static boolean isDelay = false;
-    private boolean flag = true;
+    private int timeOutErrorCount = 0;
 
     public void startTherad(){
         Log.e("$#$ THREAD", "START");
@@ -330,10 +330,10 @@ public class SwitchesListActivity extends AppCompatActivity {
                     } catch (Exception ex1) {
                         Log.e("#EXP switch", ex1.toString());
                         DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
-                        try {
+                        /*try {
                             dbHelper.openDataBase();
                             dbHelper.enableDisableMachine(machineId, false);
-                            dbHelper.close();
+                            dbHelper.close();*/
 
                             if (cursor != null) {
                                 cursor.moveToFirst();
@@ -348,9 +348,9 @@ public class SwitchesListActivity extends AppCompatActivity {
                                     } while (cursor.moveToNext());
                                 }
                             }
-                        } catch (SQLException ex) {
+                       /* } catch (SQLException ex) {
                             ex.printStackTrace();
-                        }
+                        }*/
                     }
                 }
             return null;
@@ -582,6 +582,7 @@ public class SwitchesListActivity extends AppCompatActivity {
 
             if(! isAlreadyScheduled) {
                 SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId,componentName, componentType, componentMachineID,componentMachineIP, componentMachineName, false, "00");
+
                 AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(SwitchesListActivity.this, schedulerModel);
                 addToSchedulerDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
                 addToSchedulerDialog.show();
@@ -608,7 +609,6 @@ public class SwitchesListActivity extends AppCompatActivity {
                     });
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -617,7 +617,7 @@ public class SwitchesListActivity extends AppCompatActivity {
     public class GetMachineStatus extends AsyncTask<String, Void, Void> {
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
         Cursor machineCursor;
-        int totalMachineCount = 0;
+        int totalMachineCount = machineIPs.length;
 
         @Override
         protected void onPreExecute() {
@@ -628,9 +628,9 @@ public class SwitchesListActivity extends AppCompatActivity {
         protected Void doInBackground(String... MachineIp) {
 
             for (int i = 0; i < MachineIp.length; i++) {
-
                 String machineBaseURL = "";
                 machineIp = MachineIp[i];
+                int position = i; // save to continue calling debt of the same machine until errorCount > 10
 
                 if (machineIp.startsWith("http://")) {
                     machineBaseURL = machineIp;
@@ -656,17 +656,30 @@ public class SwitchesListActivity extends AppCompatActivity {
 
                         httpUrlConnection.setRequestMethod("GET");
                         InputStream inputStream = httpUrlConnection.getInputStream();
-                        totalMachineCount++;
+                        //totalMachineCount++;
+                    } else {
+                        Log.e("TAG_MACHINE", "Already Inactive " + machineIp);
+                        //timeOutErrorCount = 0;
+                        totalMachineCount--;
                     }
-
                 } catch (Exception e) {
                     Log.e("~~~~~~~~TIME OUT~~~", e.toString());
-                    try {
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-                    } catch (SQLException ex) {
-                        Log.e("TAG EXP TIME OUT", ex.toString());
+                    timeOutErrorCount++;
+                    Log.e("# timeOutErrorCount", timeOutErrorCount+"");
+
+                    if (timeOutErrorCount > 10) {
+                        timeOutErrorCount = 0;
+                        totalMachineCount--;
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                        } catch (SQLException ex) {
+                            Log.e("TAG EXP TIME OUT", ex.toString());
+                        }
+                    } else {
+                        i = position;
+                        continue;
                     }
                 }
             }
@@ -680,6 +693,7 @@ public class SwitchesListActivity extends AppCompatActivity {
             int count = settings.getInt("ACTIVE_MACHINE", machineIPs.length);
 
             Log.e("### Total machine count", "" + totalMachineCount);
+            Log.e("### PREFS count", "" + count);
 
             if(totalMachineCount == 0) {
                 Toast.makeText(SwitchesListActivity.this, getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
