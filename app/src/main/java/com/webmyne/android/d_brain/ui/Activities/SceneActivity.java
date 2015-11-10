@@ -623,7 +623,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                                 sceneSwitchItem.setFocusable(false);
                             }
                         }
-
                         initSwitches.add(sceneSwitchItem);
                     } while (switchListCursor.moveToNext());
                 } else {

@@ -153,7 +153,6 @@ public class splash extends ActionBarActivity {
 
     private void initScreen() {
         setContentView(R.layout.activity_splash);
-        Log.e("splash", "splash");
         init();
 
         startProgressBar();

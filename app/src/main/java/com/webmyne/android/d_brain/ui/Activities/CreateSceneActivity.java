@@ -349,6 +349,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                             initSwitches.get(position).setFocusable(false);
                             isSceneSaved = false;
                         } else {
+                            // check if the component is disabled because it was already added or because it is inactive
                             if(initSwitches.get(position).getIsActive().equals("true")) {
                                 Toast.makeText(CreateSceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
                             }

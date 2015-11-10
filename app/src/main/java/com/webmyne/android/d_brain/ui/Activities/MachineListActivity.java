@@ -73,9 +73,7 @@ public class MachineListActivity extends AppCompatActivity {
         txtAddMachine = (TextView) findViewById(R.id.txtAddMachine);
 
         progress_bar = (ProgressBar) findViewById(R.id.progress_bar);
-
         progress_dialog = new ProgressDialog(MachineListActivity.this);
-
         progress_dialog.setCancelable(false);
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(this);

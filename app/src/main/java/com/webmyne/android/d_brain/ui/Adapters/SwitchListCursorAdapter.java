@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Adapters;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -57,6 +58,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     public onRenameClickListener _renameClick;
     public onCheckedChangeListener _switchClick;
 
+    private ProgressDialog progress_dialog;
+
     public SwitchListCursorAdapter(Context context){
         super(context );
         mCtx = context;
@@ -67,6 +70,9 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         super(context,cursor);
         mCtx = context;
         this.switchStatus = _switchStatus;
+        progress_dialog = new ProgressDialog(mCtx);
+        progress_dialog.setCancelable(false);
+
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -128,6 +134,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
     public  void setSwitchStatus(ArrayList<XMLValues> _switchStatus) {
         this.switchStatus = _switchStatus;
+
     }
 
     @Override
@@ -177,12 +184,10 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
                     listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
-                    if (switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
+                    if (this.switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
                         listHolder.imgSwitch.setChecked(false);
-                        //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                     } else {
                         listHolder.imgSwitch.setChecked(true);
-                        // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                     }
                     if (isActive.equals("false")) {
                         listHolder.linearParent.setAlpha(0.5f);
@@ -211,12 +216,10 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
                                 if (listHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                                    SwitchesListActivity.isDelay = true;
                                     new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                                 } else {
                                     //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                                    SwitchesListActivity.isDelay = true;
                                     new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                                 }
 
@@ -265,7 +268,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     groupViewHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
                     groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
-                    if (switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
+                    if (this.switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
                         groupViewHolder.imgSwitch.setChecked(false);
                         //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                     } else {
@@ -296,12 +299,12 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
                                 if (groupViewHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                                    SwitchesListActivity.isDelay = true;
+
                                     new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                                 } else {
                                     //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                                    SwitchesListActivity.isDelay = true;
+
                                     new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                                 }
                             }
@@ -362,6 +365,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            progress_dialog.setMessage("Please Wait..");
+            progress_dialog.show();
             _switchClick.onCheckedPreChangeClick(0);
         }
 
@@ -386,8 +391,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-             _switchClick.onCheckedChangeClick(0);
-
+            _switchClick.onCheckedChangeClick(0);
+            progress_dialog.hide();
         }
     }
 }

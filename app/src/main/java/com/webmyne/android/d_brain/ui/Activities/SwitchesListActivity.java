@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -77,8 +78,8 @@ public class SwitchesListActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private Timer timer1;
     private Handler handler,handler1;
-    public static boolean isDelay = false;
     private int timeOutErrorCount = 0;
+    private boolean isServiceRunning = false;
 
     public void startTherad(){
         Log.e("$#$ THREAD", "START");
@@ -86,28 +87,31 @@ public class SwitchesListActivity extends AppCompatActivity {
         timer1 = new Timer();
 
         timer1.scheduleAtFixedRate(new TimerTask() {
+
+
             @Override
             public void run() {
                 handler1.post(new Runnable() {
                     @Override
                     public void run() {
-                        new GetMachineStatus().execute(machineIPs);
+                        new GetSwitchStatus().execute(machineIPs);
                     }
                 });
             }
-        }, 0, 2000 * 1);
+        }, 0, 3000 * 1);
+
+
     }
 
     public void stopTherad(){
         Log.e("$#$ THREAD", "STOP");
         try {
             timer1.cancel();
+            timer1.purge();
         }catch (Exception e){
 
         }
     }
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,8 +152,8 @@ public class SwitchesListActivity extends AppCompatActivity {
         imgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            stopTherad();
-            finish();
+                stopTherad();
+                finish();
             }
         });
 
@@ -183,6 +187,7 @@ public class SwitchesListActivity extends AppCompatActivity {
         AppConstants.getCurrentSsid(SwitchesListActivity.this);
         initArrayOfSwitches();
         startTherad();
+
     }
 
     @Override
@@ -239,14 +244,22 @@ public class SwitchesListActivity extends AppCompatActivity {
     }
 
     public class GetSwitchStatus extends AsyncTask<String, Void, Void> {
-        boolean isError = false, isMachineActive = false;
+        boolean  isMachineActive = false;
         String machineId="", machineName = "", machineIp;
         Cursor cursor, machineCursor;
+        private ProgressDialog progress_dialog1;
 
         @Override
-        protected void onPreExecute() {
-            setProgressBarIndeterminateVisibility(true);
-        }
+            protected void onPreExecute() {
+
+                isServiceRunning = true;
+
+                progress_dialog1 = new ProgressDialog(SwitchesListActivity.this);
+                progress_dialog1.setCancelable(true);
+                progress_dialog1.setMessage("Please Wait..");
+               //    progress_dialog1.show();
+                setProgressBarIndeterminateVisibility(true);
+            }
 
         @Override
         protected Void doInBackground(String... machineIps) {
@@ -256,101 +269,83 @@ public class SwitchesListActivity extends AppCompatActivity {
 
                     String machineBaseURL = "";
                     machineIp = machineIps[i];
-
                     if(machineIp.startsWith("http://")) {
                         machineBaseURL = machineIp;
                     } else {
                         machineBaseURL = "http://" + machineIp;
                     }
+
                     try {
                         DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
-                        try {
-                            dbHelper.openDataBase();
-                            isMachineActive =  dbHelper.isMachineActive(machineIp);
-                            machineCursor = dbHelper.getMachineByIP(machineIp);
-                            machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
-                            machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
-                            cursor = dbHelper.getAllSwitchComponentsForAMachine(machineIp);
+                        dbHelper.openDataBase();
 
-                            dbHelper.close();
+                        isMachineActive =  dbHelper.isMachineActive(machineIp);
+                        machineCursor = dbHelper.getMachineByIP(machineIp);
+                        machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                        machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
 
-                        } catch (SQLException e) {
-                            e.printStackTrace();
+                        cursor = dbHelper.getAllSwitchComponentsForAMachine(machineIp);
+
+                        dbHelper.close();
+
+
+                    // fetch switch status from machine only if the machine is active else init all the switch status to off
+                    if (isMachineActive) {
+                        Log.e("#### Switch url",""+machineBaseURL+"ACTIVE");
+
+                        URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
+
+                        HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+
+                        httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+
+                        httpUrlConnection.setRequestMethod("GET");
+                        InputStream inputStream = null;
+                        httpUrlConnection.setDoInput(true);
+                        inputStream = httpUrlConnection.getInputStream();
+                        MainXmlPullParser pullParser = new MainXmlPullParser();
+                        switchStatusList = pullParser.processXML(inputStream);
+
+                        int totalSwitchesofMachine = 0;
+                        if (cursor != null) {
+                            totalSwitchesofMachine = cursor.getCount();
                         }
-                        // fetch switch status from machine only if the machine is active else init all the switch status to off
-                        if (isMachineActive) {
-                            Log.e("#### Switch url",""+machineBaseURL+"ACTIVE");
 
-                            URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
-                          //  Log.e("# urlValue", urlValue.toString());
+                        for (int j = 0; j < totalSwitchesofMachine; j++) {
+                            allSwitchesStatusList.add(switchStatusList.get(j));
+                        }
+                    } else {
+                        Log.e("#### Switch url",""+machineBaseURL+"DISABLE");
 
-                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
-                            httpUrlConnection.setRequestMethod("GET");
-                            inputStream = httpUrlConnection.getInputStream();
-                            //  Log.e("# inputStream", inputStream.toString());
-                            MainXmlPullParser pullParser = new MainXmlPullParser();
+                        if (cursor != null) {
+                            cursor.moveToFirst();
+                            if (cursor.getCount() > 0) {
+                                do {
+                                    String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                    XMLValues values = new XMLValues();
+                                    values.tagName = componnetId;
+                                    values.tagValue = AppConstants.OFF_VALUE;
+                                    allSwitchesStatusList.add(values);
 
-                            switchStatusList = pullParser.processXML(inputStream);
-                          //  Log.e("XML PARSERED", switchStatusList.toString());
-
-                            //DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
-                            try {
-                                dbHelper.openDataBase();
-                                int totalSwitchesofMachine = 0;
-                                if (cursor != null) {
-                                    totalSwitchesofMachine = cursor.getCount();
-                                }
-
-                                for (int j = 0; j < totalSwitchesofMachine; j++) {
-                                    allSwitchesStatusList.add(switchStatusList.get(j));
-                                }
-                                dbHelper.close();
-
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            Log.e("#### Switch url",""+machineBaseURL+"DISABLE");
-
-                            if (cursor != null) {
-                                cursor.moveToFirst();
-                                if (cursor.getCount() > 0) {
-                                    do {
-                                        String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-                                        XMLValues values = new XMLValues();
-                                        values.tagName = componnetId;
-                                        values.tagValue = AppConstants.OFF_VALUE;
-                                        allSwitchesStatusList.add(values);
-
-                                    } while (cursor.moveToNext());
-                                }
+                                } while (cursor.moveToNext());
                             }
                         }
+                    }
                     } catch (Exception ex1) {
                         Log.e("#EXP switch", ex1.toString());
-                        DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
-                        /*try {
-                            dbHelper.openDataBase();
-                            dbHelper.enableDisableMachine(machineId, false);
-                            dbHelper.close();*/
+                        if (cursor != null) {
+                            cursor.moveToFirst();
+                            if(cursor.getCount() > 0) {
+                                do {
+                                    String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                    XMLValues values = new XMLValues();
+                                    values.tagName = componnetId;
+                                    values.tagValue = AppConstants.OFF_VALUE;
+                                    allSwitchesStatusList.add(values);
 
-                            if (cursor != null) {
-                                cursor.moveToFirst();
-                                if(cursor.getCount() > 0) {
-                                    do {
-                                        String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-                                        XMLValues values = new XMLValues();
-                                        values.tagName = componnetId;
-                                        values.tagValue = AppConstants.OFF_VALUE;
-                                        allSwitchesStatusList.add(values);
-
-                                    } while (cursor.moveToNext());
-                                }
+                                } while (cursor.moveToNext());
                             }
-                       /* } catch (SQLException ex) {
-                            ex.printStackTrace();
-                        }*/
+                        }
                     }
                 }
             return null;
@@ -358,11 +353,11 @@ public class SwitchesListActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-           // Log.e("TAG_ASYNC", "Inside onPostExecute");
+            progress_dialog1.dismiss();
+            isServiceRunning = false;
+
             try {
                 progressBar.setVisibility(View.GONE);
-
-
                 if(isFirstTime) {
                     //init adapter
                     adapter = new SwitchListCursorAdapter(SwitchesListActivity.this, switchListCursor, allSwitchesStatusList);
@@ -372,15 +367,24 @@ public class SwitchesListActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
                     isFirstTime = false;
                 } else {
-                    //set adapter again
-                    adapter.setSwitchStatus(allSwitchesStatusList);
-                    adapter.notifyDataSetChanged();
+                    if(allSwitchesStatusList.size()>0) {
+                        //set adapter again
+                        adapter.setSwitchStatus(allSwitchesStatusList);
+                        adapter.notifyDataSetChanged();
+                    }else{
+                        Log.e("size zero",""+allSwitchesStatusList.size());
+                    }
                 }
 
                 adapter.setCheckedChangeListener(new onCheckedChangeListener() {
                     @Override
                     public void onCheckedChangeClick(int pos) {
-                      startTherad();
+                          //  if(isServiceRunning){
+                                stopTherad();
+                             //   startTherad();
+                           // }else {
+                                startTherad();
+                          //  }
                     }
 
                     @Override
@@ -469,6 +473,8 @@ public class SwitchesListActivity extends AppCompatActivity {
 
 
             } catch (Exception e) {
+                Log.e("EXc post", e.toString());
+
             }
         }
     }
@@ -618,10 +624,14 @@ public class SwitchesListActivity extends AppCompatActivity {
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
         Cursor machineCursor;
         int totalMachineCount = machineIPs.length;
+        ProgressDialog progress_dialog;
 
         @Override
         protected void onPreExecute() {
-            //progressDilaog.show();
+            progress_dialog = new ProgressDialog(SwitchesListActivity.this);
+            progress_dialog.setCancelable(true);
+            progress_dialog.setMessage("Please Wait..");
+            progress_dialog.show();
         }
 
         @Override
@@ -689,6 +699,8 @@ public class SwitchesListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
 
+            progress_dialog.dismiss();
+
             SharedPreferences settings = getSharedPreferences("MACHINE_STATUS", 0);
             int count = settings.getInt("ACTIVE_MACHINE", machineIPs.length);
 
@@ -729,7 +741,9 @@ public class SwitchesListActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putInt("ACTIVE_MACHINE", totalMachineCount);
                 editor.commit();
+
                 new GetSwitchStatus().execute(machineIPs);
+
             }
         }
     }

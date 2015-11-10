@@ -325,7 +325,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                 Log.e("# urlValue", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(1000 * 30);
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
 
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
@@ -362,14 +362,13 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
 
                     if (machineSerialNo.equals(userEnteredSerialNo)) {
                         if (Utils.validateProductCode(productCode)) {
+                            if(machineIP.startsWith("https://")) {
+                                machineIP = machineIP.replace("https://", "http://");
+                            } else if(!machineIP.startsWith("http://")) {
+                                machineIP = "http://" + machineIP;
+                            } else {
 
-                        if(machineIP.startsWith("https://")) {
-                            machineIP = machineIP.replace("https://", "http://");
-                        } else if(!machineIP.startsWith("http://")) {
-                            machineIP = "http://" + machineIP;
-                        } else {
-
-                        }
+                            }
                             DatabaseHelper dbHelper = new DatabaseHelper(UserGuide.this);
 
                             dbHelper.openDataBase();
@@ -400,7 +399,7 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
                     Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address and Serial No.", Toast.LENGTH_LONG).show();
                 }
             } else {
-                Toast.makeText(UserGuide.this, "Error Occurred While Adding Machine. Please Check IP Address and Serial No.", Toast.LENGTH_LONG).show();
+                Toast.makeText(UserGuide.this, "No Response from machine. Please check if machine is on or not.", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -411,7 +410,6 @@ public class UserGuide extends ActionBarActivity implements View.OnClickListener
      * @return true valid ip address, false invalid ip address
      */
     public boolean validate(final String ip){
-        Log.e("ip", ip);
         matcher = pattern.matcher(ip);
         return matcher.matches();
     }

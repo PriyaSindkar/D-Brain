@@ -50,26 +50,29 @@ public class AlarmReceiver extends BroadcastReceiver {
         Log.e("onReceive", "onReceive " + schedulerId);
        // notificationSchedulerName = arg1.getStringExtra("scheduler_name");
 
-        try {
-            DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
-            dbHelper.openDataBase();
-            schedulerModel = dbHelper.getSchedulerById(schedulerId);
-            // schedulerCursor = dbHelper.getAllSchedulers();
-            dbHelper.close();
-        } catch (Exception e) {}
+        if(schedulerId != null) {
+
+            try {
+                DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
+                dbHelper.openDataBase();
+                schedulerModel = dbHelper.getSchedulerById(schedulerId);
+                // schedulerCursor = dbHelper.getAllSchedulers();
+                dbHelper.close();
+            } catch (Exception e) {
+            }
 
 
-        if(schedulerModel != null) {
-            // cancel alarm if scheduler is disabled
-            Log.e("default",schedulerModel.toString() );
-            if (schedulerModel.getDefaultOnOffState().equals(AppConstants.OFF_VALUE)) {
-                PendingIntent alarmIntent;
-                AlarmManager alarmManager = (AlarmManager) _ctx.getSystemService(Context.ALARM_SERVICE);
-                int alarmId = Integer.parseInt(schedulerModel.getAlarmId());
-                alarmIntent = PendingIntent.getBroadcast(_ctx, alarmId, new Intent(_ctx, AlarmReceiver.class), PendingIntent.FLAG_CANCEL_CURRENT);
-                alarmManager.cancel(alarmIntent);
-            } else {
-                fireScheduler();
+            if (schedulerModel != null) {
+                // cancel alarm if scheduler is disabled
+                if (schedulerModel.getDefaultOnOffState().equals(AppConstants.OFF_VALUE)) {
+                    PendingIntent alarmIntent;
+                    AlarmManager alarmManager = (AlarmManager) _ctx.getSystemService(Context.ALARM_SERVICE);
+                    int alarmId = Integer.parseInt(schedulerModel.getAlarmId());
+                    alarmIntent = PendingIntent.getBroadcast(_ctx, alarmId, new Intent(_ctx, AlarmReceiver.class), PendingIntent.FLAG_CANCEL_CURRENT);
+                    alarmManager.cancel(alarmIntent);
+                } else {
+                    fireScheduler();
+                }
             }
         }
     }
