@@ -307,6 +307,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    public Cursor getMachineByID(String id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_ID + "=?" ,
+                    new String[]{id}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+                // machineIP =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
 
     public String getMachineIPByID(String machineID) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -471,6 +489,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MIP + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
                     new String[]{machineIP, AppConstants.SWITCH_TYPE}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+    //get switches of a machine by machine-id
+    public Cursor getAllSwitchComponentsForAMachineById(String machineId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MID + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{machineId, AppConstants.SWITCH_TYPE}, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getCount() > 0) {

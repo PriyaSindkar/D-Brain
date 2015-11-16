@@ -1,0 +1,51 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/secondaryBgColor">
+
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@id/thisToolbar"
+        android:id="@+id/recycler_view"
+        android:layout_marginLeft="@dimen/STD_MARGIN"
+        android:layout_marginRight="@dimen/STD_MARGIN"
+        android:layout_marginTop="@dimen/STD_MARGIN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/linearEmptyView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_centerInParent="true">
+
+        <ImageView
+            android:id="@+id/imgEmpty"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/STD_MARGIN"
+            android:src="@drawable/ic_action_favorite"/>
+
+        <TextView
+            android:id="@+id/txtEmptyView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="@dimen/L_TEXT_SIZE"
+            android:text="No Switches Added"/>
+
+
+    </LinearLayout>
+
+</RelativeLayout>

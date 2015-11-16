@@ -26,5 +26,6 @@
     <dimen name="DASHBOARD_CARD_HEIGHT">120dp</dimen>
 
     <dimen name="TOUCH_PANEL_ITEM_WIDTH">50dp</dimen>
+    <dimen name="TABSTRIP_HEIGHT">36dp</dimen>
 
 </resources>

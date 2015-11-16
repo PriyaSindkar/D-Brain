@@ -10,7 +10,14 @@ public class Machine {
     public String machineName;
     public String machineProductCode;
 
+    public Machine() {
+    }
 
+    public Machine(int machineId, String machineIp, String machineName) {
+        this.machineId = machineId;
+        this.machineIp = machineIp;
+        this.machineName = machineName;
+    }
     public String getMachineProductCode() {
         return machineProductCode;
     }

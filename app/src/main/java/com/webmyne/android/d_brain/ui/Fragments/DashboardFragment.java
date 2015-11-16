@@ -33,6 +33,7 @@ import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.DimmerListActivity;
 import com.webmyne.android.d_brain.ui.Activities.FavouriteListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MachineListActivity;
+import com.webmyne.android.d_brain.ui.Activities.MainSwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MotorListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SchedulersListActivity;
@@ -349,7 +350,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 break;
             case R.id.parentSwitches:
                 stopTherad();
-                intent = new Intent(getActivity(), SwitchesListActivity.class);
+                intent = new Intent(getActivity(), MainSwitchesListActivity.class);
                 startActivity(intent);
                 break;
 

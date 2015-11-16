@@ -102,6 +102,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
             this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
             this.linearParent = (LinearLayout) view.findViewById(R.id.linearParent);
             this.linearOptionsMenu = (LinearLayout)view.findViewById(R.id.linearOptionsMenu);
+
+            this.txtMachineName.setVisibility(View.GONE);
         }
     }
 
@@ -116,6 +118,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
             this.txtMachineName = (TextView) view.findViewById(R.id.txtMachineName);
             this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
             this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
+
+            this.txtMachineName.setVisibility(View.GONE);
         }
     }
 
@@ -182,7 +186,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     final ListViewHolder listHolder = (ListViewHolder) viewHolder;
 
                     listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
-                    listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
+                   // listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                     if (this.switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
                         listHolder.imgSwitch.setChecked(false);
@@ -266,7 +270,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 case 1:
                     final GridViewHolder groupViewHolder = (GridViewHolder) viewHolder;
                     groupViewHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
-                    groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
+                   // groupViewHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
 
                     if (this.switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
                         groupViewHolder.imgSwitch.setChecked(false);
