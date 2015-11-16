@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -36,6 +37,7 @@ import com.flyco.animation.SlideEnter.SlideRightEnter;
 import com.konifar.fab_transformation.FabTransformation;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.TouchPComponentListAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.TouchPanelGridAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.TouchPanelItemListAdapter;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemClickListener;
@@ -119,10 +121,80 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         linearDimmer  = (LinearLayout)leftPanel.findViewById(R.id.linearDimmer);
         linearMotor  = (LinearLayout)leftPanel.findViewById(R.id.linearMotor);
 
+        linearSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setComponentGrid(0);
+            }
+        });
+
+        linearDimmer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setComponentGrid(1);
+            }
+        });
+
+        linearMotor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setComponentGrid(2);
+            }
+        });
+
     }
 
-    private void setComponentGrid(){
+    private void setComponentGrid(int componentType){
+        // 0 - Switch
+        // 1 - Dimmer
+        // 2 - Motor
 
+        if(componentType == 0) {
+            // for switch
+
+            ArrayList<String> switchNames = new ArrayList<>();
+            switchListCursor.moveToFirst();
+            do {
+                String swName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+                switchNames.add(swName);
+
+            } while (switchListCursor.moveToNext());
+
+            TouchPanelGridAdapter gridAdapter = new TouchPanelGridAdapter(TouchPanelActivity.this, switchNames);
+            gridComponent.setNumColumns(3);
+            gridComponent.setAdapter(gridAdapter);
+
+
+            int orgColor = Color.parseColor("#18516e");
+            int SelectedColor = Color.parseColor("#009987");
+
+            linearSwitch.setBackgroundColor(SelectedColor);
+            linearDimmer.setBackgroundColor(orgColor);
+            linearMotor.setBackgroundColor(orgColor);
+
+        }else  if(componentType == 1){
+            // for dimmer
+            ArrayList<String> dimmerNames = new ArrayList<>();
+            dimmerListCursor.moveToFirst();
+            do {
+                String swName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+                dimmerNames.add(swName);
+
+            } while (dimmerListCursor.moveToNext());
+
+            TouchPanelGridAdapter gridAdapter = new TouchPanelGridAdapter(TouchPanelActivity.this, dimmerNames);
+            gridComponent.setNumColumns(3);
+            gridComponent.setAdapter(gridAdapter);
+
+            int orgColor = Color.parseColor("#18516e");
+            int SelectedColor = Color.parseColor("#009987");
+            linearDimmer.setBackgroundColor(SelectedColor);
+            linearSwitch.setBackgroundColor(orgColor);
+            linearMotor.setBackgroundColor(orgColor);
+
+        }else  if(componentType == 2){
+                // for motors
+        }
 
 
     }
@@ -145,7 +217,15 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                 super.onPostExecute(aVoid);
                 progressDialog.dismiss();
 
-                setComponentGrid();
+                // Setting the default tab like switch or dimmer or motor
+                String dpc = MACHINES.get(DEFAULT_MACHINE).getMachineProductCode();
+
+                if(Functions.isSwitchAvialabel(dpc))
+                setComponentGrid(0);
+                else if(Functions.isSwitchAvialabel(dpc))
+                    setComponentGrid(1);
+                else if(Functions.isMotorAvialabel(dpc))
+                    setComponentGrid(2);
             }
 
             @Override
@@ -173,7 +253,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
 
                 if(Functions.isDimmerAvialabel(MACHINES.get(DEFAULT_MACHINE).getMachineProductCode())) {
-                    initArrayOfDimmers();
+                    initArrayOfDimmers(DEFAULT_MACHINE);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -325,13 +405,14 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void initArrayOfDimmers() {
+    private void initArrayOfDimmers(int defaultMachine) {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
 
         //insert switches in adapter ofr machine-1
         try {
             dbHelper.openDataBase();
-            dimmerListCursor =  dbHelper.getAllDimmerComponents();
+            String defaultMachineIp = MACHINES.get(defaultMachine).getMachineIp();
+            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachine(defaultMachineIp);
             dbHelper.close();
 
         } catch (SQLException e) {
@@ -352,8 +433,6 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             e.printStackTrace();
         }
     }
-
-
 
     private void showMachinePopup(){
         final PopupMenu popup = new PopupMenu(TouchPanelActivity.this, imgChangeMachine,R.style.PopupMenu);
@@ -394,5 +473,6 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         popup.show();//showing popup menu
     }
 
-//end of main class
+
+    //end of main class
 }

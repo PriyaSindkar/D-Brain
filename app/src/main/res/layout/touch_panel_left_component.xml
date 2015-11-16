@@ -22,6 +22,7 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
+            android:background="@color/primaryColor"
             android:id="@+id/linearSwitch"
             android:layout_weight="1"
             android:orientation="horizontal"
@@ -30,7 +31,7 @@
 
         <TextView
             android:textColor="#fff"
-            android:background="@color/primaryColor"
+
             android:padding="16dp"
             android:gravity="center"
             android:layout_weight="1"
@@ -48,6 +49,7 @@
 
 
         <LinearLayout
+            android:background="@color/primaryColor"
             android:id="@+id/linearDimmer"
             android:layout_weight="1"
             android:orientation="horizontal"
@@ -56,7 +58,6 @@
 
         <TextView
             android:textColor="#fff"
-            android:background="@color/primaryColor"
             android:padding="16dp"
             android:gravity="center"
             android:layout_weight="1"
@@ -71,6 +72,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:background="@color/primaryColor"
             android:id="@+id/linearMotor"
             android:layout_weight="1"
             android:orientation="horizontal"
@@ -79,7 +81,6 @@
 
         <TextView
             android:textColor="#fff"
-            android:background="@color/primaryColor"
             android:padding="16dp"
             android:gravity="center"
             android:text="Motor"
