@@ -325,12 +325,16 @@ public class AddMachineDialog extends BaseDialog {
                 }
             }
 
-            // init the touch_panel table
-            int totalNoOfPanels = (Integer.parseInt(productCode.substring(7,8)) * 10) + Integer.parseInt(productCode.substring(8,9));
+            //int totalNoOfPanels = (Integer.parseInt(productCode.substring(7,8)) * 10) + Integer.parseInt(productCode.substring(8,9));
+
+            int totalNoOfPanels = (Integer.parseInt(productCode.substring(6,7)) * 10);
 
             for(int i=0; i<totalNoOfPanels; i++) {
                 String idSuffix = String.format("%02d", (i + 1));
                 TouchPanelModel touchPanelBox = new TouchPanelModel(AppConstants.TOUCH_PANEL_TYPE+idSuffix);
+                touchPanelBox.setMIp(machineIP);
+                touchPanelBox.setmMId((int)machineID);
+                touchPanelBox.setMname(machineName);
                 listOfTouchPanels.add(touchPanelBox);
 
             }

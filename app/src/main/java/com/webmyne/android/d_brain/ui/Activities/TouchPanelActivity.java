@@ -185,6 +185,11 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                         final String touchPanelName = touchPanelListCursor.getString(touchPanelListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
                         final String touchPanelId = touchPanelListCursor.getString(touchPanelListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
 
+                        final String machineName = touchPanelListCursor.getString(touchPanelListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
+                        final String machineId = touchPanelListCursor.getString(touchPanelListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+                        final String machineIp = touchPanelListCursor.getString(touchPanelListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+
+
                         final TextView txtPanelHeading = (TextView) view.findViewById(R.id.txtPanelHeading);
                         txtPanelHeading.setText(touchPanelName);
 

@@ -7,6 +7,10 @@ public class TouchPanelModel {
     private int id;
     private String name;
 
+    private int mid;
+    private String mname;
+    private String mip;
+
     public TouchPanelModel() {
     }
 
@@ -29,4 +33,25 @@ public class TouchPanelModel {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void setmMId(int mid) {
+        this.mid = mid;
+    }
+    public void setMname(String mname) {
+        this.mname = mname;
+    }
+    public void setMIp(String ip) {
+        this.mip = ip;
+    }
+
+    public String getMname() {
+        return mname;
+    }
+    public String getMIp() {
+        return mip;
+    }
+    public int getMId() {
+        return mid;
+    }
+
 }

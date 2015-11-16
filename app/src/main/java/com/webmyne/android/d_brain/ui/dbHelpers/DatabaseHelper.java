@@ -953,7 +953,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         for(int i=0; i<touchPanelModels.size(); i++) {
+
             values.put(DBConstants.KEY_C_NAME, touchPanelModels.get(i).getName());
+            values.put(DBConstants.KEY_C_MID, touchPanelModels.get(i).getMId());
+            values.put(DBConstants.KEY_C_MIP, touchPanelModels.get(i).getMIp());
+            values.put(DBConstants.KEY_C_MNAME, touchPanelModels.get(i).getMname());
 
             db.insert(DBConstants.TABLE_TOUCH_PANEL, null, values);
         }
