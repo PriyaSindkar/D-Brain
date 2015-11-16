@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/thisToolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/primaryColor"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/imgBack"
+        android:layout_width="@dimen/POPUP_BAR_ICON_SIZE"
+        android:layout_height="@dimen/POPUP_BAR_ICON_SIZE"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/L_MARGIN"
+        android:background="@drawable/white_border_circle"
+        android:padding="@dimen/S_MARGIN"
+        android:src="@drawable/ic_arrow_left_white" />
+
+    <TextView
+        android:id="@+id/toolbarTitle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/HEADER_BAR_SIZE"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:text="Touch Panel"
+        android:textColor="@color/white"
+        android:textSize="@dimen/L_TEXT_SIZE" />
+
+
+
+    <ImageView
+        android:layout_alignParentRight="true"
+        android:id="@+id/imgChangeMachine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/L_MARGIN"
+        android:padding="@dimen/S_MARGIN"
+        android:layout_gravity="right"
+        android:src="@drawable/ic_edit" />
+
+</RelativeLayout>

@@ -8,9 +8,12 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
+
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
@@ -32,6 +35,7 @@ import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemDeleteListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
+import com.webmyne.android.d_brain.ui.Model.Machine;
 import com.webmyne.android.d_brain.ui.Widgets.TouchPanelBox;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -55,12 +59,15 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     private View divider;
     private FloatingActionButton fab;
     private Button btnAddSwitch, btnAddDimmer, btnAddMotor, btnAdd, btnCancel;
-    private ImageView imgBack, imgListGridToggle;
+    private ImageView imgBack, imgChangeMachine;
 
     private int selectedPanelPosition;
     private String selectedPanelId;
 
     private TouchPanelItemListAdapter touchPanelItemListAdapter;
+
+    private String CURRENT_MACHINE_IP,CURRENT_MACHINE_NAME,CURRENT_MACHINE_ID;
+    private ArrayList<Machine> MACHINES;
 
 
     @Override
@@ -72,12 +79,18 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             setSupportActionBar(toolbar);
         }
         toolbarTitle = (TextView) findViewById(R.id.toolbarTitle);
-        toolbarTitle.setText("Touch Panel");
+
+
 
         imgBack = (ImageView) findViewById(R.id.imgBack);
-        imgListGridToggle = (ImageView) findViewById(R.id.imgListGridToggle);
+        imgChangeMachine = (ImageView) findViewById(R.id.imgChangeMachine);
         imgBack.setOnClickListener(this);
-        imgListGridToggle.setVisibility(View.GONE);
+        imgChangeMachine.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMachinePopup();
+            }
+        });
 
         txtDisplayPanelName = (TextView) findViewById(R.id.txtDisplayPanelName);
         linearTouchPanelItems = (LinearLayout) findViewById(R.id.linearTouchPanelItems);
@@ -165,10 +178,50 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     protected void onResume() {
         super.onResume();
         AppConstants.getCurrentSsid(TouchPanelActivity.this);
+
+        getMachine();
         //populate the each component list
         initArrayOfSwitches();
         initArrayOfDimmers();
         initArrayOfMotors();
+    }
+
+
+    private void getMachine(){
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+
+        //get all touch panel boxes configured
+        try {
+            dbHelper.openDataBase();
+            Cursor machineCursor =  dbHelper.getAllMachines();
+
+            MACHINES = new ArrayList<>();
+            machineCursor.moveToFirst();
+
+            do {
+                Machine machineItem = new Machine();
+                CURRENT_MACHINE_NAME = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                CURRENT_MACHINE_ID = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                CURRENT_MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+
+                toolbarTitle.setText(CURRENT_MACHINE_NAME);
+
+                MACHINES.add(machineItem);
+
+            }while (machineCursor.moveToNext());
+
+            if(machineCursor.getCount()>1){
+                imgChangeMachine.setVisibility(View.VISIBLE);
+            }else{
+                imgChangeMachine.setVisibility(View.GONE);
+            }
+
+
+            dbHelper.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initTouchPanelList() {
@@ -438,7 +491,28 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
+    private void showMachinePopup(){
+        final PopupMenu popup = new PopupMenu(TouchPanelActivity.this, imgChangeMachine,R.style.PopupMenu);
+        //Inflating the Popup using xml file
+        popup.getMenuInflater().inflate(R.menu.menu_changemachine, popup.getMenu());
 
+        //registering popup with OnMenuItemClickListener
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.chnangeMachine:
+
+                        break;
+
+                }
+
+                popup.dismiss();
+                return true;
+            }
+        });
+
+        popup.show();//showing popup menu
+    }
     /*@Override
     public void onPanelItemDeletion(String panelId, int positionInPanel, String componentId) {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
