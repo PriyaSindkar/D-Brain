@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -80,15 +81,16 @@ public class SwitchesListActivity extends AppCompatActivity {
     private Handler handler,handler1;
     private int timeOutErrorCount = 0;
     private boolean isServiceRunning = false;
+    private long startTime, endTime, elapsedMilliSeconds;
+    private double elapsedSeconds;
 
     public void startTherad(){
         Log.e("$#$ THREAD", "START");
         handler1 = new Handler();
         timer1 = new Timer();
+        startTime = System.currentTimeMillis();
 
         timer1.scheduleAtFixedRate(new TimerTask() {
-
-
             @Override
             public void run() {
                 handler1.post(new Runnable() {
@@ -105,6 +107,13 @@ public class SwitchesListActivity extends AppCompatActivity {
 
     public void stopTherad(){
         Log.e("$#$ THREAD", "STOP");
+        endTime = System.currentTimeMillis();
+        elapsedMilliSeconds = endTime - startTime;
+        elapsedSeconds = elapsedMilliSeconds / 1000.0;
+
+        Log.e("$#$ TIME_ELAPSED(ms)", String.valueOf(elapsedMilliSeconds));
+        Log.e("$#$ TIME_ELAPSED(secs.)", String.valueOf(elapsedSeconds));
+
         try {
             timer1.cancel();
             timer1.purge();
