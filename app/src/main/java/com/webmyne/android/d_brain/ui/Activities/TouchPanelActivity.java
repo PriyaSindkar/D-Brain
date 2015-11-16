@@ -3,10 +3,12 @@ package com.webmyne.android.d_brain.ui.Activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v7.widget.PopupMenu;
@@ -25,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.flyco.animation.SlideEnter.SlideRightEnter;
 import com.konifar.fab_transformation.FabTransformation;
@@ -60,13 +63,14 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     private FloatingActionButton fab;
     private Button btnAddSwitch, btnAddDimmer, btnAddMotor, btnAdd, btnCancel;
     private ImageView imgBack, imgChangeMachine;
-
+    AlertDialog levelDialog;
     private int selectedPanelPosition;
     private String selectedPanelId;
 
     private TouchPanelItemListAdapter touchPanelItemListAdapter;
 
-    private String CURRENT_MACHINE_IP,CURRENT_MACHINE_NAME,CURRENT_MACHINE_ID;
+    private String CURRENT_MACHINE_IP,CURRENT_MACHINE_NAME;
+    private int CURRENT_MACHINE_ID,DEFAULT_MACHINE;
     private ArrayList<Machine> MACHINES;
 
 
@@ -200,11 +204,13 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
             do {
                 Machine machineItem = new Machine();
-                CURRENT_MACHINE_NAME = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
-                CURRENT_MACHINE_ID = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
-                CURRENT_MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                String CURRENT_MACHINE_NAME = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                int CURRENT_MACHINE_ID = machineCursor.getInt(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                String CURRENT_MACHINE_IP = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
 
-                toolbarTitle.setText(CURRENT_MACHINE_NAME);
+                machineItem.setMachineId(CURRENT_MACHINE_ID);
+                machineItem.setMachineIp(CURRENT_MACHINE_IP);
+                machineItem.setMachineName(CURRENT_MACHINE_NAME);
 
                 MACHINES.add(machineItem);
 
@@ -216,12 +222,25 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                 imgChangeMachine.setVisibility(View.GONE);
             }
 
+           // Set Default machine
+            setDefaultMachine(0);
 
             dbHelper.close();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void setDefaultMachine(int counter){
+
+        DEFAULT_MACHINE = counter;
+
+        CURRENT_MACHINE_ID = MACHINES.get(counter).getMachineId();
+        CURRENT_MACHINE_IP = MACHINES.get(counter).getMachineIp();
+        CURRENT_MACHINE_NAME = MACHINES.get(counter).getMachineName();
+
+        toolbarTitle.setText(CURRENT_MACHINE_NAME);
     }
 
     private void initTouchPanelList() {
@@ -502,6 +521,23 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                 switch (item.getItemId()) {
                     case R.id.chnangeMachine:
 
+                        String [] machineItem = new String[MACHINES.size()];
+                        for(int i=0;i<MACHINES.size();i++) {
+                            machineItem[i] = MACHINES.get(i).getMachineName();
+                        }
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(TouchPanelActivity.this);
+                        builder.setTitle("Select Machine");
+                        builder.setSingleChoiceItems(machineItem, DEFAULT_MACHINE, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int pos) {
+
+                                setDefaultMachine(pos);
+
+                                levelDialog.dismiss();
+                            }
+                        });
+                        levelDialog = builder.create();
+                        levelDialog.show();
                         break;
 
                 }

@@ -10,5 +10,27 @@ public class Machine {
     public String machineName;
 
 
+    public int getMachineId() {
+        return machineId;
+    }
 
+    public void setMachineId(int machineId) {
+        this.machineId = machineId;
+    }
+
+    public String getMachineIp() {
+        return machineIp;
+    }
+
+    public void setMachineIp(String machineIp) {
+        this.machineIp = machineIp;
+    }
+
+    public String getMachineName() {
+        return machineName;
+    }
+
+    public void setMachineName(String machineName) {
+        this.machineName = machineName;
+    }
 }
