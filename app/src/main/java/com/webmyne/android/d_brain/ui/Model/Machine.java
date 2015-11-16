@@ -8,7 +8,16 @@ public class Machine {
     public int machineId;
     public String machineIp;
     public String machineName;
+    public String machineProductCode;
 
+
+    public String getMachineProductCode() {
+        return machineProductCode;
+    }
+
+    public void setMachineProductCode(String machineProductCode) {
+        this.machineProductCode = machineProductCode;
+    }
 
     public int getMachineId() {
         return machineId;
