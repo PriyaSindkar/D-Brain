@@ -32,6 +32,7 @@ public class Functions {
         return value;
     }
 
+
     public static boolean isMotorAvialabel(String dpc){
         boolean value = false;
         String trimString = dpc.substring(3,4);
