@@ -139,6 +139,11 @@ public class AddMachineFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
     private void callOnDeleteClick() {
         adapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
@@ -168,6 +173,13 @@ public class AddMachineFragment extends Fragment {
                                 callRenameClick();
                                 callOnDeleteClick();
                                 callOnMachineEnabledDisabled();
+
+                                if(machineCursor.getCount() < 3) {
+                                    ((HomeDrawerActivity) getActivity()).showAppBarButton();
+                                    ((HomeDrawerActivity) getActivity()).setClearButtonText("Add Machine");
+                                } else {
+                                    ((HomeDrawerActivity) getActivity()).hideAppBarButton();
+                                }
 
                                 Toast.makeText(getActivity(), "Machine Deleted", Toast.LENGTH_LONG).show();
                             } catch (SQLException e) {
@@ -215,6 +227,14 @@ public class AddMachineFragment extends Fragment {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
+
+                    if(machineCursor.getCount() < 3) {
+                        ((HomeDrawerActivity) getActivity()).showAppBarButton();
+                        ((HomeDrawerActivity) getActivity()).setClearButtonText("Add Machine");
+                    } else {
+                        ((HomeDrawerActivity) getActivity()).hideAppBarButton();
+                    }
+
                     Toast.makeText(getActivity(), "Machine is Deactivated.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -237,6 +257,14 @@ public class AddMachineFragment extends Fragment {
             callRenameClick();
             callOnMachineEnabledDisabled();
 
+            if(machineCursor.getCount() < 3) {
+                ((HomeDrawerActivity) getActivity()).showAppBarButton();
+                ((HomeDrawerActivity) getActivity()).setClearButtonText("Add Machine");
+            } else {
+                ((HomeDrawerActivity) getActivity()).hideAppBarButton();
+            }
+
+
         } catch (SQLException e) {
             Log.e("TAG EXP", e.toString());
         }
@@ -244,8 +272,6 @@ public class AddMachineFragment extends Fragment {
 
     private void init(View view) {
         ((HomeDrawerActivity) getActivity()).setTitle("Add Machine");
-        ((HomeDrawerActivity) getActivity()).showAppBarButton();
-        ((HomeDrawerActivity) getActivity()).setClearButtonText("Add Machine");
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
@@ -273,7 +299,6 @@ public class AddMachineFragment extends Fragment {
             e.printStackTrace();
         }
 
-
         if(machineCursor.getCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
@@ -282,6 +307,13 @@ public class AddMachineFragment extends Fragment {
         } else {
             emptyView.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
+        }
+
+        if(machineCursor.getCount() < 3) {
+            ((HomeDrawerActivity) getActivity()).showAppBarButton();
+            ((HomeDrawerActivity) getActivity()).setClearButtonText("Add Machine");
+        } else {
+            ((HomeDrawerActivity) getActivity()).hideAppBarButton();
         }
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());

@@ -71,6 +71,7 @@
                 android:backgroundTint="@color/white"
                 android:textColor="#ffffff"
                 android:textColorHint="#d1d1d1"
+                android:text="http://ws-srv-net.in.webmyne.com/Applications/DsquareWS"
                 android:textSize="@dimen/M1_TEXT_SIZE" />
         </android.support.design.widget.TextInputLayout>
 

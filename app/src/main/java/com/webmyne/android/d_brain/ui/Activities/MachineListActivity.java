@@ -97,6 +97,12 @@ public class MachineListActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        if(machineCursor.getCount() < 3) {
+           txtAddMachine.setVisibility(View.VISIBLE);
+        } else {
+            txtAddMachine.setVisibility(View.GONE);
+        }
+
         /*if(machineCursor.getCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
@@ -156,6 +162,12 @@ public class MachineListActivity extends AppCompatActivity {
                             callOnDeleteClick();
                             callOnMachineEnabledDisabled();
 
+                            if(machineCursor.getCount() < 3) {
+                                txtAddMachine.setVisibility(View.VISIBLE);
+                            } else {
+                                txtAddMachine.setVisibility(View.GONE);
+                            }
+
                         } catch (SQLException e) {
                             Log.e("TAG EXP", e.toString());
                         }
@@ -169,6 +181,13 @@ public class MachineListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         AppConstants.getCurrentSsid(MachineListActivity.this);
+
+        if(machineCursor.getCount() < 3) {
+            txtAddMachine.setVisibility(View.VISIBLE);
+        } else {
+            txtAddMachine.setVisibility(View.GONE);
+        }
+
     }
 
     private void callOnDeleteClick() {
@@ -200,6 +219,12 @@ public class MachineListActivity extends AppCompatActivity {
                                 callOnRenameClick();
                                 callOnDeleteClick();
                                 callOnMachineEnabledDisabled();
+
+                                if(machineCursor.getCount() < 3) {
+                                    txtAddMachine.setVisibility(View.VISIBLE);
+                                } else {
+                                    txtAddMachine.setVisibility(View.GONE);
+                                }
 
                                 Toast.makeText(MachineListActivity.this, "Machine Deleted", Toast.LENGTH_LONG).show();
                             } catch (SQLException e) {
@@ -292,6 +317,12 @@ public class MachineListActivity extends AppCompatActivity {
                         callOnRenameClick();
                         callOnDeleteClick();
                         callOnMachineEnabledDisabled();
+
+                        if(machineCursor.getCount() < 3) {
+                            txtAddMachine.setVisibility(View.VISIBLE);
+                        } else {
+                            txtAddMachine.setVisibility(View.GONE);
+                        }
 
                     } catch (SQLException e) {
                         e.printStackTrace();

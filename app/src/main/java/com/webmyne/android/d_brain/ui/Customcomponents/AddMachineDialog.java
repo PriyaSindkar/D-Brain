@@ -110,29 +110,10 @@ public class AddMachineDialog extends BaseDialog {
                 } else if(edtMachineSerialNo.getText().toString().trim().length() == 0) {
                     Toast.makeText(context, "Must Enter Machine Serial No.", Toast.LENGTH_LONG).show();
                 } else {
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(context);
-                        dbHelper.openDataBase();
-                        Cursor machinesCursor = dbHelper.getAllMachines();
-
-                        if (machinesCursor != null) {
-                            totalMachinesCount = machinesCursor.getCount();
-                        } else {
-                            totalMachinesCount = 0;
-                        }
-                        dbHelper.close();
-                    } catch (SQLException e) {
-                       Log.e("SQL EXP", e.toString());
-                    }
-
-                    if (totalMachinesCount >= 3) {
-                        Toast.makeText(context, "Cannot enter more than 3 machines.", Toast.LENGTH_LONG).show();
-                    } else {
-                        machineIP = edtIPAddress.getText().toString().trim();
-                        userEnteredSerialNo = edtMachineSerialNo.getText().toString().trim();
-                        machineName = edtMachineName.getText().toString().trim();
-                        new GetMachineStatus().execute();
-                    }
+                    machineIP = edtIPAddress.getText().toString().trim();
+                    userEnteredSerialNo = edtMachineSerialNo.getText().toString().trim();
+                    machineName = edtMachineName.getText().toString().trim();
+                    new GetMachineStatus().execute();
                 }
             }
         });
