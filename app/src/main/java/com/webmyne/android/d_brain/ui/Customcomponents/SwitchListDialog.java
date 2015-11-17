@@ -31,7 +31,7 @@ import jp.wasabeef.recyclerview.animators.LandingAnimator;
 /**
  * Created by priyasindkar on 16-09-2015.
  */
-public class SceneListDialog extends BaseDialog {
+public class SwitchListDialog extends BaseDialog {
     private RecyclerView mRecyclerView;
     private SceneListCursorAdapter adapter;
     private ImageView imgCancel;
@@ -41,11 +41,11 @@ public class SceneListDialog extends BaseDialog {
     private String newComponentId;
     private String newComponentType;
 
-    public SceneListDialog(Context context) {
+    public SwitchListDialog(Context context) {
         super(context);
     }
 
-    public SceneListDialog(Context context, String _componentId, String _componentType) {
+    public SwitchListDialog(Context context, String _componentId, String _componentType) {
         super(context);
         this.newComponentId = _componentId;
         this.newComponentType = _componentType;
@@ -64,6 +64,8 @@ public class SceneListDialog extends BaseDialog {
         txtEmptyView1 = (TextView) inflate.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) inflate.findViewById(R.id.txtEmptyView);
 
+        txtEmptyView1.setVisibility(View.GONE);
+
         final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
 
         mRecyclerView.setLayoutManager(layoutManager);
@@ -81,8 +83,8 @@ public class SceneListDialog extends BaseDialog {
 
     @Override
     public boolean setUiBeforShow() {
-        updateSceneList();
-        adapter = new SceneListCursorAdapter(context, sceneListCursor);
+
+        /*adapter = new SceneListCursorAdapter(context, sceneListCursor);
         adapter.setType(0);
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
@@ -92,49 +94,16 @@ public class SceneListDialog extends BaseDialog {
         mRecyclerView.getItemAnimator().setAddDuration(500);
         mRecyclerView.getItemAnimator().setRemoveDuration(500);
         mRecyclerView.getItemAnimator().setMoveDuration(500);
-        mRecyclerView.getItemAnimator().setChangeDuration(500);
+        mRecyclerView.getItemAnimator().setChangeDuration(500);*/
 
         if(sceneListCursor.getCount() == 0) {
-            AdvancedSpannableString sp = new AdvancedSpannableString("Click Here");
-            sp.setUnderLine("Click Here");
-            sp.setColor(context.getResources().getColor(R.color.yellow), "Click Here");
-            txtEmptyView1.setText(sp);
-
+            txtEmptyView.setText(context.getString(R.string.empty_switch_list));
             emptyView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
         } else {
             emptyView.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
         }
-
-        txtEmptyView1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, CreateSceneActivity.class);
-                context.startActivity(intent);
-                dismiss();
-            }
-        });
-
-        adapter.setSingleClickListener(new onSingleClickListener() {
-            @Override
-            public void onSingleClick(int pos) {
-                sceneListCursor.moveToPosition(pos);
-
-                String sceneId = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
-                String sceneName = sceneListCursor.getString(sceneListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
-
-                // Redirect To the respective saved scene
-                Intent intent = new Intent(context, SceneActivity.class);
-                intent.putExtra("scene_id", sceneId);
-                intent.putExtra("scene_name", sceneName);
-                intent.putExtra("new_component_id", newComponentId);
-                intent.putExtra("new_component_type", newComponentType);
-                context.startActivity(intent);
-                dismiss();
-            }
-        });
-
 
         imgCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,18 +113,5 @@ public class SceneListDialog extends BaseDialog {
         });
 
         return true;
-    }
-
-    private void updateSceneList() {
-        DatabaseHelper dbHelper = new DatabaseHelper(context);
-        try {
-            dbHelper.openDataBase();
-
-            sceneListCursor = dbHelper.getAllScenes("");
-            dbHelper.close();
-        } catch (SQLException e) {
-            Log.e("SQLEXP", e.toString());
-        }
-
     }
 }

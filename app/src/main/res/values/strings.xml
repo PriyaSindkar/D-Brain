@@ -32,5 +32,6 @@
     <string name="power_off_text">Power is Off. Please switch on the main switch</string>
     <string name="all_machines_off_text">All Machines Are Inactive</string>
     <string name="click_here">Click Here To Active Machine(s)</string>
+    <string name="empty_switch_list">No Switches Found</string>
 
 </resources>
