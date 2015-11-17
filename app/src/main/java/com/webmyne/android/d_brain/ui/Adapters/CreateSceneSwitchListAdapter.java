@@ -16,25 +16,28 @@ import android.widget.TextView;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
+import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
+import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by priyasindkar on 06-10-2015.
  */
 
-public class TouchPComponentListAdapter extends SimpleCursorAdapter {
+public class CreateSceneSwitchListAdapter extends SimpleCursorAdapter {
 
     private Cursor cursor;
     private Context context;
     private Activity activity;
     public static int[] chkState;
     private int layout;
-    private ArrayList<String> selectedComponents;
+    private List<SceneItemsDataObject> selectedComponents;
 
-    public TouchPComponentListAdapter(Context context, int layout, Cursor c,
-                               String[] from, int[] to) {
+    public CreateSceneSwitchListAdapter(Context context, int layout, Cursor c,
+                                        String[] from, int[] to) {
         super(context, layout, c, from, to);
 
         this.cursor = c;
@@ -50,13 +53,23 @@ public class TouchPComponentListAdapter extends SimpleCursorAdapter {
         selectedComponents = new ArrayList<>();
     }
 
-    public void init() {
+    public void init(List<SceneItemsDataObject> _alreadyAdded) {
+        selectedComponents = _alreadyAdded;
+
         chkState = new int[cursor.getCount()];
+
         for(int i=0; i<cursor.getCount(); i++){
             chkState[i] = 0;
         }
 
-        selectedComponents = new ArrayList<>();
+        cursor.moveToFirst();
+        do {
+            for(int i=0; i<selectedComponents.size(); i++){
+                if(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)).equals(selectedComponents.get(i).getSceneComponentPrimaryId())) {
+                    chkState[i] = 1;
+                }
+            }
+        } while(cursor.moveToNext());
     }
 
     @Override
@@ -76,10 +89,28 @@ public class TouchPComponentListAdapter extends SimpleCursorAdapter {
 
         final int pos = position;
         cursor.moveToPosition(pos);
+        final String componentPrimaryId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
         final String componentId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+        final String componentName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+        final String componentType = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        final String machineId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+        final String machineIp = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+        final String machineName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
+        final String isActive = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
 
-        viewHolder.txtSwitchName.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
-        viewHolder.txtMachineName.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
+
+        final SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(componentType, componentName);
+        // set component_id in scene_component table
+        sceneItemsDataObject.setSceneItemId(componentId);
+        sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
+        sceneItemsDataObject.setMachineId(machineId);
+        sceneItemsDataObject.setMachineIP(machineIp);
+        sceneItemsDataObject.setMachineName(machineName);
+        sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+        sceneItemsDataObject.setIsActive(isActive);
+
+        viewHolder.txtSwitchName.setText(componentName);
+        viewHolder.txtMachineName.setText(machineName);
 
 
         if (chkState[position] == 0) {
@@ -93,10 +124,10 @@ public class TouchPComponentListAdapter extends SimpleCursorAdapter {
             public void onClick(View v) {
                 if(viewHolder.checkedBox.isChecked()) {
                     chkState[pos] = 1;
-                    selectedComponents.add(componentId);
+                    selectedComponents.add(sceneItemsDataObject);
                 } else {
                     chkState[pos] = 0;
-                    selectedComponents.remove(componentId);
+                    selectedComponents.remove(sceneItemsDataObject);
                 }
             }
         });
@@ -104,12 +135,13 @@ public class TouchPComponentListAdapter extends SimpleCursorAdapter {
         return (convertView);
     }
 
-    public ArrayList<String> getSelectedComponents() {
+    public List<SceneItemsDataObject> getSelectedComponents() {
         return selectedComponents;
     }
 
-    public void setSelectedComponentIds(ArrayList<String> selectedComponents) {
+    public void setSelectedComponentIds(List<SceneItemsDataObject> selectedComponents) {
         this.selectedComponents = selectedComponents;
+        init(selectedComponents);
     }
 
     class ViewHolder {

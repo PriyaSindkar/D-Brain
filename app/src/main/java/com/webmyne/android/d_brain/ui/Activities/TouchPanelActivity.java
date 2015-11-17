@@ -36,7 +36,6 @@ import android.widget.Toast;
 import com.flyco.animation.SlideEnter.SlideRightEnter;
 import com.konifar.fab_transformation.FabTransformation;
 import com.webmyne.android.d_brain.R;
-import com.webmyne.android.d_brain.ui.Adapters.TouchPComponentListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.TouchPanelGridAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.TouchPanelItemListAdapter;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;

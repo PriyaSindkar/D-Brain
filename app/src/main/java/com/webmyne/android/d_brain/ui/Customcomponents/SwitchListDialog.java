@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.flyco.animation.SlideEnter.SlideBottomEnter;
@@ -16,15 +17,21 @@ import com.flyco.dialog.widget.base.BaseDialog;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
+import com.webmyne.android.d_brain.ui.Adapters.CreateSceneSwitchListAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SceneListCursorAdapter;
+import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveSceneComponentsClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -32,17 +39,25 @@ import jp.wasabeef.recyclerview.animators.LandingAnimator;
  * Created by priyasindkar on 16-09-2015.
  */
 public class SwitchListDialog extends BaseDialog {
-    private RecyclerView mRecyclerView;
-    private SceneListCursorAdapter adapter;
+    private ListView listView;
+    private CreateSceneSwitchListAdapter adapter;
     private ImageView imgCancel;
-    private TextView txtEmptyView, txtEmptyView1;
+    private TextView txtEmptyView, txtSave;
     private LinearLayout emptyView;
-    private Cursor sceneListCursor;
+    private Cursor switchListCursor;
+    private onSingleClickListener _onDismissClick;
+    private onSaveSceneComponentsClickListener _onSaveClick;
     private String newComponentId;
     private String newComponentType;
+    List<SceneItemsDataObject> alreadyAddedComponents;
 
     public SwitchListDialog(Context context) {
         super(context);
+    }
+
+    public SwitchListDialog(Context context, List<SceneItemsDataObject> _alreadyAddedComponents) {
+        super(context);
+        this.alreadyAddedComponents = _alreadyAddedComponents;
     }
 
     public SwitchListDialog(Context context, String _componentId, String _componentType) {
@@ -57,21 +72,14 @@ public class SwitchListDialog extends BaseDialog {
         showAnim(new SlideBottomEnter());
 
         // dismissAnim(this, new ZoomOutExit());
-        View inflate = View.inflate(context, R.layout.dialog_scene_list, null);
-        mRecyclerView = (RecyclerView) inflate.findViewById(R.id.recycler_view);
+        View inflate = View.inflate(context, R.layout.dialog_create_scene_switch_list, null);
+        listView = (ListView) inflate.findViewById(R.id.listView);
         imgCancel = (ImageView) inflate.findViewById(R.id.imgCancel);
         emptyView = (LinearLayout) inflate.findViewById(R.id.emptyView);
-        txtEmptyView1 = (TextView) inflate.findViewById(R.id.txtEmptyView1);
         txtEmptyView = (TextView) inflate.findViewById(R.id.txtEmptyView);
+        txtSave = (TextView) inflate.findViewById(R.id.txtSave);
 
-        txtEmptyView1.setVisibility(View.GONE);
-
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-
-        mRecyclerView.setLayoutManager(layoutManager);
-        int margin = Utils.pxToDp(context.getResources().getDimension(R.dimen.STD_MARGIN), context);
-        mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(margin));
-        mRecyclerView.setItemViewCacheSize(0);
+        initSwitches();
 
         inflate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,35 +91,56 @@ public class SwitchListDialog extends BaseDialog {
 
     @Override
     public boolean setUiBeforShow() {
-
-        /*adapter = new SceneListCursorAdapter(context, sceneListCursor);
-        adapter.setType(0);
-        adapter.setHasStableIds(true);
-        mRecyclerView.setAdapter(adapter);
-
-        mRecyclerView.setItemAnimator(new LandingAnimator());
-
-        mRecyclerView.getItemAnimator().setAddDuration(500);
-        mRecyclerView.getItemAnimator().setRemoveDuration(500);
-        mRecyclerView.getItemAnimator().setMoveDuration(500);
-        mRecyclerView.getItemAnimator().setChangeDuration(500);*/
-
-        if(sceneListCursor.getCount() == 0) {
+        if(switchListCursor.getCount() == 0) {
             txtEmptyView.setText(context.getString(R.string.empty_switch_list));
             emptyView.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.GONE);
+            listView.setVisibility(View.GONE);
         } else {
             emptyView.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
+            listView.setVisibility(View.VISIBLE);
+
+            adapter = new CreateSceneSwitchListAdapter(context, R.layout.create_scene_switch_list_item,
+                    switchListCursor, new String[] {DBConstants.KEY_C_NAME,
+                    DBConstants.KEY_C_MNAME }, new int[] { R.id.txtSwitchName, R.id.txtMachineName});
+            adapter.setSelectedComponentIds(alreadyAddedComponents);
+            listView.setAdapter(adapter);
         }
 
         imgCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                _onDismissClick.onSingleClick(0);
+                dismiss();
+            }
+        });
+
+        txtSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                _onSaveClick.onSaveClick(adapter.getSelectedComponents());
                 dismiss();
             }
         });
 
         return true;
+    }
+
+     private void initSwitches() {
+         DatabaseHelper dbHelper = new DatabaseHelper(context);
+         try {
+             dbHelper.openDataBase();
+             switchListCursor = dbHelper.getAllSwitchComponents();
+             dbHelper.close();
+         } catch (Exception e) {
+             Log.e("EXP SQL", e.toString());
+         }
+     }
+
+    public void setOnDismissListener(onSingleClickListener obj){
+        this._onDismissClick = obj;
+    }
+
+    public void setOnSaveListener(onSaveSceneComponentsClickListener obj){
+        this._onSaveClick = obj;
     }
 }

@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-
     <LinearLayout
         android:id="@+id/linearSwitch"
         android:layout_width="match_parent"
@@ -20,7 +19,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:padding="@dimen/STD_MARGIN"
+                android:padding="@dimen/VS_MARGIN"
                 android:layout_weight="1.9"
                 android:id="@+id/txtSwitchName"
                 android:layout_width="wrap_content"
@@ -30,13 +29,13 @@
                 android:src="@drawable/ic_arrow_left"/>
 
             <TextView
-                android:padding="@dimen/STD_MARGIN"
+                android:padding="@dimen/VS_MARGIN"
                 android:layout_weight="1.9"
                 android:id="@+id/txtMachineName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Machine Name"
-                android:textColor="@color/white"
+                android:textColor="@color/yellow"
                 android:src="@drawable/ic_arrow_left"/>
         </LinearLayout>
 
@@ -46,27 +45,7 @@
             android:buttonTintMode="src_atop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/S_MARGIN"/>
-        <!--<View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="@color/secondaryBgColor" />
-
-        <LinearLayout
-            android:layout_margin="@dimen/S_MARGIN"
-            android:layout_weight="0.5"
-            android:orientation="horizontal"
-            android:background="@color/primaryColor"
-            android:layout_width="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_height="wrap_content">
-
-            <com.kyleduo.switchbutton.SwitchButton
-                android:id="@+id/imgSwitch"
-                style="@style/MaterialDesignStyle" />
-
-        </LinearLayout>-->
+            android:layout_margin="@dimen/VS_MARGIN"/>
     </LinearLayout>
 
 

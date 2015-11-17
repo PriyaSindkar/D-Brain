@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.CreateSceneAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SwitchListDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
@@ -30,6 +31,7 @@ import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveSceneComponentsClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Widgets.SceneMotorItem;
@@ -38,8 +40,13 @@ import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CreateSceneActivity extends AppCompatActivity implements View.OnClickListener{
     private Toolbar toolbar;
@@ -323,7 +330,37 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
             isDimmerPopupShown = false;
             isMotorPopupShown = false;
 
-            linearPopup.setVisibility(View.VISIBLE);
+            SwitchListDialog switchListDialog = new SwitchListDialog(CreateSceneActivity.this, mData);
+            switchListDialog.show();
+
+            switchListDialog.setOnDismissListener(new onSingleClickListener() {
+                @Override
+                public void onSingleClick(int pos) {
+                    txtSwitch.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+                    isSwitchPopupShown = false;
+                    isDimmerPopupShown = false;
+                    isMotorPopupShown = false;
+                }
+            });
+
+            switchListDialog.setOnSaveListener(new onSaveSceneComponentsClickListener() {
+                @Override
+                public void onSaveClick(List<SceneItemsDataObject> _selectedComponents) {
+                    Log.e("ADSF", "ASFasf");
+                   /*for(int i=0; i<_selectedComponents.size(); i++) {
+                        mData.add(_selectedComponents.get(i));
+                        mAdapter.notifyDataSetChanged();
+                        isSceneSaved = false;
+                    }*/
+
+                    txtSwitch.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+                    isSwitchPopupShown = false;
+                    isDimmerPopupShown = false;
+                    isMotorPopupShown = false;
+                }
+            });
+
+            /*linearPopup.setVisibility(View.VISIBLE);
             linearControls.removeAllViews();
 
             for(int i=0; i < initSwitches.size(); i++) {
@@ -359,7 +396,9 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                 });
             }
 
-            animationHelper.viewPopUpMenuFromBottomLeft(linearPopup);
+            animationHelper.viewPopUpMenuFromBottomLeft(linearPopup);*/
+
+
 
 
         } else { // if switch popup is opened, close it
@@ -370,13 +409,13 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
             isDimmerPopupShown = false;
             isMotorPopupShown = false;
 
-            animationHelper.closePopUpMenuFromBottomLeft(linearPopup);
+          /*  animationHelper.closePopUpMenuFromBottomLeft(linearPopup);
             animationHelper.setInterFaceObj(new PopupAnimationEnd() {
                 @Override
                 public void animationCompleted() {
                     linearPopup.setVisibility(View.INVISIBLE);
                 }
-            });
+            });*/
         }
     }
 

@@ -23,6 +23,7 @@
     <dimen name="POPUP_BAR_ICON_SIZE">30dp</dimen>
 
     <dimen name="DASHBOARD_CARD_WIDTH">200dp</dimen>
+    <dimen name="LIST_DIALOG_HEIGHT">400dp</dimen>
     <dimen name="DASHBOARD_CARD_HEIGHT">120dp</dimen>
 
     <dimen name="TOUCH_PANEL_ITEM_WIDTH">50dp</dimen>
