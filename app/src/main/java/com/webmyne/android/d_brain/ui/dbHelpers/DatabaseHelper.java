@@ -522,6 +522,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    //get dimmers of a machine by machine-id
+    public Cursor getAllDimmerComponentsForAMachineById(String machineId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_MID + "=? AND " + DBConstants.KEY_C_TYPE + "=?",
+                    new String[]{machineId, AppConstants.DIMMER_TYPE}, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
     //get all switches from all machines
     public Cursor getAllSwitchComponents() {
         SQLiteDatabase db = this.getReadableDatabase();

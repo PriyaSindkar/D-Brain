@@ -1,8 +1,6 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,10 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
@@ -55,7 +53,7 @@ import java.util.TimerTask;
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
 
-public class SwitchesListFragment extends Fragment {
+public class DimmerListFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "MACHINE_ID";
     private static final String ARG_PARAM2 = "MACHINE_NAME";
@@ -66,10 +64,10 @@ public class SwitchesListFragment extends Fragment {
     private boolean mParamIsListView = true, isFirstTime = true, isServiceRunning = false;
     private RecyclerView mRecyclerView;
     private ProgressBar progressBar;
-    private SwitchListCursorAdapter mAdapter;
-    private Cursor switchListCursor, machineListCursor;
+    private DimmerListCursorAdapter adapter;
+    private Cursor dimmerListCursor;
     private String[] machineIPs;
-    ArrayList<XMLValues> allSwitchesStatusList;
+    ArrayList<XMLValues> allDimmerStatusList;
     private int timeOutErrorCount = 0;
 
     private Timer timer1;
@@ -86,7 +84,7 @@ public class SwitchesListFragment extends Fragment {
                 handler1.post(new Runnable() {
                     @Override
                     public void run() {
-                    new GetSwitchStatus().execute();
+                        new GetDimmerStatus().execute();
                     }
                 });
             }
@@ -105,8 +103,8 @@ public class SwitchesListFragment extends Fragment {
         }
     }
 
-    public static SwitchesListFragment newInstance(int param1, String param2, boolean isListView) {
-        SwitchesListFragment fragment = new SwitchesListFragment();
+    public static DimmerListFragment newInstance(int param1, String param2, boolean isListView) {
+        DimmerListFragment fragment = new DimmerListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -115,7 +113,7 @@ public class SwitchesListFragment extends Fragment {
         return fragment;
     }
 
-    public SwitchesListFragment() {
+    public DimmerListFragment() {
         // Required empty public constructor
     }
 
@@ -156,18 +154,18 @@ public class SwitchesListFragment extends Fragment {
         progressBar = (ProgressBar) convertView.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.VISIBLE);
 
-        mAdapter = new SwitchListCursorAdapter(getActivity());
+        adapter = new DimmerListCursorAdapter(getActivity());
 
         if(mParamIsListView) {
             mRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
-            mAdapter.setType(0);
-            mAdapter.notifyDataSetChanged();
+            adapter.setType(0);
+            adapter.notifyDataSetChanged();
         } else {
             android.support.v7.widget.GridLayoutManager layoutManager = new android.support.v7.widget.GridLayoutManager(activity, 3);
             layoutManager.supportsPredictiveItemAnimations();
             mRecyclerView.setLayoutManager(layoutManager);
-            mAdapter.setType(1);
-            mAdapter.notifyDataSetChanged();
+            adapter.setType(1);
+            adapter.notifyDataSetChanged();
         }
         return convertView;
     }
@@ -183,7 +181,7 @@ public class SwitchesListFragment extends Fragment {
         super.setUserVisibleHint(visible);
         if (visible) {
             AppConstants.getCurrentSsid(activity);
-            initArrayOfSwitches();
+            initArrayOfDimmers();
             startTherad();
         } else {
             stopTherad();
@@ -211,15 +209,16 @@ public class SwitchesListFragment extends Fragment {
     public void onStop() {
         super.onStop();
         stopTherad();
+
     }
 
 
-    private void initArrayOfSwitches() {
+    private void initArrayOfDimmers() {
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-        //get all switches in mAdapter for machine-1
+        //get all dimmers in adapter for machine-1
         try {
             dbHelper.openDataBase();
-            switchListCursor =  dbHelper.getAllSwitchComponentsForAMachineById(String.valueOf(mParamMachineId));
+            dimmerListCursor =  dbHelper.getAllDimmerComponentsForAMachineById(String.valueOf(mParamMachineId));
             dbHelper.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -228,87 +227,70 @@ public class SwitchesListFragment extends Fragment {
 
 
 
-    public class GetSwitchStatus extends AsyncTask<Void, Void, Void> {
+    public class GetDimmerStatus extends AsyncTask<Void, Void, Void> {
+        boolean isError = false;
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
         Cursor cursor, machineCursor;
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         @Override
         protected void onPreExecute() {
-            isServiceRunning = true;
+
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            allSwitchesStatusList = new ArrayList<>();
+            allDimmerStatusList = new ArrayList<>();
             String machineBaseURL = "";
 
+            DatabaseHelper dbHelper = new DatabaseHelper(activity);
             try {
                 dbHelper.openDataBase();
                 // get current machine details
                 machineCursor = dbHelper.getMachineByID(String.valueOf(mParamMachineId));
                 machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                machineIp = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
                 machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
                 isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
-                machineIp = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
-                cursor = dbHelper.getAllSwitchComponentsForAMachine(machineIp);
+                cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
                 dbHelper.close();
 
-                if(machineIp.startsWith("http://")) {
-                    machineBaseURL = machineIp;
-                } else {
-                    machineBaseURL = "http://" + machineIp;
-                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
 
-                // fetch switch status from machine only if the machine is active else init all the switch status to off
-                if (isMachineActive.equals("true")) {
-                    Log.e("$#$# Switch url",""+machineBaseURL+"ACTIVE");
+            if(machineIp.startsWith("http://")) {
+                machineBaseURL = machineIp;
+            } else {
+                machineBaseURL = "http://" + machineIp;
+            }
 
-                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
+            // fetch dimmer status from machine only if the machine is active else init all the dimmer status to off
+            if (isMachineActive.equals("true")) {
+                try {
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
+                    Log.e("# urlValue", urlValue.toString());
 
                     HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-
                     httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
-
                     httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = null;
-                    httpUrlConnection.setDoInput(true);
-                    inputStream = httpUrlConnection.getInputStream();
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    //  Log.e("# inputStream", inputStream.toString());
                     MainXmlPullParser pullParser = new MainXmlPullParser();
-                    List<XMLValues> switchStatusList = pullParser.processXML(inputStream);
 
-                    int totalSwitchesofMachine = 0;
+                    List<XMLValues> dimmerStatusList = pullParser.processXML(inputStream);
+                    Log.e("XML PARSERED", dimmerStatusList.toString());
+
+                    int totalDimmersofMachine = 0;
                     if (cursor != null) {
-                        totalSwitchesofMachine = cursor.getCount();
+                        totalDimmersofMachine = cursor.getCount();
                     }
 
-                    for (int j = 0; j < totalSwitchesofMachine; j++) {
-                        allSwitchesStatusList.add(switchStatusList.get(j));
+                    for (int j = 0; j < totalDimmersofMachine; j++) {
+                        allDimmerStatusList.add(dimmerStatusList.get(j));
                     }
-                } else {
-                    Log.e("#### Switch url",""+machineBaseURL+"DISABLE");
-
-                    if (cursor != null) {
-                        cursor.moveToFirst();
-                        if (cursor.getCount() > 0) {
-                            do {
-                                String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-                                XMLValues values = new XMLValues();
-                                values.tagName = componnetId;
-                                values.tagValue = AppConstants.OFF_VALUE;
-                                allSwitchesStatusList.add(values);
-
-                            } while (cursor.moveToNext());
-                        }
-                    }
-                }
-            } catch (Exception ex1) {
-                Log.e("~~~~~~~~TIME OUT~~~", ex1.toString());
-                timeOutErrorCount++;
-                Log.e("# timeOutErrorCount", timeOutErrorCount+"");
-
-                if (timeOutErrorCount > 10) {
-                    timeOutErrorCount = 0;
+                } catch (Exception e) {
+                    Log.e("# EXP", e.toString());
+                    isError = true;
                     try {
                         dbHelper.openDataBase();
                         dbHelper.enableDisableMachine(machineId, false);
@@ -321,56 +303,57 @@ public class SwitchesListFragment extends Fragment {
                                     String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
                                     XMLValues values = new XMLValues();
                                     values.tagName = componnetId;
-                                    values.tagValue = AppConstants.OFF_VALUE;
-                                    allSwitchesStatusList.add(values);
+                                    values.tagValue = AppConstants.OFF_VALUE + AppConstants.OFF_VALUE;
+                                    allDimmerStatusList.add(values);
 
                                 } while (cursor.moveToNext());
                             }
                         }
-
                     } catch (SQLException ex) {
-                        Log.e("TAG EXP TIME OUT", ex.toString());
+                        ex.printStackTrace();
                     }
-                } else {
-                    stopTherad();
-                    startTherad();
+                }
+            } else {
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    if (cursor.getCount() > 0) {
+                        do {
+                            String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                            XMLValues values = new XMLValues();
+                            values.tagName = componnetId;
+                            values.tagValue = AppConstants.OFF_VALUE + AppConstants.OFF_VALUE;
+                            allDimmerStatusList.add(values);
+
+                        } while (cursor.moveToNext());
+                    }
                 }
             }
-        return null;
+         return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            isServiceRunning = false;
-
             try {
                 progressBar.setVisibility(View.GONE);
+
                 if(isFirstTime) {
-                    //init mAdapter
-                    mAdapter = new SwitchListCursorAdapter(getActivity(), switchListCursor, allSwitchesStatusList);
-                    mAdapter.setHasStableIds(true);
-                    mRecyclerView.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
+                    //init adapter
+                    adapter = new DimmerListCursorAdapter(activity, dimmerListCursor, allDimmerStatusList);
+                    adapter.setHasStableIds(true);
+                    mRecyclerView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
                     isFirstTime = false;
                 } else {
-                    if(allSwitchesStatusList.size()>0) {
-                        //set mAdapter again
-                        mAdapter.setSwitchStatus(allSwitchesStatusList);
-                        mAdapter.notifyDataSetChanged();
-                    }else{
-                        Log.e("size zero",""+allSwitchesStatusList.size());
-                    }
+                    //set adapter again
+                    adapter.setDimmerStatus(allDimmerStatusList);
+                    adapter.notifyDataSetChanged();
                 }
 
-                mAdapter.setCheckedChangeListener(new onCheckedChangeListener() {
+                adapter.setCheckedChangeListener(new onCheckedChangeListener() {
                     @Override
                     public void onCheckedChangeClick(int pos) {
-                        //  if(isServiceRunning){
                         stopTherad();
-                        //   startTherad();
-                        // }else {
                         startTherad();
-                        //  }
                     }
 
                     @Override
@@ -379,7 +362,7 @@ public class SwitchesListFragment extends Fragment {
                     }
                 });
 
-                mAdapter.setRenameClickListener(new onRenameClickListener() {
+                adapter.setRenameClickListener(new onRenameClickListener() {
 
                     @Override
                     public void onRenameOptionClick(int pos, String _oldName) {
@@ -392,26 +375,33 @@ public class SwitchesListFragment extends Fragment {
                     }
                 });
 
-                mAdapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
+                adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
                     @Override
                     public void onAddToSceneOptionClick(int pos) {
                         addComponentToScene(pos);
                     }
                 });
 
-                mAdapter.setFavoriteClickListener(new onFavoriteClickListener() {
+                adapter.setFavoriteClickListener(new onFavoriteClickListener() {
                     @Override
                     public void onFavoriteOptionClick(int pos) {
                         addComponentToFavourite(pos);
                     }
                 });
 
-                mAdapter.setLongClickListener(new onLongClickListener() {
+                adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
+                    @Override
+                    public void onAddSchedulerOptionClick(int pos) {
+                        addComponentToScheduler(pos);
+                    }
+                });
+
+                adapter.setLongClickListener(new onLongClickListener() {
 
                     @Override
                     public void onLongClick(final int pos, View view) {
 
-                        LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(getActivity(), pos);
+                        LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(activity, pos);
                         longPressOptionsDialog.show();
 
                         longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {
@@ -448,49 +438,80 @@ public class SwitchesListFragment extends Fragment {
                         });
                     }
                 });
-
-                mAdapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-
-                    @Override
-                    public void onAddSchedulerOptionClick(int pos) {
-                        addComponentToScheduler(pos);
-                    }
-                });
-
-
             } catch (Exception e) {
-                Log.e("EXc post", e.toString());
-
             }
         }
     }
 
+    private void renameComponent(int pos) {
+
+        final int position = pos;
+        dimmerListCursor.moveToPosition(position);
+        final String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        final String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+
+        RenameDialog renameDialog = new RenameDialog(activity, componentName);
+        renameDialog.show();
+
+        renameDialog.setRenameListener(new onRenameClickListener() {
+            @Override
+            public void onRenameOptionClick(int pos, String newName) {
+                try {
+                    DatabaseHelper dbHelper = new DatabaseHelper(activity);
+                    dbHelper.openDataBase();
+                    dbHelper.renameComponent(componentId, newName);
+                    dimmerListCursor = dbHelper.getAllDimmerComponents();
+                    dbHelper.close();
+                    adapter.changeCursor(dimmerListCursor);
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+            }
+        });
+    }
+
+    private void addComponentToScene(int pos) {
+        stopTherad();
+        dimmerListCursor.moveToPosition(pos);
+        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        SceneListDialog dialog = new SceneListDialog(activity, componentId, componentType);
+        dialog.show();
+    }
+
     private void addComponentToFavourite(int pos) {
-        switchListCursor.moveToPosition(pos);
-        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-        String componentPrimaryId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-        String componentName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
-        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
-        String componentMachineID = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
-        String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+        dimmerListCursor.moveToPosition(pos);
+        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+        String componentPrimaryId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        String componentMachineID = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+        String machineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
         String machineName = "";
         try {
-            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+            DatabaseHelper dbHelper = new DatabaseHelper(activity);
             dbHelper.openDataBase();
             machineName = dbHelper.getMachineNameByIP(machineIP);
-            int switchCount = dbHelper.getComponentTypeCountInFavourite(componentType);
+            int dimmerCount = dbHelper.getComponentTypeCountInFavourite(componentType);
 
-            if (switchCount < 10) {
+            if(dimmerCount <10) {
                 boolean isAlreadyAFavourite = dbHelper.insertIntoFavorite(componentPrimaryId, componentId, componentName, componentType, componentMachineID,machineIP, machineName);
                 dbHelper.close();
 
                 if (isAlreadyAFavourite) {
-                    Toast.makeText(getActivity(), "Already added to Favorite.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "Already added to Favorite!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getActivity(), "Added to Favorite Successfully.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "Added to Favorite Successfully!", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(getActivity(), "Cannot add more than 10 switches to favourites.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "Cannot add more than 10 dimmers to favourites.", Toast.LENGTH_SHORT).show();
             }
 
         } catch (SQLException e) {
@@ -498,86 +519,32 @@ public class SwitchesListFragment extends Fragment {
         }
     }
 
-    private void renameComponent(int pos) {
-        final int position = pos;
-        switchListCursor.moveToPosition(position);
-        final String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-        final String componentName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
-
-
-        RenameDialog renameDialog = new RenameDialog(getActivity(), componentName);
-        renameDialog.show();
-
-        renameDialog.setRenameListener(new onRenameClickListener() {
-            @Override
-            public void onRenameOptionClick(int pos, String newName) {
-                try {
-                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                    dbHelper.openDataBase();
-                    dbHelper.renameComponent(componentId, newName);
-                    switchListCursor = dbHelper.getAllSwitchComponents();
-                    dbHelper.close();
-                    mAdapter.changeCursor(switchListCursor);
-
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onRenameOptionClick(int pos, String newName, String newDetails) {
-
-            }
-        });
-    }
-
-    private void addComponentToScene(int pos) {
-
-
-        stopTherad();
-
-        switchListCursor.moveToPosition(pos);
-        String componentId1 = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
-        SceneListDialog dialog = new SceneListDialog(getActivity(), componentId1, componentType);
-        dialog.show();
-    }
-
     private void addComponentToScheduler(int pos) {
-        switchListCursor.moveToPosition(pos);
-        String componentPrimaryId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-        String componentId = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-        String componentType = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
-        String componentName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
-        String componentMachineName = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
-        String componentMachineID = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
-        String componentMachineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+        dimmerListCursor.moveToPosition(pos);
+        String componentPrimaryId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+        String componentId = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+        String componentType = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+        String componentName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+        String componentMachineName = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
+        String componentMachineID = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+        String componentMachineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
 
         try {
-            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+            DatabaseHelper dbHelper = new DatabaseHelper(activity);
             dbHelper.openDataBase();
             boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentPrimaryId, componentMachineID);
-            dbHelper.close();
 
             if(! isAlreadyScheduled) {
                 SchedulerModel schedulerModel = new SchedulerModel("", componentPrimaryId, componentId,componentName, componentType, componentMachineID,componentMachineIP, componentMachineName, false, "00");
-
-                AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(getActivity(), schedulerModel);
-                addToSchedulerDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+                AddToSchedulerDialog addToSchedulerDialog = new AddToSchedulerDialog(activity, schedulerModel);
                 addToSchedulerDialog.show();
             } else {
-                dbHelper = new DatabaseHelper(getActivity());
                 SchedulerModel schedulerModel = null;
-                try {
-                    dbHelper.openDataBase();
-                    schedulerModel =  dbHelper.getSchedulerByComponentId(componentPrimaryId, componentMachineID, "0");
-                    dbHelper.close();
+                schedulerModel =  dbHelper.getSchedulerByComponentId(componentPrimaryId, componentMachineID, "0");
+                dbHelper.close();
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
                 if(schedulerModel != null) {
-                    EditSchedulerDialog addToSchedulerDialog = new EditSchedulerDialog(getActivity(), schedulerModel);
+                    EditSchedulerDialog addToSchedulerDialog = new EditSchedulerDialog(activity, schedulerModel);
                     addToSchedulerDialog.show();
 
                     addToSchedulerDialog.setOnSingleClick(new onSingleClickListener() {
@@ -588,6 +555,7 @@ public class SwitchesListFragment extends Fragment {
                     });
                 }
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

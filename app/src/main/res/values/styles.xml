@@ -80,7 +80,20 @@
         <item name="android:paddingBottom">@dimen/CARD_DIVIDER_HEIGHT</item>
     </style>
 
-    <style name="MaterialDesignStyle" parent="MD">
+    <style name="NMD">
+        <item name="animationVelocity">6</item>
+        <item name="insetBottom">@dimen/VS_TEXT_SIZE</item>
+        <item name="insetTop">@dimen/VS_TEXT_SIZE</item>
+        <item name="insetLeft">@dimen/VS_TEXT_SIZE</item>
+        <item name="insetRight">@dimen/VS_TEXT_SIZE</item>
+        <item name="measureFactor">1.4</item>
+        <item name="offDrawable">@drawable/md_back_off</item>
+        <item name="onDrawable">@drawable/md_back_on</item>
+        <item name="thumbDrawable">@drawable/md_thumb</item>
+        <item name="thumb_margin">-17dp</item>
+    </style>
+
+    <style name="MaterialDesignStyle" parent="NMD">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">@dimen/STD_MARGIN</item>

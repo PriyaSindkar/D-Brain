@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Adapters;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -51,17 +52,21 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
     public onAddSchedulerClickListener _addSchedulerClick;
     public onRenameClickListener _renameClick;
     public onCheckedChangeListener _switchClick;
+    private ProgressDialog progress_dialog;
 
     public DimmerListCursorAdapter(Context context){
         super(context );
         mCtx = context;
+        progress_dialog = new ProgressDialog(mCtx);
+        progress_dialog.setCancelable(false);
     }
-
 
     public DimmerListCursorAdapter(Context context, Cursor cursor, ArrayList<XMLValues> _dimmerStatus){
         super(context,cursor);
         mCtx = context;
         this.dimmerStatus = _dimmerStatus;
+        progress_dialog = new ProgressDialog(mCtx);
+        progress_dialog.setCancelable(false);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -94,6 +99,8 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             this.imgAddSchedulerOption = (ImageView) view.findViewById(R.id.imgAddSchedulerOption);
             this.imgRenameOption = (ImageView) view.findViewById(R.id.imgRenameOption);
 
+            txtMachineName.setVisibility(View.GONE);
+
         }
     }
 
@@ -112,6 +119,8 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             this.txtValue = (TextView) view.findViewById(R.id.txtValue);
             txtValue.setText("0");
             this.imgSwitch = (SwitchButton) view.findViewById(R.id.imgSwitch);
+
+            txtMachineName.setVisibility(View.GONE);
         }
     }
 
@@ -446,8 +455,9 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
         protected void onPreExecute() {
             super.onPreExecute();
             try{
+                progress_dialog.setMessage("Please Wait..");
+                progress_dialog.show();
                 _switchClick.onCheckedPreChangeClick(0);
-
             }catch(Exception e){
             }
         }
@@ -475,7 +485,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             super.onPostExecute(aVoid);
             try{
                 _switchClick.onCheckedChangeClick(0);
-
+                progress_dialog.hide();
             }catch(Exception e){
             }
         }

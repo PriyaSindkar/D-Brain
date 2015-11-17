@@ -31,6 +31,7 @@
         android:layout_marginLeft="@dimen/S_MARGIN"
         android:layout_marginRight="@dimen/S_MARGIN"
         android:padding="@dimen/VS_MARGIN"
+        android:visibility="gone"
         android:id="@+id/txtMachineName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

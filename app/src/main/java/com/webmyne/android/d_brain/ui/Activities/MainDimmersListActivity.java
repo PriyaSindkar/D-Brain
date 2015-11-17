@@ -1,7 +1,6 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -9,20 +8,16 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.ogaclejapan.smarttablayout.SmartTabIndicationInterpolator;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Fragments.DimmerListFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SwitchesListFragment;
-import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Model.Machine;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -35,7 +30,7 @@ import java.util.List;
 /**
  * Created by priyasindkar on 16-11-2015.
  */
-public class MainSwitchesListActivity extends AppCompatActivity {
+public class MainDimmersListActivity extends AppCompatActivity {
     private ViewPager pager;
     private SmartTabLayout tabHost;
     private TabsPagerAdapter pagerAdapter;
@@ -67,7 +62,7 @@ public class MainSwitchesListActivity extends AppCompatActivity {
         line = (LinearLayout) findViewById(R.id.line);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbarTitle = (TextView) findViewById(R.id.toolbarTitle);
-        toolbarTitle.setText("Switches");
+        toolbarTitle.setText("Dimmers");
 
         tabHost.setDistributeEvenly(true);
         //set pager-adapter
@@ -76,15 +71,13 @@ public class MainSwitchesListActivity extends AppCompatActivity {
         if(machineList.size() == 1) {
             tabHost.setSelectedIndicatorColors(getResources().getColor(R.color.primaryColor));
             line.setVisibility(View.VISIBLE);
-
         } else {
             tabHost.setSelectedIndicatorColors(getResources().getColor(R.color.baseButtonColor));
             line.setVisibility(View.GONE);
         }
 
         // init view pager
-        final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
-                .getDisplayMetrics());
+        final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources().getDisplayMetrics());
         pager.setPageMargin(pageMargin);
 
         pagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(), machineList);
@@ -178,7 +171,7 @@ public class MainSwitchesListActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int index) {
-            return SwitchesListFragment.newInstance(machines.get(index).getMachineId(), machines.get(index).getMachineName(), isListView);
+            return DimmerListFragment.newInstance(machines.get(index).getMachineId(), machines.get(index).getMachineName(), isListView);
         }
 
         @Override

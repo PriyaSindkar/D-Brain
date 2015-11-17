@@ -63,6 +63,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     public SwitchListCursorAdapter(Context context){
         super(context );
         mCtx = context;
+        progress_dialog = new ProgressDialog(mCtx);
+        progress_dialog.setCancelable(false);
     }
 
 
@@ -119,10 +121,9 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
             this.linearSwitch = (LinearLayout) view.findViewById(R.id.linearSwitch);
             this.imgSwitch = (SwitchButton)view.findViewById(R.id.imgSwitch);
 
-            this.txtMachineName.setVisibility(View.GONE);
+          /*  this.txtMachineName.setVisibility(View.GONE);*/
         }
     }
-
 
     @Override
     public int getItemViewType(int position) {
@@ -143,22 +144,22 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
         switch (viewType) {
             case 0:
-                ViewGroup viewgroup1 = ( ViewGroup ) mInflater.inflate ( R.layout.scene_switch_full_item, parent, false );
-                ListViewHolder listHolder = new ListViewHolder (viewgroup1);
+                ViewGroup viewgroup1 = (ViewGroup) mInflater.inflate(R.layout.scene_switch_full_item, parent, false);
+                ListViewHolder listHolder = new ListViewHolder(viewgroup1);
                 return listHolder;
             case 1:
-                ViewGroup viewgroup2 = ( ViewGroup ) mInflater.inflate(R.layout.switch_grid_item, parent, false);
-                GridViewHolder gridHolder = new GridViewHolder (viewgroup2);
+                ViewGroup viewgroup2 = (ViewGroup) mInflater.inflate(R.layout.switch_grid_item, parent, false);
+                GridViewHolder gridHolder = new GridViewHolder(viewgroup2);
                 return gridHolder;
             default:
-                ViewGroup viewgroup3 = ( ViewGroup ) mInflater.inflate ( R.layout.scene_switch_full_item, parent, false );
-                GridViewHolder gridHolder1 = new GridViewHolder (viewgroup3);
+                ViewGroup viewgroup3 = (ViewGroup) mInflater.inflate(R.layout.switch_grid_item, parent, false);
+                GridViewHolder gridHolder1 = new GridViewHolder(viewgroup3);
                 return gridHolder1;
         }
+
     }
 
     @Override
@@ -274,10 +275,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
                     if (this.switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
                         groupViewHolder.imgSwitch.setChecked(false);
-                        //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                     } else {
                         groupViewHolder.imgSwitch.setChecked(true);
-                        // listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
                     }
 
                     if (isActive.equals("false")) {
@@ -301,14 +300,11 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                                     machineIP = "http://" + machineIP;
                                 }
 
-                                if (groupViewHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+                                if (groupViewHolder.imgSwitch.isChecked()) {
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-
                                     new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                                 } else {
-                                    //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-
                                     new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
                                 }
                             }
@@ -329,12 +325,8 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                             return event.getActionMasked() == MotionEvent.ACTION_MOVE;
                         }
                     });
-
                     break;
             }
-
-
-
     }
 
     public void setSingleClickListener(onSingleClickListener obj){
