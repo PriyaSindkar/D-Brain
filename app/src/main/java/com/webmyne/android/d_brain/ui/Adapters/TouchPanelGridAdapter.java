@@ -64,25 +64,7 @@ public class TouchPanelGridAdapter extends BaseAdapter {
         }
 
         viewHolder.txtSwitchName.setText(""+values.get(position));
-       /* convertView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                if (selectedValues.contains(position)) {
-
-                    viewHolder.txtSwitchName.setTextColor(Color.WHITE);
-                    selectedValues.remove(position);
-
-                } else {
-
-                    viewHolder.txtSwitchName.setTextColor(Color.RED);
-                    selectedValues.add(position);
-
-                }
-
-
-            }
-        });*/
 
         return convertView;
     }
