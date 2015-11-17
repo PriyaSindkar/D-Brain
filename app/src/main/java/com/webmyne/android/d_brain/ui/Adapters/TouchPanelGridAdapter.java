@@ -1,6 +1,7 @@
 package com.webmyne.android.d_brain.ui.Adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -17,11 +18,13 @@ import java.util.ArrayList;
 public class TouchPanelGridAdapter extends BaseAdapter {
     private Context _ctx;
     private ArrayList<String> values;
+    private ArrayList<Integer> selectedValues;
 
 
     public TouchPanelGridAdapter(Context ctx,  ArrayList<String> data) {
         this._ctx = ctx;
         this.values = data;
+        selectedValues = new ArrayList<>();
     }
 
     @Override
@@ -36,8 +39,10 @@ public class TouchPanelGridAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
+
+
 
     class ViewHolder {
         TextView txtSwitchName;
@@ -45,7 +50,7 @@ public class TouchPanelGridAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         final ViewHolder viewHolder;
         if (convertView == null) {
             convertView = View.inflate(_ctx, R.layout.touch_panel_grid_item, null);
@@ -59,7 +64,30 @@ public class TouchPanelGridAdapter extends BaseAdapter {
         }
 
         viewHolder.txtSwitchName.setText(""+values.get(position));
+       /* convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (selectedValues.contains(position)) {
+
+                    viewHolder.txtSwitchName.setTextColor(Color.WHITE);
+                    selectedValues.remove(position);
+
+                } else {
+
+                    viewHolder.txtSwitchName.setTextColor(Color.RED);
+                    selectedValues.add(position);
+
+                }
+
+
+            }
+        });*/
 
         return convertView;
     }
+
+
+
+
 }

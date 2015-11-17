@@ -11,6 +11,8 @@
     <color name="baseButtonColorTint">#AA009987</color>
 
 
+    <color name="gridDefaultColor"> #206b92</color>
+
     <color name="baseButtonColor2">#4DB8AB</color>
 
     <color name="primaryColorDark">#1976D2</color>

@@ -25,10 +25,12 @@
     </com.webmyne.android.d_brain.ui.Widgets.TouchPanelBox>
 
     <View
+        android:layout_marginLeft="48dp"
+        android:layout_marginRight="48dp"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginBottom="6dp"
         android:layout_marginTop="4dp"
-        android:background="@color/secondaryBgColor" />
+        android:background="@color/white" />
 
 </LinearLayout>

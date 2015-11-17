@@ -63,7 +63,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
     private Cursor touchPanelListCursor, switchListCursor, dimmerListCursor, motorListCursor;
     private TouchPComponentListAdapter componentAdapter;
-
+    private ListView  panelItemsList;
 
     private ImageView imgBack, imgChangeMachine;
     AlertDialog levelDialog;
@@ -79,7 +79,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     private RelativeLayout leftParent;
 
     GridView gridComponent;
-   LinearLayout linearSwitch,linearDimmer,linearMotor;
+    LinearLayout linearSwitch,linearDimmer,linearMotor;
 
 
     @Override
@@ -113,13 +113,16 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         leftParent = (RelativeLayout)findViewById(R.id.leftParent);
         txtComponentListHeading = (TextView) findViewById(R.id.txtComponentListHeading);
 
+        panelItemsList = (ListView) findViewById(R.id.panelItemsList);
+      //  panelItemsListEmptyView = (TextView) findViewById(R.id.panelItemsListEmptyView);
+      //  panelItemsList.setEmptyView(panelItemsListEmptyView);
 
         //intialize the left component panel
         View leftPanel = leftParent;
         gridComponent = (GridView)leftPanel.findViewById(R.id.gridComponent);
-        linearSwitch  = (LinearLayout)leftPanel.findViewById(R.id.linearSwitch);
-        linearDimmer  = (LinearLayout)leftPanel.findViewById(R.id.linearDimmer);
-        linearMotor  = (LinearLayout)leftPanel.findViewById(R.id.linearMotor);
+        linearSwitch = (LinearLayout)leftPanel.findViewById(R.id.linearSwitch);
+        linearDimmer = (LinearLayout)leftPanel.findViewById(R.id.linearDimmer);
+        linearMotor = (LinearLayout)leftPanel.findViewById(R.id.linearMotor);
 
         linearSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,6 +166,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             TouchPanelGridAdapter gridAdapter = new TouchPanelGridAdapter(TouchPanelActivity.this, switchNames);
             gridComponent.setNumColumns(3);
             gridComponent.setAdapter(gridAdapter);
+           // gridComponent.setOnItemClickListener(gridItemClickListener);
 
 
             int orgColor = Color.parseColor("#18516e");
@@ -185,6 +189,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             TouchPanelGridAdapter gridAdapter = new TouchPanelGridAdapter(TouchPanelActivity.this, dimmerNames);
             gridComponent.setNumColumns(3);
             gridComponent.setAdapter(gridAdapter);
+          //  gridComponent.setOnItemClickListener(gridItemClickListener);
 
             int orgColor = Color.parseColor("#18516e");
             int SelectedColor = Color.parseColor("#009987");
@@ -198,6 +203,19 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
 
     }
+
+
+//    AdapterView.OnItemClickListener gridItemClickListener = new AdapterView.OnItemClickListener() {
+//        @Override
+//        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Toast.makeText(TouchPanelActivity.this,"Clicked "+position,Toast.LENGTH_SHORT).show();
+//
+//
+//
+//        }
+//    };
+
+
 
     private void initData(){
 
@@ -226,6 +244,9 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                     setComponentGrid(1);
                 else if(Functions.isMotorAvialabel(dpc))
                     setComponentGrid(2);
+
+                //setting up touch panel
+                initTouchPanelList();
             }
 
             @Override
@@ -269,7 +290,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                     });
                 }
 
-                if(Functions.isMotorAvialabel(MACHINES.get(DEFAULT_MACHINE).getMachineProductCode())) {
+              /*  if(Functions.isMotorAvialabel(MACHINES.get(DEFAULT_MACHINE).getMachineProductCode())) {
                     initArrayOfMotors();
                     runOnUiThread(new Runnable() {
                         @Override
@@ -284,7 +305,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                             linearMotor.setVisibility(View.GONE);
                         }
                     });
-                }
+                }*/
 
 
 
@@ -294,6 +315,72 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             }
         }.execute();
     }
+
+
+    private void initTouchPanelList() {
+
+        linearTouchPanelItems.removeAllViews();
+
+        if (touchPanelListCursor != null) {
+            touchPanelListCursor.moveToFirst();
+            if (touchPanelListCursor.getCount() > 0) {
+                do {
+                    LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View view = inflater.inflate(R.layout.touch_panel_box, null);
+
+                    final String touchPanelName = touchPanelListCursor.getString(touchPanelListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+                    final String touchPanelId = touchPanelListCursor.getString(touchPanelListCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+
+                    final TextView txtPanelHeading = (TextView) view.findViewById(R.id.txtPanelHeading);
+                    txtPanelHeading.setText(touchPanelName);
+
+                    final TouchPanelBox touchPanelBox = (TouchPanelBox) view.findViewById(R.id.touchPanelBox);
+                    touchPanelBox.setPanelId(touchPanelId);
+                    touchPanelBox.setUpTouchBox();
+
+                    touchPanelBox.setOnPanelItemClickListner(new OnPaneItemClickListener() {
+                        @Override
+                        public void onPanelItemSelection(String panelName, int positionInPanel, String panelId) {
+
+                            selectedPanelId = panelId;
+                            selectedPanelPosition = positionInPanel;
+
+
+                            DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
+
+                            //get all touch panel item components
+                            try {
+                                dbHelper.openDataBase();
+                                Cursor savedPanelItemComponents = dbHelper.getPanelItemComponents(panelId, positionInPanel);
+                                touchPanelItemListAdapter = new TouchPanelItemListAdapter(TouchPanelActivity.this, R.layout.touch_panel_item_row,
+                                        savedPanelItemComponents, new String[]{DBConstants.KEY_TP_ITEM_COMPONENT_NAME},
+                                        new int[]{R.id.txtSwitchName});
+
+                                panelItemsList.setAdapter(touchPanelItemListAdapter);
+
+                                dbHelper.close();
+
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+
+                            touchPanelBox.setSelection(panelName);
+                            txtDisplayPanelName.setText(touchPanelName + "\nPos: " + positionInPanel);
+
+
+                        }
+
+                    });
+
+                    linearTouchPanelItems.addView(view);
+
+                } while (touchPanelListCursor.moveToNext());
+            }
+        }
+    }
+
+
+
 
     @Override
     protected void onResume() {
@@ -373,6 +460,8 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             touchPanelListCursor =  dbHelper.getAllTouchPanelBoxes();
             dbHelper.close();
 
+
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -420,19 +509,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void initArrayOfMotors() {
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
 
-        //insert switches in adapter ofr machine-1
-        try {
-            dbHelper.openDataBase();
-            motorListCursor =  dbHelper.getAllMotorComponents();
-            dbHelper.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void showMachinePopup(){
         final PopupMenu popup = new PopupMenu(TouchPanelActivity.this, imgChangeMachine,R.style.PopupMenu);
