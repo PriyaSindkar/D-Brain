@@ -2,13 +2,17 @@ package com.webmyne.android.d_brain.ui.Adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 
 import java.util.ArrayList;
 
@@ -17,14 +21,21 @@ import java.util.ArrayList;
  */
 public class TouchPanelGridAdapter extends BaseAdapter {
     private Context _ctx;
-    private ArrayList<String> values;
-    private ArrayList<Integer> selectedValues;
+    private ArrayList<ComponentModel> values;
+    private static int[] selectedValues;
+    private int selectedValue;
+    private onSingleClickListener _onSingleClick;
 
 
-    public TouchPanelGridAdapter(Context ctx,  ArrayList<String> data) {
+    public TouchPanelGridAdapter(Context ctx,  ArrayList<ComponentModel> data) {
         this._ctx = ctx;
         this.values = data;
-        selectedValues = new ArrayList<>();
+        selectedValue = -1;
+        selectedValues = new int[data.size()];
+
+        for(int i=0; i<data.size(); i++){
+            selectedValues[i] = 0;
+        }
     }
 
     @Override
@@ -42,10 +53,9 @@ public class TouchPanelGridAdapter extends BaseAdapter {
         return position;
     }
 
-
-
     class ViewHolder {
         TextView txtSwitchName;
+        LinearLayout itemLinear;
 
     }
 
@@ -57,19 +67,44 @@ public class TouchPanelGridAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
 
             viewHolder.txtSwitchName = (TextView) convertView.findViewById(R.id.txtTouchPanelItemName);
+            viewHolder.itemLinear = (LinearLayout) convertView.findViewById(R.id.itemLinear);
 
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        viewHolder.txtSwitchName.setText(""+values.get(position));
+        viewHolder.txtSwitchName.setText("" + values.get(position).getName());
 
+        if(selectedValue == position) {
+            viewHolder.itemLinear.setBackgroundResource(R.drawable.touch_panel_selected);
+        } else {
+            viewHolder.itemLinear.setBackgroundResource(R.drawable.touch_panel_bg);
+        }
+
+       convertView.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               _onSingleClick.onSingleClick(values.get(position).getId());
+               setSelection(position);
+               notifyDataSetChanged();
+           }
+       });
 
         return convertView;
     }
 
+    public void setSelection(int pos) {
+        /*for(int i=0; i<values.size(); i++){
+            selectedValues[i] = 0;
+        }
+        selectedValues[pos] = 1;*/
+        selectedValue = pos;
+    }
 
+    public void setOnSingleClickListener(onSingleClickListener _onSingleClick) {
+        this._onSingleClick = _onSingleClick;
+    }
 
 
 }

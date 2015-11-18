@@ -1005,6 +1005,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return component;
     }
 
+    public Cursor getComponentByPrimaryId(String componentId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_ID + "=?" ,
+                    new String[]{componentId}, null, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+            }
+
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
     public void insertIntoTouchPanel(ArrayList<TouchPanelModel> touchPanelModels) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -1028,6 +1045,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         try {
             cursor = db.query(DBConstants.TABLE_TOUCH_PANEL, null, null, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                /*if (cursor.getCount() > 0) {
+                    do {
+                    } while (cursor.moveToNext());
+                }*/
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+    }
+
+    // get touch panels for a machine
+    public Cursor getAllTouchPanelBoxesByMachineId(int machineId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_TOUCH_PANEL, null, DBConstants.KEY_TP_MID + "=?",
+                    new String[]{ String.valueOf(machineId)}, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
                 /*if (cursor.getCount() > 0) {

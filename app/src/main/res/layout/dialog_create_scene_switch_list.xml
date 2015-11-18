@@ -18,7 +18,7 @@
         android:layout_height="@dimen/HEADER_BAR_SIZE">
 
         <TextView
-            android:id="@+id/txtSceneName"
+            android:id="@+id/txtComponentListTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
@@ -36,28 +36,38 @@
 
     </android.support.v7.widget.Toolbar>
 
-    <ListView
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_margin="@dimen/VS_TEXT_SIZE"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/txtSave"
+            android:background="@drawable/round_corner_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/STD_MARGIN"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/VS_TEXT_SIZE"
+            android:textSize="@dimen/M_TEXT_SIZE"
+            android:textColor="@color/white"
+            android:text="@string/action_add_to_scene"/>
+    </LinearLayout>
+
+    <GridView
         android:layout_below="@id/toolbar"
+        android:layout_above="@id/bottomBar"
         android:id="@+id/listView"
         android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
         android:layout_marginRight="@dimen/VS_TEXT_SIZE"
         android:layout_marginTop="@dimen/STD_MARGIN"
-        android:layout_marginBottom="@dimen/STD_MARGIN"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <TextView
-        android:id="@+id/txtSave"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/round_corner_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/STD_MARGIN"
-        android:gravity="center"
-        android:layout_margin="@dimen/VS_TEXT_SIZE"
-        android:textSize="@dimen/M_TEXT_SIZE"
-        android:textColor="@color/white"
-        android:text="@string/action_add_to_scene"/>
+
+
 
     <LinearLayout
         android:id="@+id/emptyView"

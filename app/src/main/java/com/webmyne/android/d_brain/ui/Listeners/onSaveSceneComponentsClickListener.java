@@ -6,5 +6,5 @@ import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import java.util.List;
 
 public interface onSaveSceneComponentsClickListener {
-    public void onSaveClick(List<SceneItemsDataObject> selectedComponents);
+    public void onSaveClick(List<String> selectedComponents, List<String> unSelectedComponents);
 }

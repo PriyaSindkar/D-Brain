@@ -129,7 +129,6 @@ public class SceneListDialog extends BaseDialog {
                 intent.putExtra("scene_id", sceneId);
                 intent.putExtra("scene_name", sceneName);
                 intent.putExtra("new_component_id", newComponentId);
-                intent.putExtra("new_component_type", newComponentType);
                 context.startActivity(intent);
                 dismiss();
             }

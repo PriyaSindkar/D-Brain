@@ -22,6 +22,8 @@ import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Created by priyasindkar on 06-10-2015.
@@ -34,7 +36,7 @@ public class CreateSceneSwitchListAdapter extends SimpleCursorAdapter {
     private Activity activity;
     public static int[] chkState;
     private int layout;
-    private List<SceneItemsDataObject> selectedComponents;
+    private List<String> selectedComponents, unSelectedComponents;
 
     public CreateSceneSwitchListAdapter(Context context, int layout, Cursor c,
                                         String[] from, int[] to) {
@@ -51,9 +53,11 @@ public class CreateSceneSwitchListAdapter extends SimpleCursorAdapter {
         }
 
         selectedComponents = new ArrayList<>();
+        unSelectedComponents = new ArrayList<>();
     }
 
-    public void init(List<SceneItemsDataObject> _alreadyAdded) {
+    public void init(List<String> _alreadyAdded) {
+        unSelectedComponents = new ArrayList<>();
         selectedComponents = _alreadyAdded;
 
         chkState = new int[cursor.getCount()];
@@ -62,14 +66,19 @@ public class CreateSceneSwitchListAdapter extends SimpleCursorAdapter {
             chkState[i] = 0;
         }
 
-        cursor.moveToFirst();
-        do {
-            for(int i=0; i<selectedComponents.size(); i++){
-                if(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)).equals(selectedComponents.get(i).getSceneComponentPrimaryId())) {
-                    chkState[i] = 1;
+        //init the multi-select list with already added components shown as checked
+        for(int i=0; i<selectedComponents.size(); i++) {
+            cursor.moveToFirst();
+            int j=0;
+            do {
+                if (cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)).equals(selectedComponents.get(i))) {
+                    chkState[j] = 1;
+                    break;
                 }
-            }
-        } while(cursor.moveToNext());
+                j++;
+            } while (cursor.moveToNext());
+        }
+
     }
 
     @Override
@@ -90,27 +99,9 @@ public class CreateSceneSwitchListAdapter extends SimpleCursorAdapter {
         final int pos = position;
         cursor.moveToPosition(pos);
         final String componentPrimaryId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
-        final String componentId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-        final String componentName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
-        final String componentType = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
-        final String machineId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
-        final String machineIp = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
-        final String machineName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
-        final String isActive = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
 
-
-        final SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(componentType, componentName);
-        // set component_id in scene_component table
-        sceneItemsDataObject.setSceneItemId(componentId);
-        sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
-        sceneItemsDataObject.setMachineId(machineId);
-        sceneItemsDataObject.setMachineIP(machineIp);
-        sceneItemsDataObject.setMachineName(machineName);
-        sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
-        sceneItemsDataObject.setIsActive(isActive);
-
-        viewHolder.txtSwitchName.setText(componentName);
-        viewHolder.txtMachineName.setText(machineName);
+        viewHolder.txtSwitchName.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
+        viewHolder.txtMachineName.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
 
 
         if (chkState[position] == 0) {
@@ -124,10 +115,17 @@ public class CreateSceneSwitchListAdapter extends SimpleCursorAdapter {
             public void onClick(View v) {
                 if(viewHolder.checkedBox.isChecked()) {
                     chkState[pos] = 1;
-                    selectedComponents.add(sceneItemsDataObject);
+                    selectedComponents.add(componentPrimaryId);
+
+                    if(unSelectedComponents.contains(componentPrimaryId)) {
+                        unSelectedComponents.remove(componentPrimaryId);
+                    }
                 } else {
                     chkState[pos] = 0;
-                    selectedComponents.remove(sceneItemsDataObject);
+                    if(selectedComponents.contains(componentPrimaryId)) {
+                        selectedComponents.remove(componentPrimaryId);
+                    }
+                    unSelectedComponents.add(componentPrimaryId);
                 }
             }
         });
@@ -135,13 +133,17 @@ public class CreateSceneSwitchListAdapter extends SimpleCursorAdapter {
         return (convertView);
     }
 
-    public List<SceneItemsDataObject> getSelectedComponents() {
+    public List<String> getSelectedComponents() {
         return selectedComponents;
     }
 
-    public void setSelectedComponentIds(List<SceneItemsDataObject> selectedComponents) {
+    public void setSelectedComponentIds(List<String> selectedComponents) {
         this.selectedComponents = selectedComponents;
         init(selectedComponents);
+    }
+
+    public List<String> getUnSelectedComponents() {
+        return unSelectedComponents;
     }
 
     class ViewHolder {

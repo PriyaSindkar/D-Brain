@@ -53,6 +53,7 @@ public class TouchPanelBox extends LinearLayout {
     private Context mContext;
 
 
+
     public TouchPanelBox(Context context) {
         super(context);
         init(context);
@@ -75,6 +76,8 @@ public class TouchPanelBox extends LinearLayout {
 
     private void init(Context context) {
         mContext = context;
+
+
 
         View.inflate(context, R.layout.touch_panel_grid, this);
         tableLayout = (TableLayout) findViewById(R.id.tableLayout);
@@ -106,7 +109,7 @@ public class TouchPanelBox extends LinearLayout {
             view.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onPanelItemClickListner.onPanelItemSelection(name, pos+1, panelId);
+                    onPanelItemClickListner.onPanelItemSelection(TouchPanelBox.this,name, pos+1, panelId);
                 }
             });
 
@@ -125,7 +128,7 @@ public class TouchPanelBox extends LinearLayout {
             view.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onPanelItemClickListner.onPanelItemSelection(name, pos+1, panelId);
+                    onPanelItemClickListner.onPanelItemSelection(TouchPanelBox.this,name, pos+1, panelId);
                 }
             });
         }
@@ -140,32 +143,52 @@ public class TouchPanelBox extends LinearLayout {
     }*/
 
 
+    public ArrayList<String> getSelectedValues(){
+        return addedValues;
+    }
+
     public void setSelection(String panelItemName) {
 
         for (int i = 0; i < row1.getChildCount(); i++) {
+
             final int pos = i;
             final View view = row1.getChildAt(i);
             TextView txtTouchPanelItemName = (TextView) view.findViewById(R.id.txtTouchPanelItemName);
+            TextView txtTouchPanelItemId = (TextView) view.findViewById(R.id.txtTouchPanelItemId);
+
             final LinearLayout itemLinear = (LinearLayout) view.findViewById(R.id.itemLinear);
             final String name = txtTouchPanelItemName.getText().toString();
 
             if (name.equals(panelItemName)) {
-                itemLinear.setBackgroundResource(R.drawable.touch_panel_selected);
-            } else {
-                itemLinear.setBackgroundResource(R.drawable.touch_panel_bg);
+
+                if(addedValues.contains(txtTouchPanelItemId.getText().toString())){
+                    itemLinear.setBackgroundResource(R.drawable.touch_panel_bg);
+                    addedValues.remove(txtTouchPanelItemId.getText().toString());
+                }else{
+                    itemLinear.setBackgroundResource(R.drawable.touch_panel_selected);
+                    addedValues.add(txtTouchPanelItemId.getText().toString());
+                }
+
             }
         }
 
         for (int i = 0; i < row2.getChildCount(); i++) {
             final View view = row2.getChildAt(i);
             TextView txtTouchPanelItemName = (TextView) view.findViewById(R.id.txtTouchPanelItemName);
+            TextView txtTouchPanelItemId = (TextView) view.findViewById(R.id.txtTouchPanelItemId);
             final LinearLayout itemLinear = (LinearLayout) view.findViewById(R.id.itemLinear);
             final String name = txtTouchPanelItemName.getText().toString();
 
             if (name.equals(panelItemName)) {
-                itemLinear.setBackgroundResource(R.drawable.touch_panel_selected);
-            } else {
-                itemLinear.setBackgroundResource(R.drawable.touch_panel_bg);
+
+                if(addedValues.contains(txtTouchPanelItemId.getText().toString())){
+                    itemLinear.setBackgroundResource(R.drawable.touch_panel_bg);
+                    addedValues.remove(txtTouchPanelItemId.getText().toString());
+                }else{
+                    itemLinear.setBackgroundResource(R.drawable.touch_panel_selected);
+                    addedValues.add(txtTouchPanelItemId.getText().toString());
+                }
+
             }
         }
     }

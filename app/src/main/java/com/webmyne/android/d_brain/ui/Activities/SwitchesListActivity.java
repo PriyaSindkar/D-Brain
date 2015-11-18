@@ -568,9 +568,7 @@ public class SwitchesListActivity extends AppCompatActivity {
     }
 
     private void addComponentToScene(int pos) {
-
-
-           stopTherad();
+        stopTherad();
 
         switchListCursor.moveToPosition(pos);
         String componentId1 = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));

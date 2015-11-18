@@ -13,7 +13,7 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:padding="@dimen/S_MARGIN"
+            android:padding="@dimen/VS_MARGIN"
             android:layout_weight="1"
             android:orientation="vertical"
             android:layout_width="wrap_content"

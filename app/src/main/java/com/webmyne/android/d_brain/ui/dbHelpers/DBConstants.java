@@ -71,7 +71,9 @@ public class DBConstants {
     public static final String KEY_SC_MNAME = "MACHINE_NAME";
 
 
-
+    // Touch_Panel Table Column names
+    public static final String KEY_TP_ID = "_id";
+    public static final String KEY_TP_MID = "MACHINE_ID";
 
     // Touch_Panel_item Table Column names
     public static final String KEY_TP_ITEM_ID = "_id";

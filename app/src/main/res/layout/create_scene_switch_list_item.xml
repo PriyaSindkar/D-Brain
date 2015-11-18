@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:background="@color/primaryColor"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_margin="@dimen/STD_MARGIN"
     android:layout_height="wrap_content">
 
     <LinearLayout
@@ -22,6 +23,7 @@
                 android:padding="@dimen/VS_MARGIN"
                 android:layout_weight="1.9"
                 android:id="@+id/txtSwitchName"
+                android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Switch Name"
@@ -31,6 +33,7 @@
             <TextView
                 android:padding="@dimen/VS_MARGIN"
                 android:layout_weight="1.9"
+                android:singleLine="true"
                 android:id="@+id/txtMachineName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

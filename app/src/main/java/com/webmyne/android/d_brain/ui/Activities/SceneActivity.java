@@ -1,11 +1,8 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,8 +26,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
-import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
-import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
+import com.webmyne.android.d_brain.ui.Customcomponents.SwitchListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.PopupAnimationEnd;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -39,6 +35,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveSceneComponentsClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
@@ -49,13 +46,12 @@ import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class SceneActivity extends AppCompatActivity implements View.OnClickListener{
@@ -168,13 +164,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         currentSceneName = getIntent().getStringExtra("scene_name");
 
         showSceneSavedState();
-        initSwitches();
         initMotors();
-        initDimmers();
 
         //if component added from outside
         if(getIntent().getStringExtra("new_component_id") != null) {
-            addComponentToScene(getIntent().getStringExtra("new_component_id"), getIntent().getStringExtra("new_component_type"));
+            addOutsideComponentToScene(getIntent().getStringExtra("new_component_id"));
         }
 
         mRecycler.setOnClickListener(this);
@@ -436,7 +430,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void showSwitchPopup() {
-
         if( !isSwitchPopupShown) {
 
             txtSwitch.setBackgroundColor(getResources().getColor(R.color.baseButtonColor));
@@ -447,46 +440,101 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             isDimmerPopupShown = false;
             isMotorPopupShown = false;
 
-            linearPopup.setVisibility(View.VISIBLE);
-            linearControls.removeAllViews();
+            List<String> alreadyAddedComponentList = new ArrayList<>();
 
-            for(int i=0; i < initSwitches.size(); i++) {
-                linearControls.addView(initSwitches.get(i));
-
-                final int position = i;
-                initSwitches.get(i).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (initSwitches.get(position).isFocusable()) {
-                            addSwitchToScene(position);
-                        } else {
-                            if(initSwitches.get(position).getIsActive().equals("true")) {
-                                Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-                });
-
+            // init the multi-select list with already added components shown as checked (in case popup is dismissed and edited again)
+            for(int i=0; i<mData.size(); i++) {
+                alreadyAddedComponentList.add(mData.get(i).getSceneComponentPrimaryId());
             }
 
-            animationHelper.viewPopUpMenuFromBottomLeft(linearPopup);
+            SwitchListDialog switchListDialog = new SwitchListDialog(SceneActivity.this, alreadyAddedComponentList, AppConstants.SWITCH_TYPE);
+            switchListDialog.show();
+
+            switchListDialog.setOnDismissListener(new onSingleClickListener() {
+                @Override
+                public void onSingleClick(int pos) {
+                    txtSwitch.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+                    isSwitchPopupShown = false;
+                    isDimmerPopupShown = false;
+                    isMotorPopupShown = false;
+                }
+            });
+
+            switchListDialog.setOnSaveListener(new onSaveSceneComponentsClickListener() {
+                @Override
+                public void onSaveClick(List<String> _selectedComponents, List<String> _unSelectedComponents) {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                        dbHelper.openDataBase();
+
+                        // set all the selected components in the adapter
+                        for (int i = 0; i < _selectedComponents.size(); i++) {
+                            Cursor cursor = dbHelper.getComponentByPrimaryId(_selectedComponents.get(i));
+                            final String componentPrimaryId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+                            final String componentId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                            final String componentName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+                            final String componentType = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+                            final String machineId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+                            final String machineIp = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+                            final String machineName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
+                            final String isActive = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
 
 
+                            final SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(componentType, componentName);
+                            // set component_id in scene_component table
+                            sceneItemsDataObject.setSceneItemId(componentId);
+                            sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
+                            sceneItemsDataObject.setMachineId(machineId);
+                            sceneItemsDataObject.setMachineIP(machineIp);
+                            sceneItemsDataObject.setMachineName(machineName);
+                            sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+                            sceneItemsDataObject.setIsActive(isActive);
+
+                            if (!mData.contains(sceneItemsDataObject)) {
+                                addComponentToScene(sceneItemsDataObject);
+                            }
+                        }
+
+                        // remove the unselected components from the adapter
+                        for (int i = 0; i < _unSelectedComponents.size(); i++) {
+
+                            Cursor cursor = dbHelper.getComponentByPrimaryId(_unSelectedComponents.get(i));
+                            final String componentPrimaryId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+                            final SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
+                            sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
+
+                            if (mData.contains(sceneItemsDataObject)) {
+                                deletedMData.add(sceneItemsDataObject);
+                                mData.remove(sceneItemsDataObject);
+                            }
+
+                            // remove the deleted component from update list
+                            if (updatedMData.contains(sceneItemsDataObject)) {
+                                updatedMData.remove(sceneItemsDataObject);
+                            }
+
+                            // remove the deleted component from new list
+                            if (newMData.contains(sceneItemsDataObject)) {
+                                newMData.remove(sceneItemsDataObject);
+                            }
+                        }
+                        mAdapter.notifyDataSetChanged();
+                        isSceneSaved = false;
+                        dbHelper.close();
+                    } catch (Exception e) {
+                    }
+
+                    txtSwitch.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+                    isSwitchPopupShown = false;
+                    isDimmerPopupShown = false;
+                    isMotorPopupShown = false;
+                }
+            });
         } else { // if switch popup is opened, close it
-
             txtSwitch.setBackgroundColor(getResources().getColor(R.color.primaryColor));
-
             isSwitchPopupShown = false;
             isDimmerPopupShown = false;
             isMotorPopupShown = false;
-
-            animationHelper.closePopUpMenuFromBottomLeft(linearPopup);
-            animationHelper.setInterFaceObj(new PopupAnimationEnd() {
-                @Override
-                public void animationCompleted() {
-                    linearPopup.setVisibility(View.INVISIBLE);
-                }
-            });
         }
     }
 
@@ -501,44 +549,101 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             isDimmerPopupShown = true;
             isMotorPopupShown = false;
 
-            linearPopup.setVisibility(View.VISIBLE);
-            linearControls.removeAllViews();
+            List<String> alreadyAddedComponentList = new ArrayList<>();
 
-            for(int i=0; i < initDimmers.size(); i++) {
-                linearControls.addView(initDimmers.get(i));
+            // init the multi-select list with already added components shown as checked (in case popup is dismissed and edited again)
+            for(int i=0; i<mData.size(); i++) {
+                alreadyAddedComponentList.add(mData.get(i).getSceneComponentPrimaryId());
+            }
 
-                final int position = i;
-                initDimmers.get(i).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (initDimmers.get(position).isFocusable()) {
-                            addDimmerToScene(position);
-                        } else {
-                            if(initDimmers.get(position).getIsActive().equals("true")) {
-                                Toast.makeText(SceneActivity.this, "Already Added", Toast.LENGTH_SHORT).show();
+            SwitchListDialog switchListDialog = new SwitchListDialog(SceneActivity.this, alreadyAddedComponentList, AppConstants.DIMMER_TYPE);
+            switchListDialog.show();
+
+            switchListDialog.setOnDismissListener(new onSingleClickListener() {
+                @Override
+                public void onSingleClick(int pos) {
+                    txtDimmer.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+                    isSwitchPopupShown = false;
+                    isDimmerPopupShown = false;
+                    isMotorPopupShown = false;
+                }
+            });
+
+            switchListDialog.setOnSaveListener(new onSaveSceneComponentsClickListener() {
+                @Override
+                public void onSaveClick(List<String> _selectedComponents, List<String> _unSelectedComponents) {
+                    try {
+                        DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                        dbHelper.openDataBase();
+
+                        // set all the selected components in the adapter
+                        for (int i = 0; i < _selectedComponents.size(); i++) {
+                            Cursor cursor = dbHelper.getComponentByPrimaryId(_selectedComponents.get(i));
+                            final String componentPrimaryId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+                            final String componentId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                            final String componentName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+                            final String componentType = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+                            final String machineId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+                            final String machineIp = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+                            final String machineName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
+                            final String isActive = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+
+
+                            final SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(componentType, componentName);
+                            // set component_id in scene_component table
+                            sceneItemsDataObject.setSceneItemId(componentId);
+                            sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
+                            sceneItemsDataObject.setMachineId(machineId);
+                            sceneItemsDataObject.setMachineIP(machineIp);
+                            sceneItemsDataObject.setMachineName(machineName);
+                            sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+                            sceneItemsDataObject.setIsActive(isActive);
+
+                            if (!mData.contains(sceneItemsDataObject)) {
+                                addComponentToScene(sceneItemsDataObject);
                             }
                         }
 
+                        // remove the unselected components from the adapter
+                        for (int i = 0; i < _unSelectedComponents.size(); i++) {
+
+                            Cursor cursor = dbHelper.getComponentByPrimaryId(_unSelectedComponents.get(i));
+                            final String componentPrimaryId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID));
+                            final SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject();
+                            sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
+
+                            if (mData.contains(sceneItemsDataObject)) {
+                                deletedMData.add(sceneItemsDataObject);
+                                mData.remove(sceneItemsDataObject);
+                            }
+
+                            // remove the deleted component from update list
+                            if (updatedMData.contains(sceneItemsDataObject)) {
+                                updatedMData.remove(sceneItemsDataObject);
+                            }
+
+                            // remove the deleted component from new list
+                            if (newMData.contains(sceneItemsDataObject)) {
+                                newMData.remove(sceneItemsDataObject);
+                            }
+                        }
+                        mAdapter.notifyDataSetChanged();
+                        isSceneSaved = false;
+                        dbHelper.close();
+                    } catch (Exception e) {
                     }
-                });
-            }
 
-            animationHelper.viewPopUpMenuFromBottomLeft(linearPopup);
-
-        } else { // if switch popup is opened, close it
+                    txtDimmer.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+                    isSwitchPopupShown = false;
+                    isDimmerPopupShown = false;
+                    isMotorPopupShown = false;
+                }
+            });
+        } else { // if dimmer popup is opened, close it
             txtDimmer.setBackgroundColor(getResources().getColor(R.color.primaryColor));
-
             isSwitchPopupShown = false;
             isDimmerPopupShown = false;
             isMotorPopupShown = false;
-
-            animationHelper.closePopUpMenuFromBottomLeft(linearPopup);
-            animationHelper.setInterFaceObj(new PopupAnimationEnd() {
-                @Override
-                public void animationCompleted() {
-                    linearPopup.setVisibility(View.INVISIBLE);
-                }
-            });
         }
     }
 
@@ -592,52 +697,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-
-    private void initSwitches() {
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        try {
-            dbHelper.openDataBase();
-            switchListCursor = dbHelper.getAllSwitchComponents();
-            dbHelper.close();
-
-            totalNoOfSwitches = switchListCursor.getCount();
-
-            if (switchListCursor != null) {
-                switchListCursor.moveToFirst();
-                if (switchListCursor.getCount() > 0) {
-                    do {
-                        SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
-                        sceneSwitchItem.setText(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
-                        sceneSwitchItem.setSwitchId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
-                        sceneSwitchItem.setComponentPrimaryId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
-                        sceneSwitchItem.setMachineId(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID)));
-                        sceneSwitchItem.setMachineIP(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
-                        sceneSwitchItem.setMachineName(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
-                        String isActive = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
-                        sceneSwitchItem.setIsActive(isActive);
-                        sceneSwitchItem.enableDisableComponent(isActive);
-
-                        // check if this component is already added to the scene or not
-                        for(int i=0; i<mData.size(); i++) {
-                            if(mData.get(i).getSceneComponentPrimaryId().equals(switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)))) {
-                                sceneSwitchItem.setFocusable(false);
-                            }
-                        }
-                        initSwitches.add(sceneSwitchItem);
-                    } while (switchListCursor.moveToNext());
-                } else {
-                    txtSwitch.setVisibility(View.GONE);
-                    switchDivider.setVisibility(View.GONE);
-                }
-            } else {
-                txtSwitch.setVisibility(View.GONE);
-                switchDivider.setVisibility(View.GONE);
-            }
-        } catch (SQLException e) {
-            Log.e("SQLException", e.toString());
-        }
-    }
-
     private void initMotors() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         try {
@@ -669,50 +728,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 }
             } else {
                 txtMotor.setVisibility(View.GONE);
-            }
-        } catch (SQLException e) {
-            Log.e("SQLException", e.toString());
-        }
-    }
-
-    private void initDimmers() {
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        try {
-            dbHelper.openDataBase();
-            dimmerListCursor = dbHelper.getAllDimmerComponents();
-            dbHelper.close();
-
-            totalNoOfDimmers = dimmerListCursor.getCount();
-
-            if (dimmerListCursor != null) {
-                dimmerListCursor.moveToFirst();
-                if (dimmerListCursor.getCount() > 0) {
-                    do {
-                        SceneSwitchItem sceneSwitchItem = new SceneSwitchItem(SceneActivity.this);
-                        sceneSwitchItem.setText(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME)));
-                        sceneSwitchItem.setSwitchId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_COMPONENT_ID)));
-                        sceneSwitchItem.setComponentPrimaryId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)));
-                        sceneSwitchItem.setMachineId(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID)));
-                        sceneSwitchItem.setMachineIP(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP)));
-                        sceneSwitchItem.setMachineName(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME)));
-                        String isActive = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
-                        sceneSwitchItem.setIsActive(isActive);
-                        sceneSwitchItem.enableDisableComponent(isActive);
-
-                        // check if this component is already added or not
-                        for(int i=0; i<mData.size(); i++) {
-                            if(mData.get(i).getSceneComponentPrimaryId().equals(dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_ID)))) {
-                                sceneSwitchItem.setFocusable(false);
-                            }
-                        }
-
-                        initDimmers.add(sceneSwitchItem);
-                    } while (dimmerListCursor.moveToNext());
-                } else {
-                    txtDimmer.setVisibility(View.GONE);
-                }
-            } else {
-                txtDimmer.setVisibility(View.GONE);
             }
         } catch (SQLException e) {
             Log.e("SQLException", e.toString());
@@ -811,49 +826,46 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         return true;
     }
 
-    private void addComponentToScene(String componentId, String componentType) {
-        if(componentType.equals(AppConstants.SWITCH_TYPE)) {
-            for (int i = 0; i < initSwitches.size(); i++) {
-                if (initSwitches.get(i).getComponentPrimaryId().equals(componentId)) {
-                    if (initSwitches.get(i).isFocusable()) {
-                        addSwitchToScene(i);
-                    } else {
-                        if(initSwitches.get(i).getIsActive().equals("true")) {
-                            Toast.makeText(SceneActivity.this, "Component Already Added To Scene", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    break;
-                }
+    // add switch or dimmer or motor from outside
+    private void addOutsideComponentToScene(String componentPrimaryId) {
+        DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+        try {
+            Cursor cursor = dbHelper.getComponentByPrimaryId(componentPrimaryId);
+            final String componentId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+            final String componentName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+            final String componentType = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_TYPE));
+            final String machineId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+            final String machineIp = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
+            final String machineName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME));
+            final String isActive = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+
+            dbHelper.close();
+
+            final SceneItemsDataObject sceneItemsDataObject =  new SceneItemsDataObject(componentType, componentName);
+            // set component_id in scene_component table
+            sceneItemsDataObject.setSceneItemId(componentId);
+            sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
+            sceneItemsDataObject.setMachineId(machineId);
+            sceneItemsDataObject.setMachineIP(machineIp);
+            sceneItemsDataObject.setMachineName(machineName);
+            sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
+            sceneItemsDataObject.setIsActive(isActive);
+
+            if( !mData.contains(sceneItemsDataObject)) {
+                addComponentToScene(sceneItemsDataObject);
+            } else {
+                Toast.makeText(SceneActivity.this, "Component Already Added.", Toast.LENGTH_LONG).show();
             }
-        } else if(componentType.equals(AppConstants.DIMMER_TYPE)) {
-            for (int i = 0; i < initDimmers.size(); i++) {
-                if (initDimmers.get(i).getComponentPrimaryId().equals(componentId)) {
-                    if (initDimmers.get(i).isFocusable()) {
-                        addDimmerToScene(i);
-                    } else {
-                        if(initDimmers.get(i).getIsActive().equals("true")) {
-                            Toast.makeText(SceneActivity.this, "Component Already Added To Scene", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    break;
-                }
-            }
-        }
+
+        } catch (Exception e) {}
     }
 
-    private void addSwitchToScene(int position){
-        SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.SWITCH_TYPE, initSwitches.get(position).getText());
-        sceneItemsDataObject.setSceneItemId(initSwitches.get(position).getSwitchId());
-        sceneItemsDataObject.setSceneComponentPrimaryId(initSwitches.get(position).getComponentPrimaryId());
-        sceneItemsDataObject.setMachineId(initSwitches.get(position).getMachineId());
-        sceneItemsDataObject.setMachineIP(initSwitches.get(position).getMachineIP());
-        sceneItemsDataObject.setMachineName(initSwitches.get(position).getMachineName());
+    // add switch or dimmer or motor to scene
+    private void addComponentToScene(SceneItemsDataObject sceneItemsDataObject){
 
-        sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
-        sceneItemsDataObject.setIsActive(initSwitches.get(position).getIsActive());
-
-        mData.add(sceneItemsDataObject);
-
+        if( !mData.contains(sceneItemsDataObject)) {
+            mData.add(sceneItemsDataObject);
+        }
 
         // remove the new component from deleted list
         if (deletedMData.contains(sceneItemsDataObject)) {
@@ -866,42 +878,11 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         }
 
         // to save this new component
-        newMData.add(sceneItemsDataObject);
-        mAdapter.notifyDataSetChanged();
-        initSwitches.get(position).setFocusable(false);
-        isSceneSaved = false;
-
-    }
-
-    private void addDimmerToScene(int position){
-        SceneItemsDataObject sceneItemsDataObject = new SceneItemsDataObject(AppConstants.DIMMER_TYPE, initDimmers.get(position).getText());
-        sceneItemsDataObject.setSceneItemId(initDimmers.get(position).getSwitchId());
-        sceneItemsDataObject.setSceneComponentPrimaryId(initDimmers.get(position).getComponentPrimaryId());
-        sceneItemsDataObject.setMachineId(initDimmers.get(position).getMachineId());
-        sceneItemsDataObject.setMachineIP(initDimmers.get(position).getMachineIP());
-        sceneItemsDataObject.setMachineName(initDimmers.get(position).getMachineName());
-        sceneItemsDataObject.setDefaultValue(AppConstants.OFF_VALUE);
-        sceneItemsDataObject.setIsActive(initDimmers.get(position).getIsActive());
-        //mAdapter.add(mData.size(), sceneItemsDataObject);
-        mData.add(sceneItemsDataObject);
-
-        // remove the new component from deleted list
-        if(deletedMData.contains(sceneItemsDataObject)) {
-            deletedMData.remove(sceneItemsDataObject);
+        if( !newMData.contains(sceneItemsDataObject)) {
+            newMData.add(sceneItemsDataObject);
         }
-
-        // remove the new component from updated list
-        if(updatedMData.contains(sceneItemsDataObject)) {
-            updatedMData.remove(sceneItemsDataObject);
-        }
-
-        // to save this new component
-        newMData.add(sceneItemsDataObject);
-
         mAdapter.notifyDataSetChanged();
-        initDimmers.get(position).setFocusable(false);
         isSceneSaved = false;
-
     }
 
     private void addComponentToScheduler() {

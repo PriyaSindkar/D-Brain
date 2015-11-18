@@ -16,23 +16,17 @@
         android:paddingBottom="@dimen/ICON_PADDING"
         android:paddingTop="@dimen/ICON_PADDING">
 
-
-
-            <TextView
-                android:id="@+id/txtTouchPanelItemName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:clickable="false"
-                android:gravity="center"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:text="TP01"
-                android:textColor="@color/white"
-                android:textSize="@dimen/M_TEXT_SIZE" />
-
-
+        <TextView
+            android:id="@+id/txtTouchPanelItemName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:clickable="false"
+            android:gravity="center"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="TP01"
+            android:textColor="@color/white"
+            android:textSize="@dimen/M_TEXT_SIZE" />
     </LinearLayout>
-
-
 </LinearLayout>

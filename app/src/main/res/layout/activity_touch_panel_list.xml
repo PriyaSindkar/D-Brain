@@ -25,15 +25,15 @@
             android:background="@color/white" />
 
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_weight="1"
             android:id="@+id/panelSetLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:gravity="center">
 
             <ScrollView
+                android:id="@+id/scrollView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -48,7 +48,23 @@
                 </LinearLayout>
             </ScrollView>
 
-        </LinearLayout>
+           <!-- <LinearLayout
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/round_corner_button"
+                android:layout_width="match_parent"
+                android:layout_margin="@dimen/VS_TEXT_SIZE"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:textColor="@color/white"
+                    android:gravity="center"
+                    android:padding="@dimen/VS_TEXT_SIZE"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Save"/>
+            </LinearLayout>-->
+
+        </RelativeLayout>
 
 
     </LinearLayout>

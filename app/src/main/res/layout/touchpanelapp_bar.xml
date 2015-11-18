@@ -27,16 +27,44 @@
         android:textSize="@dimen/L_TEXT_SIZE" />
 
 
-
-    <ImageView
+    <LinearLayout
         android:layout_alignParentRight="true"
-        android:id="@+id/imgChangeMachine"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="@dimen/L_MARGIN"
-        android:padding="@dimen/S_MARGIN"
-        android:layout_gravity="right"
-        android:src="@drawable/ic_edit" />
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_height="wrap_content">
+
+
+        <ImageView
+            android:id="@+id/imgChangeMachine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/STD_MARGIN"
+            android:padding="@dimen/STD_MARGIN"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_edit" />
+
+        <LinearLayout
+            android:id="@+id/linearSaveTouchPanel"
+            android:background="@drawable/round_corner_button"
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:layout_margin="@dimen/STD_MARGIN"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/txtSaveTouchPanel"
+                android:padding="@dimen/STD_MARGIN"
+                android:layout_width="wrap_content"
+                android:gravity="center"
+                android:textSize="@dimen/M_TEXT_SIZE"
+                android:layout_height="match_parent"
+                android:textColor="@color/white"
+                android:text="Save"/>
+
+        </LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>
