@@ -27,6 +27,9 @@ public class DBConstants {
     // TouchPanel table name
     public static final String TABLE_TOUCH_PANEL_ITEM = "TouchPanelItem";
 
+    // TouchPanel table name
+    public static final String TABLE_TOUCH_PANEL_SWITCH = "TouchPanelSwitch";
+
     // Favorite table name
     public static final String TABLE_FAVOURITE = "FavouriteComponent";
 
@@ -83,6 +86,19 @@ public class DBConstants {
     public static final String KEY_TP_ITEM_COMPONENT_NAME = "COMPONENT_NAME";
     public static final String KEY_TP_ITEM_COMPONENT_TYPE = "COMPONENT_TYPE";
     public static final String KEY_TP_ITEM_DEF_VALUE = "DEF_VALUE";
+
+    // Touch_Panel_Switch Table Column names
+    public static final String KEY_TP_SWITCH_ID = "_id";
+    public static final String KEY_TP_SWITCH_COMPONENT_NAME = "COMPONENT_NAME";
+    public static final String KEY_TP_SWITCH_COMPONENT_TYPE = "COMPONENT_TYPE";
+    public static final String KEY_TP_SWITCH_MID = "MACHINE_ID";
+    public static final String KEY_TP_SWITCH_PAYLOAD = "PAYLOAD";
+    public static final String KEY_TP_SWITCH_PAYLOAD1 = "POS1";
+    public static final String KEY_TP_SWITCH_PAYLOAD2 = "POS2";
+    public static final String KEY_TP_SWITCH_PAYLOAD3 = "POS3";
+    public static final String KEY_TP_SWITCH_PAYLOAD4 = "POS4";
+    public static final String KEY_TP_SWITCH_PAYLOAD5 = "POS5";
+    public static final String KEY_TP_SWITCH_PAYLOAD6 = "POS6";
 
     //Favourite table column names
     public static final String KEY_F_CNAME = "COMPONENT_NAME";

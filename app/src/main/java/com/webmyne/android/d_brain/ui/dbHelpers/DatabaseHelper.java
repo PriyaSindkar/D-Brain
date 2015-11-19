@@ -7,10 +7,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.webmyne.android.d_brain.ui.Adapters.CreateSceneAdapter;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.SceneItemsDataObject;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.Model.TouchPanelModel;
+import com.webmyne.android.d_brain.ui.Model.TouchPanelSwitchModel;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
 import java.io.File;
@@ -1090,14 +1092,77 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_TP_ITEM_COMPONENT_TYPE, component.getType());
         values.put(DBConstants.KEY_TP_ITEM_DEF_VALUE, "");
 
-        if( !isPanelItemComponentAlreadyExists(panelId, positionInPanel,component.getComponentId())) {
+        if( !isPanelItemComponentAlreadyExists(panelId, positionInPanel, component.getComponentId())) {
             Log.e("NEW",component.getComponentId() );
             db.insert(DBConstants.TABLE_TOUCH_PANEL_ITEM, null, values);
         } else {
-            Log.e("EXisITS", component.getComponentId() );
+            Log.e("EXisITS", component.getComponentId());
         }
 
         db.close();
+    }
+
+    // touch panel switch (with payload)
+    public void insertOrUpdateIntoPanelSwitch(TouchPanelSwitchModel component) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(DBConstants.KEY_TP_SWITCH_MID, component.getMid());
+        values.put(DBConstants.KEY_TP_SWITCH_COMPONENT_NAME, component.getComponentName());
+        values.put(DBConstants.KEY_TP_SWITCH_COMPONENT_TYPE, component.getComponentType());
+        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD1, component.getPos1());
+        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD2, component.getPos2());
+        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD3, component.getPos3());
+        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD4, component.getPos4());
+        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD5, component.getPos5());
+        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD6, component.getPos6());
+        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD, component.getPayLoad());
+
+        if( !isPanelSwitchComponentAlreadyExists(component.getMid(), component.getComponentName())) {
+            db.insert(DBConstants.TABLE_TOUCH_PANEL_SWITCH, null, values);
+        } else {
+            db.update(DBConstants.TABLE_TOUCH_PANEL_SWITCH, values, DBConstants.KEY_TP_SWITCH_MID + "='" + component.getMid() + "'"
+                    + " AND " + DBConstants.KEY_TP_SWITCH_COMPONENT_NAME + "='" + component.getComponentName() + "'", null);
+        }
+
+        db.close();
+    }
+
+    // get all switch components for a machine
+    public Cursor getAllSwitchComponentsForTouchPanel(String machineId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_SWITCH, null, DBConstants.KEY_TP_SWITCH_MID + "=? AND "
+                            + DBConstants.KEY_TP_SWITCH_COMPONENT_TYPE + "=?",
+                    new String[]{machineId, AppConstants.SWITCH_TYPE }, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+
+    }
+
+    // get all dimmer components for a machine
+    public Cursor getAllDimmerComponentsForTouchPanel(String machineId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_SWITCH, null, DBConstants.KEY_TP_SWITCH_MID + "=? AND "
+                            + DBConstants.KEY_TP_SWITCH_COMPONENT_TYPE + "=?",
+                    new String[]{machineId, AppConstants.DIMMER_TYPE }, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
+
     }
 
     public Cursor getPanelItemComponents(String panelId, int positionInPanel) {
@@ -1148,6 +1213,55 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.e("EXP ", e.toString());
         }
         return result;
+    }
+
+
+    // if component is already assigned to a touch panel switch
+    public boolean isPanelSwitchComponentAlreadyExists(String machineId, String componentName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        boolean result = true;
+        try {
+            // TO:DO search machine-wise
+
+           /* cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_C_MIP + "=?",
+                    new String[]{URL_MACHINE_IP}, null, null, null, null);*/
+
+            cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_SWITCH, null, DBConstants.KEY_TP_SWITCH_MID + "=? AND "
+                            + DBConstants.KEY_TP_SWITCH_COMPONENT_NAME + "=?",
+                    new String[]{machineId, componentName}, null, null, null, null);
+            if (cursor != null) {
+                if(cursor.getCount() == 0) {
+                    result =  false;
+                } else {
+                    result =  true;
+                }
+            } else {
+                result =  false;
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return result;
+    }
+
+    // get touch panel switch assignments for selected component
+    public Cursor getSwitchAssignmentForAComponent(String machineId, String componentName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_SWITCH, null, DBConstants.KEY_TP_SWITCH_MID + "=? AND "
+                            + DBConstants.KEY_TP_SWITCH_COMPONENT_NAME + "=?",
+                    new String[]{machineId, componentName}, null, null, null, null);
+            if (cursor != null) {
+                if (cursor.getCount() > 0) {
+                    cursor.moveToFirst();
+                }
+            }
+        }catch (Exception e) {
+            Log.e("EXP ", e.toString());
+        }
+        return cursor;
     }
 
     public void deletePanelItemComponents(String panelId, int positionInPanel, String componentId) {
@@ -1337,10 +1451,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, null,null, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
-               /* if (cursor.getCount() > 0) {
-                    do {
-                    } while (cursor.moveToNext());
-                }*/
             }
         }catch (Exception e) {
             Log.e("EXP ", e.toString());

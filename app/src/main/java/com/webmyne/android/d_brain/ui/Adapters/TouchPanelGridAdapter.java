@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onTouchPanelSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class TouchPanelGridAdapter extends BaseAdapter {
     private ArrayList<ComponentModel> values;
     private static int[] selectedValues;
     private int selectedValue;
-    private onSingleClickListener _onSingleClick;
+    private onTouchPanelSingleClickListener _onSingleClick;
 
 
     public TouchPanelGridAdapter(Context ctx,  ArrayList<ComponentModel> data) {
@@ -85,7 +86,7 @@ public class TouchPanelGridAdapter extends BaseAdapter {
        convertView.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View v) {
-               _onSingleClick.onSingleClick(values.get(position).getId());
+               _onSingleClick.onTouchPanelSingleClick(values.get(position).getComponentId(), String.valueOf(values.get(position).getId()));
                setSelection(position);
                notifyDataSetChanged();
            }
@@ -102,7 +103,7 @@ public class TouchPanelGridAdapter extends BaseAdapter {
         selectedValue = pos;
     }
 
-    public void setOnSingleClickListener(onSingleClickListener _onSingleClick) {
+    public void setOnTouchPanelSingleClickListener(onTouchPanelSingleClickListener _onSingleClick) {
         this._onSingleClick = _onSingleClick;
     }
 

@@ -33,5 +33,6 @@
     <string name="all_machines_off_text">All Machines Are Inactive</string>
     <string name="click_here">Click Here To Active Machine(s)</string>
     <string name="empty_switch_list">No Switches Found</string>
+    <string name="machine_unavailable">This Machine Is Unavailable</string>
 
 </resources>

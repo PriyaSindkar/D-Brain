@@ -30,6 +30,9 @@ public class AppConstants {
     public static String URL_CHANGE_DIMMER_STATUS = "/cdmcr.cgi?DM=";
     public static String URL_FETCH_SENSOR_STATUS = "/ascr.xml";
 
+    public static String URL_FETCH_TOUCH_PANEL_SWITCHLIST_STATUS = "/tchcon.xml";
+    public static String URL_CHANGE_TOUCH_PANEL_SWITCHLIST_STATUS = "/ctchcon.cgi?TSW=";
+
     //Type of component
     public static String SWITCH_TYPE="switch";
     public static String DIMMER_TYPE="dimmer";
@@ -41,11 +44,12 @@ public class AppConstants {
     public static String ALERT_PREFIX = "AS";
     public static String TOUCH_PANEL_TYPE = "touch_panel";
     public static String SCENE_TYPE="scene";
+    public static String TOUCHPANEL_SWITCH_PREFIX = "T";
 
     //component values
     public  static String OFF_VALUE = "00";
     public  static String ON_VALUE = "01";
-    public  static String DIMMER_DEFAULT_VALUE = "00";
+    public  static String TOUCH_PANEL_DEFAULT_VALUE = "0000";
 
     public static int TIMEOUT = 3000;
 
