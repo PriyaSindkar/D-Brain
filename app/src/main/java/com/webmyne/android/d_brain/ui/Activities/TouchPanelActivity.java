@@ -77,6 +77,8 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
     GridView gridComponent;
     LinearLayout linearSwitch,linearDimmer,linearMotor;
+    int timeOutErrorCounter = 0;
+    boolean isTimeOutContinue = true, isSaved  = true;
 
 
     @Override
@@ -194,28 +196,29 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                     touchPanelSwitchModel.setComponentType(AppConstants.MOTOR_TYPE);
                 }
 
+                if(  !isSaved) {
+                    // payload 24-bytes with component-position prefix to send with webservice
+                    String urlPayLoad = selectedComponentId.substring(2, 4) + payLoad.toString();
 
-                // payload 24-bytes with component-position prefix to send with webservice
-                String urlPayLoad = selectedComponentId.substring(2,4) + payLoad.toString();
+                    // update in db
+                    DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.insertOrUpdateIntoPanelSwitch(touchPanelSwitchModel);
+                        dbHelper.close();
+                    } catch (Exception e) {
+                    }
 
-                // update in db
-                DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
-                try {
-                    dbHelper.openDataBase();
-                    dbHelper.insertOrUpdateIntoPanelSwitch(touchPanelSwitchModel);
-                    dbHelper.close();
-                } catch (Exception e) {}
-
-                // call change webservice
-                String[] params = {urlPayLoad};
-                new ChangeTouchPanelStatus().execute(params);
-
-                Toast.makeText(TouchPanelActivity.this, "Switches Assigned.", Toast.LENGTH_SHORT).show();
+                    // call change webservice
+                    String[] params = {urlPayLoad};
+                    new ChangeTouchPanelStatus().execute(params);
+                }
             }
         });
     }
 
     private void setComponentGrid(int componentType){
+        isSaved = true;
         SELECTED_COMPONENT_TYPE = componentType;
         linearTouchPanelItems.removeAllViews();
         // 0 - Switch
@@ -245,6 +248,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             gridAdapter.setOnTouchPanelSingleClickListener(new onTouchPanelSingleClickListener() {
                 @Override
                 public void onTouchPanelSingleClick(String componentId, String componentPrimaryId) {
+                    isSaved = false;
                     // save selected switch component id's (for db)
                     selectedComponentId = componentId;
                     selectedComponentPrimaryId = componentPrimaryId;
@@ -281,6 +285,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             gridAdapter.setOnTouchPanelSingleClickListener(new onTouchPanelSingleClickListener() {
                 @Override
                 public void onTouchPanelSingleClick(String componentId, String componentPrimaryId) {
+                    isSaved = false;
                     // save selected switch component id's (for db)
                     selectedComponentId = componentId;
                     selectedComponentPrimaryId = componentPrimaryId;
@@ -434,7 +439,6 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     public OnPaneItemClickListener onPaneItemClickListener = new OnPaneItemClickListener() {
         @Override
         public void onPanelItemSelection(TouchPanelBox touchPanelBox, String oldName, int positionInPanel, String panelId) {
-
             if(touchPanelBox.getSelectedValues().contains(String.valueOf(positionInPanel))){
                 touchPanelBox.setSelection(oldName);
             }else{
@@ -622,12 +626,9 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         popup.show();//showing popup menu
     }
 
-    int timeOutErrorCounter = 0;
-    boolean isTimeOutContinue = true;
-
     // fetch touch panel assignment
     public class GetTouchPanelStatus extends AsyncTask<Void, Void, Void> {
-        String machineId="", machineName = "", machineIp, isMachineActive = "false";
+        String isMachineActive = "false";
         boolean isMachineUnAvailable = false;
 
         Cursor machineCursor, componentCursor;
@@ -687,11 +688,18 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
             } catch (Exception e) {
                 Log.e("# ~~~~~timeout~~~~~", timeOutErrorCounter+"");
-                //isMachineUnAvailable = true;
                 if(timeOutErrorCounter < 10) {
                     timeOutErrorCounter ++;
                     isTimeOutContinue = true;
                 } else {
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(String.valueOf(CURRENT_MACHINE_ID), false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("SQL EXP", ex.toString());
+                    }
+
                     isTimeOutContinue = false;
                     isMachineUnAvailable = true;
                 }
@@ -709,13 +717,20 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             } else {
                 timeOutErrorCounter = 0;
                 if (isMachineUnAvailable) {
+
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(String.valueOf(CURRENT_MACHINE_ID), false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("SQL EXP", ex.toString());
+                    }
+
                     MachineUnAvailableAlertDialog machineUnAvailableAlertDialog = new MachineUnAvailableAlertDialog(TouchPanelActivity.this);
                     machineUnAvailableAlertDialog.show();
 
                     linearTouchPanelItems.removeAllViews();
                 } else {
-
-                    DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
 
                     //insert switches in adapter for machine-1
                     try {
@@ -779,8 +794,12 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    // chnage touch panel assignments
+    // change touch panel assignments
     public class ChangeTouchPanelStatus extends AsyncTask<String, Void, Void> {
+        DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
+        Cursor machineCursor;
+        String isMachineActive = "true";
+        boolean isMachineUnAvailable = false;
 
         @Override
         protected void onPreExecute() {
@@ -800,15 +819,45 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                     machineBaseURL = "http://" + CURRENT_MACHINE_IP;
                 }
 
-                URL urlValue = new URL(machineBaseURL + AppConstants.URL_CHANGE_TOUCH_PANEL_SWITCHLIST_STATUS + params[0]);
-                Log.e("# url", urlValue.toString());
+                // get current machine details
+                dbHelper.openDataBase();
+                machineCursor = dbHelper.getMachineByID(String.valueOf(CURRENT_MACHINE_ID));
+                isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
+
+                if(isMachineActive.equals("true")) {
+                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_CHANGE_TOUCH_PANEL_SWITCHLIST_STATUS + params[0]);
+                    Log.e("# url", urlValue.toString());
+
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+
+                    isTimeOutContinue = false;
+                } else {
+                    isMachineUnAvailable = true;
+                    isTimeOutContinue = false;
+                }
 
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+                Log.e("# ~~~~~timeout~~~~~", timeOutErrorCounter+"");
+                if(timeOutErrorCounter < 10) {
+                    timeOutErrorCounter ++;
+                    isTimeOutContinue = true;
+                } else {
+
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(String.valueOf(CURRENT_MACHINE_ID), false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("SQL EXP", ex.toString());
+                    }
+
+                    isTimeOutContinue = false;
+                    isMachineUnAvailable = true;
+                }
             }
             return null;
         }
@@ -817,38 +866,59 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             progress_dialog.hide();
+
+            if(isTimeOutContinue) {
+                new GetTouchPanelStatus().execute();
+            } else {
+                timeOutErrorCounter = 0;
+                if (isMachineUnAvailable) {
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(String.valueOf(CURRENT_MACHINE_ID), false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("SQL EXP", ex.toString());
+                    }
+
+                    MachineUnAvailableAlertDialog machineUnAvailableAlertDialog = new MachineUnAvailableAlertDialog(TouchPanelActivity.this);
+                    machineUnAvailableAlertDialog.show();
+                } else {
+                    Toast.makeText(TouchPanelActivity.this, "Switches Assigned.", Toast.LENGTH_SHORT).show();
+                }
+            }
         }
     }
 
     private void initSelectionForAComponent(Cursor cursor) {
 
         if(cursor != null) {
-            cursor.moveToFirst();
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
 
-            String payload = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD));
+                String payload = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD));
 
-            String payload1 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD1));
-            String payload2 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD2));
-            String payload3 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD3));
-            String payload4 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD4));
-            String payload5 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD5));
-            String payload6 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD6));
+                String payload1 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD1));
+                String payload2 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD2));
+                String payload3 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD3));
+                String payload4 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD4));
+                String payload5 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD5));
+                String payload6 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD6));
 
-            HashMap<String, String> defaultPayload = new HashMap<>();
+                HashMap<String, String> defaultPayload = new HashMap<>();
 
-            defaultPayload.put(String.valueOf(0), payload1);
-            defaultPayload.put(String.valueOf(1), payload2);
-            defaultPayload.put(String.valueOf(2), payload3);
-            defaultPayload.put(String.valueOf(3), payload4);
-            defaultPayload.put(String.valueOf(4), payload5);
-            defaultPayload.put(String.valueOf(5), payload6);
+                defaultPayload.put(String.valueOf(0), payload1);
+                defaultPayload.put(String.valueOf(1), payload2);
+                defaultPayload.put(String.valueOf(2), payload3);
+                defaultPayload.put(String.valueOf(3), payload4);
+                defaultPayload.put(String.valueOf(4), payload5);
+                defaultPayload.put(String.valueOf(5), payload6);
 
-            Log.e("defaultPayload webservice", defaultPayload.toString());
+                Log.e("defaultPayload webservice", defaultPayload.toString());
 
-            // show touch panel list with selection
-            initTouchPanelList(defaultPayload);
+                // show touch panel list with selection
+                initTouchPanelList(defaultPayload);
+            }
         }
-
     }
 
 
