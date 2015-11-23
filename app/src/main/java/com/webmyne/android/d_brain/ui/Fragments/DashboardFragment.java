@@ -362,10 +362,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 break;
 
             case R.id.bulb_image:
+                txtPowerOffMessageLink.setVisibility(View.GONE);
                 if(isBulbOn) {
                   //  linearMainBody.setAlpha(0.3f);
                     //Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
-
+                    txtPowerOffMessage.setText(getString(R.string.power_off_text));
                     showOffScreen();
                     ((HomeDrawerActivity) getActivity()).hideDrawer();
 

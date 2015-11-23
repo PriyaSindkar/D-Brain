@@ -374,9 +374,9 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 Log.e("# SWCR CHANGE", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
-
 
             } catch (Exception e) {
                 Log.e("# EXP adapter", e.toString());

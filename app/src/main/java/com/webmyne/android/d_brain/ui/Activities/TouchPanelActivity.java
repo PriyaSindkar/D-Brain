@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
@@ -27,7 +28,9 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.TouchPanelGridAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.TouchPanelItemListAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.MachineUnAvailableAlertDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Listeners.OnPaneItemClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onTouchPanelSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.Machine;
@@ -53,7 +56,9 @@ import java.util.HashMap;
 public class TouchPanelActivity extends AppCompatActivity implements View.OnClickListener{
     private Toolbar toolbar;
     private TextView toolbarTitle, txtDisplayPanelName, listComponentsEmptyView, panelItemsListEmptyView, txtComponentListHeading;
-    private LinearLayout linearTouchPanelItems, linearSaveTouchPanel;
+    private LinearLayout linearTouchPanelItems, linearSaveTouchPanel, linearEmptyView, linearDimmerOptions;
+    //dimmer selectors
+    private LinearLayout linearTPDimmerOnOff, linearTPDimmerUp, linearTPDimmerDown;
     private RelativeLayout panelSetLayout;
 
     private Cursor touchPanelListCursor, switchListCursor, dimmerListCursor, motorListCursor, currentComponentAssignmentCursor;
@@ -68,7 +73,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     private TouchPanelItemListAdapter touchPanelItemListAdapter;
 
     private String CURRENT_MACHINE_IP, CURRENT_MACHINE_NAME;
-    private int CURRENT_MACHINE_ID, DEFAULT_MACHINE, SELECTED_COMPONENT_TYPE = 0;
+    private int CURRENT_MACHINE_ID, DEFAULT_MACHINE, SELECTED_COMPONENT_TYPE = 0, DIMMER_SELECTOR, PREVIUOS_SELECTED_COMPONENT_TYPE;
     private ArrayList<Machine> MACHINES;
 
     private RelativeLayout leftParent;
@@ -78,7 +83,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     GridView gridComponent;
     LinearLayout linearSwitch,linearDimmer,linearMotor;
     int timeOutErrorCounter = 0;
-    boolean isTimeOutContinue = true, isSaved  = true;
+    boolean isTimeOutContinue = true, isSwitchSaved  = true, isDimmerSaved  = true;
 
 
     @Override
@@ -113,6 +118,27 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
         txtComponentListHeading = (TextView) findViewById(R.id.txtComponentListHeading);
         linearSaveTouchPanel = (LinearLayout) findViewById(R.id.linearSaveTouchPanel);
         panelItemsList = (ListView) findViewById(R.id.panelItemsList);
+        linearEmptyView = (LinearLayout) findViewById(R.id.linearEmptyView);
+        linearDimmerOptions = (LinearLayout) findViewById(R.id.linearDimmerOptions);
+
+        // dimmer selectors
+        linearTPDimmerOnOff = (LinearLayout) findViewById(R.id.linearTPDimmerOnOff);
+        linearTPDimmerUp = (LinearLayout) findViewById(R.id.linearTPDimmerUp);
+        linearTPDimmerDown = (LinearLayout) findViewById(R.id.linearTPDimmerDown);
+
+        linearTPDimmerOnOff.setOnClickListener(this);
+        linearTPDimmerUp.setOnClickListener(this);
+        linearTPDimmerDown.setOnClickListener(this);
+
+        linearTPDimmerOnOff.setClickable(false);
+        linearTPDimmerUp.setClickable(false);
+        linearTPDimmerDown.setClickable(false);
+
+        //default seletor set to on/off
+        linearTPDimmerOnOff.setAlpha(0.5f);
+        linearTPDimmerUp.setAlpha(1.0f);
+        linearTPDimmerDown.setAlpha(1.0f);
+
 
         //intialize the left component panel
         View leftPanel = leftParent;
@@ -149,83 +175,228 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View v) {
 
-                HashMap<String, String> defaultPayLoad = new HashMap<String, String>();
-                for (int i = 0; i < 6; i++) {
-                    defaultPayLoad.put(i + "", "0000");
-                }
+                if(SELECTED_COMPONENT_TYPE == 0) { //switch
+                    saveSwitchesAssignmentsOfTouchPanel();
+                } else if (SELECTED_COMPONENT_TYPE == 1) { // dimmer
+                    saveDimmersAssignmentsOfTouchPanel();
+                } else { //motor
 
-                int t = 0; // counter for payload
-
-                for (int i = 0; i < linearTouchPanelItems.getChildCount(); i++) {
-                    View view = linearTouchPanelItems.getChildAt(i);
-                    TouchPanelBox touchPanelBox = (TouchPanelBox) view.findViewById(R.id.touchPanelBox);
-                    String tpId = String.valueOf(i + 1);
-                    ArrayList<String> selectedValues = touchPanelBox.getSelectedValues();
-
-                    if (!selectedValues.isEmpty()) {
-                        for (int j = 0; j < selectedValues.size(); j++) {
-                            String tpPosition = selectedValues.get(j);
-                            defaultPayLoad.put(t + "", String.format("%02d", Integer.parseInt(tpId)) + String.format("%02d", Integer.parseInt(tpPosition)));
-                            t++;
-                        }
-                    }
-                }
-
-                TouchPanelSwitchModel touchPanelSwitchModel = new TouchPanelSwitchModel();
-                touchPanelSwitchModel.setPos1(defaultPayLoad.get(String.valueOf(0)));
-                touchPanelSwitchModel.setPos2(defaultPayLoad.get(String.valueOf(1)));
-                touchPanelSwitchModel.setPos3(defaultPayLoad.get(String.valueOf(2)));
-                touchPanelSwitchModel.setPos4(defaultPayLoad.get(String.valueOf(3)));
-                touchPanelSwitchModel.setPos5(defaultPayLoad.get(String.valueOf(4)));
-                touchPanelSwitchModel.setPos6(defaultPayLoad.get(String.valueOf(5)));
-
-
-                StringBuilder payLoad = new StringBuilder();
-                for (int i = 0; i < 6; i++) {
-                    payLoad.append(defaultPayLoad.get(String.valueOf(i)));
-                }
-                touchPanelSwitchModel.setMid(String.valueOf(CURRENT_MACHINE_ID));
-                touchPanelSwitchModel.setComponentName(AppConstants.TOUCHPANEL_SWITCH_PREFIX + selectedComponentId);
-                touchPanelSwitchModel.setPayLoad(payLoad.toString());
-
-                if(SELECTED_COMPONENT_TYPE == 0) { //switches
-                    touchPanelSwitchModel.setComponentType(AppConstants.SWITCH_TYPE);
-                } else if(SELECTED_COMPONENT_TYPE == 1){ //dimmers
-                    touchPanelSwitchModel.setComponentType(AppConstants.DIMMER_TYPE);
-                } else if(SELECTED_COMPONENT_TYPE == 2){ //motors
-                    touchPanelSwitchModel.setComponentType(AppConstants.MOTOR_TYPE);
-                }
-
-                if(  !isSaved) {
-                    // payload 24-bytes with component-position prefix to send with webservice
-                    String urlPayLoad = selectedComponentId.substring(2, 4) + payLoad.toString();
-
-                    // update in db
-                    DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
-                    try {
-                        dbHelper.openDataBase();
-                        dbHelper.insertOrUpdateIntoPanelSwitch(touchPanelSwitchModel);
-                        dbHelper.close();
-                    } catch (Exception e) {
-                    }
-
-                    // call change webservice
-                    String[] params = {urlPayLoad};
-                    new ChangeTouchPanelStatus().execute(params);
                 }
             }
         });
     }
 
+    // save the assigned switch components in db and call status change webservice
+    private void saveSwitchesAssignmentsOfTouchPanel() {
+        HashMap<String, String> defaultPayLoad = new HashMap<String, String>();
+        for (int i = 0; i < 6; i++) {
+            defaultPayLoad.put(i + "", "0000");
+        }
+
+        int t = 0; // counter for payload
+
+        for (int i = 0; i < linearTouchPanelItems.getChildCount(); i++) {
+            View view = linearTouchPanelItems.getChildAt(i);
+            TouchPanelBox touchPanelBox = (TouchPanelBox) view.findViewById(R.id.touchPanelBox);
+            String tpId = String.valueOf(i + 1);
+            ArrayList<String> selectedValues = touchPanelBox.getSelectedValues();
+
+            if (!selectedValues.isEmpty()) {
+                for (int j = 0; j < selectedValues.size(); j++) {
+                    String tpPosition = selectedValues.get(j);
+                    defaultPayLoad.put(t + "", String.format("%02d", Integer.parseInt(tpId)) + String.format("%02d", Integer.parseInt(tpPosition)));
+                    t++;
+                }
+            }
+        }
+
+        TouchPanelSwitchModel touchPanelSwitchModel = new TouchPanelSwitchModel();
+        touchPanelSwitchModel.setPos1(defaultPayLoad.get(String.valueOf(0)));
+        touchPanelSwitchModel.setPos2(defaultPayLoad.get(String.valueOf(1)));
+        touchPanelSwitchModel.setPos3(defaultPayLoad.get(String.valueOf(2)));
+        touchPanelSwitchModel.setPos4(defaultPayLoad.get(String.valueOf(3)));
+        touchPanelSwitchModel.setPos5(defaultPayLoad.get(String.valueOf(4)));
+        touchPanelSwitchModel.setPos6(defaultPayLoad.get(String.valueOf(5)));
+
+
+        StringBuilder payLoad = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            payLoad.append(defaultPayLoad.get(String.valueOf(i)));
+        }
+        touchPanelSwitchModel.setMid(String.valueOf(CURRENT_MACHINE_ID));
+        touchPanelSwitchModel.setComponentName(AppConstants.TOUCHPANEL_SWITCH_PREFIX + selectedComponentId);
+        touchPanelSwitchModel.setPayLoad(payLoad.toString());
+
+        touchPanelSwitchModel.setComponentType(AppConstants.SWITCH_TYPE);
+
+        if( !isSwitchSaved) {
+            // payload 24-bytes with component-position prefix to send with webservice
+            String urlPayLoad = selectedComponentId.substring(2, 4) + payLoad.toString();
+
+            // update in db
+            DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
+            try {
+                dbHelper.openDataBase();
+                dbHelper.insertOrUpdateIntoPanelSwitch(touchPanelSwitchModel);
+                dbHelper.close();
+            } catch (Exception e) {
+            }
+
+            // call change webservice
+            String[] params = {urlPayLoad};
+            new ChangeTouchPanelStatus().execute(params);
+        }
+    }
+
+    // save the assigned dimmer components in db and call status change webservice
+    private void saveDimmersAssignmentsOfTouchPanel() {
+        Log.e("TAG_SAVE", "save dimmmer");
+
+        HashMap<String, String> defaultPayLoad = new HashMap<String, String>();
+        for (int i = 0; i < 6; i++) {
+            defaultPayLoad.put(i + "", "0000");
+        }
+
+
+        int onPointer = 0;
+        int upPointer = 2;
+        int downPointer = 1;
+
+        for (int i = 0; i < linearTouchPanelItems.getChildCount(); i++) {
+            View view = linearTouchPanelItems.getChildAt(i);
+            TouchPanelBox touchPanelBox = (TouchPanelBox) view.findViewById(R.id.touchPanelBox);
+            String tpId = String.valueOf(i + 1);
+            ArrayList<String> selectedOnValues = touchPanelBox.getDimmerOnAddedValues();
+            ArrayList<String> selectedUpValues = touchPanelBox.getDimmerUpAddedValues();
+            ArrayList<String> selectedDownValues = touchPanelBox.getDimmerDownAddedValues();
+
+
+            Log.e("selected tpId", tpId);
+            Log.e("selected on", selectedOnValues.toString());
+            Log.e("selected up", selectedUpValues.toString());
+            Log.e("selected down", selectedDownValues.toString());
+
+            // for dimmer on selectors
+            if (!selectedOnValues.isEmpty()) {
+                for(int s1 = 0 ; s1 <selectedOnValues.size(); s1++) {
+                    String tpPosition = selectedOnValues.get(s1);
+                    defaultPayLoad.put(onPointer + "", String.format("%02d", Integer.parseInt(tpId)) + String.format("%02d", Integer.parseInt(tpPosition)));
+                    onPointer += 3;
+                }
+            }
+
+            // for dimmer up selectors
+            if (!selectedUpValues.isEmpty()) {
+                for(int s1 = 0 ; s1 <selectedUpValues.size(); s1++) {
+                    String tpPosition = selectedUpValues.get(s1);
+                    defaultPayLoad.put(upPointer + "", String.format("%02d", Integer.parseInt(tpId)) + String.format("%02d", Integer.parseInt(tpPosition)));
+                    upPointer+=3;
+                }
+            }
+
+            // for dimmer down selectors
+            if (!selectedDownValues.isEmpty()) {
+                for(int s1 = 0 ; s1 <selectedDownValues.size(); s1++) {
+                    String tpPosition = selectedDownValues.get(s1);
+                    defaultPayLoad.put(downPointer + "", String.format("%02d", Integer.parseInt(tpId)) + String.format("%02d", Integer.parseInt(tpPosition)));
+                    downPointer+=3;
+                }
+            }
+        }
+
+        TouchPanelSwitchModel touchPanelSwitchModel = new TouchPanelSwitchModel();
+        touchPanelSwitchModel.setPos1(defaultPayLoad.get(String.valueOf(0)));
+        touchPanelSwitchModel.setPos2(defaultPayLoad.get(String.valueOf(1)));
+        touchPanelSwitchModel.setPos3(defaultPayLoad.get(String.valueOf(2)));
+        touchPanelSwitchModel.setPos4(defaultPayLoad.get(String.valueOf(3)));
+        touchPanelSwitchModel.setPos5(defaultPayLoad.get(String.valueOf(4)));
+        touchPanelSwitchModel.setPos6(defaultPayLoad.get(String.valueOf(5)));
+
+
+        StringBuilder payLoad = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            payLoad.append(defaultPayLoad.get(String.valueOf(i)));
+        }
+        touchPanelSwitchModel.setMid(String.valueOf(CURRENT_MACHINE_ID));
+        touchPanelSwitchModel.setComponentName(AppConstants.TOUCHPANEL_SWITCH_PREFIX + selectedComponentId);
+        touchPanelSwitchModel.setPayLoad(payLoad.toString());
+
+        touchPanelSwitchModel.setComponentType(AppConstants.DIMMER_TYPE);
+
+        if( !isDimmerSaved) {
+            // payload 24-bytes with component-position prefix to send with webservice
+            String urlPayLoad = selectedComponentId.substring(2, 4) + payLoad.toString();
+
+            // update in db
+            DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
+            try {
+                dbHelper.openDataBase();
+                dbHelper.insertOrUpdateIntoPanelSwitch(touchPanelSwitchModel);
+                dbHelper.close();
+            } catch (Exception e) {
+            }
+            isDimmerSaved = true;
+
+            // call change webservice
+            /*String[] params = {urlPayLoad};
+            new ChangeTouchPanelStatus().execute(params);*/
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if( !isSwitchSaved) {
+            SaveAlertDialog saveAlertDialog1 = new SaveAlertDialog(TouchPanelActivity.this, "You have not saved touch panel settings. Do you want to save the settings before exit?");
+            saveAlertDialog1.show();
+
+            saveAlertDialog1.setSaveListener(new onSaveClickListener() {
+                @Override
+                public void onSaveClick(boolean isSave) {
+                    if (isSave) {
+                        //save
+                        saveSwitchesAssignmentsOfTouchPanel();
+                        finish();
+                    } else {
+                        finish();
+                    }
+                }
+            });
+        } else {
+            if( !isDimmerSaved) {
+                SaveAlertDialog saveAlertDialog = new SaveAlertDialog(TouchPanelActivity.this, "You have not saved touch panel settings. Do you want to save the settings before exit?");
+                saveAlertDialog.show();
+
+                saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                    @Override
+                    public void onSaveClick(boolean isSave) {
+                        if (isSave) {
+                            //save
+                            saveDimmersAssignmentsOfTouchPanel();
+                            finish();
+                        } else {
+                            finish();
+                        }
+                    }
+                });
+            } else {
+                finish();
+            }
+        }
+    }
+
     private void setComponentGrid(int componentType){
-        isSaved = true;
+
+        //isSaved = true;
+        PREVIUOS_SELECTED_COMPONENT_TYPE = SELECTED_COMPONENT_TYPE;
         SELECTED_COMPONENT_TYPE = componentType;
         linearTouchPanelItems.removeAllViews();
+        linearEmptyView.setVisibility(View.VISIBLE);
         // 0 - Switch
         // 1 - Dimmer
         // 2 - Motor
 
         if(componentType == 0) {
+            linearDimmerOptions.setVisibility(View.GONE);
             // for switch
             ArrayList<ComponentModel> switches = new ArrayList<>();
             switchListCursor.moveToFirst();
@@ -247,14 +418,28 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
             gridAdapter.setOnTouchPanelSingleClickListener(new onTouchPanelSingleClickListener() {
                 @Override
-                public void onTouchPanelSingleClick(String componentId, String componentPrimaryId) {
-                    isSaved = false;
-                    // save selected switch component id's (for db)
-                    selectedComponentId = componentId;
-                    selectedComponentPrimaryId = componentPrimaryId;
+                public void onTouchPanelSingleClick(final String componentId, final String componentPrimaryId) {
 
-                    //setting up touch panel
-                    new GetTouchPanelStatus().execute();
+                    if( !isSwitchSaved) {
+                        SaveAlertDialog saveAlertDialog = new SaveAlertDialog(TouchPanelActivity.this, "You have not saved touch panel settings. Do you want to save the settings before exit?");
+                        saveAlertDialog.show();
+
+                        saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                            @Override
+                            public void onSaveClick(boolean isSave) {
+                                if (isSave) {
+                                    //save
+                                    saveSwitchesAssignmentsOfTouchPanel();
+                                    initSwitchSelection(componentId, componentPrimaryId);
+                                } else {
+                                    initSwitchSelection(componentId, componentPrimaryId);
+                                }
+                                isSwitchSaved = true;
+                            }
+                        });
+                    } else {
+                        initSwitchSelection(componentId, componentPrimaryId);
+                    }
                 }
             });
 
@@ -263,6 +448,14 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             linearMotor.setBackgroundColor(getResources().getColor(R.color.primaryColor));
 
         }else if(componentType == 1){
+            linearDimmerOptions.setVisibility(View.VISIBLE);
+            DIMMER_SELECTOR = 0;
+
+            //default seletor set to on/off
+            linearTPDimmerOnOff.setAlpha(0.5f);
+            linearTPDimmerUp.setAlpha(1.0f);
+            linearTPDimmerDown.setAlpha(1.0f);
+
             // for dimmer
             ArrayList<ComponentModel> dimmers = new ArrayList<>();
             dimmerListCursor.moveToFirst();
@@ -284,16 +477,27 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
             gridAdapter.setOnTouchPanelSingleClickListener(new onTouchPanelSingleClickListener() {
                 @Override
-                public void onTouchPanelSingleClick(String componentId, String componentPrimaryId) {
-                    isSaved = false;
-                    // save selected switch component id's (for db)
-                    selectedComponentId = componentId;
-                    selectedComponentPrimaryId = componentPrimaryId;
+                public void onTouchPanelSingleClick(final String componentId, final String componentPrimaryId) {
+                    if( !isDimmerSaved) {
+                        SaveAlertDialog saveAlertDialog = new SaveAlertDialog(TouchPanelActivity.this, "You have not saved touch panel settings. Do you want to save the settings before exit?");
+                        saveAlertDialog.show();
 
-                    //setting up touch panel
-                   // new GetTouchPanelStatus().execute();
-
-                    initTouchPanelList(new HashMap<String, String>());
+                        saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                            @Override
+                            public void onSaveClick(boolean isSave) {
+                                if (isSave) {
+                                    //save
+                                    saveDimmersAssignmentsOfTouchPanel();
+                                    initDimmerSelection(componentId, componentPrimaryId);
+                                } else {
+                                    initDimmerSelection(componentId, componentPrimaryId);
+                                }
+                                isDimmerSaved = true;
+                            }
+                        });
+                    } else {
+                        initDimmerSelection(componentId, componentPrimaryId);
+                    }
                 }
             });
 
@@ -302,8 +506,53 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             linearMotor.setBackgroundColor(getResources().getColor(R.color.primaryColor));
 
         }else  if(componentType == 2){
+            linearDimmerOptions.setVisibility(View.GONE);
                 // for motors
         }
+    }
+
+    // init switch default selection (from webserive)
+    private void initSwitchSelection(String componentId, String componentPrimaryId) {
+        // save selected switch component id's (for db)
+        selectedComponentId = componentId;
+        selectedComponentPrimaryId = componentPrimaryId;
+
+        //setting up touch panel
+        new GetTouchPanelStatus().execute();
+    }
+
+    // init dimmer default selection (from webserive/db)
+    private void initDimmerSelection(String componentId, String componentPrimaryId) {
+        // save selected dimmer component id's (for db)
+        selectedComponentId = componentId;
+        selectedComponentPrimaryId = componentPrimaryId;
+
+        //enabled dimmer color selectables
+        linearTPDimmerOnOff.setClickable(true);
+        linearTPDimmerUp.setClickable(true);
+        linearTPDimmerDown.setClickable(true);
+
+        //default seletor set to on/off
+        DIMMER_SELECTOR = 0;
+        linearTPDimmerOnOff.setAlpha(0.5f);
+        linearTPDimmerUp.setAlpha(1.0f);
+        linearTPDimmerDown.setAlpha(1.0f);
+
+        //setting up touch panel
+        // new GetTouchPanelStatus().execute();
+
+        // todo call webservice code pending.. below code in postExecute later on
+
+        DatabaseHelper dbHelper = new DatabaseHelper(TouchPanelActivity.this);
+        try {
+            dbHelper.openDataBase();
+            if (!selectedComponentId.equals(""))
+                currentComponentAssignmentCursor = dbHelper.getSwitchAssignmentForAComponent(String.valueOf(CURRENT_MACHINE_ID), AppConstants.TOUCHPANEL_SWITCH_PREFIX + selectedComponentId);
+            dbHelper.close();
+        } catch (Exception e) {}
+
+        // initial assignment
+        initSelectionForAComponent(currentComponentAssignmentCursor);
     }
 
     private void initData(){
@@ -408,6 +657,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
     private void initTouchPanelList(HashMap<String, String> selectionMap) {
         linearTouchPanelItems.removeAllViews();
+        linearEmptyView.setVisibility(View.GONE);
 
         if (touchPanelListCursor != null) {
             touchPanelListCursor.moveToFirst();
@@ -426,7 +676,13 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                     final TouchPanelBox touchPanelBox = (TouchPanelBox) view.findViewById(R.id.touchPanelBox);
                     touchPanelBox.setPanelPrimaryId(touchPanelId);
                     touchPanelBox.setPanelPositionInMachine(String.valueOf(i));
-                    touchPanelBox.setUpTouchBox(selectionMap);
+                    if(SELECTED_COMPONENT_TYPE == 0) { // switch
+                        touchPanelBox.setUpSwitchTouchBox(selectionMap);
+                    } else if(SELECTED_COMPONENT_TYPE == 1) { //dimmer
+                        touchPanelBox.setUpDimmerTouchBox(selectionMap);
+                    } else { //motor
+
+                    }
 
                     touchPanelBox.setOnPanelItemClickListner(onPaneItemClickListener);
                     linearTouchPanelItems.addView(view);
@@ -439,23 +695,68 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     public OnPaneItemClickListener onPaneItemClickListener = new OnPaneItemClickListener() {
         @Override
         public void onPanelItemSelection(TouchPanelBox touchPanelBox, String oldName, int positionInPanel, String panelId) {
-            if(touchPanelBox.getSelectedValues().contains(String.valueOf(positionInPanel))){
-                touchPanelBox.setSelection(oldName);
-            }else{
-                if(checkCount()){
-                    selectedPanelId = panelId;
-                    selectedPanelPosition = positionInPanel;
-                    touchPanelBox.setSelection(oldName);
-                }else{
-                  //  todo toast for greater then 6
+            if(SELECTED_COMPONENT_TYPE == 0) { //switch
+                Log.e("is siwtch saved", "false");
+                isSwitchSaved = false;
+
+                if (touchPanelBox.getSelectedValues().contains(String.valueOf(positionInPanel))) {
+                    touchPanelBox.setSwitchSelection(oldName);
+                } else {
+                    if (checkassignedSwitchCount()) {
+                        selectedPanelId = panelId;
+                        selectedPanelPosition = positionInPanel;
+                        touchPanelBox.setSwitchSelection(oldName);
+                    } else {
+                        Toast.makeText(TouchPanelActivity.this, "Cannot assign component to more than 6 places", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            } else if(SELECTED_COMPONENT_TYPE == 1) { //dimmer
+                 Log.e("is dimmer saved", "false");
+                isDimmerSaved = false;
+
+                if(DIMMER_SELECTOR == 0) { // dimmer on
+                    if (touchPanelBox.getDimmerOnAddedValues().contains(String.valueOf(positionInPanel))) {
+                        touchPanelBox.setDimmerSelection(oldName, DIMMER_SELECTOR);
+                    } else {
+                        if (checkassignedDimmerOnCount()) {
+                            selectedPanelId = panelId;
+                            selectedPanelPosition = positionInPanel;
+                            touchPanelBox.setDimmerSelection(oldName, DIMMER_SELECTOR);
+                        } else {
+                            Toast.makeText(TouchPanelActivity.this, "Cannot assign component to more than 2 places", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else if (DIMMER_SELECTOR == 1) { // dimmer up
+                    if (touchPanelBox.getDimmerUpAddedValues().contains(String.valueOf(positionInPanel))) {
+                        touchPanelBox.setDimmerSelection(oldName, DIMMER_SELECTOR);
+                    } else {
+                        if (checkassignedDimmerUpCount()) {
+                            selectedPanelId = panelId;
+                            selectedPanelPosition = positionInPanel;
+                            touchPanelBox.setDimmerSelection(oldName, DIMMER_SELECTOR);
+                        } else {
+                            Toast.makeText(TouchPanelActivity.this, "Cannot assign component to more than 2 places", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else { // dimmer down
+                    if (touchPanelBox.getDimmerDownAddedValues().contains(String.valueOf(positionInPanel))) {
+                        touchPanelBox.setDimmerSelection(oldName, DIMMER_SELECTOR);
+                    } else {
+                        if (checkassignedDimmerDownCount()) {
+                            selectedPanelId = panelId;
+                            selectedPanelPosition = positionInPanel;
+                            touchPanelBox.setDimmerSelection(oldName, DIMMER_SELECTOR);
+                        } else {
+                            Toast.makeText(TouchPanelActivity.this, "Cannot assign component to more than 2 places", Toast.LENGTH_SHORT).show();
+                        }
+                    }
                 }
             }
         }
-
-
     };
 
-    private boolean checkCount() {
+    // check total switches assigned into touchpanels
+    private boolean checkassignedSwitchCount() {
         int count = 0;
 
         for(int i=0;i<linearTouchPanelItems.getChildCount();i++){
@@ -464,8 +765,49 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             int temp = touchPanelBox.getSelectedValues().size();
             count = count + temp;
         }
-
         return  (count>5)?false:true;
+
+    }
+
+    // check total dimmer on/off assigned into touchpanels
+    private boolean checkassignedDimmerOnCount() {
+        int count = 0;
+
+        for(int i=0;i<linearTouchPanelItems.getChildCount();i++){
+            View view = linearTouchPanelItems.getChildAt(i);
+            TouchPanelBox touchPanelBox = (TouchPanelBox) view.findViewById(R.id.touchPanelBox);
+            int temp = touchPanelBox.getDimmerOnAddedValues().size();
+            count = count + temp;
+        }
+        return  (count>1)?false:true;
+
+    }
+
+    // check total dimmer up assigned into touchpanels
+    private boolean checkassignedDimmerUpCount() {
+        int count = 0;
+
+        for(int i=0;i<linearTouchPanelItems.getChildCount();i++){
+            View view = linearTouchPanelItems.getChildAt(i);
+            TouchPanelBox touchPanelBox = (TouchPanelBox) view.findViewById(R.id.touchPanelBox);
+            int temp = touchPanelBox.getDimmerUpAddedValues().size();
+            count = count + temp;
+        }
+        return  (count>1)?false:true;
+
+    }
+
+    // check total dimmer down assigned into touchpanels
+    private boolean checkassignedDimmerDownCount() {
+        int count = 0;
+
+        for(int i=0;i<linearTouchPanelItems.getChildCount();i++){
+            View view = linearTouchPanelItems.getChildAt(i);
+            TouchPanelBox touchPanelBox = (TouchPanelBox) view.findViewById(R.id.touchPanelBox);
+            int temp = touchPanelBox.getDimmerDownAddedValues().size();
+            count = count + temp;
+        }
+        return  (count>1)?false:true;
 
     }
 
@@ -547,8 +889,75 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     public void onClick(View v) {
         switch (v.getId()) {
            case R.id.imgBack:
-            finish();
+               if( !isSwitchSaved) {
+                   SaveAlertDialog saveAlertDialog1 = new SaveAlertDialog(TouchPanelActivity.this, "You have not saved touch panel settings. Do you want to save the settings before exit?");
+                   saveAlertDialog1.show();
+
+                   saveAlertDialog1.setSaveListener(new onSaveClickListener() {
+                       @Override
+                       public void onSaveClick(boolean isSave) {
+                           if (isSave) {
+                               //save
+                               saveSwitchesAssignmentsOfTouchPanel();
+                               finish();
+                           } else {
+                               finish();
+                           }
+                       }
+                   });
+               } else {
+                   if( !isDimmerSaved) {
+                       SaveAlertDialog saveAlertDialog = new SaveAlertDialog(TouchPanelActivity.this, "You have not saved touch panel settings. Do you want to save the settings before exit?");
+                       saveAlertDialog.show();
+
+                       saveAlertDialog.setSaveListener(new onSaveClickListener() {
+                           @Override
+                           public void onSaveClick(boolean isSave) {
+                               if (isSave) {
+                                   //save
+                                   saveDimmersAssignmentsOfTouchPanel();
+                                   finish();
+                               } else {
+                                   finish();
+                               }
+                           }
+                       });
+                   } else {
+                       finish();
+                   }
+               }
+
+
             break;
+
+           // DIMMER_SELECTOR 0 = on
+           // DIMMER_SELECTOR 1 = Up
+           // DIMMER_SELECTOR 2 = Down
+
+            case R.id.linearTPDimmerOnOff:
+
+                DIMMER_SELECTOR = 0;
+
+                linearTPDimmerOnOff.setAlpha(0.5f);
+                linearTPDimmerUp.setAlpha(1.0f);
+                linearTPDimmerDown.setAlpha(1.0f);
+                break;
+            case R.id.linearTPDimmerUp:
+
+                DIMMER_SELECTOR = 1;
+
+                linearTPDimmerOnOff.setAlpha(1.0f);
+                linearTPDimmerUp.setAlpha(0.5f);
+                linearTPDimmerDown.setAlpha(1.0f);
+                break;
+            case R.id.linearTPDimmerDown:
+
+                DIMMER_SELECTOR = 2;
+
+                linearTPDimmerOnOff.setAlpha(1.0f);
+                linearTPDimmerUp.setAlpha(1.0f);
+                linearTPDimmerDown.setAlpha(0.5f);
+                break;
         }
     }
 
@@ -608,6 +1017,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                                 setDefaultMachine(pos);
                                 initData();
                                 linearTouchPanelItems.removeAllViews();
+                                linearEmptyView.setVisibility(View.VISIBLE);
                                /* //setting up touch panel
                                 initTouchPanelList();*/
                             }
@@ -730,6 +1140,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                     machineUnAvailableAlertDialog.show();
 
                     linearTouchPanelItems.removeAllViews();
+                    linearEmptyView.setVisibility(View.VISIBLE);
                 } else {
 
                     //insert switches in adapter for machine-1
@@ -883,6 +1294,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                     MachineUnAvailableAlertDialog machineUnAvailableAlertDialog = new MachineUnAvailableAlertDialog(TouchPanelActivity.this);
                     machineUnAvailableAlertDialog.show();
                 } else {
+                    isSwitchSaved = true;
                     Toast.makeText(TouchPanelActivity.this, "Switches Assigned.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -890,7 +1302,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void initSelectionForAComponent(Cursor cursor) {
-
+        HashMap<String, String> defaultPayload = new HashMap<>();
         if(cursor != null) {
             if(cursor.getCount() > 0) {
                 cursor.moveToFirst();
@@ -904,21 +1316,17 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                 String payload5 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD5));
                 String payload6 = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_TP_SWITCH_PAYLOAD6));
 
-                HashMap<String, String> defaultPayload = new HashMap<>();
-
                 defaultPayload.put(String.valueOf(0), payload1);
                 defaultPayload.put(String.valueOf(1), payload2);
                 defaultPayload.put(String.valueOf(2), payload3);
                 defaultPayload.put(String.valueOf(3), payload4);
                 defaultPayload.put(String.valueOf(4), payload5);
                 defaultPayload.put(String.valueOf(5), payload6);
-
-                Log.e("defaultPayload webservice", defaultPayload.toString());
-
-                // show touch panel list with selection
-                initTouchPanelList(defaultPayload);
             }
         }
+        Log.e("defaultPayload webservice", defaultPayload.toString());
+        // show touch panel list with selection
+        initTouchPanelList(defaultPayload);
     }
 
 

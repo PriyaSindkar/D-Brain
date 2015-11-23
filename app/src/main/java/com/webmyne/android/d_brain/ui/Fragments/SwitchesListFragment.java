@@ -25,6 +25,7 @@ import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.LongPressOptionsDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -35,6 +36,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
@@ -181,6 +183,7 @@ public class SwitchesListFragment extends Fragment {
     @Override
     public void setUserVisibleHint(final boolean visible) {
         super.setUserVisibleHint(visible);
+        Log.e("TAG_FRAG", "setUserVisibleHint");
         if (visible) {
             AppConstants.getCurrentSsid(activity);
             initArrayOfSwitches();
@@ -231,6 +234,7 @@ public class SwitchesListFragment extends Fragment {
     public class GetSwitchStatus extends AsyncTask<Void, Void, Void> {
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
         Cursor cursor, machineCursor;
+        boolean isMachineDeactivated = false;
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         @Override
@@ -265,9 +269,7 @@ public class SwitchesListFragment extends Fragment {
                     Log.e("$#$# Switch url",""+machineBaseURL+"ACTIVE");
 
                     URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
-
                     HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-
                     httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
 
                     httpUrlConnection.setRequestMethod("GET");
@@ -328,12 +330,13 @@ public class SwitchesListFragment extends Fragment {
                             }
                         }
 
+                        isMachineDeactivated = true;
+
                     } catch (SQLException ex) {
                         Log.e("TAG EXP TIME OUT", ex.toString());
                     }
                 } else {
-                    stopTherad();
-                    startTherad();
+                    isMachineDeactivated = false;
                 }
             }
         return null;
@@ -342,126 +345,143 @@ public class SwitchesListFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             isServiceRunning = false;
-
             try {
                 progressBar.setVisibility(View.GONE);
-                if(isFirstTime) {
-                    //init mAdapter
-                    mAdapter = new SwitchListCursorAdapter(getActivity(), switchListCursor, allSwitchesStatusList);
-                    mAdapter.setHasStableIds(true);
-                    mRecyclerView.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
-                    isFirstTime = false;
+
+                if(isMachineDeactivated) {
+                    stopTherad();
+                    //show dialog
+                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(activity, "This machine has been deactivated. Please switch it on.");
+                    machineNotActiveDialog.show();
+                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            stopTherad();
+                            activity.finish();
+                        }
+                    });
+
+                    //startTherad();
                 } else {
-                    if(allSwitchesStatusList.size()>0) {
-                        //set mAdapter again
-                        mAdapter.setSwitchStatus(allSwitchesStatusList);
+
+                    if (isFirstTime) {
+                        //init mAdapter
+                        mAdapter = new SwitchListCursorAdapter(getActivity(), switchListCursor, allSwitchesStatusList);
+                        mAdapter.setHasStableIds(true);
+                        mRecyclerView.setAdapter(mAdapter);
                         mAdapter.notifyDataSetChanged();
-                    }else{
-                        Log.e("size zero",""+allSwitchesStatusList.size());
+                        isFirstTime = false;
+                    } else {
+                        if (allSwitchesStatusList.size() > 0) {
+                            //set mAdapter again
+                            mAdapter.setSwitchStatus(allSwitchesStatusList);
+                            mAdapter.notifyDataSetChanged();
+                        } else {
+                            Log.e("size zero", "" + allSwitchesStatusList.size());
+                        }
                     }
+
+                    mAdapter.setCheckedChangeListener(new onCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChangeClick(int pos) {
+                            //  if(isServiceRunning){
+                            stopTherad();
+                            //   startTherad();
+                            // }else {
+                            startTherad();
+                            //  }
+                        }
+
+                        @Override
+                        public void onCheckedPreChangeClick(int pos) {
+                            stopTherad();
+                        }
+                    });
+
+                    mAdapter.setRenameClickListener(new onRenameClickListener() {
+
+                        @Override
+                        public void onRenameOptionClick(int pos, String _oldName) {
+                            renameComponent(pos);
+                        }
+
+                        @Override
+                        public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+                        }
+                    });
+
+                    mAdapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
+                        @Override
+                        public void onAddToSceneOptionClick(int pos) {
+                            addComponentToScene(pos);
+                        }
+                    });
+
+                    mAdapter.setFavoriteClickListener(new onFavoriteClickListener() {
+                        @Override
+                        public void onFavoriteOptionClick(int pos) {
+                            addComponentToFavourite(pos);
+                        }
+                    });
+
+                    mAdapter.setLongClickListener(new onLongClickListener() {
+
+                        @Override
+                        public void onLongClick(final int pos, View view) {
+
+                            LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(getActivity(), pos);
+                            longPressOptionsDialog.show();
+
+                            longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {
+                                @Override
+                                public void onRenameOptionClick(int pos, String oldName) {
+                                    renameComponent(pos);
+                                }
+
+                                @Override
+                                public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+                                }
+                            });
+
+                            longPressOptionsDialog.setFavoriteClickListener(new onFavoriteClickListener() {
+                                @Override
+                                public void onFavoriteOptionClick(int pos) {
+                                    addComponentToFavourite(pos);
+                                }
+                            });
+
+                            longPressOptionsDialog.setAddToSceneClickListener(new onAddToSceneClickListener() {
+                                @Override
+                                public void onAddToSceneOptionClick(int pos) {
+                                    addComponentToScene(pos);
+                                }
+                            });
+
+                            longPressOptionsDialog.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
+                                @Override
+                                public void onAddSchedulerOptionClick(int pos) {
+                                    addComponentToScheduler(pos);
+                                }
+                            });
+                        }
+                    });
+
+                    mAdapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
+
+                        @Override
+                        public void onAddSchedulerOptionClick(int pos) {
+                            addComponentToScheduler(pos);
+                        }
+                    });
+
                 }
-
-                mAdapter.setCheckedChangeListener(new onCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChangeClick(int pos) {
-                        //  if(isServiceRunning){
-                        stopTherad();
-                        //   startTherad();
-                        // }else {
-                        startTherad();
-                        //  }
-                    }
-
-                    @Override
-                    public void onCheckedPreChangeClick(int pos) {
-                        stopTherad();
-                    }
-                });
-
-                mAdapter.setRenameClickListener(new onRenameClickListener() {
-
-                    @Override
-                    public void onRenameOptionClick(int pos, String _oldName) {
-                        renameComponent(pos);
-                    }
-
-                    @Override
-                    public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
-
-                    }
-                });
-
-                mAdapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
-                    @Override
-                    public void onAddToSceneOptionClick(int pos) {
-                        addComponentToScene(pos);
-                    }
-                });
-
-                mAdapter.setFavoriteClickListener(new onFavoriteClickListener() {
-                    @Override
-                    public void onFavoriteOptionClick(int pos) {
-                        addComponentToFavourite(pos);
-                    }
-                });
-
-                mAdapter.setLongClickListener(new onLongClickListener() {
-
-                    @Override
-                    public void onLongClick(final int pos, View view) {
-
-                        LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(getActivity(), pos);
-                        longPressOptionsDialog.show();
-
-                        longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {
-                            @Override
-                            public void onRenameOptionClick(int pos, String oldName) {
-                                renameComponent(pos);
-                            }
-
-                            @Override
-                            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
-
-                            }
-                        });
-
-                        longPressOptionsDialog.setFavoriteClickListener(new onFavoriteClickListener() {
-                            @Override
-                            public void onFavoriteOptionClick(int pos) {
-                                addComponentToFavourite(pos);
-                            }
-                        });
-
-                        longPressOptionsDialog.setAddToSceneClickListener(new onAddToSceneClickListener() {
-                            @Override
-                            public void onAddToSceneOptionClick(int pos) {
-                                addComponentToScene(pos);
-                            }
-                        });
-
-                        longPressOptionsDialog.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-                            @Override
-                            public void onAddSchedulerOptionClick(int pos) {
-                                addComponentToScheduler(pos);
-                            }
-                        });
-                    }
-                });
-
-                mAdapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-
-                    @Override
-                    public void onAddSchedulerOptionClick(int pos) {
-                        addComponentToScheduler(pos);
-                    }
-                });
-
-
             } catch (Exception e) {
                 Log.e("EXc post", e.toString());
 
             }
+
         }
     }
 

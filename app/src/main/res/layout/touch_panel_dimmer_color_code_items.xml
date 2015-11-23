@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+
+    <LinearLayout
+        android:id="@+id/linearTPDimmerOnOff"
+        android:layout_margin="@dimen/STD_MARGIN"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/touch_panel_dimmer_onoff"
+            android:gravity="center_horizontal"
+            android:paddingBottom="@dimen/ICON_PADDING"
+            android:paddingTop="@dimen/ICON_PADDING">
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtTPDimmerOnOff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="@dimen/S_MARGIN"
+            android:gravity="center"
+            android:text="On/Off\n(Default)"
+            android:textColor="@color/white"
+            android:textSize="@dimen/M_TEXT_SIZE" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/linearTPDimmerUp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/STD_MARGIN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/touch_panel_dimmer_up"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/ICON_PADDING"
+            android:paddingTop="@dimen/ICON_PADDING">
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtTPDimmerUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="@dimen/S_MARGIN"
+            android:text="Up\n"
+            android:textColor="@color/white"
+            android:textSize="@dimen/M_TEXT_SIZE" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearTPDimmerDown"
+        android:layout_margin="@dimen/STD_MARGIN"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/touch_panel_dimmer_down"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/ICON_PADDING"
+            android:paddingTop="@dimen/ICON_PADDING">
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtTPDimmerDown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="@dimen/S_MARGIN"
+            android:gravity="center"
+            android:text="Down\n"
+            android:textColor="@color/white"
+            android:textSize="@dimen/M_TEXT_SIZE" />
+    </LinearLayout>
+
+</LinearLayout>

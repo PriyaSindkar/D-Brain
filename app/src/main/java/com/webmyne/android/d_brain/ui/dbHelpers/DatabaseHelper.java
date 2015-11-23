@@ -1126,6 +1126,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + " AND " + DBConstants.KEY_TP_SWITCH_COMPONENT_NAME + "='" + component.getComponentName() + "'", null);
         }
 
+        Log.e("TAG_INSERT_TP_SWITCH", values.toString());
+
         db.close();
     }
 
