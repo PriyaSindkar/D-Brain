@@ -436,7 +436,22 @@ public class DimmerListActivity extends AppCompatActivity {
                     @Override
                     public void onLongClick(final int pos, View view) {
 
-                        LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(DimmerListActivity.this, pos);
+                        boolean isFavaourite = false;
+                        DatabaseHelper dbHelper = new DatabaseHelper(DimmerListActivity.this);
+                        try {
+                            dbHelper.openDataBase();
+                            Cursor cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
+                            cursor.moveToPosition(pos);
+                            String compName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                            String machineId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+                            isFavaourite =  dbHelper.isAlreadyAFavourite(compName, machineId);
+                            dbHelper.close();
+
+                        } catch (Exception e) {
+
+                        }
+
+                        LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(DimmerListActivity.this, pos, isFavaourite);
                         longPressOptionsDialog.show();
 
                         longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {

@@ -34,7 +34,9 @@ import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Fragments.NotificationFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SceneFragment;
 import com.webmyne.android.d_brain.ui.Fragments.SettingsFragment;
+import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Model.UserSettings;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
@@ -69,20 +71,7 @@ public class HomeDrawerActivity extends AppCompatActivity {
             toolbar.setTitle("");
             setSupportActionBar(toolbar);
         }
-
-
-        //Starting the ballon
-        Config.Builder builder = new Config.Builder(this);
-        Config config = builder.pullSensitivity(5.0f).lineLength(64).isOnlyDestop(true).flyDuration(3000).balloonCount(6).create();
-        BalloonPerformer.getInstance().init(this, config);
-        BalloonPerformer.getInstance().show(this, new BalloonGroup.OnBalloonFlyedListener() {
-            @Override
-            public void onBalloonFlyed() {
-                startActivity(new Intent(getApplicationContext(),HomeDrawerActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            }
-        });
-        //ends of baloon
-
+        setHangingBulb();
 
 
         initDrawer();
@@ -114,6 +103,32 @@ public class HomeDrawerActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void setHangingBulb() {
+        //Starting the ballon
+        Config.Builder builder = new Config.Builder(this);
+        Config config = builder.pullSensitivity(5.0f).lineLength(64).isOnlyDestop(true).flyDuration(3000).balloonCount(6).create();
+        BalloonPerformer.getInstance().init(this, config);
+
+
+        ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(HomeDrawerActivity.this, "settings-pref", 0);
+        UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
+
+        if(userSettings != null) {
+            if( userSettings.isStartUpHangingBulb()) {
+
+                BalloonPerformer.getInstance().show(this, new BalloonGroup.OnBalloonFlyedListener() {
+                    @Override
+                    public void onBalloonFlyed() {
+                        startActivity(new Intent(getApplicationContext(),HomeDrawerActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                    }
+                });
+            } else {
+                BalloonPerformer.getInstance().gone(HomeDrawerActivity.this);
+
+            }
+        }
     }
 
     @Override

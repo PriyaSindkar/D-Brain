@@ -33,7 +33,7 @@
 
             <LinearLayout
                 android:id="@+id/linearDimmerOptions"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:layout_alignParentTop="true"
                 android:layout_width="match_parent"
                 android:gravity="center"
@@ -49,7 +49,6 @@
                     android:text="Select Dimmer Function Type"/>
 
                 <include
-
                     layout="@layout/touch_panel_dimmer_color_code_items"/>
             </LinearLayout>
 

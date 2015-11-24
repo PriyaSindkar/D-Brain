@@ -59,6 +59,7 @@ public class splash extends ActionBarActivity {
         if(settings == null) {
             settings = new UserSettings();
             settings.setIsStartupEnabled(true);
+            settings.setIsStartUpHangingBulb(true);
 
             complexPreferences = ComplexPreferences.getComplexPreferences(this, "settings-pref", 0);
             complexPreferences.putObject("settings-pref", settings);

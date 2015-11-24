@@ -517,13 +517,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             linearMotor.setBackgroundColor(getResources().getColor(R.color.primaryColor));
 
         }else if(componentType == 1){
-            linearDimmerOptions.setVisibility(View.VISIBLE);
-            DIMMER_SELECTOR = 0;
 
-            //default seletor set to on/off
-            linearTPDimmerOnOff.setAlpha(1.0f);
-            linearTPDimmerUp.setAlpha(0.25f);
-            linearTPDimmerDown.setAlpha(0.25f);
 
             // for dimmer
             ArrayList<ComponentModel> dimmers = new ArrayList<>();
@@ -547,6 +541,8 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
             gridAdapter.setOnTouchPanelSingleClickListener(new onTouchPanelSingleClickListener() {
                 @Override
                 public void onTouchPanelSingleClick(final String componentId, final String componentPrimaryId) {
+
+
                     if( !isDimmerSaved) {
                         SaveAlertDialog saveAlertDialog = new SaveAlertDialog(TouchPanelActivity.this, "You have not saved touch panel settings. Do you want to save the settings?");
                         saveAlertDialog.show();
@@ -592,6 +588,15 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
     // init dimmer default selection (from webserive/db)
     private void initDimmerSelection(String componentId, String componentPrimaryId) {
+
+        linearDimmerOptions.setVisibility(View.VISIBLE);
+        DIMMER_SELECTOR = 0;
+
+        //default seletor set to on/off
+        linearTPDimmerOnOff.setAlpha(1.0f);
+        linearTPDimmerUp.setAlpha(0.25f);
+        linearTPDimmerDown.setAlpha(0.25f);
+
         // calculate dimmer id for db(eg. TSW23)
         String dpc = MACHINES.get(DEFAULT_MACHINE).getMachineProductCode();
         if (Functions.isSwitchAvialabel(dpc)) {

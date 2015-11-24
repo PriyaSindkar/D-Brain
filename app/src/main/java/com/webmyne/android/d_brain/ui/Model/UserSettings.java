@@ -6,6 +6,7 @@ package com.webmyne.android.d_brain.ui.Model;
 public class UserSettings {
     boolean isStartupEnabled;
     boolean isMainPowerOn;
+    boolean isStartUpHangingBulb;
 
     public UserSettings() {
         isMainPowerOn = true;
@@ -25,5 +26,13 @@ public class UserSettings {
 
     public void setIsMainPowerOn(boolean isMainPowerOn) {
         this.isMainPowerOn = isMainPowerOn;
+    }
+
+    public boolean isStartUpHangingBulb() {
+        return isStartUpHangingBulb;
+    }
+
+    public void setIsStartUpHangingBulb(boolean isStartUpHangingBulb) {
+        this.isStartUpHangingBulb = isStartUpHangingBulb;
     }
 }

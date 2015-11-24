@@ -132,6 +132,14 @@ public class MainSwitchesListActivity extends AppCompatActivity {
         });
     }
 
+    public void setListViewImage(boolean _isListView) {
+        if(_isListView) {
+            imgListGridToggle.setImageResource(R.drawable.ic_grid_view);
+        } else {
+            imgListGridToggle.setImageResource(R.drawable.ic_list_view);
+        }
+    }
+
     private void initMachineList() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         //get list of all machines added

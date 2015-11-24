@@ -19,6 +19,8 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.MainDimmersListActivity;
+import com.webmyne.android.d_brain.ui.Activities.MainSwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Adapters.DimmerListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
@@ -159,6 +161,7 @@ public class DimmerListFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
 
         adapter = new DimmerListCursorAdapter(getActivity());
+        ((MainDimmersListActivity)getActivity()).setListViewImage(mParamIsListView);
 
         if(mParamIsListView) {
             mRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
@@ -439,7 +442,22 @@ public class DimmerListFragment extends Fragment {
                         @Override
                         public void onLongClick(final int pos, View view) {
 
-                            LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(activity, pos);
+                            boolean isFavaourite = false;
+                            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                            try {
+                                dbHelper.openDataBase();
+                                Cursor cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
+                                cursor.moveToPosition(pos);
+                                String compName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                String machineId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+                                isFavaourite =  dbHelper.isAlreadyAFavourite(compName, machineId);
+                                dbHelper.close();
+
+                            } catch (Exception e) {
+
+                            }
+
+                            LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(activity, pos, isFavaourite);
                             longPressOptionsDialog.show();
 
                             longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {

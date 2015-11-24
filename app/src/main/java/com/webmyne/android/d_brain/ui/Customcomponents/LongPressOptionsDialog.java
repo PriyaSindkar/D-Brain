@@ -1,6 +1,10 @@
 package com.webmyne.android.d_brain.ui.Customcomponents;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +29,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.ComponentModel;
 import com.webmyne.android.d_brain.ui.Model.TouchPanelModel;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 import com.webmyne.android.d_brain.ui.xmlHelpers.MainXmlPullParser;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
@@ -46,16 +51,22 @@ public class LongPressOptionsDialog extends BaseDialog {
     public onAddSchedulerClickListener _addSchedulerClick;
     public onRenameClickListener _renameClick;
     int pos;
+    DatabaseHelper dbHelper;
+    private boolean isFavourite = false;
 
-    public LongPressOptionsDialog(Context context, int pos) {
+
+    public LongPressOptionsDialog(Context context, int pos, boolean _fav) {
         super(context);
         this.pos = pos;
+        this.isFavourite = _fav;
     }
 
     @Override
     public View onCreateView() {
         widthScale(0.85f);
         showAnim(new FadeEnter());
+
+        dbHelper = new DatabaseHelper(context);
 
         View inflate = View.inflate(context, R.layout.dialog_long_press_options, null);
         txtRename = (TextView) inflate.findViewById(R.id.txtRename);
@@ -65,8 +76,6 @@ public class LongPressOptionsDialog extends BaseDialog {
 
         imgCancel = (ImageView) inflate.findViewById(R.id.imgCancel);
 
-
-
         inflate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,13 +83,38 @@ public class LongPressOptionsDialog extends BaseDialog {
             }
         });
 
+
+
         return inflate;
     }
 
 
-
     @Override
     public boolean setUiBeforShow() {
+
+
+        // check whether component is favorite or not
+        Log.e(" ##IS_FAV", isFavourite + "");
+
+        if(isFavourite) {
+            txtAddToFavorite.setTextColor(context.getResources().getColor(R.color.yellow));
+            Drawable[] drawables = txtAddToFavorite.getCompoundDrawables();
+            Drawable leftDrawable = drawables[0];
+
+            leftDrawable.setColorFilter(new PorterDuffColorFilter(context.getResources().getColor(R.color.yellow), PorterDuff.Mode.MULTIPLY));
+            txtAddToFavorite.setCompoundDrawables(leftDrawable, null, null, null);
+        } else {
+            txtAddToFavorite.setTextColor(context.getResources().getColor(R.color.white));
+
+            Drawable[] drawables = txtAddToFavorite.getCompoundDrawables();
+            Drawable leftDrawable = drawables[0];
+
+            leftDrawable.setColorFilter(new PorterDuffColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.MULTIPLY));
+            txtAddToFavorite.setCompoundDrawables(leftDrawable, null, null, null);
+        }
+
+
+
         imgCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

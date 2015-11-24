@@ -24,8 +24,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Activities.MainSwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.ExternalCirclePainter;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.LongPressOptionsDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
@@ -80,6 +82,8 @@ public class SwitchesListFragment extends Fragment {
 
     private Timer timer1;
     private Handler handler1;
+    DatabaseHelper dbHelper;
+
 
     public void startTherad(){
         Log.e("$#$ THREAD", "START");
@@ -128,6 +132,9 @@ public class SwitchesListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbHelper = new DatabaseHelper(getActivity());
+
+
 
         if (getArguments() != null) {
             mParamMachineId = getArguments().getInt(ARG_PARAM1);
@@ -163,7 +170,7 @@ public class SwitchesListFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
 
         mAdapter = new SwitchListCursorAdapter(getActivity());
-
+        ((MainSwitchesListActivity)getActivity()).setListViewImage(mParamIsListView);
         if(mParamIsListView) {
             mRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
             mAdapter.setType(0);
@@ -222,7 +229,7 @@ public class SwitchesListFragment extends Fragment {
 
 
     private void initArrayOfSwitches() {
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+       // DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         //get all switches in mAdapter for machine-1
         try {
             dbHelper.openDataBase();
@@ -239,7 +246,7 @@ public class SwitchesListFragment extends Fragment {
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
         Cursor cursor, machineCursor;
         boolean isMachineDeactivated = false;
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+       // DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         @Override
         protected void onPreExecute() {
@@ -436,8 +443,22 @@ public class SwitchesListFragment extends Fragment {
 
                         @Override
                         public void onLongClick(final int pos, View view) {
+                            boolean isFavaourite = false;
+                            try {
+                                dbHelper.openDataBase();
+                                Cursor cursor = dbHelper.getAllSwitchComponentsForAMachine(machineIp);
+                                cursor.moveToPosition(pos);
+                                String compName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                String machineId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+                                isFavaourite =  dbHelper.isAlreadyAFavourite(compName, machineId);
+                                dbHelper.close();
 
-                            LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(getActivity(), pos);
+                            } catch (Exception e) {
+
+                            }
+
+
+                            LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(getActivity(), pos, isFavaourite);
                             longPressOptionsDialog.show();
 
                             longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {
@@ -502,7 +523,7 @@ public class SwitchesListFragment extends Fragment {
         String machineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
         String machineName = "";
         try {
-            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+           // DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
             dbHelper.openDataBase();
             machineName = dbHelper.getMachineNameByIP(machineIP);
             int switchCount = dbHelper.getComponentTypeCountInFavourite(componentType);
@@ -512,7 +533,10 @@ public class SwitchesListFragment extends Fragment {
                 dbHelper.close();
 
                 if (isAlreadyAFavourite) {
-                    Toast.makeText(getActivity(), "Already added to Favorite.", Toast.LENGTH_SHORT).show();
+                    dbHelper.openDataBase();
+                    dbHelper.deleteComponentFromFavourite(componentPrimaryId);
+                    dbHelper.close();
+                    Toast.makeText(getActivity(), "Removed from Favorite.", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getActivity(), "Added to Favorite Successfully.", Toast.LENGTH_SHORT).show();
                 }
@@ -520,7 +544,10 @@ public class SwitchesListFragment extends Fragment {
                 Toast.makeText(getActivity(), "Cannot add more than 10 switches to favourites.", Toast.LENGTH_SHORT).show();
             }
 
+            dbHelper.close();
+
         } catch (SQLException e) {
+            dbHelper.close();
             e.printStackTrace();
         }
     }
@@ -539,7 +566,7 @@ public class SwitchesListFragment extends Fragment {
             @Override
             public void onRenameOptionClick(int pos, String newName) {
                 try {
-                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                    //DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                     dbHelper.openDataBase();
                     dbHelper.renameComponent(componentId, newName);
                     switchListCursor = dbHelper.getAllSwitchComponents();
@@ -547,6 +574,7 @@ public class SwitchesListFragment extends Fragment {
                     mAdapter.changeCursor(switchListCursor);
 
                 } catch (SQLException e) {
+                    dbHelper.close();
                     e.printStackTrace();
                 }
             }
@@ -581,7 +609,7 @@ public class SwitchesListFragment extends Fragment {
         String componentMachineIP = switchListCursor.getString(switchListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
 
         try {
-            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+           // DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
             dbHelper.openDataBase();
             boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentPrimaryId, componentMachineID);
             dbHelper.close();
@@ -601,6 +629,7 @@ public class SwitchesListFragment extends Fragment {
                     dbHelper.close();
 
                 } catch (SQLException e) {
+                    dbHelper.close();
                     e.printStackTrace();
                 }
                 if(schedulerModel != null) {
@@ -616,6 +645,7 @@ public class SwitchesListFragment extends Fragment {
                 }
             }
         } catch (SQLException e) {
+            dbHelper.close();
             e.printStackTrace();
         }
     }

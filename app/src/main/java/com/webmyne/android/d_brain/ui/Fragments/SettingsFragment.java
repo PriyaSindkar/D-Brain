@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +14,9 @@ import android.widget.TextView;
 
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.BallonComponent.BalloonPerformer;
+import com.webmyne.android.d_brain.ui.BallonComponent.configs.Config;
+import com.webmyne.android.d_brain.ui.BallonComponent.widgets.BalloonGroup;
 import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
 import com.webmyne.android.d_brain.ui.Model.UserSettings;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
@@ -20,7 +24,7 @@ import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 
 public class SettingsFragment extends Fragment {
     Toolbar toolbar;
-    SwitchButton imgSwitchIsStartupEnabled;
+    SwitchButton imgSwitchIsStartupEnabled, imgSwitchIsHangingBulbEnabled;
 
     public static SettingsFragment newInstance() {
         SettingsFragment fragment = new SettingsFragment();
@@ -52,6 +56,7 @@ public class SettingsFragment extends Fragment {
         ((HomeDrawerActivity) getActivity()).hideAppBarButton();
 
         imgSwitchIsStartupEnabled = (SwitchButton) view.findViewById(R.id.imgSwitchIsStartupEnabled);
+        imgSwitchIsHangingBulbEnabled = (SwitchButton) view.findViewById(R.id.imgSwitchIsHangingBulbEnabled);
 
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
         UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
@@ -60,6 +65,10 @@ public class SettingsFragment extends Fragment {
             if(userSettings.isStartupEnabled()) {
                 imgSwitchIsStartupEnabled.setChecked(true);
             }
+
+            if(userSettings.isStartUpHangingBulb()) {
+                imgSwitchIsHangingBulbEnabled.setChecked(true);
+            }
         }
 
         imgSwitchIsStartupEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -67,6 +76,7 @@ public class SettingsFragment extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 final UserSettings settings = new UserSettings();
                 settings.setIsStartupEnabled(isChecked);
+                settings.setIsStartUpHangingBulb(imgSwitchIsHangingBulbEnabled.isChecked());
 
                 ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
                 complexPreferences.putObject("settings-pref", settings);
@@ -74,7 +84,20 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        imgSwitchIsHangingBulbEnabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                final UserSettings settings = new UserSettings();
+                settings.setIsStartUpHangingBulb(isChecked);
+                settings.setIsStartupEnabled(imgSwitchIsStartupEnabled.isChecked());
 
+                ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
+                complexPreferences.putObject("settings-pref", settings);
+                complexPreferences.commit();
+
+                ((HomeDrawerActivity) getActivity()).setHangingBulb();
+            }
+        });
 
 
 

@@ -27,7 +27,6 @@
                 android:text="Notifications"/>
 
                 <com.kyleduo.switchbutton.SwitchButton
-                    android:layout_weight="0.1"
                     android:layout_gravity="center"
                     style="@style/MaterialDesignStyle" />
         </LinearLayout>
@@ -52,7 +51,6 @@
 
             <com.kyleduo.switchbutton.SwitchButton
                 android:id="@+id/imgSwitchIsStartupEnabled"
-                android:layout_weight="0.1"
                 android:layout_gravity="center"
                 style="@style/MaterialDesignStyle" />
         </LinearLayout>
@@ -62,6 +60,30 @@
             android:layout_height="1dp"
             android:background="@color/secondaryBgColor"/>
 
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:padding="@dimen/L_MARGIN"
+                android:text="Quick Startup Hanging Bulb"/>
+
+            <com.kyleduo.switchbutton.SwitchButton
+                android:id="@+id/imgSwitchIsHangingBulbEnabled"
+                android:layout_gravity="center"
+                style="@style/MaterialDesignStyle" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/secondaryBgColor"/>
 
     </LinearLayout>
 

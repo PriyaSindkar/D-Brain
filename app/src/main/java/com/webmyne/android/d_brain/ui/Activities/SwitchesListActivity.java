@@ -34,6 +34,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.MachineNotActiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.SwitchListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
@@ -434,7 +435,22 @@ public class SwitchesListActivity extends AppCompatActivity {
                     @Override
                     public void onLongClick(final int pos, View view) {
 
-                        LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(SwitchesListActivity.this, pos);
+                        boolean isFavaourite = false;
+                        DatabaseHelper dbHelper = new DatabaseHelper(SwitchesListActivity.this);
+                        try {
+                            dbHelper.openDataBase();
+                            Cursor cursor = dbHelper.getAllSwitchComponentsForAMachine(machineIp);
+                            cursor.moveToPosition(pos);
+                            String compName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                            String machineId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID));
+                            isFavaourite =  dbHelper.isAlreadyAFavourite(compName, machineId);
+                            dbHelper.close();
+
+                        } catch (Exception e) {
+
+                        }
+
+                        LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(SwitchesListActivity.this, pos, isFavaourite);
                         longPressOptionsDialog.show();
 
                         longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {

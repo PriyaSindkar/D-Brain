@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -176,6 +177,17 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         int componentIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID);
         String componentName = cursor.getString(componentIdIndex);
 
+        // check whether switch is favorite or not
+        boolean isFavourite = false;
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
+            dbHelper.openDataBase();
+            isFavourite =  dbHelper.isAlreadyAFavourite(componentName, machineId);
+            dbHelper.close();
+        }catch(Exception e) {
+
+        }
+
         final int position = cursor.getPosition();
         //final String strPosition = String.format("%02d", (position + 1));
         final String strPosition = componentName.substring(2,4);
@@ -186,6 +198,14 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
                     listHolder.txtSwitchName.setText(cursor.getString(switchNameIndex));
                    // listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
+
+                    if(isFavourite) {
+                        listHolder.imgFavoriteOption.setColorFilter(mCtx.getResources().getColor(R.color.yellow));
+                        listHolder.imgFavoriteOption.setBackgroundResource(R.drawable.circle);
+                    } else {
+                        listHolder.imgFavoriteOption.setColorFilter(mCtx.getResources().getColor(R.color.white));
+                        listHolder.imgFavoriteOption.setBackgroundResource(R.drawable.white_border_circle);
+                    }
 
                     if (this.switchStatus.get(position).tagValue.equals(AppConstants.OFF_VALUE)) {
                         listHolder.imgSwitch.setChecked(false);
@@ -232,7 +252,6 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                                     params[1] = machineId;
                                     new ChangeSwitchStatus().execute(params);
                                 }
-
                             }
                         });
 
@@ -250,9 +269,18 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                             }
                         });
 
+                        final boolean finalIsFavourite = isFavourite;
                         listHolder.imgFavoriteOption.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
+                                if( !finalIsFavourite) {
+                                    listHolder.imgFavoriteOption.setColorFilter(mCtx.getResources().getColor(R.color.yellow));
+                                    listHolder.imgFavoriteOption.setBackgroundResource(R.drawable.circle);
+                                } else {
+                                    listHolder.imgFavoriteOption.setColorFilter(mCtx.getResources().getColor(R.color.white));
+                                    listHolder.imgFavoriteOption.setBackgroundResource(R.drawable.white_border_circle);
+                                }
+
                                 _favoriteClick.onFavoriteOptionClick(position);
                             }
                         });
@@ -388,14 +416,6 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 parameter = params[0];
                 machineId = params[1];
 
-                /*dbHelper.openDataBase();
-                // get current machine details
-                machineCursor = dbHelper.getMachineByID(String.valueOf(machineId));
-                isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
-                dbHelper.close();
-
-                if(isMachineActive.equals("true")) {*/
-
                     URL urlValue = new URL(params[0]);
                     Log.e("# SWCR CHANGE", urlValue.toString());
 
@@ -404,13 +424,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                     httpUrlConnection.setRequestMethod("GET");
                     InputStream inputStream = httpUrlConnection.getInputStream();
                     isError = false;
-               /* } else {
-                    progress_dialog.dismiss();
-                    isError = true;
-                    switchtimeOutErrorCount = 0;
-                }*/
             } catch (Exception e) {
-                Log.e("# ADAPTER switchtimeOutErrorCount", switchtimeOutErrorCount +"");
                 isError = true;
                 switchtimeOutErrorCount--;
             }
@@ -424,16 +438,13 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                 _switchClick.onCheckedChangeClick(0);
                 progress_dialog.dismiss();
             } else {
-                Log.e("ADAP", ""+isError);
                 if(switchtimeOutErrorCount > 0) {
-                    Log.e("ADAP", "time out > 0");
                     progress_dialog.setMessage("Sending request to machine.. " + switchtimeOutErrorCount);
                     String[] parameters = new String[2];
                     parameters[0] = parameter;
                     parameters[1] = machineId;
                     new ChangeSwitchStatus().execute(parameters);
                 } else {
-                    Log.e("ADAP", "time out == 0");
                     progress_dialog.dismiss();
                     switchtimeOutErrorCount = 3;
 

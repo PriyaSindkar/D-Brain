@@ -1364,6 +1364,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public boolean isAlreadyAFavourite(String componentId, String machineIP) {
+
+        Log.e(" ## componentId", componentId );
+        Log.e(" ## machineId", machineIP);
+
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         boolean result = true;
