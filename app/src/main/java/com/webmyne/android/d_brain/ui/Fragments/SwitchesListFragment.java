@@ -536,9 +536,9 @@ public class SwitchesListFragment extends Fragment {
                     dbHelper.openDataBase();
                     dbHelper.deleteComponentFromFavourite(componentPrimaryId);
                     dbHelper.close();
-                    Toast.makeText(getActivity(), "Removed from Favorite.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Removed from Favorites.", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getActivity(), "Added to Favorite Successfully.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Added to Favorites Successfully.", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(getActivity(), "Cannot add more than 10 switches to favourites.", Toast.LENGTH_SHORT).show();

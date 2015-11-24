@@ -563,9 +563,12 @@ public class DimmerListFragment extends Fragment {
                 dbHelper.close();
 
                 if (isAlreadyAFavourite) {
-                    Toast.makeText(activity, "Already added to Favorite!", Toast.LENGTH_SHORT).show();
+                    dbHelper.openDataBase();
+                    dbHelper.deleteComponentFromFavourite(componentPrimaryId);
+                    dbHelper.close();
+                    Toast.makeText(activity, "Removed from Favorites.", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(activity, "Added to Favorite Successfully!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "Added to Favorites Successfully!", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(activity, "Cannot add more than 10 dimmers to favourites.", Toast.LENGTH_SHORT).show();

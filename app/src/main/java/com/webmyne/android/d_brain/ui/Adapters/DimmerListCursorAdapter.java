@@ -187,6 +187,17 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
             machineIP = "http://" + machineIP;
         }
 
+        // check whether switch is favorite or not
+        boolean isFavourite = false;
+        try {
+            DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
+            dbHelper.openDataBase();
+            isFavourite =  dbHelper.isAlreadyAFavourite(componentName, machineId);
+            dbHelper.close();
+        }catch(Exception e) {
+
+        }
+
         final int position = cursor.getPosition();
        // final String strPosition = String.format("%02d", (position + 1));
         final String strPosition = componentName.substring(2,4);
@@ -206,6 +217,14 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
                 listHolder.txtDimmerName.setText(cursor.getString(dimmerNameIndex));
                 listHolder.txtMachineName.setText(cursor.getString(machineNameIndex));
+
+                if(isFavourite) {
+                    listHolder.imgFavoriteOption.setColorFilter(mCtx.getResources().getColor(R.color.yellow));
+                    listHolder.imgFavoriteOption.setBackgroundResource(R.drawable.circle);
+                } else {
+                    listHolder.imgFavoriteOption.setColorFilter(mCtx.getResources().getColor(R.color.white));
+                    listHolder.imgFavoriteOption.setBackgroundResource(R.drawable.white_border_circle);
+                }
 
                 if(dimmerOnOffStatus.equals(AppConstants.OFF_VALUE)) {
                     listHolder.imgSwitch.setChecked(false);
