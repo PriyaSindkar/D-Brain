@@ -2,32 +2,29 @@ package com.webmyne.android.d_brain.ui.Adapters;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
-import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
-import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
-import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onAddToSceneClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -59,6 +56,7 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     public onCheckedChangeListener _switchClick;
 
     private ProgressDialog progress_dialog;
+    int switchtimeOutErrorCount = 3;
 
     public SwitchListCursorAdapter(Context context){
         super(context );
@@ -220,12 +218,19 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
                                 }
 
                                 if (listHolder.imgSwitch.isChecked()) {// listHolder.linearSwitch.setBackgroundResource(R.drawable.on_switch_border);
+
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                                    new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                    String[] params = new String[2];
+                                    params[0] = CHANGE_STATUS_URL;
+                                    params[1] = machineId;
+                                    new ChangeSwitchStatus().execute(params);
                                 } else {
                                     //listHolder.linearSwitch.setBackgroundResource(R.drawable.off_switch_border);
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                                    new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                    String[] params = new String[2];
+                                    params[0] = CHANGE_STATUS_URL;
+                                    params[1] = machineId;
+                                    new ChangeSwitchStatus().execute(params);
                                 }
 
                             }
@@ -302,10 +307,16 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
 
                                 if (groupViewHolder.imgSwitch.isChecked()) {
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                                    new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                    String[] params = new String[2];
+                                    params[0] = CHANGE_STATUS_URL;
+                                    params[1] = machineId;
+                                    new ChangeSwitchStatus().execute(params);
                                 } else {
                                     String CHANGE_STATUS_URL = machineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
-                                    new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                    String[] params = new String[2];
+                                    params[0] = CHANGE_STATUS_URL;
+                                    params[1] = machineId;
+                                    new ChangeSwitchStatus().execute(params);
                                 }
                             }
                         });
@@ -357,11 +368,15 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
     }
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+        String parameter, machineId, isMachineActive;
+        Cursor machineCursor;
+        DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progress_dialog.setMessage("Please Wait..");
+            progress_dialog.setMessage("Sending request to machine.. " + switchtimeOutErrorCount);
             progress_dialog.show();
             _switchClick.onCheckedPreChangeClick(0);
         }
@@ -370,16 +385,34 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         protected Void doInBackground(String... params) {
 
             try {
-                URL urlValue = new URL(params[0]);
-                Log.e("# SWCR CHANGE", urlValue.toString());
+                parameter = params[0];
+                machineId = params[1];
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
+                /*dbHelper.openDataBase();
+                // get current machine details
+                machineCursor = dbHelper.getMachineByID(String.valueOf(machineId));
+                isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                dbHelper.close();
 
+                if(isMachineActive.equals("true")) {*/
+
+                    URL urlValue = new URL(params[0]);
+                    Log.e("# SWCR CHANGE", urlValue.toString());
+
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    isError = false;
+               /* } else {
+                    progress_dialog.dismiss();
+                    isError = true;
+                    switchtimeOutErrorCount = 0;
+                }*/
             } catch (Exception e) {
-                Log.e("# EXP adapter", e.toString());
+                Log.e("# ADAPTER switchtimeOutErrorCount", switchtimeOutErrorCount +"");
+                isError = true;
+                switchtimeOutErrorCount--;
             }
             return null;
         }
@@ -387,8 +420,43 @@ public class SwitchListCursorAdapter extends CursorRecyclerViewAdapter<SwitchLis
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            _switchClick.onCheckedChangeClick(0);
-            progress_dialog.hide();
+            if( !isError) {
+                _switchClick.onCheckedChangeClick(0);
+                progress_dialog.dismiss();
+            } else {
+                Log.e("ADAP", ""+isError);
+                if(switchtimeOutErrorCount > 0) {
+                    Log.e("ADAP", "time out > 0");
+                    progress_dialog.setMessage("Sending request to machine.. " + switchtimeOutErrorCount);
+                    String[] parameters = new String[2];
+                    parameters[0] = parameter;
+                    parameters[1] = machineId;
+                    new ChangeSwitchStatus().execute(parameters);
+                } else {
+                    Log.e("ADAP", "time out == 0");
+                    progress_dialog.dismiss();
+                    switchtimeOutErrorCount = 3;
+
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("TAG EXP TIME OUT", ex.toString());
+                    }
+
+                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(mCtx, "Your machine was deactivated.");
+                    machineNotActiveDialog.show();
+                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            switchtimeOutErrorCount = 3;
+                            _switchClick.onCheckedChangeClick(1);
+                            progress_dialog.dismiss();
+                        }
+                    });
+                }
+            }
         }
     }
 }

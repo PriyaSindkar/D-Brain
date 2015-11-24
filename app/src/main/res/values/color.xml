@@ -10,6 +10,10 @@
     <color name="baseButtonColor">#009987</color>
     <color name="baseButtonColorTint">#AA009987</color>
 
+        <color name="dimmerDown">#ff9933</color>
+    <color name="dimmerUp">#3399ff</color>
+    <color name="dimmerOn">#009900</color>
+
 
     <color name="gridDefaultColor"> #206b92</color>
 

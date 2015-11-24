@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Adapters;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
@@ -26,6 +28,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -53,9 +56,16 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
     public onDeleteClickListener _onDeleteClick;
     public onCheckedChangeListener _switchClick;
 
+    private ProgressDialog progress_dialog;
+    int switchtimeOutErrorCount = 3;
+    int dimmertimeOutErrorCount = 3;
+
     public FavouriteListCursorAdapter(Context context){
         super(context );
         mCtx = context;
+
+        progress_dialog = new ProgressDialog(mCtx);
+        progress_dialog.setCancelable(false);
     }
 
 
@@ -64,12 +74,18 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
         mCtx = context;
         this.componentStatus = _componentStatus;
         this.mCursor = cursor;
+
+        progress_dialog = new ProgressDialog(mCtx);
+        progress_dialog.setCancelable(false);
     }
 
     public FavouriteListCursorAdapter(Context context, Cursor cursor){
         super(context,cursor);
         mCtx = context;
         this.mCursor = cursor;
+
+        progress_dialog = new ProgressDialog(mCtx);
+        progress_dialog.setCancelable(false);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -214,6 +230,8 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
         int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_F_MNAME);
         final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP);
+        final int machineIDIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID);
+        final String machineId = cursor.getString(machineIDIndex);
 
         String machineIP = cursor.getString(machineIPIndex);
         if(!machineIP.startsWith("http://")) {
@@ -259,12 +277,16 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
 
                             if(switchHolder.imgSwitch.isChecked()){
                                 String CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.OFF_VALUE;
-                                //  SwitchesListActivity.isDelay  = true;
-                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                String[] params = new String[2];
+                                params[0] = CHANGE_STATUS_URL;
+                                params[1] = machineId;
+                                new ChangeSwitchStatus().execute(params);
                             }else{
                                 String CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_SWITCH_STATUS + switchStrPosition + AppConstants.ON_VALUE;
-                                // SwitchesListActivity.isDelay  = true;
-                                new ChangeSwitchStatus().execute(CHANGE_STATUS_URL);
+                                String[] params = new String[2];
+                                params[0] = CHANGE_STATUS_URL;
+                                params[1] = machineId;
+                                new ChangeSwitchStatus().execute(params);
                             }
                         }
                     });
@@ -361,8 +383,10 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                                 componentStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                                 dimmerHolder.imgSwitch.setChecked(false);
                             }
-                            // DimmerListActivity.isDelay = true;
-                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                            String[] params = new String[2];
+                            params[0] = CHANGE_STATUS_URL;
+                            params[1] = machineId;
+                            new ChangeDimmerStatus().execute(params);
                         }
                     });
 
@@ -385,8 +409,10 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
                                 //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             }
 
-                            // DimmerListActivity.isDelay = true;
-                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                            String[] params = new String[2];
+                            params[0] = CHANGE_STATUS_URL;
+                            params[1] = machineId;
+                            new ChangeDimmerStatus().execute(params);
                         }
                     });
 
@@ -453,31 +479,51 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
     }
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+        String parameter, machineId, isMachineActive;
+        Cursor machineCursor;
+        DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            try{
-                _switchClick.onCheckedPreChangeClick(0);
-
-            }catch(Exception e){
-            }
+            _switchClick.onCheckedPreChangeClick(0);
+            progress_dialog.setMessage("Sending request to machine.. " + switchtimeOutErrorCount);
+            progress_dialog.show();
         }
 
         @Override
         protected Void doInBackground(String... params) {
 
             try {
+                parameter = params[0];
+                machineId = params[1];
+
+                /*dbHelper.openDataBase();
+                // get current machine details
+                machineCursor = dbHelper.getMachineByID(String.valueOf(machineId));
+                isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                dbHelper.close();
+
+                if(isMachineActive.equals("true")) {*/
+
                 URL urlValue = new URL(params[0]);
-                Log.e("# urlValue", urlValue.toString());
+                Log.e("# SWCR CHANGE", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
-
-
+                isError = false;
+               /* } else {
+                    progress_dialog.dismiss();
+                    isError = true;
+                    switchtimeOutErrorCount = 0;
+                }*/
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+                Log.e("# ADAPTER switchtimeOutErrorCount", switchtimeOutErrorCount +"");
+                isError = true;
+                switchtimeOutErrorCount--;
             }
             return null;
         }
@@ -485,30 +531,84 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            try{
+            if( !isError) {
                 _switchClick.onCheckedChangeClick(0);
+                progress_dialog.dismiss();
+            } else {
+                Log.e("ADAP", ""+isError);
+                if(switchtimeOutErrorCount > 0) {
+                    Log.e("ADAP", "time out > 0");
+                    progress_dialog.setMessage("Sending request to machine.. " + switchtimeOutErrorCount);
+                    String[] parameters = new String[2];
+                    parameters[0] = parameter;
+                    parameters[1] = machineId;
+                    new ChangeSwitchStatus().execute(parameters);
+                } else {
+                    Log.e("ADAP", "time out == 0");
+                    progress_dialog.dismiss();
+                    switchtimeOutErrorCount = 3;
 
-            }catch(Exception e){
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("TAG EXP TIME OUT", ex.toString());
+                    }
+
+                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(mCtx, "Your machine was deactivated.");
+                    machineNotActiveDialog.show();
+                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            switchtimeOutErrorCount = 3;
+                            _switchClick.onCheckedChangeClick(1);
+                            progress_dialog.dismiss();
+                        }
+                    });
+                }
             }
         }
     }
 
     public class ChangeDimmerStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+        String parameter, machineId, isMachineActive;
+        Cursor machineCursor;
+        DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            try{
+                progress_dialog.setMessage("Sending request to machine.. " + dimmertimeOutErrorCount);
+                progress_dialog.show();
+                _switchClick.onCheckedPreChangeClick(0);
+            }catch(Exception e){
+            }
+        }
 
         @Override
         protected Void doInBackground(String... params) {
 
             try {
+
+                parameter = params[0];
+                machineId = params[1];
+
                 URL urlValue = new URL(params[0]);
                 Log.e("# url change dimmer", urlValue.toString());
 
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
 
 
             } catch (Exception e) {
                 Log.e("# EXP", e.toString());
+                isError = true;
+                dimmertimeOutErrorCount--;
             }
             return null;
         }
@@ -517,7 +617,40 @@ public class FavouriteListCursorAdapter extends CursorRecyclerViewAdapter<Favour
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             try{
-                _switchClick.onCheckedChangeClick(0);
+                if( !isError) {
+                    _switchClick.onCheckedChangeClick(0);
+                    progress_dialog.dismiss();
+                } else {
+                    if(dimmertimeOutErrorCount > 0) {
+                        progress_dialog.setMessage("Sending request to machine.. " + dimmertimeOutErrorCount);
+                        String[] parameters = new String[2];
+                        parameters[0] = parameter;
+                        parameters[1] = machineId;
+                        new ChangeDimmerStatus().execute(parameters);
+                    } else {
+                        progress_dialog.dismiss();
+                        dimmertimeOutErrorCount = 3;
+
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                        } catch (SQLException ex) {
+                            Log.e("TAG EXP TIME OUT", ex.toString());
+                        }
+
+                        MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(mCtx, "Your machine was deactivated.");
+                        machineNotActiveDialog.show();
+                        machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                            @Override
+                            public void onSaveClick(boolean isSave) {
+                                dimmertimeOutErrorCount = 3;
+                                _switchClick.onCheckedChangeClick(1);
+                                progress_dialog.dismiss();
+                            }
+                        });
+                    }
+                }
 
             }catch(Exception e){
             }

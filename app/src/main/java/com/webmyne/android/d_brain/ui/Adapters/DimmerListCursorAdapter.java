@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.kyleduo.switchbutton.SwitchButton;
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.DimmerListActivity;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Fragments.DashboardFragment;
 import com.webmyne.android.d_brain.ui.Helpers.AdvancedSpannableString;
 import com.webmyne.android.d_brain.ui.Listeners.onAddSchedulerClickListener;
@@ -26,14 +27,17 @@ import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
+import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
 import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -53,6 +57,7 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
     public onRenameClickListener _renameClick;
     public onCheckedChangeListener _switchClick;
     private ProgressDialog progress_dialog;
+    private int dimmertimeOutErrorCount = 3;
 
     public DimmerListCursorAdapter(Context context){
         super(context );
@@ -168,6 +173,9 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
         final int machineNameIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MNAME);
         final int machineIPIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP);
 
+        final int machineIDIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_MID);
+        final String machineId = cursor.getString(machineIDIndex);
+
         int componentIdIndex = cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID);
         String componentName = cursor.getString(componentIdIndex);
 
@@ -252,8 +260,10 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                                 CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                                 dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             }
-
-                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                            String[] params = new String[2];
+                            params[0] = CHANGE_STATUS_URL;
+                            params[1] = machineId;
+                            new ChangeDimmerStatus().execute(params);
                         }
                     });
 
@@ -275,8 +285,10 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                                 CHANGE_STATUS_URL = finalMachineIP + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.ON_VALUE + strProgress;
                                 //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             }
-
-                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                            String[] params = new String[2];
+                            params[0] = CHANGE_STATUS_URL;
+                            params[1] = machineId;
+                            new ChangeDimmerStatus().execute(params);
                         }
                     });
 
@@ -371,8 +383,10 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                                 CHANGE_STATUS_URL = finalMachineIP1 + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
                                 dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             }
-
-                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                            String[] params = new String[2];
+                            params[0] = CHANGE_STATUS_URL;
+                            params[1] = machineId;
+                            new ChangeDimmerStatus().execute(params);
 
                         }
                     });
@@ -396,7 +410,10 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
                                 //dimmerStatus.get(position).tagValue = AppConstants.OFF_VALUE + strProgress;
                             }
 
-                            new ChangeDimmerStatus().execute(CHANGE_STATUS_URL);
+                            String[] params = new String[2];
+                            params[0] = CHANGE_STATUS_URL;
+                            params[1] = machineId;
+                            new ChangeDimmerStatus().execute(params);
                         }
                     });
 
@@ -450,12 +467,16 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
     }
 
     public class ChangeDimmerStatus extends AsyncTask<String, Void, Void> {
+        boolean isError = false;
+        String parameter, machineId, isMachineActive;
+        Cursor machineCursor;
+        DatabaseHelper dbHelper = new DatabaseHelper(mCtx);
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             try{
-                progress_dialog.setMessage("Please Wait..");
+                progress_dialog.setMessage("Sending request to machine.. " + dimmertimeOutErrorCount);
                 progress_dialog.show();
                 _switchClick.onCheckedPreChangeClick(0);
             }catch(Exception e){
@@ -464,18 +485,22 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
 
         @Override
         protected Void doInBackground(String... params) {
-
             try {
+                parameter = params[0];
+                machineId = params[1];
+
                 URL urlValue = new URL(params[0]);
                 Log.e("# url change dimmer", urlValue.toString());
-
                 HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
 
 
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+                Log.e("# ADAPTER dimmertimeOutErrorCount", dimmertimeOutErrorCount +"");
+                isError = true;
+                dimmertimeOutErrorCount--;
             }
             return null;
         }
@@ -483,10 +508,42 @@ public class DimmerListCursorAdapter extends CursorRecyclerViewAdapter<DimmerLis
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            try{
+            if( !isError) {
                 _switchClick.onCheckedChangeClick(0);
-                progress_dialog.hide();
-            }catch(Exception e){
+                progress_dialog.dismiss();
+            } else {
+                Log.e("ADAP", ""+isError);
+                if(dimmertimeOutErrorCount > 0) {
+                    Log.e("ADAP", "time out > 0");
+                    progress_dialog.setMessage("Sending request to machine.. " + dimmertimeOutErrorCount);
+                    String[] parameters = new String[2];
+                    parameters[0] = parameter;
+                    parameters[1] = machineId;
+                    new ChangeDimmerStatus().execute(parameters);
+                } else {
+                    Log.e("ADAP", "time out == 0");
+                    progress_dialog.dismiss();
+                    dimmertimeOutErrorCount = 3;
+
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("TAG EXP TIME OUT", ex.toString());
+                    }
+
+                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(mCtx, "Your machine was deactivated.");
+                    machineNotActiveDialog.show();
+                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            dimmertimeOutErrorCount = 3;
+                            _switchClick.onCheckedChangeClick(1);
+                            progress_dialog.dismiss();
+                        }
+                    });
+                }
             }
         }
     }

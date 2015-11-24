@@ -241,6 +241,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // change is_active status of machine in tables: machine, SceneComponent, Component, FavouriteComponent, Schedulers
     public void enableDisableMachine(String machineId, boolean isEnabled) {
+        Log.e("DISABLE_MACHINE", machineId + " " + isEnabled);
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -270,6 +271,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
         db.close();
+
+        Log.e("MACHIEN ENABLEDIS", values.toString());
     }
 
     public String getMachineNameByIP(String machineIP) {
@@ -1111,12 +1114,48 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_TP_SWITCH_MID, component.getMid());
         values.put(DBConstants.KEY_TP_SWITCH_COMPONENT_NAME, component.getComponentName());
         values.put(DBConstants.KEY_TP_SWITCH_COMPONENT_TYPE, component.getComponentType());
-        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD1, component.getPos1());
-        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD2, component.getPos2());
+
+        if(component.getPos1() == null || component.getPos1().equals("")) {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD1, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
+        } else {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD1, component.getPos1());
+        }
+
+        if(component.getPos2() == null || component.getPos2().equals("")) {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD2, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
+        } else {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD2, component.getPos2());
+        }
+
+        if(component.getPos3() == null || component.getPos3().equals("")) {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD3, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
+        } else {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD3, component.getPos3());
+        }
+
+        if(component.getPos4() == null || component.getPos4().equals("")) {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD4, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
+        } else {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD4, component.getPos4());
+        }
+
+        if(component.getPos5() == null || component.getPos5().equals("")) {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD5, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
+        } else {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD5, component.getPos5());
+        }
+
+        if(component.getPos6() == null || component.getPos6().equals("")) {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD6, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
+        } else {
+            values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD6, component.getPos6());
+        }
+
+        /*values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD2, component.getPos2());
         values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD3, component.getPos3());
         values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD4, component.getPos4());
         values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD5, component.getPos5());
-        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD6, component.getPos6());
+        values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD6, component.getPos6());*/
         values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD, component.getPayLoad());
 
         if( !isPanelSwitchComponentAlreadyExists(component.getMid(), component.getComponentName())) {

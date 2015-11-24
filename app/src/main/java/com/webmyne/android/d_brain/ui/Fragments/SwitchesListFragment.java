@@ -3,12 +3,15 @@ package com.webmyne.android.d_brain.ui.Fragments;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -39,6 +42,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
+import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -346,8 +350,6 @@ public class SwitchesListFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             isServiceRunning = false;
             try {
-                progressBar.setVisibility(View.GONE);
-
                 if(isMachineDeactivated) {
                     stopTherad();
                     //show dialog
@@ -365,31 +367,36 @@ public class SwitchesListFragment extends Fragment {
                 } else {
 
                     if (isFirstTime) {
-                        //init mAdapter
-                        mAdapter = new SwitchListCursorAdapter(getActivity(), switchListCursor, allSwitchesStatusList);
-                        mAdapter.setHasStableIds(true);
-                        mRecyclerView.setAdapter(mAdapter);
-                        mAdapter.notifyDataSetChanged();
-                        isFirstTime = false;
+                        if (allSwitchesStatusList.size() > 0) {
+                            progressBar.setVisibility(View.GONE);
+                            //init mAdapter
+                            mAdapter = new SwitchListCursorAdapter(getActivity(), switchListCursor, allSwitchesStatusList);
+                            mAdapter.setHasStableIds(true);
+                            mRecyclerView.setAdapter(mAdapter);
+                            mAdapter.notifyDataSetChanged();
+                            isFirstTime = false;
+                        }
                     } else {
                         if (allSwitchesStatusList.size() > 0) {
+                            progressBar.setVisibility(View.GONE);
                             //set mAdapter again
                             mAdapter.setSwitchStatus(allSwitchesStatusList);
                             mAdapter.notifyDataSetChanged();
-                        } else {
-                            Log.e("size zero", "" + allSwitchesStatusList.size());
                         }
                     }
 
                     mAdapter.setCheckedChangeListener(new onCheckedChangeListener() {
                         @Override
                         public void onCheckedChangeClick(int pos) {
-                            //  if(isServiceRunning){
-                            stopTherad();
-                            //   startTherad();
-                            // }else {
-                            startTherad();
-                            //  }
+                            if(pos == 0) {
+                                stopTherad();
+                                startTherad();
+                            } else {
+                                stopTherad();
+                                Intent intent = new Intent(getActivity(), HomeDrawerActivity.class);
+                                getActivity().startActivity(intent);
+                                getActivity().finish();
+                            }
                         }
 
                         @Override

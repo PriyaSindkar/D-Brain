@@ -24,6 +24,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
+import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
@@ -134,6 +135,10 @@ public class FavoritesFragment extends Fragment {
     }
 
     public class GetSwitchStatus extends AsyncTask<String, Void, Void> {
+        Cursor machineCursor;
+        String machineIp, machineId;
+        boolean isMachineActive = true;
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         @Override
         protected void onPreExecute() {
@@ -141,52 +146,101 @@ public class FavoritesFragment extends Fragment {
 
         @Override
         protected Void doInBackground(String... params) {
-            try {
-                switchStatusList = new ArrayList<>();
+            switchStatusList = new ArrayList<>();
 
-                for(int i=0; i<params.length; i++) {
+            for(int i=0; i<params.length; i++) {
 
-                    String machineBaseURL = "";
+                String machineBaseURL = "";
+                machineIp = params[i];
 
-                    if(params[i].startsWith("http://")) {
-                        machineBaseURL = params[i];
-                    } else {
-                        machineBaseURL = "http://" + params[i];
+                if(machineIp.startsWith("http://")) {
+                    machineBaseURL = machineIp;
+                } else {
+                    machineBaseURL = "http://" + machineIp;
+                }
+
+                try {
+                    dbHelper.openDataBase();
+
+                    isMachineActive = dbHelper.isMachineActive(machineIp);
+                    machineCursor = dbHelper.getMachineByIP(machineIp);
+                    machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+
+
+                    if (isMachineActive) {
+                        URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
+                        Log.e("# urlValue", urlValue.toString());
+
+                        HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                        httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                        httpUrlConnection.setRequestMethod("GET");
+                        InputStream inputStream = httpUrlConnection.getInputStream();
+                        //  Log.e("# inputStream", inputStream.toString());
+                        MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                        ArrayList<XMLValues> tempSwitchStatusList = pullParser.processXML(inputStream);
+                        Log.e("XML PARSERED", tempSwitchStatusList.toString());
+
+                        try {
+                            dbHelper.openDataBase();
+                            Cursor cursor = dbHelper.getAllSwitchComponentsForAMachine(params[i]);
+                            int totalSwitchesofMachine = 0;
+                            if (cursor != null) {
+                                totalSwitchesofMachine = cursor.getCount();
+                            }
+                            for (int j = 0; j < totalSwitchesofMachine; j++) {
+                                switchStatusList.add(tempSwitchStatusList.get(j));
+                            }
+                            dbHelper.close();
+
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }  else {
+                        Log.e("TAG_FAV", "INACTIVE");
+                        try {
+                            dbHelper.openDataBase();
+                            Cursor cursor = dbHelper.getAllSwitchComponentsForAMachine(params[i]);
+                            if (cursor != null) {
+                                cursor.moveToFirst();
+                                if (cursor.getCount() > 0) {
+                                    do {
+                                        String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                        XMLValues values = new XMLValues();
+                                        values.tagName = componnetId;
+                                        values.tagValue = AppConstants.OFF_VALUE;
+                                        switchStatusList.add(values);
+
+                                    } while (cursor.moveToNext());
+                                }
+                            }
+                        } catch (Exception ex) {
+                        }
                     }
+                } catch(Exception e){
+                    Log.e("TAG_FAV", "TIMEOUT");
 
-                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
-                    Log.e("# urlValue", urlValue.toString());
-
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = httpUrlConnection.getInputStream();
-                    //  Log.e("# inputStream", inputStream.toString());
-                    MainXmlPullParser pullParser = new MainXmlPullParser();
-
-                    ArrayList<XMLValues> tempSwitchStatusList = pullParser.processXML(inputStream);
-                    Log.e("XML PARSERED", tempSwitchStatusList.toString());
-
-                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                     try {
                         dbHelper.openDataBase();
                         Cursor cursor = dbHelper.getAllSwitchComponentsForAMachine(params[i]);
-                        int totalSwitchesofMachine = 0;
                         if (cursor != null) {
-                            totalSwitchesofMachine = cursor.getCount();
-                        }
-                        for (int j = 0; j < totalSwitchesofMachine; j++) {
-                            switchStatusList.add(tempSwitchStatusList.get(j));
-                        }
-                        dbHelper.close();
+                            cursor.moveToFirst();
+                            if (cursor.getCount() > 0) {
+                                do {
+                                    String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                    XMLValues values = new XMLValues();
+                                    values.tagName = componnetId;
+                                    values.tagValue = AppConstants.OFF_VALUE;
+                                    switchStatusList.add(values);
 
-                    } catch (SQLException e) {
-                        e.printStackTrace();
+                                } while (cursor.moveToNext());
+                            }
+                        }
+                    } catch (Exception ex) {
                     }
                 }
-
-            } catch (Exception e) {
-                Log.e("# EXP123", e.toString());
             }
+
             return null;
         }
 
@@ -203,61 +257,110 @@ public class FavoritesFragment extends Fragment {
     }
 
     public class GetDimmerStatus extends AsyncTask<String, Void, Void> {
+        Cursor machineCursor;
+        String machineIp, machineId;
+        boolean isMachineActive = true;
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         @Override
         protected void onPreExecute() {
-            //setProgressBarIndeterminateVisibility(true);
         }
 
         @Override
         protected Void doInBackground(String... params) {
-            try {
-                dimmerStatusList =  new ArrayList<>();
-                for (int i = 0; i < params.length; i++) {
-                    String machineBaseURL = "";
+            dimmerStatusList =  new ArrayList<>();
+            for (int i = 0; i < params.length; i++) {
+                String machineBaseURL = "";
+                machineIp = params[i];
 
-                    if(params[i].startsWith("http://")) {
-                        machineBaseURL = params[i];
+                if(machineIp.startsWith("http://")) {
+                    machineBaseURL = machineIp;
+                } else {
+                    machineBaseURL = "http://" + machineIp;
+                }
+
+                try {
+                    dbHelper.openDataBase();
+
+                    isMachineActive = dbHelper.isMachineActive(machineIp);
+                    machineCursor = dbHelper.getMachineByIP(machineIp);
+                    machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+
+                    if(isMachineActive) {
+
+                        URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
+                        Log.e("# urlValue", urlValue.toString());
+
+                        HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                        httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                        httpUrlConnection.setRequestMethod("GET");
+                        InputStream inputStream = httpUrlConnection.getInputStream();
+                        //  Log.e("# inputStream", inputStream.toString());
+                        MainXmlPullParser pullParser = new MainXmlPullParser();
+
+                        ArrayList<XMLValues> tempDimmerStatusList = pullParser.processXML(inputStream);
+                        //Log.e("XML PARSERED", dimmerStatusList.toString());
+
+
+                        try {
+                            dbHelper.openDataBase();
+                            Cursor cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
+                            int totalDimmersofMachine = 0;
+                            if (cursor != null) {
+                                totalDimmersofMachine = cursor.getCount();
+                            }
+                            for (int j = 0; j < totalDimmersofMachine; j++) {
+                                dimmerStatusList.add(tempDimmerStatusList.get(j));
+                            }
+
+                            dbHelper.close();
+
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     } else {
-                        machineBaseURL = "http://" + params[i];
+                        Log.e("TAG_FAV", "INACTIVE");
+                        try {
+                            dbHelper.openDataBase();
+                            Cursor cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
+                            if (cursor != null) {
+                                cursor.moveToFirst();
+                                if (cursor.getCount() > 0) {
+                                    do {
+                                        String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                        XMLValues values = new XMLValues();
+                                        values.tagName = componnetId;
+                                        values.tagValue = AppConstants.OFF_VALUE + AppConstants.OFF_VALUE;
+                                        dimmerStatusList.add(values);
+
+                                    } while (cursor.moveToNext());
+                                }
+                            }
+                        } catch (Exception ex) {
+                        }
                     }
 
-                    URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
-                    Log.e("# urlValue", urlValue.toString());
-
-                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                    httpUrlConnection.setRequestMethod("GET");
-                    InputStream inputStream = httpUrlConnection.getInputStream();
-                    //  Log.e("# inputStream", inputStream.toString());
-                    MainXmlPullParser pullParser = new MainXmlPullParser();
-
-                    ArrayList<XMLValues> tempDimmerStatusList = pullParser.processXML(inputStream);
-                    //Log.e("XML PARSERED", dimmerStatusList.toString());
-
-                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                }catch (Exception ex) {
+                    Log.e("TAG_FAV", "TIMEOUT");
                     try {
                         dbHelper.openDataBase();
                         Cursor cursor = dbHelper.getAllDimmerComponentsForAMachine(params[i]);
-                        int totalDimmersofMachine = 0;
                         if (cursor != null) {
-                            totalDimmersofMachine = cursor.getCount();
+                            cursor.moveToFirst();
+                            if (cursor.getCount() > 0) {
+                                do {
+                                    String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                    XMLValues values = new XMLValues();
+                                    values.tagName = componnetId;
+                                    values.tagValue = AppConstants.OFF_VALUE + AppConstants.OFF_VALUE;
+                                    dimmerStatusList.add(values);
+
+                                } while (cursor.moveToNext());
+                            }
                         }
-                        for (int j = 0; j < totalDimmersofMachine; j++) {
-                            dimmerStatusList.add(tempDimmerStatusList.get(j));
-                        }
-
-                        dbHelper.close();
-
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-
+                    } catch(Exception e) {}
                 }
-
-            }catch(Exception e){
-                Log.e("# EXP456", e.toString());
             }
-
             return null;
         }
 
@@ -301,14 +404,14 @@ public class FavoritesFragment extends Fragment {
                         mRecyclerView.setVisibility(View.GONE);
                         imgEmpty.setVisibility(View.VISIBLE);
                         imgEmpty.setImageResource(R.drawable.drawer_schedulers);
-                        txtEmptyView.setText("You Have No Favourites");
+                        txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
                     }
                 } else {
                     emptyView.setVisibility(View.VISIBLE);
                     mRecyclerView.setVisibility(View.GONE);
                     imgEmpty.setVisibility(View.VISIBLE);
                     imgEmpty.setImageResource(R.drawable.drawer_schedulers);
-                    txtEmptyView.setText("You Have No Favourites");
+                    txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
                 }
 
                 //init adapter
@@ -318,6 +421,7 @@ public class FavoritesFragment extends Fragment {
                 adapter.notifyDataSetChanged();
 
                 deleteComponent();
+                switchChangeCheck();
 
             } catch (Exception e) {
             }
@@ -341,6 +445,24 @@ public class FavoritesFragment extends Fragment {
                         }
                     }
                 });
+            }
+        });
+    }
+
+    private void switchChangeCheck() {
+        adapter.setCheckedChangeListener(new onCheckedChangeListener() {
+            @Override
+            public void onCheckedChangeClick(int pos) {
+                if (pos == 1) {
+                    Intent intent = new Intent(getActivity(), HomeDrawerActivity.class);
+                    getActivity().startActivity(intent);
+                    getActivity().finish();
+                }
+            }
+
+            @Override
+            public void onCheckedPreChangeClick(int pos) {
+
             }
         });
     }

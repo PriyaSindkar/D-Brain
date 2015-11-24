@@ -1,6 +1,7 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.webmyne.android.d_brain.ui.Adapters.SwitchListCursorAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.LongPressOptionsDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SceneListDialog;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
@@ -33,8 +35,10 @@ import com.webmyne.android.d_brain.ui.Listeners.onCheckedChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onFavoriteClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onLongClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
+import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
 import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
+import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -231,10 +235,12 @@ public class DimmerListFragment extends Fragment {
         boolean isError = false;
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
         Cursor cursor, machineCursor;
+        boolean isMachineDeactivated = false;
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         @Override
         protected void onPreExecute() {
-
+            isServiceRunning = true;
         }
 
         @Override
@@ -254,19 +260,16 @@ public class DimmerListFragment extends Fragment {
                 cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
                 dbHelper.close();
 
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
 
-            if(machineIp.startsWith("http://")) {
-                machineBaseURL = machineIp;
-            } else {
-                machineBaseURL = "http://" + machineIp;
-            }
+                if (machineIp.startsWith("http://")) {
+                    machineBaseURL = machineIp;
+                } else {
+                    machineBaseURL = "http://" + machineIp;
+                }
 
-            // fetch dimmer status from machine only if the machine is active else init all the dimmer status to off
-            if (isMachineActive.equals("true")) {
-                try {
+                // fetch dimmer status from machine only if the machine is active else init all the dimmer status to off
+                if (isMachineActive.equals("true")) {
+
                     URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
                     Log.e("# urlValue", urlValue.toString());
 
@@ -288,17 +291,10 @@ public class DimmerListFragment extends Fragment {
                     for (int j = 0; j < totalDimmersofMachine; j++) {
                         allDimmerStatusList.add(dimmerStatusList.get(j));
                     }
-                } catch (Exception e) {
-                    Log.e("# EXP", e.toString());
-                    isError = true;
-                    try {
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-
+                    } else {
                         if (cursor != null) {
                             cursor.moveToFirst();
-                            if(cursor.getCount() > 0) {
+                            if (cursor.getCount() > 0) {
                                 do {
                                     String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
                                     XMLValues values = new XMLValues();
@@ -309,135 +305,178 @@ public class DimmerListFragment extends Fragment {
                                 } while (cursor.moveToNext());
                             }
                         }
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
                     }
-                }
-            } else {
-                if (cursor != null) {
-                    cursor.moveToFirst();
-                    if (cursor.getCount() > 0) {
-                        do {
-                            String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
-                            XMLValues values = new XMLValues();
-                            values.tagName = componnetId;
-                            values.tagValue = AppConstants.OFF_VALUE + AppConstants.OFF_VALUE;
-                            allDimmerStatusList.add(values);
+                }catch (Exception e) {
+                    Log.e("~~~~~~~~TIME OUT~~~", e.toString());
+                    timeOutErrorCount++;
+                    Log.e("# timeOutErrorCount", timeOutErrorCount + "");
 
-                        } while (cursor.moveToNext());
+                    if (timeOutErrorCount > 10) {
+                        timeOutErrorCount = 0;
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+
+                            if (cursor != null) {
+                                cursor.moveToFirst();
+                                if (cursor.getCount() > 0) {
+                                    do {
+                                        String componnetId = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID));
+                                        XMLValues values = new XMLValues();
+                                        values.tagName = componnetId;
+                                        values.tagValue = AppConstants.OFF_VALUE + AppConstants.OFF_VALUE;
+                                        allDimmerStatusList.add(values);
+
+                                    } while (cursor.moveToNext());
+                                }
+                            }
+                            isMachineDeactivated = true;
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
+                    } else {
+                        isMachineDeactivated = false;
                     }
                 }
-            }
          return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            isServiceRunning = false;
             try {
-                progressBar.setVisibility(View.GONE);
+                if(isMachineDeactivated) {
+                    stopTherad();
+                    //show dialog
+                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(activity, "This machine has been deactivated. Please switch it on.");
+                    machineNotActiveDialog.show();
+                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                        @Override
+                        public void onSaveClick(boolean isSave) {
+                            stopTherad();
+                            activity.finish();
+                        }
+                    });
 
-                if(isFirstTime) {
-                    //init adapter
-                    adapter = new DimmerListCursorAdapter(activity, dimmerListCursor, allDimmerStatusList);
-                    adapter.setHasStableIds(true);
-                    mRecyclerView.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
-                    isFirstTime = false;
+                    //startTherad();
                 } else {
-                    //set adapter again
-                    adapter.setDimmerStatus(allDimmerStatusList);
-                    adapter.notifyDataSetChanged();
+                    if (isFirstTime) {
+                        if (allDimmerStatusList.size() > 0) {
+                            progressBar.setVisibility(View.GONE);
+                            //init adapter
+                            adapter = new DimmerListCursorAdapter(activity, dimmerListCursor, allDimmerStatusList);
+                            adapter.setHasStableIds(true);
+                            mRecyclerView.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+                            isFirstTime = false;
+                        }
+                    } else {
+                        if (allDimmerStatusList.size() > 0) {
+                            progressBar.setVisibility(View.GONE);
+                            //set adapter again
+                            adapter.setDimmerStatus(allDimmerStatusList);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    adapter.setCheckedChangeListener(new onCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChangeClick(int pos) {
+                            if (pos == 0) {
+                                stopTherad();
+                                startTherad();
+                            } else {
+                                stopTherad();
+                                Intent intent = new Intent(getActivity(), HomeDrawerActivity.class);
+                                getActivity().startActivity(intent);
+                                getActivity().finish();
+                            }
+                        }
+
+                        @Override
+                        public void onCheckedPreChangeClick(int pos) {
+                            stopTherad();
+                        }
+                    });
+
+                    adapter.setRenameClickListener(new onRenameClickListener() {
+
+                        @Override
+                        public void onRenameOptionClick(int pos, String _oldName) {
+                            renameComponent(pos);
+                        }
+
+                        @Override
+                        public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+                        }
+                    });
+
+                    adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
+                        @Override
+                        public void onAddToSceneOptionClick(int pos) {
+                            addComponentToScene(pos);
+                        }
+                    });
+
+                    adapter.setFavoriteClickListener(new onFavoriteClickListener() {
+                        @Override
+                        public void onFavoriteOptionClick(int pos) {
+                            addComponentToFavourite(pos);
+                        }
+                    });
+
+                    adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
+                        @Override
+                        public void onAddSchedulerOptionClick(int pos) {
+                            addComponentToScheduler(pos);
+                        }
+                    });
+
+                    adapter.setLongClickListener(new onLongClickListener() {
+
+                        @Override
+                        public void onLongClick(final int pos, View view) {
+
+                            LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(activity, pos);
+                            longPressOptionsDialog.show();
+
+                            longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {
+                                @Override
+                                public void onRenameOptionClick(int pos, String oldName) {
+                                    renameComponent(pos);
+                                }
+
+                                @Override
+                                public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
+
+                                }
+                            });
+
+                            longPressOptionsDialog.setFavoriteClickListener(new onFavoriteClickListener() {
+                                @Override
+                                public void onFavoriteOptionClick(int pos) {
+                                    addComponentToFavourite(pos);
+                                }
+                            });
+
+                            longPressOptionsDialog.setAddToSceneClickListener(new onAddToSceneClickListener() {
+                                @Override
+                                public void onAddToSceneOptionClick(int pos) {
+                                    addComponentToScene(pos);
+                                }
+                            });
+
+                            longPressOptionsDialog.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
+                                @Override
+                                public void onAddSchedulerOptionClick(int pos) {
+                                    addComponentToScheduler(pos);
+                                }
+                            });
+                        }
+                    });
                 }
-
-                adapter.setCheckedChangeListener(new onCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChangeClick(int pos) {
-                        stopTherad();
-                        startTherad();
-                    }
-
-                    @Override
-                    public void onCheckedPreChangeClick(int pos) {
-                        stopTherad();
-                    }
-                });
-
-                adapter.setRenameClickListener(new onRenameClickListener() {
-
-                    @Override
-                    public void onRenameOptionClick(int pos, String _oldName) {
-                        renameComponent(pos);
-                    }
-
-                    @Override
-                    public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
-
-                    }
-                });
-
-                adapter.setAddToSceneClickListener(new onAddToSceneClickListener() {
-                    @Override
-                    public void onAddToSceneOptionClick(int pos) {
-                        addComponentToScene(pos);
-                    }
-                });
-
-                adapter.setFavoriteClickListener(new onFavoriteClickListener() {
-                    @Override
-                    public void onFavoriteOptionClick(int pos) {
-                        addComponentToFavourite(pos);
-                    }
-                });
-
-                adapter.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-                    @Override
-                    public void onAddSchedulerOptionClick(int pos) {
-                        addComponentToScheduler(pos);
-                    }
-                });
-
-                adapter.setLongClickListener(new onLongClickListener() {
-
-                    @Override
-                    public void onLongClick(final int pos, View view) {
-
-                        LongPressOptionsDialog longPressOptionsDialog = new LongPressOptionsDialog(activity, pos);
-                        longPressOptionsDialog.show();
-
-                        longPressOptionsDialog.setRenameClickListener(new onRenameClickListener() {
-                            @Override
-                            public void onRenameOptionClick(int pos, String oldName) {
-                                renameComponent(pos);
-                            }
-
-                            @Override
-                            public void onRenameOptionClick(int pos, String oldName, String oldDetails) {
-
-                            }
-                        });
-
-                        longPressOptionsDialog.setFavoriteClickListener(new onFavoriteClickListener() {
-                            @Override
-                            public void onFavoriteOptionClick(int pos) {
-                                addComponentToFavourite(pos);
-                            }
-                        });
-
-                        longPressOptionsDialog.setAddToSceneClickListener(new onAddToSceneClickListener() {
-                            @Override
-                            public void onAddToSceneOptionClick(int pos) {
-                                addComponentToScene(pos);
-                            }
-                        });
-
-                        longPressOptionsDialog.setAddSchedulerClickListener(new onAddSchedulerClickListener() {
-                            @Override
-                            public void onAddSchedulerOptionClick(int pos) {
-                                addComponentToScheduler(pos);
-                            }
-                        });
-                    }
-                });
             } catch (Exception e) {
             }
         }

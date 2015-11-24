@@ -81,7 +81,6 @@ public class TouchPanelBox extends LinearLayout {
 
     public void setupSwitchRows(final String[] arr1, final String[] arr2, HashMap<String, String> selectionMap) {
         String strPanelPositionInMachine = String.format("%02d", Integer.parseInt(panelPositionInMachine));
-        Log.e("TAG_BOX PANELID", strPanelPositionInMachine );
         int noOfComponentsRow1 = arr1.length;
 
         for (int i = 0; i < row1.getChildCount(); i++) {
@@ -111,8 +110,6 @@ public class TouchPanelBox extends LinearLayout {
                             }
                         }
                     }
-                } else {
-                    Log.e("TAG_BOX", "selection empty");
                 }
             }
 
@@ -151,8 +148,6 @@ public class TouchPanelBox extends LinearLayout {
                             }
                         }
                     }
-                } else {
-                    Log.e("TAG_BOX", "selection empty");
                 }
             }
 
@@ -173,7 +168,6 @@ public class TouchPanelBox extends LinearLayout {
 
     public void setupDimmerRows(final String[] arr1, final String[] arr2, HashMap<String, String> selectionMap) {
         String strPanelPositionInMachine = String.format("%02d", Integer.parseInt(panelPositionInMachine));
-        Log.e("TAG_BOX PANELID", strPanelPositionInMachine );
         int noOfComponentsRow1 = arr1.length;
 
         for (int i = 0; i < row1.getChildCount(); i++) {
@@ -213,8 +207,6 @@ public class TouchPanelBox extends LinearLayout {
                             }
                         }
                     }
-                } else {
-                    Log.e("TAG_BOX", "selection empty");
                 }
             }
 
@@ -263,8 +255,6 @@ public class TouchPanelBox extends LinearLayout {
                             }
                         }
                     }
-                } else {
-                    Log.e("TAG_BOX", "selection empty");
                 }
             }
 

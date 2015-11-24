@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.flyco.animation.Attention.Flash;
 import com.flyco.animation.SlideEnter.SlideBottomEnter;
 import com.flyco.dialog.widget.base.BaseDialog;
 import com.webmyne.android.d_brain.R;
@@ -31,7 +32,7 @@ public class MachineInactiveDialog extends BaseDialog {
     @Override
     public View onCreateView() {
         widthScale(0.85f);
-        showAnim(new SlideBottomEnter());
+        showAnim(new Flash());
 
         View inflate = View.inflate(context, R.layout.dialog_save_alert, null);
         txtYes = (TextView) inflate.findViewById(R.id.txtYes);

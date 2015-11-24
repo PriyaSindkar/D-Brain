@@ -1186,11 +1186,20 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                             dbHelper1.enableDisableMachine(machineId, false);
                             dbHelper1.close();
 
-                            /*activity.runOnUiThread(new Runnable() {
+                            activity.runOnUiThread(new Runnable() {
                                 public void run() {
-                                    Toast.makeText(activity, "One of your machines has been deactivated", Toast.LENGTH_LONG);
+                                    //show dialog
+                                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(activity, "One of the machines is deactivated.");
+                                    machineNotActiveDialog.show();
+                                    machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                                        @Override
+                                        public void onSaveClick(boolean isSave) {
+                                            //stopTherad();
+                                            //activity.finish();
+                                        }
+                                    });
                                 }
-                            });*/
+                            });
                         } catch (Exception ex) {
                             Log.e("TAG EXP", ex.toString());
                         }
