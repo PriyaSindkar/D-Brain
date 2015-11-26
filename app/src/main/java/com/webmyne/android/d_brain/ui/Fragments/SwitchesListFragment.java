@@ -134,8 +134,6 @@ public class SwitchesListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         dbHelper = new DatabaseHelper(getActivity());
 
-
-
         if (getArguments() != null) {
             mParamMachineId = getArguments().getInt(ARG_PARAM1);
             mParamMachineName = getArguments().getString(ARG_PARAM2);
@@ -359,8 +357,9 @@ public class SwitchesListFragment extends Fragment {
             try {
                 if(isMachineDeactivated) {
                     stopTherad();
+                    progressBar.setVisibility(View.GONE);
                     //show dialog
-                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(activity, "This machine has been deactivated. Please switch it on.");
+                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(activity, "Your machine was deactivated.");
                     machineNotActiveDialog.show();
                     machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
                         @Override

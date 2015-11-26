@@ -83,7 +83,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-
     public boolean openDataBase() throws SQLException {
         String mPath = DBConstants.DATABASE_PATH + DBConstants.DATABASE_NAME;
         //Log.e("mPath", mPath);
@@ -112,7 +111,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
-       // db.execSQL(DBConstants.CREATE_COMPONENT_TABLE);
+        // db.execSQL(DBConstants.CREATE_COMPONENT_TABLE);
     }
 
     // Upgrading database
@@ -125,42 +124,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);*/
     }
 
-   public long insertIntoMachine(ArrayList<XMLValues> machineValuesList, String machineName, String machineIP) {
+    public long insertIntoMachine(ArrayList<XMLValues> machineValuesList, String machineName, String machineIP) {
 
-       Log.e("TAG_DB", "Insert machine");
+        Log.e("TAG_DB", "Insert machine");
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-       for(int i=0; i<machineValuesList.size(); i++) {
-           if(machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_DA)){
-               values.put(DBConstants.KEY_M_DA, machineValuesList.get(i).tagValue);
-           } else if(machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_SERIALNO)){
-               values.put(DBConstants.KEY_M_SERIALNO, machineValuesList.get(i).tagValue);
-           } else if(machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_VERSION)){
-               values.put(DBConstants.KEY_M_VERSION, machineValuesList.get(i).tagValue);
-           } else if(machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_PRODUCTCODE)){
-               values.put(DBConstants.KEY_M_PRODUCTCODE, machineValuesList.get(i).tagValue);
-           } else if(machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_DATETIME)){
-               values.put(DBConstants.KEY_M_DATETIME, machineValuesList.get(i).tagValue);
-           }
-           values.put(DBConstants.KEY_M_NAME, machineName);
-           values.put(DBConstants.KEY_M_IP, machineIP);
-           values.put(DBConstants.KEY_M_ISACTIVE, "true");
-       }
+        for (int i = 0; i < machineValuesList.size(); i++) {
+            if (machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_DA)) {
+                values.put(DBConstants.KEY_M_DA, machineValuesList.get(i).tagValue);
+            } else if (machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_SERIALNO)) {
+                values.put(DBConstants.KEY_M_SERIALNO, machineValuesList.get(i).tagValue);
+            } else if (machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_VERSION)) {
+                values.put(DBConstants.KEY_M_VERSION, machineValuesList.get(i).tagValue);
+            } else if (machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_PRODUCTCODE)) {
+                values.put(DBConstants.KEY_M_PRODUCTCODE, machineValuesList.get(i).tagValue);
+            } else if (machineValuesList.get(i).tagName.equals(DBConstants.KEY_M_DATETIME)) {
+                values.put(DBConstants.KEY_M_DATETIME, machineValuesList.get(i).tagValue);
+            }
+            values.put(DBConstants.KEY_M_NAME, machineName);
+            values.put(DBConstants.KEY_M_IP, machineIP);
+            values.put(DBConstants.KEY_M_ISACTIVE, "true");
+        }
 
-       Log.e("Machine_CV", values.toString());
+        Log.e("Machine_CV", values.toString());
 
-       long id = db.insert(DBConstants.TABLE_MACHINE, null, values);
-       db.close();
+        long id = db.insert(DBConstants.TABLE_MACHINE, null, values);
+        db.close();
 
-       return id;
+        return id;
     }
 
     public Cursor getAllMachines() {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         try {
-            cursor = db.query(DBConstants.TABLE_MACHINE, null, null,null, null, null, null, null);
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, null, null, null, null, null, null);
             /*if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getCount() > 0) {
@@ -169,7 +168,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }*/
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -212,13 +211,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_SCH_MIP, newMachineIP);
         db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
 
-
+        //update TouchPanel
+        values = new ContentValues();
+        values.put(DBConstants.KEY_SCH_MNAME, newMachineName);
+        values.put(DBConstants.KEY_SCH_MIP, newMachineIP);
+        db.update(DBConstants.TABLE_TOUCH_PANEL, values, DBConstants.KEY_TP_MID + "='" + machineId + "'", null);
         db.close();
     }
 
 
     // delete machine. Also delete all entries of this machine in tables: machine,
-    // SceneComponent, Component, FavouriteComponent, Schedulers
+    // SceneComponent, Component, FavouriteComponent, Schedulers, TouchPanel, TouchPanelSwitch
     public void deleteMachine(String machineId) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -236,21 +239,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         //update Schedulers
         db.delete(DBConstants.TABLE_SCHEDULERS, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
+
+        //update Touch Panel
+        db.delete(DBConstants.TABLE_TOUCH_PANEL, DBConstants.KEY_TP_MID + "='" + machineId + "'", null);
+
+        //update Touch Panel Switch Item
+        db.delete(DBConstants.TABLE_TOUCH_PANEL_SWITCH, DBConstants.KEY_TP_SWITCH_MID + "='" + machineId + "'", null);
     }
 
 
     // change is_active status of machine in tables: machine, SceneComponent, Component, FavouriteComponent, Schedulers
     public void enableDisableMachine(String machineId, boolean isEnabled) {
-        Log.e("DISABLE_MACHINE", machineId + " " + isEnabled);
-
         SQLiteDatabase db = this.getWritableDatabase();
 
         //update machine
         ContentValues values = new ContentValues();
-        if(isEnabled) {
+        if (isEnabled) {
             values.put(DBConstants.KEY_M_ISACTIVE, "true");
-        }
-        else {
+        } else {
             values.put(DBConstants.KEY_M_ISACTIVE, "false");
         }
 
@@ -269,10 +275,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //update Schedulers
         db.update(DBConstants.TABLE_SCHEDULERS, values, DBConstants.KEY_SCH_MID + "='" + machineId + "'", null);
 
-
         db.close();
-
-        Log.e("MACHIEN ENABLEDIS", values.toString());
     }
 
     public String getMachineNameByIP(String machineIP) {
@@ -280,15 +283,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         String machineName = "";
         try {
-            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?" ,
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?",
                     new String[]{machineIP}, null, null, null, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();
-                machineName =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                machineName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return machineName;
@@ -298,15 +301,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         try {
-            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?" ,
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?",
                     new String[]{IP}, null, null, null, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();
-               // machineIP =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                // machineIP =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -316,7 +319,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         try {
-            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_ID + "=?" ,
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_ID + "=?",
                     new String[]{id}, null, null, null, null);
 
             if (cursor != null) {
@@ -324,7 +327,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // machineIP =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -336,15 +339,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         String machineIP = "";
         try {
-            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_ID + "=?" ,
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_ID + "=?",
                     new String[]{machineID}, null, null, null, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();
-                machineIP =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
+                machineIP = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return machineIP;
@@ -359,15 +362,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=? AND " + DBConstants.KEY_M_IP + "!=?",
                     new String[]{machineIP, oldMachineIP}, null, null, null, null);
             if (cursor != null) {
-                if(cursor.getCount() == 0) {
-                    result =  false;
+                if (cursor.getCount() == 0) {
+                    result = false;
                 } else {
-                    result =  true;
+                    result = true;
                 }
             } else {
-                result =  false;
+                result = false;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return result;
@@ -382,15 +385,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?",
                     new String[]{machineIP}, null, null, null, null);
             if (cursor != null) {
-                if(cursor.getCount() == 0) {
-                    result =  false;
+                if (cursor.getCount() == 0) {
+                    result = false;
                 } else {
-                    result =  true;
+                    result = true;
                 }
             } else {
-                result =  false;
+                result = false;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return result;
@@ -405,15 +408,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_SERIALNO + "=?",
                     new String[]{machineSerialNo}, null, null, null, null);
             if (cursor != null) {
-                if(cursor.getCount() == 0) {
-                    result =  false;
+                if (cursor.getCount() == 0) {
+                    result = false;
                 } else {
-                    result =  true;
+                    result = true;
                 }
             } else {
-                result =  false;
+                result = false;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return result;
@@ -425,21 +428,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String isActive = "";
         boolean isMachineActive = false;
         try {
-            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?" ,
+            cursor = db.query(DBConstants.TABLE_MACHINE, null, DBConstants.KEY_M_IP + "=?",
                     new String[]{machineIP}, null, null, null, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();
-                isActive =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                isActive = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
             }
 
-            if(isActive.equals("true")) {
+            if (isActive.equals("true")) {
                 isMachineActive = true;
             } else {
                 isMachineActive = false;
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return isMachineActive;
@@ -451,7 +454,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
 
-        for(int i=0; i<componentModels.size(); i++) {
+        for (int i = 0; i < componentModels.size(); i++) {
             values.put(DBConstants.KEY_C_COMPONENT_ID, componentModels.get(i).getComponentId());
             values.put(DBConstants.KEY_C_NAME, componentModels.get(i).getName());
             values.put(DBConstants.KEY_C_TYPE, componentModels.get(i).getType());
@@ -473,7 +476,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // save new component name
         ContentValues values = new ContentValues();
         values.put(DBConstants.KEY_C_NAME, componentName);
-        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_ID + "='" + componentId+"'", null);
+        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_ID + "='" + componentId + "'", null);
         db.close();
     }
 
@@ -484,7 +487,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(DBConstants.KEY_C_NAME, componentName);
         values.put(DBConstants.KEY_C_DETAILS, componentDetails);
-        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_ID + "='" + componentId+"'", null);
+        db.update(DBConstants.TABLE_COMPONENT, values, DBConstants.KEY_C_ID + "='" + componentId + "'", null);
         db.close();
     }
 
@@ -501,7 +504,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -521,7 +524,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -541,7 +544,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -561,7 +564,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -581,7 +584,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -601,7 +604,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -620,7 +623,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -640,7 +643,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -660,7 +663,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -680,7 +683,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -699,7 +702,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // create scene components
         values = new ContentValues();
 
-        for(int i=0; i<componentModels.size(); i++) {
+        for (int i = 0; i < componentModels.size(); i++) {
             values.put(DBConstants.KEY_SC_SCENE_ID, String.valueOf(sceneId));
             values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
             values.put(DBConstants.KEY_SC_COMP_PRIMARY_ID, componentModels.get(i).getSceneComponentPrimaryId());
@@ -746,7 +749,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_SCENE, null, DBConstants.KEY_S_ID + "=?",
                     new String[]{sceneId}, null, null, null, null);
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -755,7 +758,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public String getSceneStatus(String sceneId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
-        String sceneStatus="no";
+        String sceneStatus = "no";
         try {
             // TO:DO search machine-wise
 
@@ -770,7 +773,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     sceneStatus = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_S_STATUS));
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return sceneStatus;
@@ -787,7 +790,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     new String[]{machineIP}, null, null, null, null);*/
 
             cursor = db.query(DBConstants.TABLE_SCENE, null, null,
-                    null , null, null, null, null);
+                    null, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getCount() > 0) {
@@ -795,7 +798,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -813,7 +816,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // save new scene components
         ContentValues values = new ContentValues();
 
-        for(int i=0; i<componentModels.size(); i++) {
+        for (int i = 0; i < componentModels.size(); i++) {
 
             values.put(DBConstants.KEY_SC_SCENE_ID, sceneId);
             values.put(DBConstants.KEY_SC_COMPONENT_ID, componentModels.get(i).getSceneItemId());
@@ -825,7 +828,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
             values.put(DBConstants.KEY_M_ISACTIVE, componentModels.get(i).getIsActive());
 
-            if( !isComponentAlreadyExists(componentModels.get(i).getSceneComponentPrimaryId(), sceneId))
+            if (!isComponentAlreadyExists(componentModels.get(i).getSceneComponentPrimaryId(), sceneId))
                 db.insert(DBConstants.TABLE_SCENE_COMPONENT, null, values);
             else {
                 db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMP_PRIMARY_ID + " = '" + componentModels.get(i).getSceneComponentPrimaryId() + "'", null);
@@ -842,7 +845,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // update scene components
         ContentValues values = new ContentValues();
 
-        for(int i=0; i<componentModels.size(); i++) {
+        for (int i = 0; i < componentModels.size(); i++) {
 
             /*if(componentModels.get(i).getSceneControlType().equals(AppConstants.DIMMER_TYPE)) {
                 String strDefault = "00";
@@ -854,9 +857,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     }
                 }
                 values.put(DBConstants.KEY_SC_DEFAULT, strDefault);*/
-          //  } else {
-                values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
-          //  }
+            //  } else {
+            values.put(DBConstants.KEY_SC_DEFAULT, componentModels.get(i).getDefaultValue());
+            //  }
 
             db.update(DBConstants.TABLE_SCENE_COMPONENT, values, DBConstants.KEY_SC_COMP_PRIMARY_ID + " = '" + componentModels.get(i).getSceneComponentPrimaryId() + "'", null);
         }
@@ -868,7 +871,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void deleteSceneComponents(ArrayList<SceneItemsDataObject> componentModels) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        for(int i=0; i<componentModels.size(); i++) {
+        for (int i = 0; i < componentModels.size(); i++) {
             db.delete(DBConstants.TABLE_SCENE_COMPONENT, DBConstants.KEY_SC_COMP_PRIMARY_ID + "='" + componentModels.get(i).getSceneComponentPrimaryId() + "'", null);
         }
 
@@ -897,15 +900,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_SCENE_COMPONENT, null, DBConstants.KEY_SC_SCENE_ID + "=? AND " + DBConstants.KEY_SC_COMP_PRIMARY_ID + "=?",
                     new String[]{sceneId, componentId}, null, null, null, null);
             if (cursor != null) {
-                if(cursor.getCount() == 0) {
-                    result =  false;
+                if (cursor.getCount() == 0) {
+                    result = false;
                 } else {
-                    result =  true;
+                    result = true;
                 }
             } else {
-                result =  false;
+                result = false;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return result;
@@ -923,7 +926,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-
     public Cursor getAllSwitchComponentsInAScene(String sceneId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
@@ -931,7 +933,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_SCENE_COMPONENT, null, DBConstants.KEY_SC_SCENE_ID + "=? AND " + DBConstants.KEY_SC_TYPE + "=?",
                     new String[]{sceneId, AppConstants.SWITCH_TYPE}, null, null, null, null);
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -945,7 +947,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_SCENE_COMPONENT, null, DBConstants.KEY_SC_SCENE_ID + "=?",
                     new String[]{sceneId}, null, null, null, null);
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -956,15 +958,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         String componentName = "";
         try {
-            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_COMPONENT_ID + "=?" ,
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_COMPONENT_ID + "=?",
                     new String[]{componentId}, null, null, null, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();
-                componentName =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+                componentName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return componentName;
@@ -975,15 +977,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         String componentName = "";
         try {
-            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_ID + "=?" ,
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_ID + "=?",
                     new String[]{_componentId}, null, null, null, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();
-                componentName =  cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
+                componentName = cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return componentName;
@@ -994,7 +996,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         ComponentModel component = new ComponentModel();
         try {
-            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_COMPONENT_ID + "=?" ,
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_COMPONENT_ID + "=?",
                     new String[]{componentId}, null, null, null, null);
 
             if (cursor != null) {
@@ -1004,7 +1006,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 component.setComponentId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_C_COMPONENT_ID)));
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return component;
@@ -1014,14 +1016,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         try {
-            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_ID + "=?" ,
+            cursor = db.query(DBConstants.TABLE_COMPONENT, null, DBConstants.KEY_C_ID + "=?",
                     new String[]{componentId}, null, null, null, null);
 
             if (cursor != null) {
                 cursor.moveToFirst();
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -1032,7 +1034,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
 
-        for(int i=0; i<touchPanelModels.size(); i++) {
+        for (int i = 0; i < touchPanelModels.size(); i++) {
 
             values.put(DBConstants.KEY_C_NAME, touchPanelModels.get(i).getName());
             values.put(DBConstants.KEY_C_MID, touchPanelModels.get(i).getMId());
@@ -1057,7 +1059,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }*/
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -1069,7 +1071,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         try {
             cursor = db.query(DBConstants.TABLE_TOUCH_PANEL, null, DBConstants.KEY_TP_MID + "=?",
-                    new String[]{ String.valueOf(machineId)}, null, null, null, null);
+                    new String[]{String.valueOf(machineId)}, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
                 /*if (cursor.getCount() > 0) {
@@ -1077,7 +1079,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }*/
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -1095,11 +1097,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_TP_ITEM_COMPONENT_TYPE, component.getType());
         values.put(DBConstants.KEY_TP_ITEM_DEF_VALUE, "");
 
-        if( !isPanelItemComponentAlreadyExists(panelId, positionInPanel, component.getComponentId())) {
-            Log.e("NEW",component.getComponentId() );
+        if (!isPanelItemComponentAlreadyExists(panelId, positionInPanel, component.getComponentId())) {
             db.insert(DBConstants.TABLE_TOUCH_PANEL_ITEM, null, values);
-        } else {
-            Log.e("EXisITS", component.getComponentId());
         }
 
         db.close();
@@ -1115,37 +1114,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_TP_SWITCH_COMPONENT_NAME, component.getComponentName());
         values.put(DBConstants.KEY_TP_SWITCH_COMPONENT_TYPE, component.getComponentType());
 
-        if(component.getPos1() == null || component.getPos1().equals("")) {
+        if (component.getPos1() == null || component.getPos1().equals("")) {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD1, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
         } else {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD1, component.getPos1());
         }
 
-        if(component.getPos2() == null || component.getPos2().equals("")) {
+        if (component.getPos2() == null || component.getPos2().equals("")) {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD2, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
         } else {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD2, component.getPos2());
         }
 
-        if(component.getPos3() == null || component.getPos3().equals("")) {
+        if (component.getPos3() == null || component.getPos3().equals("")) {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD3, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
         } else {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD3, component.getPos3());
         }
 
-        if(component.getPos4() == null || component.getPos4().equals("")) {
+        if (component.getPos4() == null || component.getPos4().equals("")) {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD4, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
         } else {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD4, component.getPos4());
         }
 
-        if(component.getPos5() == null || component.getPos5().equals("")) {
+        if (component.getPos5() == null || component.getPos5().equals("")) {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD5, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
         } else {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD5, component.getPos5());
         }
 
-        if(component.getPos6() == null || component.getPos6().equals("")) {
+        if (component.getPos6() == null || component.getPos6().equals("")) {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD6, AppConstants.TOUCH_PANEL_DEFAULT_VALUE);
         } else {
             values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD6, component.getPos6());
@@ -1158,15 +1157,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD6, component.getPos6());*/
         values.put(DBConstants.KEY_TP_SWITCH_PAYLOAD, component.getPayLoad());
 
-        if( !isPanelSwitchComponentAlreadyExists(component.getMid(), component.getComponentName())) {
+        if (!isPanelSwitchComponentAlreadyExists(component.getMid(), component.getComponentName())) {
             db.insert(DBConstants.TABLE_TOUCH_PANEL_SWITCH, null, values);
         } else {
             db.update(DBConstants.TABLE_TOUCH_PANEL_SWITCH, values, DBConstants.KEY_TP_SWITCH_MID + "='" + component.getMid() + "'"
                     + " AND " + DBConstants.KEY_TP_SWITCH_COMPONENT_NAME + "='" + component.getComponentName() + "'", null);
         }
-
-        Log.e("TAG_INSERT_TP_SWITCH", values.toString());
-
         db.close();
     }
 
@@ -1177,11 +1173,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_SWITCH, null, DBConstants.KEY_TP_SWITCH_MID + "=? AND "
                             + DBConstants.KEY_TP_SWITCH_COMPONENT_TYPE + "=?",
-                    new String[]{machineId, AppConstants.SWITCH_TYPE }, null, null, null, null);
+                    new String[]{machineId, AppConstants.SWITCH_TYPE}, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -1195,11 +1191,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_SWITCH, null, DBConstants.KEY_TP_SWITCH_MID + "=? AND "
                             + DBConstants.KEY_TP_SWITCH_COMPONENT_TYPE + "=?",
-                    new String[]{machineId, AppConstants.DIMMER_TYPE }, null, null, null, null);
+                    new String[]{machineId, AppConstants.DIMMER_TYPE}, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -1212,7 +1208,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             cursor = db.query(DBConstants.TABLE_TOUCH_PANEL_ITEM, null, DBConstants.KEY_TP_ITEM_PID + "=? AND "
                             + DBConstants.KEY_TP_ITEM_POS + "=?",
-                    new String[]{panelId, String.valueOf(positionInPanel) }, null, null, null, null);
+                    new String[]{panelId, String.valueOf(positionInPanel)}, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
                 if (cursor.getCount() > 0) {
@@ -1221,14 +1217,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     } while (cursor.moveToNext());
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
 
     }
 
-    public boolean isPanelItemComponentAlreadyExists(String panelId, int position,String componentId) {
+    public boolean isPanelItemComponentAlreadyExists(String panelId, int position, String componentId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         boolean result = true;
@@ -1242,15 +1238,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             + DBConstants.KEY_TP_ITEM_POS + "=? AND " + DBConstants.KEY_TP_ITEM_COMPONENT_ID + "=?",
                     new String[]{panelId, String.valueOf(position), componentId}, null, null, null, null);
             if (cursor != null) {
-                if(cursor.getCount() == 0) {
-                    result =  false;
+                if (cursor.getCount() == 0) {
+                    result = false;
                 } else {
-                    result =  true;
+                    result = true;
                 }
             } else {
-                result =  false;
+                result = false;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return result;
@@ -1272,15 +1268,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             + DBConstants.KEY_TP_SWITCH_COMPONENT_NAME + "=?",
                     new String[]{machineId, componentName}, null, null, null, null);
             if (cursor != null) {
-                if(cursor.getCount() == 0) {
-                    result =  false;
+                if (cursor.getCount() == 0) {
+                    result = false;
                 } else {
-                    result =  true;
+                    result = true;
                 }
             } else {
-                result =  false;
+                result = false;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return result;
@@ -1299,7 +1295,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     cursor.moveToFirst();
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -1313,15 +1309,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             + DBConstants.KEY_TP_ITEM_POS + "=? AND " +DBConstants.KEY_TP_ITEM_COMPONENT_ID + "=?" ,
                     new String[]{panelId, String.valueOf(positionInPanel), componentId }, null, null, null, null);*/
 
-            db.delete(DBConstants.TABLE_TOUCH_PANEL_ITEM,  DBConstants.KEY_TP_ITEM_PID + "=? AND "
-                            + DBConstants.KEY_TP_ITEM_POS + "=? AND " +DBConstants.KEY_TP_ITEM_COMPONENT_ID + "=?" ,
-                    new String[]{panelId, String.valueOf(positionInPanel), componentId });
-        }catch (Exception e) {
+            db.delete(DBConstants.TABLE_TOUCH_PANEL_ITEM, DBConstants.KEY_TP_ITEM_PID + "=? AND "
+                            + DBConstants.KEY_TP_ITEM_POS + "=? AND " + DBConstants.KEY_TP_ITEM_COMPONENT_ID + "=?",
+                    new String[]{panelId, String.valueOf(positionInPanel), componentId});
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
     }
 
-    public boolean insertIntoFavorite(String componentPrimaryId, String componentId, String componentName, String componentType, String machineID,String machineIP, String machineName) {
+    public boolean insertIntoFavorite(String componentPrimaryId, String componentId, String componentName, String componentType, String machineID, String machineIP, String machineName) {
         SQLiteDatabase db = this.getWritableDatabase();
         boolean flag = false;
 
@@ -1335,7 +1331,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_F_MNAME, machineName);
         values.put(DBConstants.KEY_M_ISACTIVE, "true");
 
-        if(!isAlreadyAFavourite(componentId, machineID)) {
+        if (!isAlreadyAFavourite(componentId, machineID)) {
             db.insert(DBConstants.TABLE_FAVOURITE, null, values);
         } else {
             flag = true;
@@ -1345,29 +1341,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return flag;
     }
 
-    public int getComponentTypeCountInFavourite( String comopnentType) {
+    public int getComponentTypeCountInFavourite(String comopnentType) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         int count = 0;
         try {
-            cursor = db.query(DBConstants.TABLE_FAVOURITE, null,  DBConstants.KEY_C_TYPE + "=?",
+            cursor = db.query(DBConstants.TABLE_FAVOURITE, null, DBConstants.KEY_C_TYPE + "=?",
                     new String[]{comopnentType}, null, null, null, null);
             if (cursor != null) {
                 count = cursor.getCount();
             } else {
                 Log.e("CURSOR", "null");
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return count;
     }
 
     public boolean isAlreadyAFavourite(String componentId, String machineIP) {
-
-        Log.e(" ## componentId", componentId );
-        Log.e(" ## machineId", machineIP);
-
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         boolean result = true;
@@ -1375,15 +1367,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_FAVOURITE, null, DBConstants.KEY_C_COMPONENT_ID + "=? AND " + DBConstants.KEY_C_MID + "=?",
                     new String[]{componentId, machineIP}, null, null, null, null);
             if (cursor != null) {
-                if(cursor.getCount() == 0) {
-                    result =  false;
+                if (cursor.getCount() == 0) {
+                    result = false;
                 } else {
-                    result =  true;
+                    result = true;
                 }
             } else {
-                result =  false;
+                result = false;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return result;
@@ -1393,11 +1385,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         try {
-            cursor = db.query(DBConstants.TABLE_FAVOURITE, null, null,null, null, null, null, null);
+            cursor = db.query(DBConstants.TABLE_FAVOURITE, null, null, null, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         } /*finally {
             if (cursor != null) {
@@ -1437,7 +1429,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(DBConstants.KEY_M_ISACTIVE, "true");
         values.put(DBConstants.KEY_SCH_ALARM_ID, schedulerModel.getAlarmId());
 
-        long id =  db.insert(DBConstants.TABLE_SCHEDULERS, null, values);
+        long id = db.insert(DBConstants.TABLE_SCHEDULERS, null, values);
 
         db.close();
         return id;
@@ -1452,15 +1444,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_SCH_SCENE_ID + "=? AND " + DBConstants.KEY_SCH_MID + "=?",
                     new String[]{componentId, machineId}, null, null, null, null);
             if (cursor != null) {
-                if(cursor.getCount() == 0) {
-                    result =  false;
+                if (cursor.getCount() == 0) {
+                    result = false;
                 } else {
-                    result =  true;
+                    result = true;
                 }
             } else {
-                result =  false;
+                result = false;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return result;
@@ -1475,15 +1467,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_SCH_SCENE_ID + "=? AND " + DBConstants.KEY_SCH_IS_SCENE + "=?",
                     new String[]{componentId, "1"}, null, null, null, null);
             if (cursor != null) {
-                if(cursor.getCount() == 0) {
-                    result =  false;
+                if (cursor.getCount() == 0) {
+                    result = false;
                 } else {
-                    result =  true;
+                    result = true;
                 }
             } else {
-                result =  false;
+                result = false;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return result;
@@ -1493,11 +1485,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
         try {
-            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, null,null, null, null, null, null);
+            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, null, null, null, null, null, null);
             if (cursor != null) {
                 cursor.moveToFirst();
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return cursor;
@@ -1527,12 +1519,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // master on/off state
     public void updateSchedulerDefaultOnOffValue(boolean isOn, String schedulerId) {
-        Log.e("TAG_DB","update default on/off schedulers");
+        Log.e("TAG_DB", "update default on/off schedulers");
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
 
-        if(isOn) {
+        if (isOn) {
             values.put(DBConstants.KEY_SCH_DEF_ON_OFF, AppConstants.ON_VALUE);
         } else {
             values.put(DBConstants.KEY_SCH_DEF_ON_OFF, AppConstants.OFF_VALUE);
@@ -1547,7 +1539,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         SchedulerModel schedulerModel = new SchedulerModel();
         try {
-            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_SCH_ID + "=?" ,
+            cursor = db.query(DBConstants.TABLE_SCHEDULERS, null, DBConstants.KEY_SCH_ID + "=?",
                     new String[]{_schedulerId}, null, null, null, null);
 
             if (cursor != null) {
@@ -1564,7 +1556,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 schedulerModel.setAlarmId(cursor.getString(cursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_ALARM_ID)));
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return schedulerModel;
@@ -1598,7 +1590,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("EXP ", e.toString());
         }
         return schedulerModel;

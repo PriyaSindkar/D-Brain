@@ -75,6 +75,7 @@ public class DimmerListFragment extends Fragment {
     private String[] machineIPs;
     ArrayList<XMLValues> allDimmerStatusList;
     private int timeOutErrorCount = 0;
+    DatabaseHelper dbHelper;
 
     private Timer timer1;
     private Handler handler1;
@@ -126,6 +127,7 @@ public class DimmerListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbHelper = new DatabaseHelper(getActivity());
 
         if (getArguments() != null) {
             mParamMachineId = getArguments().getInt(ARG_PARAM1);
@@ -221,7 +223,6 @@ public class DimmerListFragment extends Fragment {
 
 
     private void initArrayOfDimmers() {
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         //get all dimmers in adapter for machine-1
         try {
             dbHelper.openDataBase();
@@ -239,7 +240,6 @@ public class DimmerListFragment extends Fragment {
         String machineId="", machineName = "", machineIp, isMachineActive = "false";
         Cursor cursor, machineCursor;
         boolean isMachineDeactivated = false;
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         @Override
         protected void onPreExecute() {
@@ -251,7 +251,6 @@ public class DimmerListFragment extends Fragment {
             allDimmerStatusList = new ArrayList<>();
             String machineBaseURL = "";
 
-            DatabaseHelper dbHelper = new DatabaseHelper(activity);
             try {
                 dbHelper.openDataBase();
                 // get current machine details
@@ -352,7 +351,7 @@ public class DimmerListFragment extends Fragment {
                 if(isMachineDeactivated) {
                     stopTherad();
                     //show dialog
-                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(activity, "This machine has been deactivated. Please switch it on.");
+                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(activity, "Your machine was deactivated.");
                     machineNotActiveDialog.show();
                     machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
                         @Override
@@ -443,7 +442,6 @@ public class DimmerListFragment extends Fragment {
                         public void onLongClick(final int pos, View view) {
 
                             boolean isFavaourite = false;
-                            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                             try {
                                 dbHelper.openDataBase();
                                 Cursor cursor = dbHelper.getAllDimmerComponentsForAMachine(machineIp);
@@ -514,7 +512,6 @@ public class DimmerListFragment extends Fragment {
             @Override
             public void onRenameOptionClick(int pos, String newName) {
                 try {
-                    DatabaseHelper dbHelper = new DatabaseHelper(activity);
                     dbHelper.openDataBase();
                     dbHelper.renameComponent(componentId, newName);
                     dimmerListCursor = dbHelper.getAllDimmerComponents();
@@ -553,7 +550,6 @@ public class DimmerListFragment extends Fragment {
         String machineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
         String machineName = "";
         try {
-            DatabaseHelper dbHelper = new DatabaseHelper(activity);
             dbHelper.openDataBase();
             machineName = dbHelper.getMachineNameByIP(machineIP);
             int dimmerCount = dbHelper.getComponentTypeCountInFavourite(componentType);
@@ -590,7 +586,6 @@ public class DimmerListFragment extends Fragment {
         String componentMachineIP = dimmerListCursor.getString(dimmerListCursor.getColumnIndexOrThrow(DBConstants.KEY_C_MIP));
 
         try {
-            DatabaseHelper dbHelper = new DatabaseHelper(activity);
             dbHelper.openDataBase();
             boolean isAlreadyScheduled = dbHelper.isAlreadyScheduled(componentPrimaryId, componentMachineID);
 

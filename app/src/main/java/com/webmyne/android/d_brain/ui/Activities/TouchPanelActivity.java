@@ -718,10 +718,6 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
                     });
                 }
 
-
-
-
-
                 return null;
             }
         }.execute();
@@ -1209,6 +1205,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
                     MachineUnAvailableAlertDialog machineUnAvailableAlertDialog = new MachineUnAvailableAlertDialog(TouchPanelActivity.this);
                     machineUnAvailableAlertDialog.show();
+                    linearDimmerOptions.setVisibility(View.GONE);
 
                     linearTouchPanelItems.removeAllViews();
                     linearEmptyView.setVisibility(View.VISIBLE);
@@ -1392,6 +1389,7 @@ public class TouchPanelActivity extends AppCompatActivity implements View.OnClic
 
                     MachineUnAvailableAlertDialog machineUnAvailableAlertDialog = new MachineUnAvailableAlertDialog(TouchPanelActivity.this);
                     machineUnAvailableAlertDialog.show();
+
                 } else {
                     isSwitchSaved = true;
                     isDimmerSaved = true;

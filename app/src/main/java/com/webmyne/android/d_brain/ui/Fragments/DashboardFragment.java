@@ -1,16 +1,10 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,11 +20,9 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Activities.CreateSceneActivity;
-import com.webmyne.android.d_brain.ui.Activities.DimmerListActivity;
 import com.webmyne.android.d_brain.ui.Activities.FavouriteListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MachineListActivity;
 import com.webmyne.android.d_brain.ui.Activities.MainDimmersListActivity;
@@ -39,10 +31,7 @@ import com.webmyne.android.d_brain.ui.Activities.MotorListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SceneActivity;
 import com.webmyne.android.d_brain.ui.Activities.SchedulersListActivity;
 import com.webmyne.android.d_brain.ui.Activities.SensorsListActivity;
-import com.webmyne.android.d_brain.ui.Activities.SwitchesListActivity;
 import com.webmyne.android.d_brain.ui.Activities.TouchPanelActivity;
-import com.webmyne.android.d_brain.ui.Adapters.MachineListCursorAdapter;
-import com.webmyne.android.d_brain.ui.Customcomponents.CustomProgressBar.ExternalCirclePainter;
 import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Helpers.AnimationHelper;
 import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
@@ -61,7 +50,6 @@ import com.webmyne.android.d_brain.ui.xmlHelpers.XMLValues;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.KeyStore;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -74,13 +62,13 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private boolean isImageUp = true, isBulbOn;
     private LinearLayout layoutBottom, linearOptions, linearSceneList, linearDisabled;
     private HorizontalScrollView hScrollView;
-    private FrameLayout parentMotor, parentSlider, parentSwitches, parentSensors, linearLeft ;
+    private FrameLayout parentMotor, parentSlider, parentSwitches, parentSensors, linearLeft;
     private TextView txtNoOfSwitchUnits, txtNoOfMotorUnits, txtNoOfSensorUnits, txtNoOfSliderUnits, txtPowerOffMessage, txtPowerOffMessageLink;
     private LinearLayout linearCreateScene, linearAddMachine, linearAddScheduler, firstBottomItem, linearTopComponentRow, linearBottomComponentRow, linearFavorites;
     private ArrayList<XMLValues> switchStatusList, dimmerStatusList;
     private Cursor switchListCursor, dimmerListCursor, motorListCursor, sensorListCursor, machineCursor, machineListCursor;
-    private boolean  isPowerOn = true;
-    private  ArrayList<XMLValues> powerStatus;
+    private boolean isPowerOn = true, mainPowerOnOffFlag;
+    private ArrayList<XMLValues> powerStatus;
     private FragmentActivity activity;
     private int powerSignalCount = 0;
     private String previousLed = "", led = "";
@@ -94,9 +82,9 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     private Timer timer1;
     private Handler handler1;
     private Context mContext;
-    int timeOutErrorCount = 0;
+    int timeOutErrorCount = 0, changeSwitchTimeOutErorrCount = 0, changeDimmerTimeOutErorrCount = 0, fetchStatusTimeOutErrorCount = 0;
 
-    public void startTherad(){
+    public void startTherad() {
         handler1 = new Handler();
         timer1 = new Timer();
 
@@ -115,10 +103,10 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         }, 0, 2000 * 1);
     }
 
-    public void stopTherad(){
+    public void stopTherad() {
         try {
             timer1.cancel();
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }
@@ -167,8 +155,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         progressDilaog.setCancelable(false);
 
 
-        linearLeft = (FrameLayout)row.findViewById(R.id.linearLeft);
-        firstBottomItem = (LinearLayout)row.findViewById(R.id.firstBottomItem);
+        linearLeft = (FrameLayout) row.findViewById(R.id.linearLeft);
+        firstBottomItem = (LinearLayout) row.findViewById(R.id.firstBottomItem);
 
         imgOptions = (ImageView) row.findViewById(R.id.imgOptions);
         layoutBottom = (LinearLayout) row.findViewById(R.id.layoutBottom);
@@ -270,7 +258,6 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         initComponents();
 
-
         HomeDrawerActivity homeScreen = ((HomeDrawerActivity) getActivity());
         homeScreen.setTitle("Main Panel");
         homeScreen.hideAppBarButton();
@@ -278,10 +265,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
         UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
 
-        if(userSettings != null) {
-            if( !userSettings.isMainPowerOn()) {
-               // Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
-
+        if (userSettings != null) {
+            if (!userSettings.isMainPowerOn()) {
                 showOffScreen();
                 ((HomeDrawerActivity) getActivity()).hideDrawer();
 
@@ -312,12 +297,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     }
 
 
-
     @Override
     public void onPause() {
         super.onPause();
 
-            stopTherad();
+        stopTherad();
 
     }
 
@@ -325,7 +309,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     public void onDestroy() {
         super.onDestroy();
 
-            stopTherad();
+        stopTherad();
 
     }
 
@@ -333,7 +317,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     public void onStop() {
         super.onStop();
 
-            stopTherad();
+        stopTherad();
 
     }
 
@@ -363,34 +347,29 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
             case R.id.bulb_image:
                 txtPowerOffMessageLink.setVisibility(View.GONE);
-                if(isBulbOn) {
-                  //  linearMainBody.setAlpha(0.3f);
-                    //Toast.makeText(getActivity(), getString(R.string.power_off_text), Toast.LENGTH_LONG).show();
-                    txtPowerOffMessage.setText(getString(R.string.power_off_text));
-                    showOffScreen();
-                    ((HomeDrawerActivity) getActivity()).hideDrawer();
-
+                if (isBulbOn) {
+                    mainPowerOnOffFlag = false;
                     bulb_image.setColorFilter(getResources().getColor(R.color.white));
                     bulb_image.setBackgroundResource(R.drawable.white_border_circle);
 
                     // if switches exist, fetch their status
-                    if(switchListCursor != null && switchListCursor.getCount() > 0) {
+                    if (switchListCursor != null && switchListCursor.getCount() > 0) {
                         new GetSwitchStatus().execute(machineIPs);
-                    } else {
-                        Log.e("TAG_DASHBOARD", "No switches");
                     }
 
                     // if dimmers exist, fetch their status
-                    if(dimmerListCursor != null && dimmerListCursor.getCount() > 0) {
+                    if (dimmerListCursor != null && dimmerListCursor.getCount() > 0) {
                         new GetDimmerStatus().execute(machineIPs);
-                    } else {
-                        Log.e("TAG_DASHBOARD", "No dimmers");
                     }
+
+                    txtPowerOffMessage.setText(getString(R.string.power_off_text));
+                    showOffScreen();
+                    ((HomeDrawerActivity) getActivity()).hideDrawer();
 
                     ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
                     UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
 
-                    if(userSettings == null) {
+                    if (userSettings == null) {
                         userSettings = new UserSettings();
                     }
                     userSettings.setIsMainPowerOn(false);
@@ -398,6 +377,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     complexPreferences.commit();
 
                 } else {
+                    mainPowerOnOffFlag = true;
                     bulb_image.setColorFilter(getResources().getColor(R.color.yellowBorder));
                     bulb_image.setBackgroundResource(R.drawable.circle);
 
@@ -405,7 +385,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     ((HomeDrawerActivity) getActivity()).showDrawer();
 
                     // switch on all the previously saved on switches(set prior to main power off)
-                    if(allOnSwitchesList != null && !allOnSwitchesList.isEmpty()) {
+                    if (allOnSwitchesList != null && !allOnSwitchesList.isEmpty()) {
                         for (int i = 0; i < allOnSwitchesList.size(); i++) {
                             String strPosition = allOnSwitchesList.get(i).getName().substring(2, 4);
                             String CHANGE_STATUS_URL = allOnSwitchesList.get(i).getMip() + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.ON_VALUE;
@@ -418,7 +398,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     }
 
                     // switch on all the previously saved on dimmers with previously saved value(set prior to main power off)
-                    if(allOnDimmersList != null && !allOnDimmersList.isEmpty()) {
+                    if (allOnDimmersList != null && !allOnDimmersList.isEmpty()) {
                         for (int i = 0; i < allOnDimmersList.size(); i++) {
                             ComponentModel dimmer = allOnDimmersList.get(i);
                             String strPosition = dimmer.getName().substring(2, 4);
@@ -435,7 +415,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(getActivity(), "settings-pref", 0);
                     UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
 
-                    if(userSettings == null) {
+                    if (userSettings == null) {
                         userSettings = new UserSettings();
                     }
                     userSettings.setIsMainPowerOn(true);
@@ -526,7 +506,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                         final LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                         View view = inflater.inflate(R.layout.dashboard_scene_slider_item, null);
                         TextView txtSceneName = (TextView) view.findViewById(R.id.txtSceneName);
-                        final String sceneId = ""+sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
+                        final String sceneId = "" + sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_ID));
                         final String sceneName = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_S_NAME));
 
                         txtSceneName.setText(sceneName);
@@ -572,14 +552,14 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         try {
             dbHelper.openDataBase();
 
-            switchListCursor =  dbHelper.getAllSwitchComponents();
-            dimmerListCursor =  dbHelper.getAllDimmerComponents();
-            motorListCursor =   dbHelper.getAllMotorComponents();
-            sensorListCursor =  dbHelper.getAllSensorsComponents();
+            switchListCursor = dbHelper.getAllSwitchComponents();
+            dimmerListCursor = dbHelper.getAllDimmerComponents();
+            motorListCursor = dbHelper.getAllMotorComponents();
+            sensorListCursor = dbHelper.getAllSensorsComponents();
             machineListCursor = dbHelper.getAllMachines();
 
-            if(machineListCursor != null) {
-                if(machineListCursor.getCount() > 0) {
+            if (machineListCursor != null) {
+                if (machineListCursor.getCount() > 0) {
                     machineIPs = new String[machineListCursor.getCount()];
                     machineListCursor.moveToFirst();
                     int i = 0;
@@ -587,17 +567,17 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                         String machineIP = machineListCursor.getString(machineListCursor.getColumnIndexOrThrow(DBConstants.KEY_M_IP));
                         machineIPs[i] = machineIP;
                         i++;
-                    } while(machineListCursor.moveToNext());
+                    } while (machineListCursor.moveToNext());
                 }
             }
             dbHelper.close();
 
             // get no of switches from db, if 0 no, switches not shown
-            if(switchListCursor != null) {
+            if (switchListCursor != null) {
                 if (switchListCursor.getCount() == 0) {
                     parentSwitches.setVisibility(View.GONE);
                 } else {
-                    topRowComponentCount ++;
+                    topRowComponentCount++;
                     parentSwitches.setVisibility(View.VISIBLE);
                     txtNoOfSwitchUnits.setText(String.valueOf(switchListCursor.getCount()));
                 }
@@ -606,7 +586,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             }
 
             // get no of dimmers from db, if 0 no, dimmeres not shown
-            if(dimmerListCursor != null) {
+            if (dimmerListCursor != null) {
                 if (dimmerListCursor.getCount() == 0) {
                     parentSlider.setVisibility(View.GONE);
                 } else {
@@ -619,11 +599,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             }
 
             // get no of motors from db, if 0 no, motors not shown
-            if(motorListCursor != null) {
+            if (motorListCursor != null) {
                 if (motorListCursor.getCount() == 0) {
                     parentMotor.setVisibility(View.GONE);
                     // set right margin of left side block to 0
-                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1f);
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
                     lp.rightMargin = 0;
                     parentSwitches.setLayoutParams(lp);
                 } else {
@@ -641,11 +621,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             }
 
             // get no of sensors/alerts from db, if 0 no, sensors/alerts not shown
-            if(sensorListCursor != null) {
+            if (sensorListCursor != null) {
                 if (sensorListCursor.getCount() == 0) {
                     parentSensors.setVisibility(View.GONE);
                     // set right margin of left side block to 0
-                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1f);
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
                     lp.rightMargin = 0;
                     parentSlider.setLayoutParams(lp);
                 } else {
@@ -660,7 +640,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             e.printStackTrace();
         }
 
-        if(topRowComponentCount < 2 && topRowComponentCount > 0) {
+        if (topRowComponentCount < 2 && topRowComponentCount > 0) {
             parentSwitches.setBackgroundColor(getResources().getColor(R.color.baseButtonColorTint));
             parentMotor.setBackgroundColor(getResources().getColor(R.color.baseButtonColorTint));
 
@@ -668,18 +648,18 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             parentSensors.setBackgroundColor(getResources().getColor(R.color.primaryColorTint));
         } else if (topRowComponentCount == 0) {
             //check if any top row is empty, if yes, shift bottom component above
-            if(bottomRowComponentCount == 2) {
+            if (bottomRowComponentCount == 2) {
                 linearBottomComponentRow.removeView(parentSlider);
                 linearTopComponentRow.addView(parentSlider);
 
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1f);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
                 lp.rightMargin = 0;
                 parentSlider.setLayoutParams(lp);
             } else {
                 linearTopComponentRow.setVisibility(View.GONE);
             }
         }
-        if(bottomRowComponentCount < 2 && bottomRowComponentCount > 0) {
+        if (bottomRowComponentCount < 2 && bottomRowComponentCount > 0) {
             parentSwitches.setBackgroundColor(getResources().getColor(R.color.baseButtonColorTint));
             parentMotor.setBackgroundColor(getResources().getColor(R.color.baseButtonColorTint));
 
@@ -687,11 +667,11 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
             parentSensors.setBackgroundColor(getResources().getColor(R.color.primaryColorTint));
         } else if (bottomRowComponentCount == 0) {
             //check if any bottom row is empty, if yes, shift bottom component above
-            if(topRowComponentCount == 2) {
+            if (topRowComponentCount == 2) {
                 linearTopComponentRow.removeView(parentMotor);
                 linearBottomComponentRow.addView(parentMotor);
 
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT,1f);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
                 lp.rightMargin = 0;
                 parentSwitches.setLayoutParams(lp);
             } else {
@@ -705,104 +685,115 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
 
     public class GetSwitchStatus extends AsyncTask<String, Void, Void> {
-        boolean isError = false, isMachineActive = false;
-        String machineId="", machineName = "", machineIp;
+        boolean isDeactivated = false, isMachineActive = false;
+        String machineId = "", machineName = "", machineIp;
         Cursor cursor, machineCursor;
+        ProgressDialog progressDialog1;
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        int position = 0;
 
         @Override
         protected void onPreExecute() {
-
+            progressDialog1 = new ProgressDialog(activity);
+            progressDialog1.setCancelable(false);
+            progressDialog1.setMessage("Please wait ..");
+            progressDialog1.show();
         }
 
         @Override
         protected Void doInBackground(String... params) {
 
-                allOnSwitchesList = new ArrayList<>();
-                for (int i = 0; i < machineIPs.length; i++) {
-                    String machineBaseURL = "";
-                    machineIp = machineIPs[i];
+            allOnSwitchesList = new ArrayList<>();
+            for (int i = 0; i < machineIPs.length; i++) {
+                String machineBaseURL = "";
+                machineIp = machineIPs[i];
+                position = i; // save to continue calling debt of the same machine until errorCount > 3
 
-                    if(machineIp.startsWith("http://")) {
-                        machineBaseURL = machineIp;
-                    } else {
-                        machineBaseURL = "http://" + machineIp;
-                    }
+                if (machineIp.startsWith("http://")) {
+                    machineBaseURL = machineIp;
+                } else {
+                    machineBaseURL = "http://" + machineIp;
+                }
 
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                        dbHelper.openDataBase();
-                        isMachineActive =  dbHelper.isMachineActive(machineIp);
-                        machineCursor = dbHelper.getMachineByIP(machineIp);
-                        machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
-                        machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
-                        dbHelper.close();
+                try {
+                    dbHelper.openDataBase();
+                    isMachineActive = dbHelper.isMachineActive(machineIp);
+                    machineCursor = dbHelper.getMachineByIP(machineIp);
+                    machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                    machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                    dbHelper.close();
 
-                        // fetch switch status from machine only if the machine is active else init all the switch status to off
-                        if (isMachineActive) {
-                            URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
-                            Log.e("# url", urlValue.toString());
+                    // fetch switch status from machine only if the machine is active else init all the switch status to off
+                    if (isMachineActive) {
+                        URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_SWITCH_STATUS);
+                        Log.e("# url", urlValue.toString());
 
-                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
-                            httpUrlConnection.setRequestMethod("GET");
-                            InputStream inputStream = httpUrlConnection.getInputStream();
-                            //  Log.e("# inputStream", inputStream.toString());
-                            MainXmlPullParser pullParser = new MainXmlPullParser();
+                        HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                        httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                        httpUrlConnection.setRequestMethod("GET");
+                        InputStream inputStream = httpUrlConnection.getInputStream();
+                        //  Log.e("# inputStream", inputStream.toString());
+                        MainXmlPullParser pullParser = new MainXmlPullParser();
 
-                            switchStatusList = new ArrayList<>();
-                            switchStatusList = pullParser.processXML(inputStream);
+                        switchStatusList = new ArrayList<>();
+                        switchStatusList = pullParser.processXML(inputStream);
 
-                            for (int k = 0; k < switchStatusList.size(); k++) {
-                                if (switchStatusList.get(k).tagValue.equals("01")) {
-                                    ComponentModel componentModel = new ComponentModel();
-                                    componentModel.setName(switchStatusList.get(k).tagName);
-                                    componentModel.setDefaultValue(switchStatusList.get(k).tagValue);
-                                    componentModel.setMip(machineBaseURL);
-                                    componentModel.setMid(machineId);
-                                    componentModel.setMachineName(machineName);
-                                    allOnSwitchesList.add(componentModel);
-                                }
+                        for (int k = 0; k < switchStatusList.size(); k++) {
+                            if (switchStatusList.get(k).tagValue.equals("01")) {
+                                ComponentModel componentModel = new ComponentModel();
+                                componentModel.setName(switchStatusList.get(k).tagName);
+                                componentModel.setDefaultValue(switchStatusList.get(k).tagValue);
+                                componentModel.setMip(machineBaseURL);
+                                componentModel.setMid(machineId);
+                                componentModel.setMachineName(machineName);
+                                allOnSwitchesList.add(componentModel);
                             }
                         }
-                    }catch(Exception e){
-                        Log.e("# EXP GetSwitchStatus", e.toString());
-                        isError = true;
-                        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                        isDeactivated = false;
+                    }
+
+                } catch (Exception e) {
+                    Log.e("#TIMEOUT GetSwitchStatus", e.toString());
+                    fetchStatusTimeOutErrorCount++;
+
+                    if (fetchStatusTimeOutErrorCount > 3) {
+                        isDeactivated = true;
+                        fetchStatusTimeOutErrorCount = 0;
                         try {
                             dbHelper.openDataBase();
                             dbHelper.enableDisableMachine(machineId, false);
                             dbHelper.close();
-                        } catch (Exception ex) {}
+                            //Toast.makeText(getActivity(), "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        } catch (SQLException ex) {
+                            Log.e("TAG EXP", ex.toString());
+                        }
+                    } else {
+                        i = position;
+                        continue;
                     }
-
                 }
-
+            }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(isError) {
-                try {
-                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                    dbHelper.openDataBase();
-                    dbHelper.enableDisableMachine(machineId, false);
-                    dbHelper.close();
-                    Toast.makeText(getActivity(), "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                } catch (SQLException e) {
-                    Log.e("TAG EXP", e.toString());
-                }
-            }
+            progressDialog1.dismiss();
 
-            // turn off all the on switches
-            for(int i=0; i< allOnSwitchesList.size();i++) {
-                String strPosition = allOnSwitchesList.get(i).getName().substring(2,4);
-                String CHANGE_STATUS_URL = allOnSwitchesList.get(i).getMip() + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
-                String[] params = new String[3];
-                params[0] = CHANGE_STATUS_URL;
-                params[1] =  allOnSwitchesList.get(i).getMid();
-                params[2] =  allOnSwitchesList.get(i).getMachineName();
-                new ChangeSwitchStatus().execute(params);
+            if (isDeactivated) {
+
+            } else {
+                // turn off all the on switches
+                for (int i = 0; i < allOnSwitchesList.size(); i++) {
+                    String strPosition = allOnSwitchesList.get(i).getName().substring(2, 4);
+                    String CHANGE_STATUS_URL = allOnSwitchesList.get(i).getMip() + AppConstants.URL_CHANGE_SWITCH_STATUS + strPosition + AppConstants.OFF_VALUE;
+                    String[] params = new String[3];
+                    params[0] = CHANGE_STATUS_URL;
+                    params[1] = allOnSwitchesList.get(i).getMid();
+                    params[2] = allOnSwitchesList.get(i).getMachineName();
+                    new ChangeSwitchStatus().execute(params);
+                }
+                changeSwitchTimeOutErorrCount = 0;
             }
         }
     }
@@ -810,72 +801,95 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     // fetch current status of all dimmers before OFF on main power.
     // Store the list of on dimmers with their values(to maintain previous state for turning on the main power)
     // and turn-off the on dimmers
+
     public class GetDimmerStatus extends AsyncTask<String, Void, Void> {
-        boolean isError = false;
-        String machineId="", machineName = "", machineIp, isMachineActive = "false";
+        boolean isDeactivated = false;
+        String machineId = "", machineName = "", machineIp, isMachineActive = "false";
         Cursor cursor, machineCursor;
+        ProgressDialog progressDialog1;
+        DatabaseHelper dbHelper = new DatabaseHelper(activity);
+        int position = 0;
 
         @Override
         protected void onPreExecute() {
-
+            fetchStatusTimeOutErrorCount = 0;
+            progressDialog1 = new ProgressDialog(activity);
+            progressDialog1.setCancelable(false);
+            progressDialog1.setMessage("Please wait ..");
+            progressDialog1.show();
         }
 
         @Override
         protected Void doInBackground(String... params) {
 
-                allOnDimmersList = new ArrayList<>();
-                for (int i = 0; i < machineIPs.length; i++) {
-                    String machineBaseURL = "";
-                    machineIp = machineIPs[i];
+            allOnDimmersList = new ArrayList<>();
+            for (int i = 0; i < machineIPs.length; i++) {
+                String machineBaseURL = "";
+                machineIp = machineIPs[i];
+                position = i; // save to continue calling debt of the same machine until errorCount > 3
 
-                    if(machineIp.startsWith("http://")) {
-                        machineBaseURL = machineIp;
-                    } else {
-                        machineBaseURL = "http://" + machineIp;
-                    }
+                if (machineIp.startsWith("http://")) {
+                    machineBaseURL = machineIp;
+                } else {
+                    machineBaseURL = "http://" + machineIp;
+                }
 
-                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                    try {
+                try {
+                    dbHelper.openDataBase();
+                    machineCursor = dbHelper.getMachineByIP(machineIp);
+                    machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
+                    machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
+                    isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                    dbHelper.close();
 
-                        dbHelper.openDataBase();
-                        machineCursor = dbHelper.getMachineByIP(machineIp);
-                        machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
-                        machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
-                        isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
-                        dbHelper.close();
+                    // fetch dimmer status from machine only if the machine is active else init all the dimmer status to off
+                    if (isMachineActive.equals("true")) {
+                        URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
+                        Log.e("# url", urlValue.toString());
 
-                        // fetch dimmer status from machine only if the machine is active else init all the dimmer status to off
-                        if (isMachineActive.equals("true")) {
-                            URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_DIMMER_STATUS);
-                            Log.e("# url", urlValue.toString());
+                        HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                        httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                        httpUrlConnection.setRequestMethod("GET");
+                        InputStream inputStream = httpUrlConnection.getInputStream();
+                        //Log.e("# inputStream dimmer" , inputStream.toString());
+                        MainXmlPullParser pullParser = new MainXmlPullParser();
 
-                            HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                            httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
-                            httpUrlConnection.setRequestMethod("GET");
-                            InputStream inputStream = httpUrlConnection.getInputStream();
-                            //Log.e("# inputStream dimmer" , inputStream.toString());
-                            MainXmlPullParser pullParser = new MainXmlPullParser();
+                        dimmerStatusList = new ArrayList<>();
+                        dimmerStatusList = pullParser.processXML(inputStream);
 
-                            dimmerStatusList = new ArrayList<>();
-                            dimmerStatusList = pullParser.processXML(inputStream);
-
-                            for (int k = 0; k < dimmerStatusList.size(); k++) {
-                                if (dimmerStatusList.get(k).tagValue.substring(0, 2).equals("01")) {
-                                    ComponentModel componentModel = new ComponentModel();
-                                    componentModel.setName(dimmerStatusList.get(k).tagName);
-                                    componentModel.setDefaultValue(dimmerStatusList.get(k).tagValue);
-                                    componentModel.setMip(machineBaseURL);
-                                    componentModel.setMid(machineId);
-                                    componentModel.setMachineName(machineName);
-                                    allOnDimmersList.add(componentModel);
-                                }
+                        for (int k = 0; k < dimmerStatusList.size(); k++) {
+                            if (dimmerStatusList.get(k).tagValue.substring(0, 2).equals("01")) {
+                                ComponentModel componentModel = new ComponentModel();
+                                componentModel.setName(dimmerStatusList.get(k).tagName);
+                                componentModel.setDefaultValue(dimmerStatusList.get(k).tagValue);
+                                componentModel.setMip(machineBaseURL);
+                                componentModel.setMid(machineId);
+                                componentModel.setMachineName(machineName);
+                                allOnDimmersList.add(componentModel);
                             }
                         }
-                    }catch(Exception e){
-                        Log.e("# EXP GetDimmerStatus", e.toString());
-                        isError = true;
+                    }
+                } catch (Exception e) {
+                    Log.e("#TIMEOUT GetDimmerStatus", e.toString());
+                    fetchStatusTimeOutErrorCount++;
+
+                    if (fetchStatusTimeOutErrorCount > 3) {
+                        isDeactivated = true;
+                        fetchStatusTimeOutErrorCount = 0;
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                            //Toast.makeText(getActivity(), "Machine : " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        } catch (SQLException ex) {
+                            Log.e("TAG EXP", ex.toString());
+                        }
+                    } else {
+                        i = position;
+                        continue;
                     }
                 }
+            }
 
 
             return null;
@@ -883,114 +897,184 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(isError) {
-                try {
-                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                    dbHelper.openDataBase();
-                    dbHelper.enableDisableMachine(machineId, false);
-                    dbHelper.close();
-                    Toast.makeText(getActivity(), "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                } catch (SQLException e) {
-                    Log.e("TAG EXP", e.toString());
-                }
-            }
+            progressDialog1.dismiss();
 
-            // switch off on dimmers
-            for(int i=0; i< allOnDimmersList.size();i++) {
-                ComponentModel dimmer = allOnDimmersList.get(i);
-                String strPosition =  dimmer.getName().substring(2, 4);
-                String strProgress = dimmer.getDefaultValue().substring(2, 4);
-                String CHANGE_STATUS_URL = dimmer.getMip() + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
-                String[] params = new String[3];
-                params[0] = CHANGE_STATUS_URL;
-                params[1] =  dimmer.getMid();
-                params[2] =  dimmer.getMachineName();
-                new ChangeDimmerStatus().execute(params);
+            if (isDeactivated) {
+
+            } else {
+                // switch off on dimmers
+                for (int i = 0; i < allOnDimmersList.size(); i++) {
+                    ComponentModel dimmer = allOnDimmersList.get(i);
+                    String strPosition = dimmer.getName().substring(2, 4);
+                    String strProgress = dimmer.getDefaultValue().substring(2, 4);
+                    String CHANGE_STATUS_URL = dimmer.getMip() + AppConstants.URL_CHANGE_DIMMER_STATUS + strPosition + AppConstants.OFF_VALUE + strProgress;
+                    String[] params = new String[3];
+                    params[0] = CHANGE_STATUS_URL;
+                    params[1] = dimmer.getMid();
+                    params[2] = dimmer.getMachineName();
+                    new ChangeDimmerStatus().execute(params);
+                }
             }
         }
     }
 
     public class ChangeSwitchStatus extends AsyncTask<String, Void, Void> {
-        boolean isError = false;
-        String mid = "", mname = "";
+        boolean isMachineActived = true;
+        String mid = "", mname = "", url = "";
+        DatabaseHelper dbHelper = new DatabaseHelper(activity);
+        ProgressDialog progressDialog1;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog1 = new ProgressDialog(activity);
+            progressDialog1.setCancelable(false);
+            if( !mainPowerOnOffFlag) {
+                progressDialog1.setMessage("Please wait while the machine is shutting down..");
+            } else {
+                progressDialog1.setMessage("Please wait while the machine is restarting..");
+            }
+            progressDialog1.show();
+        }
 
         @Override
         protected Void doInBackground(String... params) {
 
             try {
+                url = params[0];
                 URL urlValue = new URL(params[0]);
                 mid = params[1];
                 mname = params[2];
                 Log.e("# url change switch", urlValue.toString());
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
+                dbHelper.openDataBase();
+                machineCursor = dbHelper.getMachineByID(mid);
+                String isActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                dbHelper.close();
 
-
+                if (isActive.equals("true")) {
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    isMachineActived = true;
+                } else {
+                    isMachineActived = true;
+                }
             } catch (Exception e) {
-                Log.e("#EXP ChangeSwitchStatus", e.toString());
-                isError = true;
+                Log.e("#TIMEOUT ChangeSwitchStatus", changeSwitchTimeOutErorrCount+"");
+                changeSwitchTimeOutErorrCount++;
+                isMachineActived = false;
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            progressDialog1.dismiss();
             // machine became inactive.
-            if(isError) {
+            if (changeSwitchTimeOutErorrCount > 3) {
+                isMachineActived = true;
+                changeSwitchTimeOutErorrCount = 0;
                 try {
                     DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                     dbHelper.openDataBase();
                     dbHelper.enableDisableMachine(mid, false);
                     dbHelper.close();
-                    Toast.makeText(getActivity(), "Machine, " + mname + " was deactivated.", Toast.LENGTH_LONG).show();
+                    // Toast.makeText(getActivity(), "Machine, " + mname + " was deactivated.", Toast.LENGTH_LONG).show();
                 } catch (SQLException e) {
                     Log.e("TAG EXP", e.toString());
                 }
+            } else {
+                if (isMachineActived) {
+                    changeSwitchTimeOutErorrCount = 0;
+                } else {
+                    String[] params = new String[3];
+                    params[0] = url;
+                    params[1] = mid;
+                    params[2] = mname;
+                    new ChangeSwitchStatus().execute(params);
+                }
             }
-
         }
     }
 
     public class ChangeDimmerStatus extends AsyncTask<String, Void, Void> {
-        boolean isError = false;
-        String mid = "", mname = "";
+        boolean isMachineActived = true;
+        String mid = "", mname = "", url = "";
+        DatabaseHelper dbHelper = new DatabaseHelper(activity);
+        ProgressDialog progressDialog1;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog1 = new ProgressDialog(activity);
+            progressDialog1.setCancelable(false);
+            if( !mainPowerOnOffFlag) {
+                progressDialog1.setMessage("Please wait while the machine is shutting down..");
+            } else {
+                progressDialog1.setMessage("Please wait while the machine is restarting..");
+            }
+           progressDialog1.show();
+        }
 
         @Override
         protected Void doInBackground(String... params) {
 
             try {
                 URL urlValue = new URL(params[0]);
+                url = params[0];
                 mid = params[1];
                 mname = params[2];
                 Log.e("# url change dimmer", urlValue.toString());
 
-                HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
-                httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
-                httpUrlConnection.setRequestMethod("GET");
-                InputStream inputStream = httpUrlConnection.getInputStream();
+                dbHelper.openDataBase();
+                machineCursor = dbHelper.getMachineByID(mid);
+                String isActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
+                dbHelper.close();
 
+                if (isActive.equals("true")) {
+                    HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
+                    httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
+                    httpUrlConnection.setRequestMethod("GET");
+                    InputStream inputStream = httpUrlConnection.getInputStream();
+                    isMachineActived = true;
+                } else {
+                    isMachineActived = true;
+                }
 
             } catch (Exception e) {
-                Log.e("#EXP ChangeDimmerStatus", e.toString());
-                isError = true;
+                Log.e("#TIMEOUT ChangeDimmerStatus", e.toString());
+                changeDimmerTimeOutErorrCount++;
+                isMachineActived = false;
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(isError) {
+            progressDialog1.dismiss();
+            if (changeDimmerTimeOutErorrCount > 3) {
+                isMachineActived = true;
+                changeDimmerTimeOutErorrCount = 0;
                 try {
-                    DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                     dbHelper.openDataBase();
                     dbHelper.enableDisableMachine(mid, false);
                     dbHelper.close();
-                    Toast.makeText(getActivity(), "Machine : " + mname + " was deactivated.", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getActivity(), "Machine : " + mname + " was deactivated.", Toast.LENGTH_LONG).show();
                 } catch (SQLException e) {
                     Log.e("TAG EXP", e.toString());
+                }
+            } else {
+
+                if (isMachineActived) {
+                    changeDimmerTimeOutErorrCount = 0;
+                } else {
+                    String[] params = new String[3];
+                    params[0] = url;
+                    params[1] = mid;
+                    params[2] = mname;
+                    new ChangeDimmerStatus().execute(params);
                 }
             }
 
@@ -1122,10 +1206,8 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
     }
 
 
-
-
     public class GetMachineStatus extends AsyncTask<String, Void, Void> {
-        String machineId="", machineName = "", machineIp, isMachineActive = "false";
+        String machineId = "", machineName = "", machineIp, isMachineActive = "false";
         int totalMachineCount = machineIPs.length;
 
         @Override
@@ -1139,7 +1221,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                 String machineBaseURL = "";
                 machineIp = machineIP[i];
                 int position = i; // save to continue calling debt of the same machine until errorCount > 10
-                Log.e("loop ", i + " "+ machineIp);
+                Log.e("loop ", i + " " + machineIp);
 
                 if (machineIp.startsWith("http://")) {
                     machineBaseURL = machineIp;
@@ -1156,9 +1238,10 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                     isMachineActive = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ISACTIVE));
                     dbHelper.close();
 
-                    if(isMachineActive.equals("true")) {
+                    if (isMachineActive.equals("true")) {
                         URL urlValue = new URL(machineBaseURL + AppConstants.URL_FETCH_MACHINE_STATUS);
                         Log.e("# urlValue", urlValue.toString());
+                        Log.e("# totalMachineCount", totalMachineCount+"");
 
                         HttpURLConnection httpUrlConnection = (HttpURLConnection) urlValue.openConnection();
                         httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
@@ -1167,16 +1250,16 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                         InputStream inputStream = httpUrlConnection.getInputStream();
                         //totalMachineCount++;
                     } else {
-                        Log.e("TAG_MACHINE", "Already Inactive "+ machineIp );
+                        Log.e("TAG_MACHINE", "Already Inactive " + machineIp);
                         //timeOutErrorCount = 0;
                         totalMachineCount--;
                     }
                 } catch (Exception e) {
                     Log.e("# EXP123", e.toString());
                     timeOutErrorCount++;
-                    Log.e("# timeOutErrorCount", timeOutErrorCount+"");
+                    Log.e("# timeOutErrorCount", timeOutErrorCount + "");
 
-                    if(timeOutErrorCount >= 10) {
+                    if (timeOutErrorCount > 10) {
                         timeOutErrorCount = 0;
                         totalMachineCount--;
                         Log.e("TAG IF", "time out");
@@ -1189,7 +1272,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
                             activity.runOnUiThread(new Runnable() {
                                 public void run() {
                                     //show dialog
-                                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(activity, "One of the machines is deactivated.");
+                                    MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(activity, "One of the machines was deactivated.");
                                     machineNotActiveDialog.show();
                                     machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
                                         @Override
@@ -1216,7 +1299,7 @@ public class DashboardFragment extends Fragment implements PopupAnimationEnd, Vi
         @Override
         protected void onPostExecute(Void aVoid) {
             Log.e("TAG onPost", "Inside onPost");
-            if(totalMachineCount == 0) {
+            if (totalMachineCount == 0) {
                 //Toast.makeText(getActivity(), getString(R.string.all_machines_off_text), Toast.LENGTH_LONG).show();
                 txtPowerOffMessageLink.setVisibility(View.VISIBLE);
                 txtPowerOffMessage.setText(getString(R.string.all_machines_off_text));

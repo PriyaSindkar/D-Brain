@@ -27,6 +27,7 @@ import com.webmyne.android.d_brain.ui.Customcomponents.EditMachineDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.MachineNotActiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
+import com.webmyne.android.d_brain.ui.Helpers.ComplexPreferences;
 import com.webmyne.android.d_brain.ui.Helpers.Utils;
 import com.webmyne.android.d_brain.ui.Helpers.VerticalSpaceItemDecoration;
 import com.webmyne.android.d_brain.ui.Listeners.onDeleteClickListener;
@@ -34,6 +35,7 @@ import com.webmyne.android.d_brain.ui.Listeners.onMachineStateChangeListener;
 import com.webmyne.android.d_brain.ui.Listeners.onRenameClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSaveClickListener;
 import com.webmyne.android.d_brain.ui.Listeners.onSingleClickListener;
+import com.webmyne.android.d_brain.ui.Model.UserSettings;
 import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
@@ -405,6 +407,20 @@ public class MachineListActivity extends AppCompatActivity {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
+
+                    // to switch main power on/off button to on
+                    ComplexPreferences complexPreferences = ComplexPreferences.getComplexPreferences(MachineListActivity.this, "settings-pref", 0);
+                    UserSettings userSettings = complexPreferences.getObject("settings-pref", UserSettings.class);
+
+                    if(userSettings == null) {
+                        userSettings = new UserSettings();
+                        userSettings.setIsMainPowerOn(true);
+                    } else {
+                        userSettings.setIsMainPowerOn(true);
+                    }
+                    complexPreferences.putObject("settings-pref", userSettings);
+                    complexPreferences.commit();
+
                     Toast.makeText(MachineListActivity.this, "Machine is Activated.", Toast.LENGTH_SHORT).show();
                 } else {
                     if(timeOutErrorCount > 0) {
