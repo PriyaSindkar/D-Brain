@@ -59,6 +59,8 @@ public class SceneFragment extends Fragment {
     private Cursor sceneListCursor;
     private ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
 
+    private int timeOutErrorCount = 3;
+
     public static SceneFragment newInstance() {
         SceneFragment fragment = new SceneFragment();
 
@@ -379,6 +381,7 @@ public class SceneFragment extends Fragment {
                 } catch (Exception e) {
                     Log.e("# EXP", e.toString());
                     isError = true;
+                    timeOutErrorCount--;
                 }
             }
 
@@ -391,14 +394,19 @@ public class SceneFragment extends Fragment {
             super.onPostExecute(aVoid);
             try{
                 if(isError) {
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-                        Toast.makeText(getActivity(), "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
+                    if(timeOutErrorCount > 0) {
+                        new CallSceneOn().execute();
+                    } else {
+                        timeOutErrorCount = 3;
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                            Toast.makeText(getActivity(), "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        } catch (SQLException e) {
+                            Log.e("TAG EXP", e.toString());
+                        }
                     }
                 }
             }catch(Exception e){
@@ -469,6 +477,7 @@ public class SceneFragment extends Fragment {
                 } catch (Exception e) {
                     Log.e("# EXP", e.toString());
                     isError = true;
+                    timeOutErrorCount--;
                 }
             }
 
@@ -480,14 +489,19 @@ public class SceneFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             try{
                 if(isError) {
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-                        Toast.makeText(getActivity(), "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
+                    if(timeOutErrorCount > 0) {
+                        new CallSceneOff().execute();
+                    } else {
+                        timeOutErrorCount = 3;
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                            Toast.makeText(getActivity(), "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        } catch (SQLException e) {
+                            Log.e("TAG EXP", e.toString());
+                        }
                     }
                 }
             }catch(Exception e){
