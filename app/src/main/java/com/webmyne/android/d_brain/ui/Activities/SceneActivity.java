@@ -91,6 +91,8 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     ArrayList<SceneSwitchItem> initSwitches = new ArrayList<>();
     ArrayList<SceneMotorItem> initMotors = new ArrayList<>();
     ArrayList<SceneSwitchItem> initDimmers = new ArrayList<>();
+    private int timeOutErrorCount = 3;
+
 
 
     @Override
@@ -1009,8 +1011,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             }
                         }
                     } catch (Exception e) {
-                        Log.e("# EXP", e.toString());
+                        Log.e("# EXP CallSceneOn", e.toString());
                         isError = true;
+                        timeOutErrorCount--;
                     }
                 }
 
@@ -1023,14 +1026,19 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             super.onPostExecute(aVoid);
             try{
                 if(isError) {
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-                       // Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
+                    if(timeOutErrorCount > 0) {
+                        new CallSceneOn().execute();
+                    } else {
+                        timeOutErrorCount = 3;
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                            //Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        } catch (SQLException e) {
+                            Log.e("TAG EXP", e.toString());
+                        }
                     }
                 }
             }catch(Exception e){
@@ -1042,6 +1050,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         boolean isError = false, isMachineActive = false;
         String machineId="", machineName = "", machineIp;
         Cursor  machineCursor;
+
         @Override
         protected Void doInBackground(Void... params) {
 
@@ -1099,8 +1108,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             }
                         }
                     } catch (Exception e) {
-                        Log.e("# EXP", e.toString());
+                        Log.e("# EXP CallSceneOff", e.toString());
                         isError = true;
+                        timeOutErrorCount--;
                     }
                 }
 
@@ -1112,14 +1122,19 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         protected void onPostExecute(Void aVoid) {
             try{
                 if(isError) {
-                    try {
-                        DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-                        //Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
+                    if(timeOutErrorCount > 0) {
+                        new CallSceneOff().execute();
+                    } else {
+                        timeOutErrorCount = 3;
+                        try {
+                            DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                            //Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                        } catch (SQLException e) {
+                            Log.e("TAG EXP", e.toString());
+                        }
                     }
                 }
             }catch(Exception e){
