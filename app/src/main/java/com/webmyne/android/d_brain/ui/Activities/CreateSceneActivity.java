@@ -81,7 +81,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
     private int totalNoOfDimmers = 77;
 
     private  ArrayList<SceneSwitchItem> initSwitches = new ArrayList<>();
-    private   ArrayList<SceneMotorItem> initMotors = new ArrayList<>();
+    private  ArrayList<SceneMotorItem> initMotors = new ArrayList<>();
     private  ArrayList<SceneSwitchItem> initDimmers = new ArrayList<>();
 
 
@@ -128,6 +128,9 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
         txtMotor.setOnClickListener(this);
         txtDimmer.setOnClickListener(this);
         linearSaveScene.setOnClickListener(this);
+
+        // disabled initially
+        linearSaveScene.setAlpha(0.5f);
 
         imgHScrollLeft.setOnClickListener(this);
         imgHScrollRight.setOnClickListener(this);
@@ -231,6 +234,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                linearSaveScene.setAlpha(1.0f);
                 isSceneSaved = false;
             }
 
@@ -403,6 +407,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
                     mAdapter.notifyDataSetChanged();
                     isSceneSaved = false;
+                    linearSaveScene.setAlpha(1.0f);
 
                     txtSwitch.setBackgroundColor(getResources().getColor(R.color.primaryColor));
                     isSwitchPopupShown = false;
@@ -501,6 +506,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
 
                     mAdapter.notifyDataSetChanged();
                     isSceneSaved = false;
+                    linearSaveScene.setAlpha(1.0f);
 
                     txtDimmer.setBackgroundColor(getResources().getColor(R.color.primaryColor));
                     isSwitchPopupShown = false;
@@ -615,6 +621,7 @@ public class CreateSceneActivity extends AppCompatActivity implements View.OnCli
                 dbHelper.close();
                 txtSceneTitle.setText(edtIPAddress.getText().toString().trim());
                 isSceneSaved = true;
+                linearSaveScene.setAlpha(0.5f);
                 Toast.makeText(CreateSceneActivity.this, "Scene Created", Toast.LENGTH_SHORT).show();
                 finish();
             } catch (SQLException e) {

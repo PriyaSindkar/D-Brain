@@ -109,7 +109,19 @@ public class SchedulersListActivity extends AppCompatActivity {
 
         callDeleteClick();
         callOnDefaultToggle();
+        callRenameOnClick();
 
+        imgBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+
+    }
+
+    private void callRenameOnClick() {
         adapter.setRenameClickListener(new onRenameClickListener() {
 
             @Override
@@ -142,8 +154,8 @@ public class SchedulersListActivity extends AppCompatActivity {
 
                         try {
                             dbHelper.openDataBase();
-                            schedulersCursor =  dbHelper.getAllSchedulers();
-                            if(schedulersCursor.getCount() == 0) {
+                            schedulersCursor = dbHelper.getAllSchedulers();
+                            if (schedulersCursor.getCount() == 0) {
                                 linearEmptyView.setVisibility(View.VISIBLE);
                                 mRecyclerView.setVisibility(View.GONE);
                                 imgEmpty.setImageResource(R.drawable.drawer_schedulers);
@@ -173,15 +185,6 @@ public class SchedulersListActivity extends AppCompatActivity {
 
             }
         });
-
-        imgBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
-
     }
 
     @Override
@@ -267,6 +270,7 @@ public class SchedulersListActivity extends AppCompatActivity {
 
             callDeleteClick();
             callOnDefaultToggle();
+            callRenameOnClick();
 
             Toast.makeText(SchedulersListActivity.this, "Scheduler Deleted.", Toast.LENGTH_SHORT).show();
 

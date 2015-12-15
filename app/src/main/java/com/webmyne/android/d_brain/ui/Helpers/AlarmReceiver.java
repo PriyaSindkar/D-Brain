@@ -64,14 +64,16 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             if (schedulerModel != null) {
                 // cancel alarm if scheduler is disabled
-                if (schedulerModel.getDefaultOnOffState().equals(AppConstants.OFF_VALUE)) {
-                    PendingIntent alarmIntent;
-                    AlarmManager alarmManager = (AlarmManager) _ctx.getSystemService(Context.ALARM_SERVICE);
-                    int alarmId = Integer.parseInt(schedulerModel.getAlarmId());
-                    alarmIntent = PendingIntent.getBroadcast(_ctx, alarmId, new Intent(_ctx, AlarmReceiver.class), PendingIntent.FLAG_CANCEL_CURRENT);
-                    alarmManager.cancel(alarmIntent);
-                } else {
-                    fireScheduler();
+                if (schedulerModel.getDefaultOnOffState() != null) {
+                    if (schedulerModel.getDefaultOnOffState().equals(AppConstants.OFF_VALUE)) {
+                        PendingIntent alarmIntent;
+                        AlarmManager alarmManager = (AlarmManager) _ctx.getSystemService(Context.ALARM_SERVICE);
+                        int alarmId = Integer.parseInt(schedulerModel.getAlarmId());
+                        alarmIntent = PendingIntent.getBroadcast(_ctx, alarmId, new Intent(_ctx, AlarmReceiver.class), PendingIntent.FLAG_CANCEL_CURRENT);
+                        alarmManager.cancel(alarmIntent);
+                    } else {
+                        fireScheduler();
+                    }
                 }
             }
         }

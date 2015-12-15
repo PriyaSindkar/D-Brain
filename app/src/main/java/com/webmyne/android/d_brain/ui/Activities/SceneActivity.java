@@ -129,6 +129,9 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         txtMotor.setOnClickListener(this);
         txtDimmer.setOnClickListener(this);
         linearSaveScene.setOnClickListener(this);
+
+        // show disabled button initially
+        linearSaveScene.setAlpha(0.5f);
         sceneMainSwitch.setOnClickListener(this);
 
         sceneMainSwitch.setOnTouchListener(new View.OnTouchListener() {
@@ -230,6 +233,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                 }
 
                 isSceneSaved = false;
+                linearSaveScene.setAlpha(1.0f);
                 deletedMData.add(mData.get(pos));
                 mData.remove(pos);
                 mAdapter.notifyDataSetChanged();
@@ -241,6 +245,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onCheckedChangeClick(int pos) {
                 isSceneSaved = false;
+                linearSaveScene.setAlpha(1.0f);
 
                 if(!newMData.contains(mData.get(pos)) ) {
                     updatedMData.add(mData.get(pos));
@@ -330,6 +335,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                     public void onRenameOptionClick(int pos, String newName) {
                         isSceneNamedChanged = true;
                         isSceneSaved = false;
+                        linearSaveScene.setAlpha(1.0f);
                         currentSceneName = newName;
                         edtSceneName.setText(newName);
                     }
@@ -520,6 +526,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         }
                         mAdapter.notifyDataSetChanged();
                         isSceneSaved = false;
+                        linearSaveScene.setAlpha(1.0f);
                         dbHelper.close();
                     } catch (Exception e) {
                     }
@@ -629,6 +636,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         }
                         mAdapter.notifyDataSetChanged();
                         isSceneSaved = false;
+                        linearSaveScene.setAlpha(1.0f);
                         dbHelper.close();
                     } catch (Exception e) {
                     }
@@ -819,6 +827,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
             dbHelper.close();
             isSceneSaved = true;
+            linearSaveScene.setAlpha(0.5f);
             Toast.makeText(SceneActivity.this, "Scene Updated", Toast.LENGTH_SHORT).show();
         } catch (SQLException e) {
             Log.e("SQLEXP", e.toString());
@@ -883,6 +892,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         }
         mAdapter.notifyDataSetChanged();
         isSceneSaved = false;
+        linearSaveScene.setAlpha(1.0f);
     }
 
     private void addComponentToScheduler() {

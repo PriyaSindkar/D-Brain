@@ -126,6 +126,38 @@ public class SchedulersFragment extends Fragment {
         mRecyclerView.getItemAnimator().setMoveDuration(500);
         mRecyclerView.getItemAnimator().setChangeDuration(500);
 
+        callOnDeleteClick();
+        callRenameOnClick();
+
+        adapter.setOnDefaultValueChanged(new onMachineStateChangeListener() {
+            @Override
+            public void onMachineEnabledDisabled(int pos, boolean isEnabled) {
+                schedulersCursor.moveToPosition(pos);
+                String schedulerId = schedulersCursor.getString(schedulersCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_ID));
+
+                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                try {
+                    dbHelper.openDataBase();
+                    dbHelper.updateSchedulerDefaultOnOffValue(isEnabled, schedulerId);
+                    schedulersCursor = dbHelper.getAllSchedulers();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+              /*  adapter = new SchedulersListCursorAdapter(SchedulersListActivity.this, schedulersCursor);
+                adapter.setHasStableIds(true);
+                mRecyclerView.setAdapter(adapter);*/
+                adapter.changeCursor(schedulersCursor);
+                adapter.notifyDataSetChanged();
+                dbHelper.close();
+
+                /*callDeleteClick();
+                callOnDefaultToggle();*/
+            }
+        });
+    }
+
+    private void callOnDeleteClick() {
         adapter.setDeleteClickListener(new onDeleteClickListener() {
             @Override
             public void onDeleteOptionClick(final int pos) {
@@ -142,7 +174,9 @@ public class SchedulersFragment extends Fragment {
                 });
             }
         });
+    }
 
+    private void callRenameOnClick() {
         adapter.setRenameClickListener(new onRenameClickListener() {
 
             @Override
@@ -210,33 +244,6 @@ public class SchedulersFragment extends Fragment {
 
             }
         });
-
-        adapter.setOnDefaultValueChanged(new onMachineStateChangeListener() {
-            @Override
-            public void onMachineEnabledDisabled(int pos, boolean isEnabled) {
-                schedulersCursor.moveToPosition(pos);
-                String schedulerId = schedulersCursor.getString(schedulersCursor.getColumnIndexOrThrow(DBConstants.KEY_SCH_ID));
-
-                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-                try {
-                    dbHelper.openDataBase();
-                    dbHelper.updateSchedulerDefaultOnOffValue(isEnabled, schedulerId);
-                    schedulersCursor = dbHelper.getAllSchedulers();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-              /*  adapter = new SchedulersListCursorAdapter(SchedulersListActivity.this, schedulersCursor);
-                adapter.setHasStableIds(true);
-                mRecyclerView.setAdapter(adapter);*/
-                adapter.changeCursor(schedulersCursor);
-                adapter.notifyDataSetChanged();
-                dbHelper.close();
-
-                /*callDeleteClick();
-                callOnDefaultToggle();*/
-            }
-        });
     }
 
     private void deleteScheduler(int pos) {
@@ -266,6 +273,9 @@ public class SchedulersFragment extends Fragment {
             adapter.setHasStableIds(true);
             mRecyclerView.setAdapter(adapter);
             dbHelper.close();
+
+            callOnDeleteClick();
+            callRenameOnClick();
 
             Toast.makeText(getActivity(), "Scheduler Deleted.", Toast.LENGTH_SHORT).show();
 
