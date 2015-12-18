@@ -948,7 +948,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     new String[]{sceneId}, null, null, null, null);
 
         } catch (Exception e) {
-            Log.e("EXP ", e.toString());
+            Log.e("EXP", e.toString());
         }
         return cursor;
     }
@@ -986,7 +986,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
 
         } catch (Exception e) {
-            Log.e("EXP ", e.toString());
+            Log.e("EXP 123 ", e.toString());
         }
         return componentName;
     }

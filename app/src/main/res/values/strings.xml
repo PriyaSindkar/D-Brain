@@ -15,6 +15,7 @@
     <string name="empty_scene">You have not created any scene.\n To Add New Scene</string>
     <string name="empty_notification_list">You Have No Notifications</string>
     <string name="empty_schedulers_list">You Have Not Added Any Scheduler</string>
+    <string name="empty_favourites_list">You Have Not Added Any Favourites</string>
     <string name="empty_sensors_list">You Have No Sensors</string>
     <string name="empty_machines_list">You Have Not Added Any Machine</string>
     <string name="empty_scehdulers_list">You Have Not Added Any Scheduler</string>

@@ -403,15 +403,15 @@ public class FavoritesFragment extends Fragment {
                         emptyView.setVisibility(View.VISIBLE);
                         mRecyclerView.setVisibility(View.GONE);
                         imgEmpty.setVisibility(View.VISIBLE);
-                        imgEmpty.setImageResource(R.drawable.drawer_schedulers);
-                        txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
+                        imgEmpty.setImageResource(R.drawable.ic_action_favorite);
+                        txtEmptyView.setText(getResources().getString(R.string.empty_favourites_list));
                     }
                 } else {
                     emptyView.setVisibility(View.VISIBLE);
                     mRecyclerView.setVisibility(View.GONE);
                     imgEmpty.setVisibility(View.VISIBLE);
-                    imgEmpty.setImageResource(R.drawable.drawer_schedulers);
-                    txtEmptyView.setText(getResources().getString(R.string.empty_scehdulers_list));
+                    imgEmpty.setImageResource(R.drawable.ic_action_favorite);
+                    txtEmptyView.setText(getResources().getString(R.string.empty_favourites_list));
                 }
 
                 //init adapter

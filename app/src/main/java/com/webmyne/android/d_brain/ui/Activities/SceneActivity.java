@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Activities;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import com.webmyne.android.d_brain.R;
 import com.webmyne.android.d_brain.ui.Adapters.SceneAdapter;
 import com.webmyne.android.d_brain.ui.Customcomponents.AddToSchedulerDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.EditSchedulerDialog;
+import com.webmyne.android.d_brain.ui.Customcomponents.MachineInactiveDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.RenameDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SaveAlertDialog;
 import com.webmyne.android.d_brain.ui.Customcomponents.SwitchListDialog;
@@ -42,6 +44,7 @@ import com.webmyne.android.d_brain.ui.Model.SchedulerModel;
 import com.webmyne.android.d_brain.ui.Model.onItemClickListener;
 import com.webmyne.android.d_brain.ui.Widgets.SceneMotorItem;
 import com.webmyne.android.d_brain.ui.Widgets.SceneSwitchItem;
+import com.webmyne.android.d_brain.ui.base.HomeDrawerActivity;
 import com.webmyne.android.d_brain.ui.dbHelpers.AppConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DBConstants;
 import com.webmyne.android.d_brain.ui.dbHelpers.DatabaseHelper;
@@ -91,7 +94,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
     ArrayList<SceneSwitchItem> initSwitches = new ArrayList<>();
     ArrayList<SceneMotorItem> initMotors = new ArrayList<>();
     ArrayList<SceneSwitchItem> initDimmers = new ArrayList<>();
-    private int timeOutErrorCount = 3;
+    private int timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
 
 
 
@@ -779,7 +782,7 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
                         sceneItemsDataObject.setIsActive(isActive);
 
-                        String componentName = dbHelper.getComponentNameByPrimaryId(componentId);
+                        String componentName = dbHelper.getComponentNameByPrimaryId(componentPrimaryId);
                         //String componentName = componentCursor.getString(componentCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
 
                         sceneItemsDataObject.setName(componentName);
@@ -969,7 +972,6 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                         machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
                         machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
 
-
                         if(isMachineActive) {
                             // set defaults for switch
                             if (mData.get(i).getSceneControlType().equals(AppConstants.SWITCH_TYPE)) {
@@ -1000,20 +1002,52 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                             httpUrlConnection.setRequestMethod("GET");
                             InputStream inputStream = httpUrlConnection.getInputStream();
+                            isError = false;
+                            timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
+                            Log.e("$$$ ERRR_COUNTER ON", timeOutErrorCount+"");
+
                         } else {
                             try {
                                 dbHelper.openDataBase();
                                 dbHelper.enableDisableMachine(machineId, false);
                                 dbHelper.close();
-                                Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
                             } catch (SQLException e) {
                                 Log.e("TAG EXP", e.toString());
                             }
                         }
                     } catch (Exception e) {
-                        Log.e("# EXP CallSceneOn", e.toString());
+                        Log.e("$$$ ERRR_COUNTER ON", timeOutErrorCount+"");
+                        Log.e("# TIMEOUT CallSceneOn", e.toString());
                         isError = true;
                         timeOutErrorCount--;
+
+                        if(timeOutErrorCount <= 0) {
+                            timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
+                            try {
+                                dbHelper.openDataBase();
+                                dbHelper.enableDisableMachine(machineId, false);
+                                dbHelper.close();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                       /* MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(SceneActivity.this, "Your machine was deactivated.");
+                                        machineNotActiveDialog.show();
+                                        machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                                            @Override
+                                            public void onSaveClick(boolean isSave) {
+                                                Intent intent = new Intent(SceneActivity.this, HomeDrawerActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        });*/
+                                        Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+
+                            } catch (SQLException ex) {
+                                Log.e("TAG EXP", ex.toString());
+                            }
+                        }
                     }
                 }
 
@@ -1024,18 +1058,30 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            Log.e("onPost", "Scene on "+ timeOutErrorCount );
             try{
                 if(isError) {
                     if(timeOutErrorCount > 0) {
                         new CallSceneOn().execute();
                     } else {
-                        timeOutErrorCount = 3;
+                        timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
                         try {
                             DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
                             dbHelper.openDataBase();
                             dbHelper.enableDisableMachine(machineId, false);
                             dbHelper.close();
-                            //Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+
+                           /* MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(SceneActivity.this, "Your machine was deactivated.");
+                            machineNotActiveDialog.show();
+                            machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                                @Override
+                                public void onSaveClick(boolean isSave) {
+                                    Intent intent = new Intent(SceneActivity.this, HomeDrawerActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });*/
+                            Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
                         } catch (SQLException e) {
                             Log.e("TAG EXP", e.toString());
                         }
@@ -1097,20 +1143,50 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
                             httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                             httpUrlConnection.setRequestMethod("GET");
                             InputStream inputStream = httpUrlConnection.getInputStream();
+                            timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
+                            Log.e("$$$ ERRR_COUNTER", timeOutErrorCount+"");
+                            isError = false;
                         } else {
                             try {
                                 dbHelper.openDataBase();
                                 dbHelper.enableDisableMachine(machineId, false);
                                 dbHelper.close();
-                                Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
                             } catch (SQLException e) {
                                 Log.e("TAG EXP", e.toString());
                             }
                         }
                     } catch (Exception e) {
-                        Log.e("# EXP CallSceneOff", e.toString());
+                        Log.e("$$$ ERRR_COUNTER", timeOutErrorCount+"");
+                        Log.e("# TIMEOUT CallSceneOff", e.toString());
                         isError = true;
                         timeOutErrorCount--;
+
+                        if(timeOutErrorCount <= 0) {
+                            timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
+                            try {
+                                dbHelper.openDataBase();
+                                dbHelper.enableDisableMachine(machineId, false);
+                                dbHelper.close();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        /*MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(SceneActivity.this, "Your machine was deactivated.");
+                                        machineNotActiveDialog.show();
+                                        machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                                            @Override
+                                            public void onSaveClick(boolean isSave) {
+                                                Intent intent = new Intent(SceneActivity.this, HomeDrawerActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        });*/
+                                        Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            } catch (SQLException ex) {
+                                Log.e("TAG EXP", ex.toString());
+                            }
+                        }
                     }
                 }
 
@@ -1120,18 +1196,32 @@ public class SceneActivity extends AppCompatActivity implements View.OnClickList
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            Log.e("onPost", "Scene off "+ timeOutErrorCount );
             try{
                 if(isError) {
                     if(timeOutErrorCount > 0) {
                         new CallSceneOff().execute();
                     } else {
-                        timeOutErrorCount = 3;
+                        timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
                         try {
                             DatabaseHelper dbHelper = new DatabaseHelper(SceneActivity.this);
                             dbHelper.openDataBase();
                             dbHelper.enableDisableMachine(machineId, false);
                             dbHelper.close();
-                            //Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+
+                           /* MachineInactiveDialog machineNotActiveDialog = new MachineInactiveDialog(SceneActivity.this, "Your machine was deactivated.");
+                            machineNotActiveDialog.show();
+                            machineNotActiveDialog.setSaveListener(new onSaveClickListener() {
+                                @Override
+                                public void onSaveClick(boolean isSave) {
+                                    Intent intent = new Intent(SceneActivity.this, HomeDrawerActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });*/
+
+
+                            Toast.makeText(SceneActivity.this, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
                         } catch (SQLException e) {
                             Log.e("TAG EXP", e.toString());
                         }

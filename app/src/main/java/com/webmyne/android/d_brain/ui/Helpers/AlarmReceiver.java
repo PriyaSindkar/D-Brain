@@ -42,6 +42,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     String schedulerId, notificationSchedulerName = "";
     SchedulerModel schedulerModel;
     Cursor schedulerCursor;
+    private int timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
 
     @Override
     public void onReceive(Context ctx, Intent arg1) {
@@ -173,6 +174,18 @@ public class AlarmReceiver extends BroadcastReceiver {
                             if (sceneCursor != null) {
                                 if (sceneCursor.getCount() > 0) {
                                     sceneCursor.moveToFirst();
+                                    String defStateForScene = schedulerModel.getDefaultValue();
+                                    String sceneStatus;
+                                    if(defStateForScene.equals("01")) {
+                                        sceneStatus = "yes";
+                                    } else {
+                                        sceneStatus = "no";
+                                    }
+
+                                    if(schedulerModel.getComponentPrimaryId() != null) {
+                                        dbHelper.updateSceneStatus(schedulerModel.getComponentPrimaryId(), sceneStatus);
+                                    }
+
                                     do {
                                         String URL = "", baseMachineUrl = "";
                                         String mip = sceneCursor.getString(sceneCursor.getColumnIndexOrThrow(DBConstants.KEY_SC_MIP));
@@ -251,11 +264,23 @@ public class AlarmReceiver extends BroadcastReceiver {
                 httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
-
+                isError = false;
+                timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
 
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
+                Log.e("# TIMEOUT SWITCH EXP", e.toString());
                 isError = true;
+                timeOutErrorCount--;
+
+                if(timeOutErrorCount <= 0) {
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                }
             }
             return null;
         }
@@ -265,15 +290,17 @@ public class AlarmReceiver extends BroadcastReceiver {
             try{
                 DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
                 if(isError) {
-                    try {
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-                        Toast.makeText(_ctx, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
+                    if(timeOutErrorCount <= 0) {
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                        } catch (SQLException e) {
+                            Log.e("TAG EXP", e.toString());
+                        }
                     }
                 } else {
+                    timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
                     String msg = notificationSchedulerName + " Set";
                     if (schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE))
                         sendNotification(msg);
@@ -306,11 +333,23 @@ public class AlarmReceiver extends BroadcastReceiver {
                 httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                 httpUrlConnection.setRequestMethod("GET");
                 InputStream inputStream = httpUrlConnection.getInputStream();
-
+                isError = false;
+                timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
 
             } catch (Exception e) {
-                Log.e("# EXP", e.toString());
-                isError = false;
+                Log.e("# TIMEOUT DIMMER EXP", e.toString());
+                isError = true;
+                timeOutErrorCount--;
+
+                if(timeOutErrorCount <= 0) {
+                    try {
+                        dbHelper.openDataBase();
+                        dbHelper.enableDisableMachine(machineId, false);
+                        dbHelper.close();
+                    } catch (SQLException ex) {
+                        Log.e("TAG EXP", e.toString());
+                    }
+                }
             }
             return null;
         }
@@ -320,15 +359,17 @@ public class AlarmReceiver extends BroadcastReceiver {
             try {
                 DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
                 if(isError) {
-                    try {
-                        dbHelper.openDataBase();
-                        dbHelper.enableDisableMachine(machineId, false);
-                        dbHelper.close();
-                        Toast.makeText(_ctx, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
-                    } catch (SQLException e) {
-                        Log.e("TAG EXP", e.toString());
+                    if(timeOutErrorCount <= 0) {
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                        } catch (SQLException e) {
+                            Log.e("TAG EXP", e.toString());
+                        }
                     }
                 } else {
+                    timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
                     String msg = notificationSchedulerName + " Set";
                     if(schedulerModel.getComponentType().equals(AppConstants.SWITCH_TYPE))
                         sendNotification(msg);

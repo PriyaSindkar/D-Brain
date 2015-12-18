@@ -52,6 +52,7 @@ public class AppConstants {
     public  static String TOUCH_PANEL_DEFAULT_VALUE = "0000";
 
     public static int TIMEOUT = 3000;
+    public static int ERROR_COUNTER_TIMEOUT = 10;
 
 
     public static void getCurrentSsid(Context context) {

@@ -50,10 +50,14 @@
         android:visibility="gone"
         android:layout_centerInParent="true"/>
 
-    <RelativeLayout
-        android:id="@+id/relativeContent"
+    <ScrollView
         android:layout_centerInParent="true"
         android:layout_below="@id/parentLogo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/relativeContent"
         android:orientation="vertical"
         android:layout_marginLeft="@dimen/VS_TEXT_SIZE"
         android:layout_marginRight="@dimen/VS_TEXT_SIZE"
@@ -217,5 +221,7 @@
 
 
     </RelativeLayout>
+
+    </ScrollView>
 
 </RelativeLayout>

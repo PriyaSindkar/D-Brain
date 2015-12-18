@@ -201,7 +201,6 @@ public class SceneAdapter extends RecyclerView.Adapter<SceneAdapter.ViewHolder> 
         DatabaseHelper dbHelper = new DatabaseHelper(_ctx);
         String componentName = "";
         final String isActive = mDataset.get(position).getIsActive();
-        Log.e("isActive", position + " " +isActive);
 
         try {
             dbHelper.openDataBase();

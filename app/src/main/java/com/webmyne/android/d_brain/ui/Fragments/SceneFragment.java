@@ -1,5 +1,6 @@
 package com.webmyne.android.d_brain.ui.Fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -58,6 +59,7 @@ public class SceneFragment extends Fragment {
     private ImageView imgEmpty;
     private Cursor sceneListCursor;
     private ArrayList<SceneItemsDataObject> mData = new ArrayList<>();
+    private Activity activity;
 
     private int timeOutErrorCount = 3;
 
@@ -97,6 +99,8 @@ public class SceneFragment extends Fragment {
         ((HomeDrawerActivity) getActivity()).setTitle("Scenes");
         ((HomeDrawerActivity) getActivity()).showAppBarButton();
         ((HomeDrawerActivity) getActivity()).setClearButtonText("Create New Scene");
+
+        activity = getActivity();
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         emptyView = (LinearLayout) view.findViewById(R.id.emptyView);
@@ -277,7 +281,7 @@ public class SceneFragment extends Fragment {
                         sceneItemsDataObject.setSceneItemId(componentId);
                         sceneItemsDataObject.setSceneComponentPrimaryId(componentPrimaryId);
 
-                        String componentName = dbHelper.getComponentNameByPrimaryId(componentId);
+                        String componentName = dbHelper.getComponentNameByPrimaryId(componentPrimaryId);
                         //String componentName = componentCursor.getString(componentCursor.getColumnIndexOrThrow(DBConstants.KEY_C_NAME));
 
                         sceneItemsDataObject.setName(componentName);
@@ -329,14 +333,13 @@ public class SceneFragment extends Fragment {
                 } else {
                     baseMachineUrl = "http://"+ machineIp;
                 }
-                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                DatabaseHelper dbHelper = new DatabaseHelper(activity);
 
                 try {
                     isMachineActive =  dbHelper.isMachineActive(machineIp);
                     machineCursor = dbHelper.getMachineByIP(machineIp);
                     machineId = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_ID));
                     machineName = machineCursor.getString(machineCursor.getColumnIndexOrThrow(DBConstants.KEY_M_NAME));
-
 
                     if(isMachineActive) {
                         // set defaults for switch
@@ -368,6 +371,7 @@ public class SceneFragment extends Fragment {
                         httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                         httpUrlConnection.setRequestMethod("GET");
                         InputStream inputStream = httpUrlConnection.getInputStream();
+                        isError = false;
                     } else {
                         try {
                             dbHelper.openDataBase();
@@ -379,9 +383,26 @@ public class SceneFragment extends Fragment {
                         }
                     }
                 } catch (Exception e) {
-                    Log.e("# EXP", e.toString());
+                    Log.e("# ON EXP", e.toString());
                     isError = true;
                     timeOutErrorCount--;
+
+                    if(timeOutErrorCount <= 0) {
+                        timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(activity, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        } catch (SQLException ex) {
+                            Log.e("TAG EXP", ex.toString());
+                        }
+                    }
                 }
             }
 
@@ -399,7 +420,7 @@ public class SceneFragment extends Fragment {
                     } else {
                         timeOutErrorCount = 3;
                         try {
-                            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                            DatabaseHelper dbHelper = new DatabaseHelper(activity);
                             dbHelper.openDataBase();
                             dbHelper.enableDisableMachine(machineId, false);
                             dbHelper.close();
@@ -435,7 +456,7 @@ public class SceneFragment extends Fragment {
                 } else {
                     baseMachineUrl = "http://"+ machineIp;
                 }
-                DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                DatabaseHelper dbHelper = new DatabaseHelper(activity);
                 try {
                     isMachineActive =  dbHelper.isMachineActive(machineIp);
                     machineCursor = dbHelper.getMachineByIP(machineIp);
@@ -464,6 +485,7 @@ public class SceneFragment extends Fragment {
                         httpUrlConnection.setConnectTimeout(AppConstants.TIMEOUT);
                         httpUrlConnection.setRequestMethod("GET");
                         InputStream inputStream = httpUrlConnection.getInputStream();
+                        isError = false;
                     } else {
                         try {
                             dbHelper.openDataBase();
@@ -475,9 +497,26 @@ public class SceneFragment extends Fragment {
                         }
                     }
                 } catch (Exception e) {
-                    Log.e("# EXP", e.toString());
+                    Log.e("# OFF EXP", e.toString());
                     isError = true;
                     timeOutErrorCount--;
+
+                    if(timeOutErrorCount <= 0) {
+                        timeOutErrorCount = AppConstants.ERROR_COUNTER_TIMEOUT;
+                        try {
+                            dbHelper.openDataBase();
+                            dbHelper.enableDisableMachine(machineId, false);
+                            dbHelper.close();
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(activity, "Machine, " + machineName + " was deactivated.", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        } catch (SQLException ex) {
+                            Log.e("TAG EXP", ex.toString());
+                        }
+                    }
                 }
             }
 
@@ -494,7 +533,7 @@ public class SceneFragment extends Fragment {
                     } else {
                         timeOutErrorCount = 3;
                         try {
-                            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+                            DatabaseHelper dbHelper = new DatabaseHelper(activity);
                             dbHelper.openDataBase();
                             dbHelper.enableDisableMachine(machineId, false);
                             dbHelper.close();
